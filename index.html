@@ -260,6 +260,29 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tabs a[aria-current="page"]{color:var(--ok);background:color-mix(in srgb,var(--pitch) 16%,transparent)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
 .fed-row{cursor:default}
+
+.tab-ic{display:grid;place-items:center;height:24px}
+.tabs a{position:relative}
+.tab-badge{position:absolute;top:2px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--card-red);color:#fff;font-size:11px;line-height:18px;font-weight:800}
+.avatar{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--pitch);color:var(--pitch-ink);font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.02em;flex:none}
+.avatar.sm{width:26px;height:26px;font-size:12px}
+.tabs a[aria-current="page"] .avatar.sm{background:var(--ok)}
+.acc-head{display:flex;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.acc-head > div{display:flex;flex-direction:column;min-width:0}
+.acc-head b{font-size:19px}
+.acc-head > div span{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.share-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;background:var(--surface-2);overflow-wrap:anywhere}
+.share-row .x{border:0;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer;min-width:36px;min-height:36px}
+.share-add{display:flex;gap:8px}
+.share-add input{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.dz{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px}
+.dz.new{border-color:var(--card-yellow);box-shadow:inset 0 0 0 1px var(--card-yellow)}
+.dz-date{font-family:var(--display);font-size:20px;font-weight:700;color:var(--card-red);text-transform:uppercase;line-height:1.1}
+.dz h2{font-size:22px;text-transform:uppercase;line-height:1.1;overflow-wrap:anywhere}
+.dz-st{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;padding:3px 10px;border-radius:99px;align-self:flex-start}
+.dz-st.wait{background:color-mix(in srgb,var(--card-yellow) 25%,transparent)}
+.dz-st.done{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.dz-st.no{background:color-mix(in srgb,var(--card-red) 14%,transparent);color:var(--card-red)}
 .band{padding-top:env(safe-area-inset-top,0px)}
 .round[hidden]{display:grid!important;visibility:hidden}
 .tabs nav{grid-template-columns:repeat(5,1fr)!important}
@@ -295,19 +318,20 @@ button,input,select,textarea{font:inherit;color:inherit}
   </div></div>
   <div class="wrap view">
     <div id="storeNote" class="note" hidden></div>
+    <div id="desHint" hidden></div>
     <div id="nextBox"></div>
     <div class="sec-head"><h2>Scorciatoie</h2></div>
     <div class="shortcuts">
       <a class="sc" href="#importa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span>Importa gara</a>
       <a class="sc" href="#calendario"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Calendario</a>
-      <a class="sc" href="#spese"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span>Spese/km</a>
+      <a class="sc" href="#spese"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span>Rimborsi</a>
     </div>
     <div class="sec-head"><h2 id="seasonHead">Questa stagione</h2><a href="#partite">Vedi gare</a></div>
     <div class="stats" id="stats"></div>
     <button class="btn btn-primary btn-block" id="goReferto">Compila referto</button>
     <div class="note" id="refHint" hidden></div>
     <section class="ref-sec" style="margin-top:22px"><h3>Backup dei dati</h3>
-      <p class="note" style="margin:0">I dati sono salvati solo su questo telefono. Ogni tanto fai un backup e tienilo in File o iCloud: serve se cambi telefono o se Safari cancella i dati.</p>
+      <p class="note" style="margin:0">Se sei entrato con il tuo account i dati sono già salvati online. Il backup su file è una copia in più da tenere in File o iCloud.</p>
       <div class="row"><button class="btn btn-primary" id="bkExport">Salva backup</button><button class="btn btn-ghost" id="bkImport">Ripristina backup</button></div>
       <input type="file" id="bkFile" accept=".json,application/json" hidden>
       <div id="bkConfirm"></div>
@@ -321,10 +345,10 @@ button,input,select,textarea{font:inherit;color:inherit}
   <div class="wrap view" id="refBody"></div>
 </section>
 
-<!-- ===== DESIGNAZIONI ===== -->
-<section id="v-designa" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Designa</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
-  <div class="wrap view" id="dsBody"></div>
+<!-- ===== ACCOUNT / DESIGNA ===== -->
+<section id="v-account" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1 id="accTitle">Login</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
+  <div class="wrap view" id="accBody"></div>
 </section>
 
 <!-- ===== PARTITE ===== -->
@@ -363,7 +387,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 <!-- ===== SPESE ===== -->
 <section id="v-spese" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Spese &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Periodo">
       <button id="sMese" aria-pressed="true">Mese</button>
@@ -414,8 +438,8 @@ button,input,select,textarea{font:inherit;color:inherit}
     <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Oggi</a>
     <a href="#partite" data-v="partite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg>Partite</a>
     <a href="#calendario" data-v="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendario</a>
-    <a href="#spese" data-v="spese"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg>Spese</a>
-    <a href="#designa" data-v="designa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5.4 6-5.4s5.4 2 6 5.4"/><path d="M16 4.5a3 3 0 0 1 0 6M18 14.8c1.7.7 2.8 2.4 3 5.2"/></svg>Designa</a>
+    <a href="#spese" data-v="spese"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg>Rimborsi</a>
+    <a href="#account" data-v="account" id="accTab"><span class="tab-ic"></span><span class="tab-lbl">Login</span><span class="tab-badge" hidden></span></a>
   </nav>
 </div>
 
@@ -450,7 +474,7 @@ $('#seasonHead').textContent = 'Questa stagione · ' + SEASON.label;
 function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent = msg; $('#toastRoot').replaceChildren(t); setTimeout(()=>t.remove(), 2600); }
 
 /* ---------- archivio: gare e spese nella stessa raccolta privata ---------- */
-const GF = ['data','ora','categoria','girone','numeroGara','casa','ospite','impianto','indirizzo','citta','ruolo','colleghi','osservatore','note','stato','risultato','gialli','rossi','voto','referto','mapsUrl'];
+const GF = ['desId','data','ora','categoria','girone','numeroGara','casa','ospite','impianto','indirizzo','citta','ruolo','colleghi','osservatore','note','stato','risultato','gialli','rossi','voto','referto','mapsUrl'];
 const SF = ['data','tipo','importo','km','tariffa','consumo','prezzo','descrizione','garaId'];
 function clean(o, fields){ const r = {}; for(const f of fields){ let v = o[f]; if(v === undefined || v === null) v = ''; r[f] = typeof v === 'string' ? v.trim() : v; } r.createdAt = o.createdAt || Date.now(); return r; }
 
@@ -493,15 +517,47 @@ const Store = {
     }catch(e){}
   },
   useLocal(msg){
-    if(this.mode === 'db') return;
+    if(this.mode === 'db' || this.mode === 'fb') return;
     this.mode = 'local';
     try{ this.rows = JSON.parse(localStorage.getItem('registro-gare') || '[]'); }catch(e){ this.rows = []; }
     const n = $('#storeNote'); n.textContent = msg; n.hidden = !msg;
     render();
   },
-  persistLocal(){ try{ localStorage.setItem('registro-gare', JSON.stringify(this.rows)); }catch(e){} },
+  persistLocal(){ if(this.mode !== 'local') return; try{ localStorage.setItem('registro-gare', JSON.stringify(this.rows)); }catch(e){} },
+  attachFb(col, own){
+    if(this.fbUnsub) this.fbUnsub();
+    this.col = col; this.mode = 'fb'; this.synced = false; this.rows = []; render();
+    let merged = false;
+    this.fbUnsub = col.onSnapshot({includeMetadataChanges: true}, snap => {
+      this.rows = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      if(!snap.metadata.fromCache){
+        this.synced = true;
+        if(!merged){ merged = true; if(own) this.mergeLegacy(snap); }
+      }
+      render(); syncAccettate();
+    }, () => toast('Non riesco a leggere il registro online.'));
+  },
+  async mergeLegacy(snap){
+    let old = []; try{ old = JSON.parse(localStorage.getItem('registro-gare') || '[]'); }catch(e){}
+    if(!old.length) return;
+    const have = new Set(snap.docs.map(d => d.id)), add = old.filter(r => r && r.id && !have.has(r.id));
+    try{
+      for(let i = 0; i < add.length; i += 400){
+        const b = firebase.firestore().batch();
+        add.slice(i, i + 400).forEach(r => { const {id, ...data} = r; b.set(this.col.doc(id), data); });
+        await b.commit();
+      }
+      localStorage.removeItem('registro-gare');
+      if(add.length) toast(`Ho salvato online i tuoi dati (${add.filter(r => !r.kind || r.kind === 'gara').length} gare).`);
+    }catch(e){ toast('Non sono riuscito a salvare online i dati di questo telefono. Riprovo al prossimo accesso.'); }
+  },
+  detach(){
+    if(this.fbUnsub) this.fbUnsub(); this.fbUnsub = null; this.col = null;
+    this.mode = 'none'; this.useLocal('');
+  },
   async put(id, data){
     if(this.mode === 'db'){ await this.col.doc(id).set(data); }
+    else if(this.mode === 'fb'){ this.col.doc(id).set(data).catch(() => toast('Salvataggio online non riuscito.')); }
     else { const i = this.rows.findIndex(x => x.id === id); const row = {id, ...data}; if(i >= 0) this.rows[i] = row; else this.rows.push(row); this.persistLocal(); render(); }
     return id;
   },
@@ -517,6 +573,7 @@ const Store = {
   saveSettings(o){ return this.put('impostazioni', {partenza: o.partenza || '', auto: o.auto || '', carburante: o.carburante || '', consumo: toNum(o.consumo), prezzo: toNum(o.prezzo), tariffa: toNum(o.tariffa), kind: 'settings', createdAt: Date.now()}); },
   async remove(id){
     if(this.mode === 'db'){ await this.col.doc(id).delete(); }
+    else if(this.mode === 'fb'){ this.col.doc(id).delete().catch(() => toast('Eliminazione online non riuscita.')); }
     else { this.rows = this.rows.filter(x => x.id !== id); this.persistLocal(); render(); }
   }
 };
@@ -524,13 +581,13 @@ const sortKey = g => `${g.data || '9999-99-99'} ${g.ora || '99:99'}`;
 const isPast = g => g.stato === 'disputata' || (g.data && g.data < todayIso());
 
 /* ---------- navigazione ---------- */
-const VIEWS = ['oggi','partite','calendario','spese','importa','referto','designa'];
+const VIEWS = ['oggi','partite','calendario','spese','importa','referto','account'];
 function route(){
   let v = location.hash.replace('#','');
   if(!VIEWS.includes(v)) v = 'oggi';
   VIEWS.forEach(x => $('#v-'+x).hidden = x !== v);
   if(v === 'referto') renderReferto();
-  if(v === 'designa'){ dsStart(); renderDesigna(); }
+  if(v === 'account') renderAccount();
   document.querySelectorAll('.tabs a').forEach(a => { if(a.dataset.v === v) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   window.scrollTo(0,0);
 }
@@ -705,9 +762,17 @@ $('#bkFile').addEventListener('change', async () => {
   try{ const j = JSON.parse(await f.text()); rows = Array.isArray(j) ? j : j.rows; if(!Array.isArray(rows) || rows.some(r => !r || typeof r.id !== 'string')) throw 0; }
   catch(e){ toast('Questo file non è un backup del Registro Gare.'); return; }
   const nG = rows.filter(r => !r.kind || r.kind === 'gara').length, cb = $('#bkConfirm');
-  cb.innerHTML = `<div class="confirm" style="margin-top:12px"><strong>Ripristinare il backup con ${nG} gare?</strong><span class="note">Sostituisce i dati di questo telefono (ora ${Store.gare.length} gare).</span><div class="row"><button class="btn btn-danger" data-yes>Sì, ripristina</button><button class="btn btn-ghost" data-no>Annulla</button></div></div>`;
+  cb.innerHTML = `<div class="confirm" style="margin-top:12px"><strong>Ripristinare il backup con ${nG} gare?</strong><span class="note">${Store.mode === 'fb' ? 'Le gare del backup vengono aggiunte al registro online' : 'Sostituisce i dati di questo telefono'} (ora ${Store.gare.length} gare).</span><div class="row"><button class="btn btn-danger" data-yes>Sì, ripristina</button><button class="btn btn-ghost" data-no>Annulla</button></div></div>`;
   cb.querySelector('[data-no]').onclick = () => cb.innerHTML = '';
-  cb.querySelector('[data-yes]').onclick = () => { Store.rows = rows; Store.persistLocal(); cb.innerHTML = ''; render(); toast(`Ripristinate ${nG} gare.`); };
+  cb.querySelector('[data-yes]').onclick = async () => {
+    cb.innerHTML = '';
+    if(Store.mode === 'fb'){
+      try{ for(let i = 0; i < rows.length; i += 400){ const bt = firebase.firestore().batch(); rows.slice(i, i + 400).forEach(r => { const {id, ...data} = r; bt.set(Store.col.doc(id), data); }); await bt.commit(); } toast(`Ripristinate ${nG} gare e salvate online.`); }
+      catch(e){ toast('Ripristino online non riuscito. Riprova.'); }
+      return;
+    }
+    Store.rows = rows; Store.persistLocal(); render(); toast(`Ripristinate ${nG} gare.`);
+  };
 });
 $('#exportAll').onclick = () => saveIcs(Store.gare.filter(g => !isPast(g)), 'gare-in-programma.ics');
 
@@ -1440,7 +1505,7 @@ function renderCampi(){
   dl.innerHTML = Store.campi.map(c => `<option value="${esc(c.nome)}">${esc([c.indirizzo, c.citta].filter(Boolean).join(', '))}</option>`).join('');
 }
 function render(){ renderCampi(); renderOggi(); renderList(); renderCal(); renderSpese(); if(!$('#v-referto').hidden && !draft) renderReferto(); }
-/* ---------- DESIGNAZIONI (admin): Firebase, gli arbitri vedono le loro gare in arbitro.html ---------- */
+/* ---------- ACCOUNT: login Firebase, registro online, designazioni ricevute, funzioni designatore ---------- */
 const FBV = '10.12.2';
 let fbP = null;
 function loadFB(){
@@ -1453,6 +1518,7 @@ function loadFB(){
       if(!firebase.apps.length){
         firebase.initializeApp(window.FIREBASE_CONFIG);
         if(window.FB_EMU){ firebase.auth().useEmulator(window.FB_EMU.auth, {disableWarnings: true}); firebase.firestore().useEmulator(window.FB_EMU.host, window.FB_EMU.port); }
+        else firebase.firestore().enablePersistence({synchronizeTabs: true}).catch(() => {});
       }
       return firebase;
     });
@@ -1460,91 +1526,243 @@ function loadFB(){
   return fbP;
 }
 const ADMINS = () => [].concat(window.FIREBASE_ADMINS || window.FIREBASE_ADMIN || []).map(e => String(e).trim().toLowerCase()).filter(Boolean);
-const fbReady = () => !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && ADMINS().length);
-const DS = {user: null, isAdmin: false, gare: [], arbitri: [], tab: 'gare', past: false, unsub: [], loaded: false, err: ''};
-const arbitroUrl = () => new URL('arbitro.html', location.href.split('#')[0]).href;
+const fbReady = () => !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey);
+const DS = {gare: [], arbitri: [], tab: 'gare', past: false, loaded: false, err: ''};
+const ACC = {ready: false, user: null, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], mieLoaded: false, unsub: [], mode: 'login', err: '', pendingProfile: null};
+const arbitroUrl = () => new URL('index.html#account', location.href.split('#')[0]).href;
 const nomeArb = a => a ? [a.nome, a.cognome].filter(Boolean).join(' ') || a.email : 'Arbitro rimosso';
 const RISP = {accettata: ['Accettata', 'done'], rifiutata: ['Rifiutata', 'no'], '': ['In attesa', 'wait']};
 const rispOf = (d, uid) => (d.risposte && d.risposte[uid]) || null;
-
-function dsStart(){
-  if(DS.started) return; DS.started = true;
-  if(!fbReady()){ renderDesigna(); return; }
-  loadFB().then(fb => {
-    fb.auth().onAuthStateChanged(u => {
-      DS.unsub.forEach(f => f()); DS.unsub = []; DS.gare = []; DS.arbitri = []; DS.loaded = false; DS.err = '';
-      DS.user = u; DS.isAdmin = !!u && ADMINS().includes((u.email || '').toLowerCase());
-      if(DS.isAdmin){
-        const db = fb.firestore(), fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderDesigna(); };
-        DS.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = s.docs.map(d => ({id: d.id, ...d.data()})); DS.loaded = true; renderDesigna(); }, fail));
-        DS.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = s.docs.map(d => ({id: d.id, ...d.data()})); renderDesigna(); }, fail));
-      }
-      renderDesigna();
-    });
-  }).catch(() => { DS.err = 'Serve internet per aprire le designazioni.'; DS.started = false; renderDesigna(); });
-}
-
-function renderDesigna(){
-  const box = $('#dsBody'); if(!box) return;
-  const head = $('#dsHeadBtn');
-  head.hidden = !DS.isAdmin;
-  if(!fbReady()){
-    box.innerHTML = `<div class="ref-sec"><h3>Da collegare</h3><p class="note" style="margin:0">Per mandare le designazioni agli arbitri serve l'archivio online (Firebase). Manca il file <b>firebase-config.js</b> con i dati del tuo progetto: segui le istruzioni che ti ho dato.</p></div>`; return;
-  }
-  if(DS.err && !DS.user){ box.innerHTML = `<div class="status err">${esc(DS.err)}</div><button class="btn btn-ghost btn-block" id="dsRetry">Riprova</button>`; $('#dsRetry').onclick = dsStart; return; }
-  if(!DS.started || DS.user === null && !DS.authSeen){ DS.authSeen = true; }
-  if(!DS.user){ box.innerHTML = loginHTML(); bindLogin(box); return; }
-  if(!DS.isAdmin){
-    box.innerHTML = `<div class="ref-sec"><h3>Account non admin</h3><p class="note" style="margin:0">Sei entrato come ${esc(DS.user.email)}. Solo l'account designatore può creare designazioni. Gli arbitri usano la pagina <a href="${esc(arbitroUrl())}">arbitro</a>.</p><button class="btn btn-ghost" id="dsOut">Esci</button></div>`;
-    $('#dsOut').onclick = () => firebase.auth().signOut(); return;
-  }
-  const tab = DS.tab;
-  box.innerHTML = `<div class="seg" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri <span class="cnt">${DS.arbitri.length}</span></button></div>
-    ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
-    <div id="dsList"></div>
-    <p class="note" style="margin:0;text-align:center">Designatore: ${esc(DS.user.email)} · <button class="linkbtn" id="dsOut">Esci</button></p>`;
-  box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
-  $('#dsOut').onclick = () => firebase.auth().signOut();
-  if(tab === 'gare') renderDsGare(); else renderDsArbitri();
-}
-
-function loginHTML(){
-  return `<form class="form" id="dsLogin" autocomplete="on">
-    <h3>Accesso designatore</h3>
-    <p class="note" style="grid-column:1/-1;margin:0">Entra con il tuo account designatore (${esc(ADMINS().join(' o '))}). La prima volta tocca “Crea account admin”.</p>
-    <div class="field full"><label for="dsEmail">Email</label><input id="dsEmail" type="email" autocomplete="username" value="${esc(ADMINS().length === 1 ? ADMINS()[0] : '')}" required></div>
-    <div class="field full"><label for="dsPw">Password</label><input id="dsPw" type="password" autocomplete="current-password" minlength="6" required></div>
-    <div class="field full" id="dsLoginMsg" aria-live="polite"></div>
-    <div class="actions row"><button class="btn btn-primary" type="submit">Entra</button><button class="btn btn-ghost" type="button" id="dsNew">Crea account admin</button></div>
-    <button class="linkbtn" type="button" id="dsReset" style="grid-column:1/-1">Password dimenticata?</button>
-  </form>`;
-}
+const iniziali = p => p ? ((p.nome || '')[0] || '') + ((p.cognome || '')[0] || '') : '';
+const myEmail = () => ((ACC.user && ACC.user.email) || '').toLowerCase();
 const fbErr = e => {
   const c = e && e.code || '';
   return /invalid-credential|wrong-password|user-not-found|invalid-login/.test(c) ? 'Email o password sbagliate.'
-    : /email-already-in-use/.test(c) ? 'Esiste già un account con questa email: tocca “Entra”.'
+    : /email-already-in-use/.test(c) ? 'Esiste già un account con questa email: usa “Accedi”.'
     : /weak-password/.test(c) ? 'La password deve avere almeno 6 caratteri.'
     : /invalid-email/.test(c) ? 'Email non valida.'
     : /too-many-requests/.test(c) ? 'Troppi tentativi: riprova tra qualche minuto.'
-    : /network/.test(c) ? 'Nessuna connessione.'
+    : /network|unavailable/.test(c) ? 'Nessuna connessione.'
     : /permission/.test(c) ? 'Permesso negato: controlla le regole di Firestore.'
     : 'Operazione non riuscita. Riprova.';
 };
-function bindLogin(box){
-  const f = box.querySelector('#dsLogin'), msg = box.querySelector('#dsLoginMsg');
-  const go = async create => {
-    const em = f.querySelector('#dsEmail').value.trim(), pw = f.querySelector('#dsPw').value;
-    if(!em || pw.length < 6){ msg.innerHTML = '<span class="err-t">Scrivi email e una password di almeno 6 caratteri.</span>'; return; }
-    msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
-    try{ const a = firebase.auth(); if(create) await a.createUserWithEmailAndPassword(em, pw); else await a.signInWithEmailAndPassword(em, pw); }
-    catch(e){ msg.innerHTML = `<span class="err-t">${esc(fbErr(e))}</span>`; }
+
+function accStart(){
+  if(ACC.started) return; ACC.started = true;
+  if(!fbReady()){ ACC.ready = true; renderAccount(); renderTab(); return; }
+  loadFB().then(fb => fb.auth().onAuthStateChanged(u => onUser(u).catch(e => { ACC.err = fbErr(e); ACC.ready = true; renderAccount(); renderTab(); })))
+    .catch(() => { ACC.started = false; ACC.ready = true; ACC.err = 'Serve internet per accedere. Riprova.'; renderAccount(); renderTab(); });
+}
+async function onUser(u){
+  ACC.unsub.forEach(f => f()); ACC.unsub = [];
+  Object.assign(ACC, {user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], mieLoaded: false, err: ''});
+  Object.assign(DS, {gare: [], arbitri: [], loaded: false, err: ''});
+  if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); return; }
+  const db = firebase.firestore(), em = myEmail();
+  ACC.isAdmin = ADMINS().includes(em);
+  try{ const p = await db.collection('arbitri').doc(u.uid).get(); ACC.profilo = p.exists ? p.data() : null; }catch(e){}
+  if(!ACC.profilo && ACC.pendingProfile){ const p = {...ACC.pendingProfile, email: em}; try{ await db.collection('arbitri').doc(u.uid).set(p); ACC.profilo = p; }catch(e){} }
+  ACC.pendingProfile = null;
+  // registro personale online (+ registri condivisi con questa email)
+  const own = db.collection('registri').doc(u.uid);
+  let os = null; try{ os = await own.get(); }catch(e){}
+  if(!os || !os.exists){ const r = {owner: u.uid, membri: [em], nome: nomeArb(ACC.profilo) || em, createdAt: Date.now()}; try{ await own.set(r); }catch(e){} ACC.regs = [{id: u.uid, ...r}]; }
+  else ACC.regs = [{id: u.uid, ...os.data()}];
+  try{ const sh = await db.collection('registri').where('membri', 'array-contains', em).get(); sh.docs.forEach(d => { if(d.id !== u.uid) ACC.regs.push({id: d.id, ...d.data()}); }); }catch(e){}
+  let pref = null; try{ pref = localStorage.getItem('registro-attivo-' + u.uid); }catch(e){}
+  let rid = ACC.regs.some(r => r.id === pref) ? pref : u.uid;
+  if(!pref && ACC.regs.length > 1){ let vuoto = true; try{ vuoto = (await own.collection('righe').limit(1).get()).empty; }catch(e){} if(vuoto && !hasLegacy()) rid = ACC.regs.find(r => r.id !== u.uid).id; }
+  useRegistro(rid);
+  // designazioni ricevute
+  ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot(s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; syncAccettate(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
+  if(ACC.isAdmin){
+    const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
+    ACC.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = s.docs.map(d => ({id: d.id, ...d.data()})); DS.loaded = true; renderAccount(); }, fail));
+    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = s.docs.map(d => ({id: d.id, ...d.data()})); renderAccount(); }, fail));
+  }
+  ACC.ready = true; renderAccount(); renderTab();
+}
+const hasLegacy = () => { try{ return JSON.parse(localStorage.getItem('registro-gare') || '[]').length > 0; }catch(e){ return false; } };
+function useRegistro(rid){
+  ACC.regId = rid;
+  try{ localStorage.setItem('registro-attivo-' + ACC.user.uid, rid); }catch(e){}
+  Store.attachFb(firebase.firestore().collection('registri').doc(rid).collection('righe'), rid === ACC.user.uid);
+}
+
+function renderTab(){
+  const a = $('#accTab'); if(!a) return;
+  const p = ACC.user ? (ACC.profilo || {nome: ACC.user.email}) : null;
+  a.querySelector('.tab-ic').innerHTML = p ? `<span class="avatar sm">${esc(iniziali(p).toUpperCase() || '?')}</span>` : ICON_USER;
+  a.querySelector('.tab-lbl').textContent = !p ? 'Login' : ACC.isAdmin ? 'Designa' : 'Profilo';
+  a.setAttribute('aria-label', !p ? 'Login' : 'Account di ' + nomeArb(p));
+  const note = $('#storeNote');
+  if(note && fbReady() && ACC.ready){ const off = !ACC.user; note.hidden = !off; if(off) note.innerHTML = 'Non sei entrato: i dati restano solo su questo telefono. <a href="#account">Accedi</a> per salvarli online.'; }
+  const n = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)).length : 0;
+  a.querySelector('.tab-badge').hidden = !n; a.querySelector('.tab-badge').textContent = n;
+}
+const ICON_USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6.5 8-6.5s7.2 2.5 8 6.5"/></svg>';
+
+function renderAccount(){
+  const box = $('#accBody'); if(!box) return;
+  $('#dsHeadBtn').hidden = !(ACC.user && ACC.isAdmin);
+  $('#accTitle').textContent = !ACC.user ? 'Login' : ACC.isAdmin ? 'Designa' : 'Profilo';
+  if(!fbReady()){ box.innerHTML = `<div class="ref-sec"><h3>Da collegare</h3><p class="note" style="margin:0">Manca il file <b>firebase-config.js</b> con i dati del progetto Firebase.</p></div>`; return; }
+  if(!ACC.ready){ box.innerHTML = '<div class="status"><span class="spin"></span>Collego l’account…</div>'; return; }
+  if(!ACC.user){ box.innerHTML = (ACC.err ? `<div class="status err">${esc(ACC.err)}</div>` : '') + authHTML(); bindAuth(); return; }
+  if(!ACC.profilo){ box.innerHTML = profileHTML(); bindProfile(); return; }
+  const p = ACC.profilo;
+  box.innerHTML = `<div class="acc-head"><span class="avatar">${esc(iniziali(p).toUpperCase())}</span><div><b>${esc(nomeArb(p))}</b><span>${esc(ACC.user.email)}${ACC.isAdmin ? ' · Designatore' : ''}</span></div></div>
+    ${ACC.isAdmin ? '<div id="dsBody" class="view"></div>' : ''}
+    <section class="ref-sec" id="mieBox"></section>
+    <section class="ref-sec" id="regBox"></section>
+    <button class="btn btn-ghost btn-block" id="accOut">Esci</button>`;
+  $('#accOut').onclick = () => firebase.auth().signOut();
+  if(ACC.isAdmin) renderDesigna();
+  renderMie(); renderRegBox();
+}
+
+/* -- login / registrazione -- */
+function authHTML(){
+  const reg = ACC.mode === 'reg';
+  return `<div class="seg" role="group" aria-label="Accesso"><button data-m="login" aria-pressed="${!reg}">Accedi</button><button data-m="reg" aria-pressed="${reg}">Registrati</button></div>
+  <form class="form" id="auth" autocomplete="on">
+    <h3>${reg ? 'Crea il tuo account' : 'Accedi'}</h3>
+    <p class="note" style="grid-column:1/-1;margin:0">${reg ? 'Le tue gare, i rimborsi e i referti si salvano online nel tuo account e ricevi qui le designazioni.' : 'Entra per ritrovare il tuo registro su ogni telefono e vedere le designazioni.'}</p>
+    ${reg ? `<div class="field"><label for="a-nome">Nome</label><input id="a-nome" autocomplete="given-name" required></div><div class="field"><label for="a-cog">Cognome</label><input id="a-cog" autocomplete="family-name" required></div>
+    <div class="field full"><label for="a-tel">Cellulare</label><input id="a-tel" type="tel" autocomplete="tel" placeholder="Per ricevere le designazioni su WhatsApp"></div>` : ''}
+    <div class="field full"><label for="a-em">Email</label><input id="a-em" type="email" autocomplete="username" required></div>
+    <div class="field full"><label for="a-pw">Password</label><input id="a-pw" type="password" autocomplete="${reg ? 'new-password' : 'current-password'}" minlength="6" required></div>
+    <div class="field full" id="a-msg" aria-live="polite"></div>
+    <div class="actions"><button class="btn btn-primary btn-block" type="submit">${reg ? 'Registrati' : 'Entra'}</button></div>
+    ${reg ? '' : '<button class="linkbtn" type="button" id="a-reset" style="grid-column:1/-1">Password dimenticata?</button>'}
+  </form>`;
+}
+function bindAuth(){
+  document.querySelectorAll('#accBody [data-m]').forEach(b => b.onclick = () => { ACC.mode = b.dataset.m; ACC.err = ''; renderAccount(); });
+  const f = $('#auth'), msg = $('#a-msg'), v = id => (f.querySelector('#' + id) || {value: ''}).value.trim();
+  f.onsubmit = async e => {
+    e.preventDefault(); msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
+    try{
+      if(ACC.mode === 'reg'){
+        if(!v('a-nome') || !v('a-cog')){ msg.innerHTML = '<span class="err-t">Scrivi nome e cognome.</span>'; return; }
+        ACC.pendingProfile = {nome: v('a-nome'), cognome: v('a-cog'), telefono: v('a-tel'), createdAt: Date.now()};
+        await firebase.auth().createUserWithEmailAndPassword(v('a-em'), f.querySelector('#a-pw').value);
+      } else await firebase.auth().signInWithEmailAndPassword(v('a-em'), f.querySelector('#a-pw').value);
+    }catch(err){ ACC.pendingProfile = null; msg.innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; }
   };
-  f.onsubmit = e => { e.preventDefault(); go(false); };
-  f.querySelector('#dsNew').onclick = () => go(true);
-  f.querySelector('#dsReset').onclick = async () => {
-    const em = f.querySelector('#dsEmail').value.trim(); if(!em){ msg.textContent = 'Scrivi prima la tua email.'; return; }
-    try{ await firebase.auth().sendPasswordResetEmail(em); msg.textContent = 'Ti ho mandato un’email per cambiare la password.'; }catch(e){ msg.innerHTML = `<span class="err-t">${esc(fbErr(e))}</span>`; }
+  if($('#a-reset')) $('#a-reset').onclick = async () => {
+    if(!v('a-em')){ msg.textContent = 'Scrivi prima la tua email.'; return; }
+    try{ await firebase.auth().sendPasswordResetEmail(v('a-em')); msg.textContent = 'Ti ho mandato un’email per cambiare la password.'; }catch(err){ msg.innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; }
   };
+}
+function profileHTML(){
+  return `<form class="form" id="prof"><h3>Completa il profilo</h3><p class="note" style="grid-column:1/-1;margin:0">Nome e cognome servono per le iniziali e per farti trovare dai designatori.</p>
+    <div class="field"><label for="p-nome">Nome</label><input id="p-nome" required></div><div class="field"><label for="p-cog">Cognome</label><input id="p-cog" required></div>
+    <div class="field full"><label for="p-tel">Cellulare</label><input id="p-tel" type="tel"></div>
+    <div class="field full" id="p-msg"></div><div class="actions row"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" id="p-out">Esci</button></div></form>`;
+}
+function bindProfile(){
+  const f = $('#prof'), v = id => f.querySelector('#' + id).value.trim();
+  $('#p-out').onclick = () => firebase.auth().signOut();
+  f.onsubmit = async e => { e.preventDefault();
+    const p = {nome: v('p-nome'), cognome: v('p-cog'), telefono: v('p-tel'), email: myEmail(), createdAt: Date.now()};
+    try{ await firebase.firestore().collection('arbitri').doc(ACC.user.uid).set(p); ACC.profilo = p; renderAccount(); renderTab(); }catch(err){ $('#p-msg').innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; } };
+}
+
+/* -- registro online: quale registro, con chi è condiviso -- */
+function renderRegBox(){
+  const box = $('#regBox'); if(!box) return;
+  const cur = ACC.regs.find(r => r.id === ACC.regId) || {}, mine = cur.owner === ACC.user.uid;
+  const altri = (cur.membri || []).filter(e => e !== myEmail());
+  box.innerHTML = `<h3>Il tuo registro</h3>
+    <p class="note" style="margin:0">Gare, rimborsi e referti si salvano online da soli a ogni modifica.${mine ? '' : ` Stai usando il registro di <b>${esc(cur.nome || 'un altro account')}</b>.`}</p>
+    ${ACC.regs.length > 1 ? `<div class="field"><label for="regSel">Registro da usare</label><select id="regSel">${ACC.regs.map(r => `<option value="${esc(r.id)}" ${r.id === ACC.regId ? 'selected' : ''}>${r.id === ACC.user.uid ? 'Il mio registro' : 'Registro di ' + esc(r.nome || 'altro account')}</option>`).join('')}</select></div>` : ''}
+    ${mine ? `<div class="field"><label>Altri account che vedono e modificano questo registro</label>
+      ${altri.length ? altri.map(e => `<div class="share-row"><span>${esc(e)}</span><button class="x" data-rm="${esc(e)}" aria-label="Togli ${esc(e)}">✕</button></div>`).join('') : '<p class="note" style="margin:0">Nessuno: il registro lo vedi solo tu.</p>'}</div>
+      <form class="share-add" id="shareAdd"><input type="email" id="shareEm" placeholder="Email dell'altro account" aria-label="Email dell'altro account" required><button class="btn btn-ghost sm">Aggiungi</button></form>` : ''}`;
+  if($('#regSel')) $('#regSel').onchange = e => { useRegistro(e.target.value); renderAccount(); };
+  const ref = () => firebase.firestore().collection('registri').doc(ACC.regId);
+  const setM = async m => { try{ await ref().update({membri: m}); cur.membri = m; renderRegBox(); toast('Condivisione aggiornata'); }catch(err){ toast(fbErr(err)); } };
+  box.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => setM((cur.membri || []).filter(e => e !== b.dataset.rm)));
+  if($('#shareAdd')) $('#shareAdd').onsubmit = e => { e.preventDefault(); const em = $('#shareEm').value.trim().toLowerCase(); if(!em || (cur.membri || []).includes(em)) return; setM([...(cur.membri || []), em]); };
+}
+
+/* -- designazioni ricevute: accetta / rifiuta; le accettate entrano nel registro -- */
+function renderMie(){
+  const box = $('#mieBox'); if(!box) return;
+  const t = todayIso(), uid = ACC.user.uid, key = d => `${d.data || '9999'} ${d.ora || ''}`;
+  const up = ACC.mie.filter(d => !d.data || d.data >= t).sort((a, b) => key(a).localeCompare(key(b)));
+  if(ACC.isAdmin && !up.length){ box.hidden = true; return; }
+  box.hidden = false;
+  if(!ACC.mieLoaded){ box.innerHTML = '<h3>Le mie designazioni</h3><div class="status"><span class="spin"></span>Carico…</div>'; return; }
+  box.innerHTML = `<h3>Le mie designazioni</h3>${up.length ? up.map(d => {
+    const r = rispOf(d, uid), mine = (d.ufficiali || []).find(u => u.uid === uid) || {}, altri = (d.ufficiali || []).filter(u => u.uid !== uid);
+    const st = r ? (r.stato === 'accettata' ? '<span class="dz-st done">✓ Accettata · è nel tuo registro</span>' : '<span class="dz-st no">✕ Rifiutata</span>') : '<span class="dz-st wait">● Da confermare</span>';
+    return `<article class="dz${r ? '' : ' new'}">${st}
+      <div class="dz-date">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
+      <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
+      <dl class="kv">${[['Ruolo', mine.ruolo || 'Arbitro'], ['Campionato', [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · ')], ['Campo', [d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Con', altri.map(u => `${u.nome} (${u.ruolo})`).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      <div class="row">${!r || r.stato !== 'accettata' ? `<button class="btn btn-primary" data-acc="${esc(d.id)}">Accetto</button>` : ''}${!r || r.stato !== 'rifiutata' ? `<button class="btn btn-danger" data-rif="${esc(d.id)}">Rifiuto</button>` : ''}</div><div data-rbox="${esc(d.id)}"></div></article>`;
+  }).join('') : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
+  box.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => rispondi(b.dataset.acc, 'accettata'));
+  box.querySelectorAll('[data-rif]').forEach(b => b.onclick = () => {
+    const rb = box.querySelector(`[data-rbox="${b.dataset.rif}"]`);
+    rb.innerHTML = `<div class="field"><label for="m-${esc(b.dataset.rif)}">Motivo (facoltativo)</label><input id="m-${esc(b.dataset.rif)}" placeholder="Es. impegno di lavoro"></div><div class="row"><button class="btn btn-danger" data-ok>Conferma rifiuto</button><button class="btn btn-ghost" data-no>Annulla</button></div>`;
+    rb.querySelector('[data-no]').onclick = () => rb.innerHTML = '';
+    rb.querySelector('[data-ok]').onclick = () => rispondi(b.dataset.rif, 'rifiutata', rb.querySelector('input').value.trim());
+  });
+}
+async function rispondi(id, stato, motivo){
+  const d = ACC.mie.find(x => x.id === id); if(!d) return;
+  try{
+    await firebase.firestore().collection('designazioni').doc(id).update({[`risposte.${ACC.user.uid}`]: {stato, motivo: motivo || '', at: Date.now()}});
+    if(stato === 'accettata'){ mettiInRegistro(d); toast('Gara accettata e aggiunta al tuo registro'); }
+    else { const g = Store.gare.find(x => x.desId === id); if(g){ Store.remove(g.id); Store.spese.filter(s => s.garaId === g.id).forEach(s => Store.remove(s.id)); } toast('Gara rifiutata'); }
+  }catch(e){ toast('Non sono riuscito a salvare la risposta. Riprova.'); }
+}
+const DES_F = ['data', 'ora', 'categoria', 'girone', 'numeroGara', 'casa', 'ospite', 'impianto', 'indirizzo', 'citta', 'mapsUrl'];
+function garaDaDes(d){
+  const uid = ACC.user.uid, mine = (d.ufficiali || []).find(u => u.uid === uid) || {};
+  const o = {}; DES_F.forEach(k => o[k] = d[k] || '');
+  o.ruolo = mine.ruolo || 'Arbitro';
+  o.colleghi = (d.ufficiali || []).filter(u => u.uid !== uid).map(u => `${u.nome} (${u.ruolo})`).join(', ');
+  o.note = d.note || ''; o.desId = d.id;
+  return o;
+}
+function mettiInRegistro(d){
+  const id = 'd-' + d.id, old = Store.gare.find(x => x.id === id) || {};
+  const g = {...old, ...garaDaDes(d), id, stato: old.stato || 'programmata'};
+  Store.saveGara(g);
+  if(!Store.spese.some(s => s.garaId === id)){
+    const kn = kmNoto(g);
+    Store.saveSpesa({id: 'sd-' + d.id, data: g.data, tipo: 'rimborso', importo: toNum(d.rimborso), km: kn ? kn.km : 0, garaId: id, prezzo: lastPrezzo(), descrizione: 'Rimborso designazione'});
+  }
+}
+function syncAccettate(){
+  if(Store.mode !== 'fb' || !Store.synced) return;
+  ACC.mie.forEach(d => {
+    const r = rispOf(d, ACC.user.uid); if(!r || r.stato !== 'accettata') return;
+    const g = Store.gare.find(x => x.id === 'd-' + d.id);
+    if(!g){ mettiInRegistro(d); return; }
+    const n = garaDaDes(d); if(Object.keys(n).some(k => (g[k] || '') !== (n[k] || ''))) Store.saveGara({...g, ...n});
+  });
+}
+function renderOggiDes(){
+  const el = $('#desHint'); if(!el) return;
+  const n = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)).length : 0;
+  el.hidden = !n; el.innerHTML = n ? `<a class="status" href="#account" style="text-decoration:none;color:inherit"><span style="flex:1">📋 Hai ${n === 1 ? '1 designazione' : n + ' designazioni'} da confermare</span><b>Apri ›</b></a>` : '';
+  renderTab();
+}
+
+/* -- funzioni designatore -- */
+function renderDesigna(){
+  const box = $('#dsBody'); if(!box) return;
+  const tab = DS.tab;
+  box.innerHTML = `<div class="seg" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri <span class="cnt">${DS.arbitri.length}</span></button></div>
+    ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
+    <div id="dsList" class="view"></div>`;
+  box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
+  if(tab === 'gare') renderDsGare(); else renderDsArbitri();
 }
 
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
@@ -1676,7 +1894,7 @@ function openDsForm(d){
 }
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
-route(); render(); Store.init();
+route(); render(); Store.init(); renderTab(); accStart();
 })();
 </script>
 
