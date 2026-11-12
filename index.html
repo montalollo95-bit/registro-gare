@@ -261,6 +261,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
 .fed-row{cursor:default}
 
+/* account non designatore: sola lettura sulle gare */
+.ro-only{display:none}
+body.lock .ro-only{display:inline}
+body.lock .rw-only{display:none!important}
+body.lock a[href="#importa"],body.lock #bkImport,body.lock [data-act=edit],body.lock [data-act=del]{display:none!important}
+body.lock .band a.round[href="#importa"]{display:grid!important;visibility:hidden;pointer-events:none}
+body.lock .shortcuts{grid-template-columns:repeat(2,1fr)}
+.form select:disabled,.form input:disabled{opacity:.6}
+
 /* app shell: il body non scorre (su iPhone la barra in basso resta ferma), scorre solo #scroller */
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!important;margin:0}
@@ -597,6 +606,7 @@ const VIEWS = ['oggi','partite','calendario','spese','importa','referto','accoun
 function route(){
   let v = location.hash.replace('#','');
   if(!VIEWS.includes(v)) v = 'oggi';
+  if(v === 'importa' && locked()) v = 'oggi';
   VIEWS.forEach(x => $('#v-'+x).hidden = x !== v);
   if(v === 'referto') renderReferto();
   if(v === 'account') renderAccount();
@@ -636,7 +646,7 @@ function renderOggi(){
       box.querySelector('[data-open]').onclick = () => openSheet(n.id);
     } else {
       box.innerHTML = `<div class="next"><span class="eyebrow">Prossima designazione</span><h2>Nessuna gara in programma</h2>
-        <span class="note" style="font-size:15px">Quando ti arriva una designazione su Sinfonia4You, fai uno screenshot e importalo qui.</span>
+        <span class="note" style="font-size:15px"><span class="rw-only">Quando ti arriva una designazione su Sinfonia4You, fai uno screenshot e importalo qui.</span><span class="ro-only">Quando un designatore ti assegna una gara la trovi in <a href="#account">Profilo</a>: accettala e comparirà qui.</span></span>
         <a class="btn btn-yellow btn-block" href="#importa">+ Aggiungi designazione</a></div>`;
     }
   }
@@ -684,7 +694,7 @@ function renderList(){
   if(Store.mode === 'loading'){ list.innerHTML = `<li class="status"><span class="spin"></span>Apro il registro…</li>`; return; }
   if(!items.length){
     list.innerHTML = q ? `<li class="empty-box">Nessuna gara trovata per “${esc(q)}”.</li>`
-      : filter === 'up' ? `<li class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna designazione</h3><span>Importa lo screenshot della designazione o aggiungi una gara a mano.</span><a class="btn btn-primary" href="#importa">+ Aggiungi gara</a></li>`
+      : filter === 'up' ? `<li class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna designazione</h3><span><span class="rw-only">Importa lo screenshot della designazione o aggiungi una gara a mano.</span><span class="ro-only">Le gare che accetti in <a href="#account">Profilo</a> compaiono qui.</span></span><a class="btn btn-primary" href="#importa">+ Aggiungi gara</a></li>`
       : `<li class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna gara conclusa</h3><span>Dopo ogni partita apri la gara e segna risultato, cartellini e voto.</span></li>`;
     return;
   }
@@ -943,6 +953,13 @@ function openSpesaForm(s){
   const tipo = q('sp-tipo'), km = q('sp-km'), tar = q('sp-tariffa'), cons = q('sp-consumo'), prz = q('sp-prezzo'), imp = q('sp-importo'), garaSel = q('sp-gara'), msg = q('sp-msg'), maps = q('sp-maps'), calcBtn = q('sp-calc');
   const fix = n => n.toFixed(2).replace('.',',');
   const fuelBox = q('sp-fuel');
+  if(locked() && Store.gare.some(x => x.id === s.garaId && x.desId) && !isNew){
+    f.dataset.lock = '1';
+    ['sp-data', 'sp-tipo', 'sp-gara', 'sp-importo'].forEach(id => q(id).disabled = true);
+    f.querySelectorAll('.rimb').forEach(el => el.remove());
+    const dl = f.querySelector('[data-del]'); if(dl) dl.style.display = 'none';
+    q('sp-importo').insertAdjacentHTML('afterend', '<span class="note">Il rimborso lo decide il designatore. Tu puoi cambiare i km e il prezzo della benzina.</span>');
+  }
   const showFuel = () => {
     const S = Store.settings, k = toNum(km.value), c = toNum(S.consumo), p = toNum(prz.value) || toNum(S.prezzo);
     fuelBox.hidden = tipo.value !== 'rimborso' || !k;
@@ -955,7 +972,7 @@ function openSpesaForm(s){
   };
   const calc = () => {
     const k = toNum(km.value);
-    if(tipo.value === 'rimborso' && k && toNum(tar.value)) imp.value = fix(k * toNum(tar.value));
+    if(tipo.value === 'rimborso' && !f.dataset.lock && k && toNum(tar.value)) imp.value = fix(k * toNum(tar.value));
     if(tipo.value === 'carburante' && k && toNum(cons.value) && toNum(prz.value)) imp.value = fix(k / toNum(cons.value) * toNum(prz.value));
     showFuel();
   };
@@ -1005,7 +1022,7 @@ function openSpesaForm(s){
     if(d.tipo !== 'carburante') d.consumo = '';
     if(d.tipo !== 'carburante' && d.tipo !== 'rimborso') d.prezzo = '';
     if(d.tipo !== 'rimborso' && d.tipo !== 'carburante') d.km = '';
-    if(!toNum(d.importo)){ toast('Inserisci l’importo.'); return; }
+    if(!toNum(d.importo) && !f.dataset.lock){ toast('Inserisci l’importo.'); return; }
     try{ const { autoCalc, ...rest } = s; await Store.saveSpesa({...rest, ...d}); box.innerHTML = ''; toast('Spesa salvata');
       const dd = parseD(d.data); if(dd && sMode === 'mese'){ sMonth = new Date(dd.getFullYear(), dd.getMonth(), 1); renderSpese(); } }
     catch(e){ toast('Salvataggio non riuscito. Riprova.'); }
@@ -1572,6 +1589,7 @@ async function onUser(u){
   if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); return; }
   const db = firebase.firestore(), em = myEmail();
   ACC.isAdmin = ADMINS().includes(em);
+  try{ localStorage.setItem('rg-admin', ACC.isAdmin ? '1' : ''); }catch(e){}
   try{ const p = await db.collection('arbitri').doc(u.uid).get(); ACC.profilo = p.exists ? p.data() : null; }catch(e){}
   if(!ACC.profilo && ACC.pendingProfile){ const p = {...ACC.pendingProfile, email: em}; try{ await db.collection('arbitri').doc(u.uid).set(p); ACC.profilo = p; }catch(e){} }
   ACC.pendingProfile = null;
@@ -1602,6 +1620,7 @@ function useRegistro(rid){
 }
 
 function renderTab(){
+  applyLock();
   const a = $('#accTab'); if(!a) return;
   const p = ACC.user ? (ACC.profilo || {nome: ACC.user.email}) : null;
   a.querySelector('.tab-ic').innerHTML = p ? `<span class="avatar sm">${esc(iniziali(p).toUpperCase() || '?')}</span>` : ICON_USER;
@@ -1611,6 +1630,17 @@ function renderTab(){
   if(note && fbReady() && ACC.ready){ const off = !ACC.user; note.hidden = !off; if(off) note.innerHTML = 'Non sei entrato: i dati restano solo su questo telefono. <a href="#account">Accedi</a> per salvarli online.'; }
   const n = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)).length : 0;
   a.querySelector('.tab-badge').hidden = !n; a.querySelector('.tab-badge').textContent = n;
+}
+/* solo i designatori inseriscono e modificano le gare: gli altri vedono, accettano e segnano km e benzina */
+function locked(){
+  if(!fbReady()) return false;
+  if(ACC.ready) return !(ACC.user && ACC.isAdmin);
+  try{ return localStorage.getItem('rg-admin') !== '1'; }catch(e){ return true; }
+}
+function applyLock(){
+  const l = locked(), was = document.body.classList.contains('lock');
+  document.body.classList.toggle('lock', l);
+  if(l && !was && location.hash === '#importa') route();
 }
 const ICON_USER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6.5 8-6.5s7.2 2.5 8 6.5"/></svg>';
 
@@ -1757,6 +1787,8 @@ function syncAccettate(){
     const g = Store.gare.find(x => x.id === 'd-' + d.id);
     if(!g){ mettiInRegistro(d); return; }
     const n = garaDaDes(d); if(Object.keys(n).some(k => (g[k] || '') !== (n[k] || ''))) Store.saveGara({...g, ...n});
+    const sp = Store.spese.find(x => x.id === 'sd-' + d.id);
+    if(sp && toNum(sp.importo) !== toNum(d.rimborso)) Store.saveSpesa({...sp, importo: toNum(d.rimborso)});
   });
 }
 function renderOggiDes(){
