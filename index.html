@@ -261,6 +261,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
 .fed-row{cursor:default}
 
+/* app shell: il body non scorre (su iPhone la barra in basso resta ferma), scorre solo #scroller */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;padding:0!important;margin:0}
+#scroller{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+.tabs{transform:translateZ(0)}
+
 .tab-ic{display:grid;place-items:center;height:24px}
 .tabs a{position:relative}
 .tab-badge{position:absolute;top:2px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--card-red);color:#fff;font-size:11px;line-height:18px;font-weight:800}
@@ -307,6 +315,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ds-offrow .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
 </style>
 </head><body>
+<div id="scroller">
 
 
 <!-- ===== OGGI ===== -->
@@ -433,6 +442,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   </div>
 </section>
 
+</div><!-- /scroller -->
 <div class="tabs">
   <nav aria-label="Sezioni">
     <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Oggi</a>
@@ -589,7 +599,7 @@ function route(){
   if(v === 'referto') renderReferto();
   if(v === 'account') renderAccount();
   document.querySelectorAll('.tabs a').forEach(a => { if(a.dataset.v === v) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
-  window.scrollTo(0,0);
+  $('#scroller').scrollTop = 0;
 }
 window.addEventListener('hashchange', route);
 function seg(a, b, on){ a.setAttribute('aria-pressed', on ? 'true':'false'); b.setAttribute('aria-pressed', on ? 'false':'true'); }
