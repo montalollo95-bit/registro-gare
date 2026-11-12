@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Registro Gare">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#1E6A47">
+<meta name="theme-color" content="#1677D2">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -267,7 +267,6 @@ body.lock .ro-only{display:inline}
 body.lock .rw-only{display:none!important}
 body.lock a[href="#importa"],body.lock #bkImport,body.lock [data-act=edit],body.lock [data-act=del]{display:none!important}
 body.lock .band a.round[href="#importa"]{display:grid!important;visibility:hidden;pointer-events:none}
-body.lock .shortcuts{grid-template-columns:repeat(2,1fr)}
 .form select:disabled,.form input:disabled{opacity:.6}
 
 /* app shell: il body non scorre (su iPhone la barra in basso resta ferma), scorre solo #scroller */
@@ -324,6 +323,25 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 .ds-offrow{display:grid;grid-template-columns:1fr 132px 40px;gap:6px;margin-bottom:6px}
 .ds-offrow select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0;width:100%}
 .ds-offrow .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
+
+/* tema azzurro */
+:root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
+:root[data-theme="dark"]{--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}
+.band.sub::before{display:none}
+.ro-flex{display:none!important}
+body.lock .ro-flex{display:flex!important}
+.des-home{border-color:var(--card-yellow)}
+.des-home .cnt{font-size:14px}
+.wrap{width:100%;box-sizing:border-box}
+.ds-arb.pay .pay-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%}
+.ds-arb.pay .pay-r b{margin-right:auto}
+.ds-arb.pay .pay-r b{font-family:var(--display);font-size:24px}
+.ds-arb.pay.paid{opacity:.75}
+.ds-arb details{font-size:14px;color:var(--muted)}
+.ds-arb summary{cursor:pointer;padding:2px 0}
+.ds-sum b.num{font-size:22px}
+#dsBody .seg button{padding-left:4px;padding-right:4px}
 </style>
 </head><body>
 <div id="scroller">
@@ -343,6 +361,7 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
     <div class="sec-head"><h2>Scorciatoie</h2></div>
     <div class="shortcuts">
       <a class="sc" href="#importa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span>Importa gara</a>
+      <a class="sc ro-flex" href="#partite"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg></span>Partite</a>
       <a class="sc" href="#calendario"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Calendario</a>
       <a class="sc" href="#spese"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span>Rimborsi</a>
     </div>
@@ -361,19 +380,19 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 
 <!-- ===== REFERTO ===== -->
 <section id="v-referto" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Referto</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Referto</h1><span class="spacer"></span></div></div>
   <div class="wrap view" id="refBody"></div>
 </section>
 
 <!-- ===== ACCOUNT / DESIGNA ===== -->
 <section id="v-account" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1 id="accTitle">Login</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1 id="accTitle">Login</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
   <div class="wrap view" id="accBody"></div>
 </section>
 
 <!-- ===== PARTITE ===== -->
 <section id="v-partite" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Filtro gare">
       <button id="fUp" aria-pressed="true">Prossime</button>
@@ -386,7 +405,7 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 
 <!-- ===== CALENDARIO ===== -->
 <section id="v-calendario" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Calendario</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Calendario</h1><span class="spacer"></span></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Vista calendario">
       <button id="cMese" aria-pressed="true">Mese</button>
@@ -407,8 +426,9 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 
 <!-- ===== SPESE ===== -->
 <section id="v-spese" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
   <div class="wrap view">
+    <div id="payBox" hidden></div>
     <div class="seg" role="group" aria-label="Periodo">
       <button id="sMese" aria-pressed="true">Mese</button>
       <button id="sStag" aria-pressed="false">Stagione</button>
@@ -425,7 +445,7 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 
 <!-- ===== IMPORTA ===== -->
 <section id="v-importa" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
   <div class="wrap view">
     <div class="hero">
       <h2>La gara si compila da sola</h2>
@@ -456,7 +476,7 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 </div><!-- /scroller -->
 <div class="tabs">
   <nav aria-label="Sezioni">
-    <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Oggi</a>
+    <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="rw-only">Oggi</span><span class="ro-only">Home</span></a>
     <a href="#partite" data-v="partite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg>Partite</a>
     <a href="#calendario" data-v="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendario</a>
     <a href="#spese" data-v="spese"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg>Rimborsi</a>
@@ -646,7 +666,7 @@ function renderOggi(){
       box.querySelector('[data-open]').onclick = () => openSheet(n.id);
     } else {
       box.innerHTML = `<div class="next"><span class="eyebrow">Prossima designazione</span><h2>Nessuna gara in programma</h2>
-        <span class="note" style="font-size:15px"><span class="rw-only">Quando ti arriva una designazione su Sinfonia4You, fai uno screenshot e importalo qui.</span><span class="ro-only">Quando un designatore ti assegna una gara la trovi in <a href="#account">Profilo</a>: accettala e comparirà qui.</span></span>
+        <span class="note" style="font-size:15px"><span class="rw-only">Quando ti arriva una designazione su Sinfonia4You, fai uno screenshot e importalo qui.</span><span class="ro-only">Quando un designatore ti assegna una gara compare qui sopra: tocca Accetto e la trovi nelle tue partite.</span></span>
         <a class="btn btn-yellow btn-block" href="#importa">+ Aggiungi designazione</a></div>`;
     }
   }
@@ -1556,7 +1576,8 @@ function loadFB(){
 }
 const ADMINS = () => [].concat(window.FIREBASE_ADMINS || window.FIREBASE_ADMIN || []).map(e => String(e).trim().toLowerCase()).filter(Boolean);
 const fbReady = () => !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey);
-const DS = {gare: [], arbitri: [], tab: 'gare', past: false, loaded: false, err: ''};
+const DS = {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], tab: 'gare', past: false, loaded: false, err: '', sqCat: 'C5 AICS'};
+const PAY = {mese: todayIso().slice(0, 7)};
 const ACC = {ready: false, user: null, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], mieLoaded: false, unsub: [], mode: 'login', err: '', pendingProfile: null};
 const arbitroUrl = () => new URL('index.html#account', location.href.split('#')[0]).href;
 const nomeArb = a => a ? [a.nome, a.cognome].filter(Boolean).join(' ') || a.email : 'Arbitro rimosso';
@@ -1585,8 +1606,8 @@ function accStart(){
 async function onUser(u){
   ACC.unsub.forEach(f => f()); ACC.unsub = [];
   Object.assign(ACC, {user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], mieLoaded: false, err: ''});
-  Object.assign(DS, {gare: [], arbitri: [], loaded: false, err: ''});
-  if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); return; }
+  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], loaded: false, err: ''});
+  if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); return; }
   const db = firebase.firestore(), em = myEmail();
   ACC.isAdmin = ADMINS().includes(em);
   try{ localStorage.setItem('rg-admin', ACC.isAdmin ? '1' : ''); }catch(e){}
@@ -1607,8 +1628,12 @@ async function onUser(u){
   ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot(s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; syncAccettate(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
   if(ACC.isAdmin){
     const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
-    ACC.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = s.docs.map(d => ({id: d.id, ...d.data()})); DS.loaded = true; renderAccount(); }, fail));
-    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = s.docs.map(d => ({id: d.id, ...d.data()})); renderAccount(); }, fail));
+    const docs = s => s.docs.map(d => ({id: d.id, ...d.data()}));
+    ACC.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = docs(s); DS.loaded = true; renderAccount(); renderPay(); }, fail));
+    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = docs(s); renderAccount(); renderPay(); }, fail));
+    ACC.unsub.push(db.collection('squadre').onSnapshot(s => { DS.squadre = docs(s); if(['squadre'].includes(DS.tab)) renderAccount(); }, fail));
+    ACC.unsub.push(db.collection('impianti').onSnapshot(s => { DS.impianti = docs(s); if(['impianti'].includes(DS.tab)) renderAccount(); }, fail));
+    ACC.unsub.push(db.collection('pagamenti').onSnapshot(s => { DS.pag = docs(s); renderPay(); }, fail));
   }
   ACC.ready = true; renderAccount(); renderTab();
 }
@@ -1656,11 +1681,12 @@ function renderAccount(){
   box.innerHTML = `<div class="acc-head"><span class="avatar">${esc(iniziali(p).toUpperCase())}</span><div><b>${esc(nomeArb(p))}</b><span>${esc(ACC.user.email)}${ACC.isAdmin ? ' · Designatore' : ''}</span></div></div>
     ${ACC.isAdmin ? '<div id="dsBody" class="view"></div>' : ''}
     <section class="ref-sec" id="mieBox"></section>
+    <section class="ref-sec" id="datiBox"></section>
     <section class="ref-sec" id="regBox"></section>
     <button class="btn btn-ghost btn-block" id="accOut">Esci</button>`;
   $('#accOut').onclick = () => firebase.auth().signOut();
   if(ACC.isAdmin) renderDesigna();
-  renderMie(); renderRegBox();
+  renderMie(); renderDati(); renderRegBox();
 }
 
 /* -- login / registrazione -- */
@@ -1711,6 +1737,89 @@ function bindProfile(){
     try{ await firebase.firestore().collection('arbitri').doc(ACC.user.uid).set(p); ACC.profilo = p; renderAccount(); renderTab(); }catch(err){ $('#p-msg').innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; } };
 }
 
+/* -- dati anagrafici e IBAN (li vedono solo l'arbitro e i designatori) -- */
+const ANAG = [['nome', 'Nome'], ['cognome', 'Cognome'], ['dataNascita', 'Data di nascita', 'date'], ['luogoNascita', 'Luogo di nascita'], ['codiceFiscale', 'Codice fiscale'],
+  ['indirizzo', 'Indirizzo di residenza', 'text', 1], ['cap', 'CAP', 'text', 0, 'inputmode="numeric" maxlength="5"'], ['citta', 'Città'], ['provincia', 'Provincia', 'text', 0, 'maxlength="2"'],
+  ['telefono', 'Cellulare', 'tel'], ['iban', 'IBAN per il rimborso', 'text', 1, 'autocapitalize="characters" spellcheck="false"'], ['intestatario', 'Intestatario del conto', 'text', 1]];
+const ibanFmt = v => String(v || '').replace(/\s+/g, '').toUpperCase().replace(/(.{4})/g, '$1 ').trim();
+function ibanOk(v){
+  const s = String(v || '').replace(/\s+/g, '').toUpperCase();
+  if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s) || (s.startsWith('IT') && s.length !== 27)) return false;
+  const r = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, c => c.charCodeAt(0) - 55);
+  let m = 0; for(const ch of r) m = (m * 10 + +ch) % 97; return m === 1;
+}
+const datiVal = (p, k) => k === 'dataNascita' ? (p[k] ? p[k].split('-').reverse().join('/') : '') : k === 'iban' ? ibanFmt(p[k]) : (p[k] || '');
+const datiKv = p => `<dl class="kv">${ANAG.filter(([k]) => p[k]).map(([k, l]) => `<dt>${l}</dt><dd>${esc(datiVal(p, k))}</dd>`).join('')}<dt>Email</dt><dd>${esc(p.email || '')}</dd></dl>`;
+function renderDati(edit){
+  const box = $('#datiBox'); if(!box) return;
+  const p = ACC.profilo || {};
+  const manca = ['dataNascita', 'codiceFiscale', 'indirizzo', 'iban'].filter(k => !p[k]).length;
+  if(!edit){
+    box.innerHTML = `<h3>I miei dati</h3>${manca ? '<p class="note" style="margin:0">Completa i tuoi dati e l’IBAN: servono ai designatori per pagarti il rimborso.</p>' : ''}${datiKv({...p, email: ACC.user.email})}
+      <button class="btn ${manca ? 'btn-primary' : 'btn-ghost'}" id="datiEdit">${manca ? 'Completa i miei dati' : 'Modifica i miei dati'}</button>`;
+    $('#datiEdit').onclick = () => renderDati(true); return;
+  }
+  box.innerHTML = `<form class="form" id="datiForm" style="padding:0;border:0;background:transparent"><h3>I miei dati</h3>
+    ${ANAG.map(([k, l, t = 'text', full, ex = '']) => `<div class="field${full ? ' full' : ''}"><label for="an-${k}">${l}</label><input id="an-${k}" data-k="${k}" type="${t}" value="${esc(k === 'iban' ? ibanFmt(p[k]) : p[k] || '')}" ${ex}></div>`).join('')}
+    <p class="note" style="grid-column:1/-1;margin:0">Questi dati li vedete solo tu e i designatori.</p>
+    <div class="field full" id="an-msg" aria-live="polite"></div>
+    <div class="actions row"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" id="an-x">Annulla</button></div></form>`;
+  const f = $('#datiForm'), msg = $('#an-msg');
+  $('#an-x').onclick = () => renderDati();
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const o = {}; f.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
+    o.iban = o.iban.replace(/\s+/g, '').toUpperCase(); o.codiceFiscale = o.codiceFiscale.toUpperCase(); o.provincia = o.provincia.toUpperCase();
+    if(!o.nome || !o.cognome){ msg.innerHTML = '<span class="err-t">Nome e cognome servono.</span>'; return; }
+    if(o.iban && !ibanOk(o.iban)){ msg.innerHTML = '<span class="err-t">L’IBAN non è corretto: controlla di averlo scritto tutto (in Italia sono 27 caratteri, inizia con IT).</span>'; return; }
+    if(o.codiceFiscale && !/^[A-Z0-9]{16}$/.test(o.codiceFiscale)){ msg.innerHTML = '<span class="err-t">Il codice fiscale deve avere 16 caratteri.</span>'; return; }
+    try{ await firebase.firestore().collection('arbitri').doc(ACC.user.uid).set(o, {merge: true}); ACC.profilo = {...p, ...o}; toast('Dati salvati'); renderTab(); renderAccount(); }
+    catch(err){ msg.innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; }
+  };
+}
+
+/* -- designatori: totale da pagare a ogni arbitro, per mese (C5 25 €, C7 30 €) -- */
+const tariffaDes = d => /c\s*7|calcio a 7/i.test(d.categoria || '') ? 30 : /c\s*5|calcio a 5|futsal/i.test(d.categoria || '') ? 25 : toNum(d.rimborso);
+const giocata = d => { const t = todayIso(); if(!d.data) return false; if(d.data !== t) return d.data < t; const n = new Date(); return (d.ora || '23:59') <= `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; };
+function renderPay(){
+  const box = $('#payBox'); if(!box) return;
+  if(!(ACC.user && ACC.isAdmin)){ box.innerHTML = ''; box.hidden = true; return; }
+  box.hidden = false;
+  const [y, m] = PAY.mese.split('-').map(Number), lbl = MESI[m - 1][0].toUpperCase() + MESI[m - 1].slice(1) + ' ' + y;
+  const per = new Map();
+  DS.gare.filter(d => (d.data || '').startsWith(PAY.mese) && giocata(d)).forEach(d => (d.ufficiali || []).forEach(u => {
+    if((rispOf(d, u.uid) || {}).stato !== 'accettata') return;
+    const o = per.get(u.uid) || {uid: u.uid, nome: u.nome, gare: [], tot: 0};
+    o.gare.push(d); o.tot += tariffaDes(d); per.set(u.uid, o);
+  }));
+  const rows = [...per.values()].map(o => ({...o, a: DS.arbitri.find(x => x.id === o.uid), p: DS.pag.find(x => x.id === `${o.uid}_${PAY.mese}`)})).sort((a, b) => nomeArb(a.a || {nome: a.nome}).localeCompare(nomeArb(b.a || {nome: b.nome})));
+  const tot = rows.reduce((s, r) => s + r.tot, 0), pagato = rows.reduce((s, r) => s + Math.min(r.tot, r.p ? toNum(r.p.importo) : 0), 0);
+  box.innerHTML = `<section class="ref-sec"><h3>Da pagare agli arbitri</h3>
+    <div class="cal-head"><button class="icon-btn" data-pm="-1" aria-label="Mese precedente">‹</button><h2 style="font-size:22px">${lbl}</h2><button class="icon-btn" data-pm="1" aria-label="Mese successivo">›</button></div>
+    <div class="ds-sum"><div><b class="num">${eur(tot)}</b><span>totale</span></div><div><b class="num">${eur(pagato)}</b><span>pagato</span></div><div class="${tot - pagato > 0 ? 'bad' : ''}"><b class="num">${eur(tot - pagato)}</b><span>da pagare</span></div></div>
+    <p class="note" style="margin:0">Gare accettate e già giocate: 25 € calcio a 5, 30 € calcio a 7.</p>
+    ${rows.length ? `<ul class="list">${rows.map(r => {
+      const n5 = r.gare.filter(d => tariffaDes(d) === 25).length, n7 = r.gare.filter(d => tariffaDes(d) === 30).length, pg = r.p ? toNum(r.p.importo) : 0, ok = r.p && pg >= r.tot;
+      return `<li class="ds-arb pay${ok ? ' paid' : ''}"><div><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>
+        <span>${r.gare.length} ${r.gare.length === 1 ? 'gara' : 'gare'}${n5 ? ` · ${n5} C5` : ''}${n7 ? ` · ${n7} C7` : ''}</span>
+        <span>${r.a && r.a.iban ? 'IBAN ' + esc(ibanFmt(r.a.iban)) : '<span class="err-t">IBAN non inserito</span>'}</span>
+        ${r.p ? `<span class="ds-chip done"><i></i>Pagato ${eur(pg)} il ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</span>${pg < r.tot ? `<span class="err-t">Mancano ${eur(r.tot - pg)}</span>` : ''}` : ''}
+        <details><summary class="note">Vedi gare</summary><span>${r.gare.sort(dsSort).map(d => `${esc(fmtShort(d.data))} · ${esc(d.casa)} – ${esc(d.ospite)} · ${eur(tariffaDes(d))}`).join('<br>')}</span></details></div>
+        <div class="pay-r"><b class="num">${eur(r.tot)}</b>
+        ${r.a && r.a.iban ? `<button class="btn btn-ghost sm" data-iban="${esc(r.a.iban)}">Copia IBAN</button>` : ''}
+        <button class="btn ${ok ? 'btn-ghost' : 'btn-primary'} sm" data-pay="${esc(r.uid)}" data-imp="${r.tot}" data-n="${r.gare.length}">${ok ? 'Annulla pagato' : 'Segna pagato'}</button></div></li>`; }).join('')}</ul>`
+      : '<p class="note" style="margin:0">Nessuna gara accettata e giocata in questo mese.</p>'}</section>`;
+  box.querySelectorAll('[data-pm]').forEach(b => b.onclick = () => { const d = new Date(y, m - 1 + +b.dataset.pm, 1); PAY.mese = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; renderPay(); });
+  box.querySelectorAll('[data-iban]').forEach(b => b.onclick = async () => { try{ await navigator.clipboard.writeText(b.dataset.iban); toast('IBAN copiato'); }catch(e){ toast(ibanFmt(b.dataset.iban)); } });
+  box.querySelectorAll('[data-pay]').forEach(b => b.onclick = async () => {
+    const id = `${b.dataset.pay}_${PAY.mese}`, ref = firebase.firestore().collection('pagamenti').doc(id), was = DS.pag.find(x => x.id === id), imp = +b.dataset.imp;
+    try{
+      if(was && toNum(was.importo) >= imp){ await ref.delete(); toast('Pagamento annullato'); }
+      else { await ref.set({uid: b.dataset.pay, mese: PAY.mese, importo: imp, gare: +b.dataset.n, at: Date.now(), da: myEmail()}); toast('Segnato come pagato'); }
+    }catch(err){ toast(fbErr(err)); }
+  });
+}
+
 /* -- registro online: quale registro, con chi è condiviso -- */
 function renderRegBox(){
   const box = $('#regBox'); if(!box) return;
@@ -1737,15 +1846,19 @@ function renderMie(){
   if(ACC.isAdmin && !up.length){ box.hidden = true; return; }
   box.hidden = false;
   if(!ACC.mieLoaded){ box.innerHTML = '<h3>Le mie designazioni</h3><div class="status"><span class="spin"></span>Carico…</div>'; return; }
-  box.innerHTML = `<h3>Le mie designazioni</h3>${up.length ? up.map(d => {
-    const r = rispOf(d, uid), mine = (d.ufficiali || []).find(u => u.uid === uid) || {}, altri = (d.ufficiali || []).filter(u => u.uid !== uid);
+  box.innerHTML = `<h3>Le mie designazioni</h3>${up.length ? up.map(mieCard).join('') : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
+  bindMie(box);
+}
+function mieCard(d){
+    const uid = ACC.user.uid, r = rispOf(d, uid), mine = (d.ufficiali || []).find(u => u.uid === uid) || {}, altri = (d.ufficiali || []).filter(u => u.uid !== uid);
     const st = r ? (r.stato === 'accettata' ? '<span class="dz-st done">✓ Accettata · è nel tuo registro</span>' : '<span class="dz-st no">✕ Rifiutata</span>') : '<span class="dz-st wait">● Da confermare</span>';
     return `<article class="dz${r ? '' : ' new'}">${st}
       <div class="dz-date">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
       <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
       <dl class="kv">${[['Ruolo', mine.ruolo || 'Arbitro'], ['Campionato', [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · ')], ['Campo', [d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Con', altri.map(u => `${u.nome} (${u.ruolo})`).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
       <div class="row">${!r || r.stato !== 'accettata' ? `<button class="btn btn-primary" data-acc="${esc(d.id)}">Accetto</button>` : ''}${!r || r.stato !== 'rifiutata' ? `<button class="btn btn-danger" data-rif="${esc(d.id)}">Rifiuto</button>` : ''}</div><div data-rbox="${esc(d.id)}"></div></article>`;
-  }).join('') : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
+}
+function bindMie(box){
   box.querySelectorAll('[data-acc]').forEach(b => b.onclick = () => rispondi(b.dataset.acc, 'accettata'));
   box.querySelectorAll('[data-rif]').forEach(b => b.onclick = () => {
     const rb = box.querySelector(`[data-rbox="${b.dataset.rif}"]`);
@@ -1793,8 +1906,11 @@ function syncAccettate(){
 }
 function renderOggiDes(){
   const el = $('#desHint'); if(!el) return;
-  const n = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)).length : 0;
-  el.hidden = !n; el.innerHTML = n ? `<a class="status" href="#account" style="text-decoration:none;color:inherit"><span style="flex:1">📋 Hai ${n === 1 ? '1 designazione' : n + ' designazioni'} da confermare</span><b>Apri ›</b></a>` : '';
+  const t = todayIso(), key = d => `${d.data || '9999'} ${d.ora || ''}`;
+  const da = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= t) && !rispOf(d, ACC.user.uid)).sort((a, b) => key(a).localeCompare(key(b))) : [];
+  el.hidden = !da.length;
+  el.innerHTML = da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3>${da.map(mieCard).join('')}</section>` : '';
+  if(da.length) bindMie(el);
   renderTab();
 }
 
@@ -1802,11 +1918,11 @@ function renderOggiDes(){
 function renderDesigna(){
   const box = $('#dsBody'); if(!box) return;
   const tab = DS.tab;
-  box.innerHTML = `<div class="seg" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri <span class="cnt">${DS.arbitri.length}</span></button></div>
+  box.innerHTML = `<div class="seg" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button></div>
     ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
     <div id="dsList" class="view"></div>`;
   box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
-  if(tab === 'gare') renderDsGare(); else renderDsArbitri();
+  ({gare: renderDsGare, arbitri: renderDsArbitri, squadre: renderDsSquadre, impianti: renderDsImpianti})[tab]();
 }
 
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
@@ -1841,9 +1957,64 @@ function renderDsArbitri(){
   el.innerHTML = `<div class="ref-sec"><h3>Invita gli arbitri</h3><p class="note" style="margin:0">Mandagli questo link: si registrano con nome, telefono, email e password e compaiono qui sotto. Poi li puoi designare.</p>
       <div class="row"><a class="btn btn-primary" href="https://wa.me/?text=${encodeURIComponent(inv)}" target="_blank" rel="noopener">Invita su WhatsApp</a><button class="btn btn-ghost" id="dsCopy">Copia link</button></div></div>
     ${list.length ? `<ul class="list">${list.map(a => { const n = DS.gare.filter(d => (d.arbitriIds || []).includes(a.id) && d.data >= t).length;
-      return `<li class="ds-arb"><div><b>${esc(nomeArb(a))}</b><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span></div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
+      return `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span></div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
       : `<div class="empty-box"><h3>Nessun arbitro registrato</h3><span>Quando un arbitro si registra dal link compare qui.</span></div>`}`;
   $('#dsCopy').onclick = async () => { try{ await navigator.clipboard.writeText(arbitroUrl()); toast('Link copiato'); }catch(e){ toast(arbitroUrl()); } };
+  el.querySelectorAll('[data-arb]').forEach(b => b.onclick = () => openArb(b.dataset.arb));
+}
+function openArb(id){
+  const a = DS.arbitri.find(x => x.id === id); if(!a) return;
+  const root = $('#sheetRoot'), close = () => root.innerHTML = '';
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Dati arbitro"><div class="grab"></div>
+    <h2>${esc(nomeArb(a))}</h2>${ADMINS().includes((a.email || '').toLowerCase()) ? '<span class="pill ruolo" style="align-self:flex-start">Designatore</span>' : ''}
+    ${datiKv(a)}
+    <div class="row">${a.iban ? `<button class="btn btn-primary" data-a="iban">Copia IBAN</button>` : '<span class="err-t">IBAN non inserito</span>'}${a.telefono ? `<a class="btn btn-ghost" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-ghost" href="tel:${esc(a.telefono)}">Chiama</a>` : ''}</div>
+    <button class="btn btn-ghost btn-block" data-a="close">Chiudi</button></div></div>`;
+  const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
+  root.querySelector('[data-a=close]').onclick = close;
+  const ib = root.querySelector('[data-a=iban]'); if(ib) ib.onclick = async () => { try{ await navigator.clipboard.writeText(a.iban); toast('IBAN copiato'); }catch(e){ toast(ibanFmt(a.iban)); } };
+}
+
+/* -- archivio squadre (per categoria) e campi, condiviso tra i designatori -- */
+const CATS = ['C5 AICS', 'C7 AICS'];
+const catKey = c => /c\s*7|calcio a 7/i.test(c || '') ? 'C7 AICS' : /c\s*5|calcio a 5|futsal/i.test(c || '') ? 'C5 AICS' : (c || '');
+const byName = (a, b) => (a.nome || '').localeCompare(b.nome || '', 'it');
+function renderDsSquadre(){
+  const el = $('#dsList'), cat = DS.sqCat, list = DS.squadre.filter(q => q.categoria === cat).sort(byName);
+  el.innerHTML = `<div class="seg" role="group" aria-label="Categoria">${CATS.map(c => `<button data-c="${c}" aria-pressed="${c === cat}">${c} <span class="cnt">${DS.squadre.filter(q => q.categoria === c).length}</span></button>`).join('')}</div>
+    <form class="share-add" id="sqAdd"><input id="sqNome" placeholder="Nome squadra ${cat}" aria-label="Nome squadra" autocapitalize="characters" required><button class="btn btn-primary sm">Aggiungi</button></form>
+    ${list.length ? `<div class="view" style="gap:6px">${list.map(q => `<div class="share-row"><span>${esc(q.nome)}</span><button class="x" data-rm="${esc(q.id)}" aria-label="Togli ${esc(q.nome)}">✕</button></div>`).join('')}</div>`
+      : `<div class="empty-box"><h3>Nessuna squadra ${cat}</h3><span>Aggiungile qui: quando designi una gara ${cat} potrai scegliere solo queste.</span></div>`}`;
+  el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { DS.sqCat = b.dataset.c; renderDsSquadre(); });
+  const col = firebase.firestore().collection('squadre');
+  $('#sqAdd').onsubmit = async e => { e.preventDefault(); const nome = $('#sqNome').value.trim().toUpperCase(); if(!nome) return;
+    if(DS.squadre.some(q => q.categoria === cat && q.nome.toUpperCase() === nome)){ toast('Questa squadra c’è già'); return; }
+    try{ await col.add({nome, categoria: cat, createdAt: Date.now()}); toast('Squadra aggiunta'); }catch(err){ toast(fbErr(err)); } };
+  el.querySelectorAll('[data-rm]').forEach(b => b.onclick = async () => { const q = DS.squadre.find(x => x.id === b.dataset.rm); if(!q || !confirm(`Togliere ${q.nome} dall’archivio?`)) return; try{ await col.doc(q.id).delete(); toast('Squadra tolta'); }catch(err){ toast(fbErr(err)); } });
+}
+function renderDsImpianti(){
+  const el = $('#dsList'), list = DS.impianti.slice().sort(byName);
+  el.innerHTML = `<button class="btn btn-primary btn-block" id="impAdd">+ Nuovo campo</button>
+    ${list.length ? `<ul class="list">${list.map(c => `<li class="ds-arb"><div><b>${esc(c.nome)}</b><span>${esc([c.indirizzo, c.citta].filter(Boolean).join(', '))}</span>${c.note ? `<span>${esc(c.note)}</span>` : ''}</div><button class="btn btn-ghost sm" data-imp="${esc(c.id)}">Modifica</button></li>`).join('')}</ul>`
+      : '<div class="empty-box"><h3>Nessun campo</h3><span>Aggiungi i campi con indirizzo e link di Google Maps: quando designi li scegli dall’elenco e si compila tutto da solo.</span></div>'}`;
+  $('#impAdd').onclick = () => openImp({});
+  el.querySelectorAll('[data-imp]').forEach(b => b.onclick = () => openImp(DS.impianti.find(x => x.id === b.dataset.imp) || {}));
+}
+function openImp(c){
+  const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !c.id;
+  const inp = (f, l, type = 'text', full = true, ex = '') => `<div class="field${full ? ' full' : ''}"><label for="im-${f}">${l}</label><input id="im-${f}" data-f="${f}" type="${type}" value="${esc(c[f] || '')}" ${ex}></div>`;
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Campo"><div class="grab"></div>
+    <form class="form" id="impForm"><h3>${isNew ? 'Nuovo campo' : 'Modifica campo'}</h3>
+    ${inp('nome', 'Nome del campo', 'text', true, 'required autocapitalize="characters"')}${inp('indirizzo', 'Indirizzo', 'text', false)}${inp('citta', 'Città', 'text', false)}
+    ${inp('mapsUrl', 'Link Google Maps (facoltativo)', 'url')}
+    <div class="field full"><label for="im-note">Note (spogliatoi, parcheggio, superficie…)</label><textarea id="im-note" data-f="note">${esc(c.note || '')}</textarea></div>
+    <div class="actions row"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button>${isNew ? '' : '<button type="button" class="btn btn-danger" data-del>Elimina</button>'}</div></form></div></div>`;
+  const f = root.querySelector('form'), col = firebase.firestore().collection('impianti');
+  root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
+  f.querySelector('[data-x]').onclick = close;
+  if(!isNew) f.querySelector('[data-del]').onclick = async () => { if(!confirm(`Eliminare ${c.nome}?`)) return; try{ await col.doc(c.id).delete(); close(); toast('Campo eliminato'); }catch(err){ toast(fbErr(err)); } };
+  f.onsubmit = async e => { e.preventDefault(); const o = {}; f.querySelectorAll('[data-f]').forEach(el => o[el.dataset.f] = el.value.trim()); o.nome = o.nome.toUpperCase();
+    try{ if(isNew) await col.add({...o, createdAt: Date.now()}); else await col.doc(c.id).set(o, {merge: true}); close(); toast('Campo salvato'); }catch(err){ toast(fbErr(err)); } };
 }
 const waUrl = (tel, text) => { let n = String(tel || '').replace(/[^\d+]/g, '').replace(/^\+/, '').replace(/^00/, ''); if(n && n.length <= 10) n = '39' + n; return `https://wa.me/${n}${text ? '?text=' + encodeURIComponent(text) : ''}`; };
 function dsText(d, u){
@@ -1892,10 +2063,13 @@ function openDsForm(d){
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <form class="form" id="dsForm"><h3>${isNew ? 'Nuova designazione' : 'Modifica designazione'}</h3>
     ${inp('data', 'Data', 'date', false, 'required')}${inp('ora', 'Ora', 'time')}
-    ${inp('casa', 'Squadra di casa', 'text', true, 'required')}${inp('ospite', 'Squadra ospite', 'text', true, 'required')}
-    ${inp('categoria', 'Campionato', 'text', true, 'list="ds-cats"')}<datalist id="ds-cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+    <div class="field full"><label for="df-categoria">Categoria</label><select id="df-categoria" data-f="categoria" required><option value="">Scegli la categoria…</option>${[...CATS, ...(d.categoria && !CATS.includes(d.categoria) ? [d.categoria] : [])].map(c => `<option ${c === d.categoria ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+    <div class="field full"><label for="df-casa">Squadra di casa</label><select id="df-casa" data-f="casa" required></select></div>
+    <div class="field full"><label for="df-ospite">Squadra ospite</label><select id="df-ospite" data-f="ospite" required></select></div>
+    <div class="field full" id="df-sqmsg" hidden></div>
     ${inp('girone', 'Girone')}${inp('numeroGara', 'N. gara', 'text', false, 'inputmode="numeric"')}
-    ${inp('impianto', 'Campo', 'text', true, 'list="campi-list"')}${inp('indirizzo', 'Indirizzo')}${inp('citta', 'Città')}
+    <div class="field full"><label for="df-impSel">Campo</label><select id="df-impSel"><option value="">Scegli il campo…</option>${DS.impianti.slice().sort(byName).map(c => `<option value="${esc(c.id)}" ${c.nome === d.impianto ? 'selected' : ''}>${esc(c.nome)}${c.citta ? ' · ' + esc(c.citta) : ''}</option>`).join('')}<option value="__altro" ${d.impianto && !DS.impianti.some(c => c.nome === d.impianto) ? 'selected' : ''}>Altro campo (scrivo io)…</option></select></div>
+    ${inp('impianto', 'Nome del campo', 'text', true)}${inp('indirizzo', 'Indirizzo')}${inp('citta', 'Città')}
     ${inp('mapsUrl', 'Link Google Maps (facoltativo)', 'url', true)}
     ${inp('rimborso', 'Rimborso €', 'text', false, 'inputmode="decimal"')}<div class="field"></div>
     <div class="field full"><label for="df-note">Note per gli arbitri</label><textarea id="df-note" data-f="note">${esc(d.note || '')}</textarea></div>
@@ -1907,6 +2081,25 @@ function openDsForm(d){
     <div class="actions row"><button type="submit" class="btn btn-primary">${isNew ? 'Crea designazione' : 'Salva modifiche'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
     </form></div></div>`;
   const f = root.querySelector('#dsForm'), offs = f.querySelector('#dsOffs');
+  const cSel = f.querySelector('#df-categoria'), impSel = f.querySelector('#df-impSel'), impIn = f.querySelector('#df-impianto'), rimb = f.querySelector('#df-rimborso');
+  const fillSq = () => {
+    const c = cSel.value, sq = DS.squadre.filter(q => q.categoria === catKey(c)).sort(byName), m = f.querySelector('#df-sqmsg');
+    ['casa', 'ospite'].forEach(k => {
+      const s = f.querySelector('#df-' + k), cur = s.value || d[k] || '', names = sq.map(q => q.nome);
+      if(cur && !names.includes(cur) && catKey(c) === catKey(d.categoria) && cur === d[k]) names.unshift(cur);
+      s.innerHTML = `<option value="">${c ? 'Scegli la squadra…' : 'Prima scegli la categoria'}</option>` + names.map(n => `<option ${n === cur ? 'selected' : ''}>${esc(n)}</option>`).join('');
+      s.disabled = !c;
+    });
+    m.hidden = !c || sq.length > 0; m.innerHTML = `<span class="err-t">Nessuna squadra ${esc(c)} in archivio: aggiungile nella scheda Squadre.</span>`;
+  };
+  const syncImp = () => { const v = impSel.value, altro = v === '__altro' || (!DS.impianti.length);
+    impIn.closest('.field').hidden = !altro;
+    if(v && v !== '__altro'){ const c = DS.impianti.find(x => x.id === v); if(c){ impIn.value = c.nome; ['indirizzo', 'citta', 'mapsUrl'].forEach(k => f.querySelector('#df-' + k).value = c[k] || ''); } }
+    else if(altro && impIn.value && DS.impianti.some(c => c.nome === impIn.value)) impIn.value = '';
+  };
+  if(!DS.impianti.length) impSel.closest('.field').hidden = true;
+  cSel.onchange = () => { fillSq(); const t = tariffaDes({categoria: cSel.value}); if(t && (!toNum(rimb.value) || [25, 30].includes(toNum(rimb.value)))) rimb.value = t; };
+  impSel.onchange = syncImp; fillSq(); syncImp();
   const bindX = () => offs.querySelectorAll('.x').forEach(b => b.onclick = () => b.parentElement.remove());
   bindX();
   if(f.querySelector('#dsAddOff')) f.querySelector('#dsAddOff').onclick = () => { offs.insertAdjacentHTML('beforeend', offRow({ruolo: offs.querySelectorAll('.ds-offrow').length ? 'Assistente ' + Math.min(2, offs.querySelectorAll('.ds-offrow').length) : 'Arbitro'})); bindX(); };
@@ -1916,6 +2109,8 @@ function openDsForm(d){
     const msg = f.querySelector('#dsFormMsg'), btn = f.querySelector('[type=submit]');
     const o = {}; f.querySelectorAll('[data-f]').forEach(el => o[el.dataset.f] = el.value.trim());
     o.rimborso = toNum(o.rimborso);
+    if(!o.casa || !o.ospite){ msg.innerHTML = '<span class="err-t">Scegli categoria e squadre.</span>'; return; }
+    if(o.casa === o.ospite){ msg.innerHTML = '<span class="err-t">Casa e ospite sono la stessa squadra.</span>'; return; }
     const ufficiali = [...offs.querySelectorAll('.ds-offrow')].map(r => ({uid: r.querySelector('[data-o=uid]').value, ruolo: r.querySelector('[data-o=ruolo]').value})).filter(u => u.uid);
     if(new Set(ufficiali.map(u => u.uid)).size !== ufficiali.length){ msg.innerHTML = '<span class="err-t">Lo stesso arbitro è scelto due volte.</span>'; return; }
     ufficiali.forEach(u => u.nome = nomeArb(DS.arbitri.find(a => a.id === u.uid)));
@@ -1937,6 +2132,25 @@ function openDsForm(d){
   };
 }
 $('#dsHeadBtn').onclick = () => openDsForm({});
+
+/* aggiornamento automatico */
+const APP_BUILD = '20261112184543';
+let updChecking = false;
+async function checkUpdate(){
+  if(updChecking || !navigator.onLine) return; updChecking = true;
+  try{
+    const r = await fetch(location.pathname.replace(/[^/]*$/, '') + 'index.html?u=' + Date.now(), {cache: 'no-store'});
+    const m = (await r.text()).match(/APP_BUILD = '(\d+)'/);
+    if(m && m[1] !== APP_BUILD){
+      const busy = ['importa', 'referto'].includes(location.hash.slice(1)) || $('#sheetRoot').innerHTML || ($('#spesaForm') && $('#spesaForm').innerHTML) || document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+      if(!busy){ location.reload(); return; }
+      toast('C’è una versione nuova: si aggiorna alla prossima apertura.');
+    }
+  }catch(e){}
+  updChecking = false;
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') checkUpdate(); });
+setTimeout(checkUpdate, 3000);
 
 route(); render(); Store.init(); renderTab(); accStart();
 })();

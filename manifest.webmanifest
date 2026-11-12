@@ -1,1 +1,1 @@
-{"name":"Registro Gare","short_name":"Registro Gare","start_url":"./","display":"standalone","background_color":"#F2F4EF","theme_color":"#1E6A47","icons":[{"src":"icon.png","sizes":"512x512","type":"image/png"}]}
+{"name": "Registro Gare", "short_name": "Registro Gare", "start_url": "./", "display": "standalone", "background_color": "#F0F5FA", "theme_color": "#1677D2", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
