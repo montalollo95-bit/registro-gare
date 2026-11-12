@@ -1153,7 +1153,9 @@ const LISTS = {marcatori:{t:'Reti', add:'Rete', mot:TIPO_GOL, lbl:'Tipo di rete'
 const QUAL = ['Allenatore','Allenatore in seconda','Dirigente accompagnatore','Medico','Massaggiatore / fisioterapista','Preparatore','Altro'];
 const PROV = ['Ammonizione','Espulsione (allontanamento)'];
 let refId = null, draft = null;
-const refCandidates = () => Store.gare.filter(g => g.data && g.data <= todayIso() && g.stato !== 'rinviata').sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+const oraNow = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
+const iniziata = g => !!g.data && (g.data < todayIso() || (g.data === todayIso() && (!g.ora || g.ora <= oraNow())));
+const refCandidates = () => Store.gare.filter(g => iniziata(g) && g.stato !== 'rinviata').sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
 function openReferto(id){ refId = id || null; draft = null; if(location.hash === '#referto') renderReferto(); else location.hash = '#referto'; }
 
 function renderReferto(){
@@ -1162,11 +1164,12 @@ function renderReferto(){
   const g = refId && Store.gare.find(x => x.id === refId);
   if(!g){
     const c = refCandidates();
-    if(!c.length){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna gara da refertare</h3><span>Il referto si compila per una gara di oggi o già giocata. Prima importa la designazione.</span><a class="btn btn-primary" href="#importa">+ Importa designazione</a></div>`; return; }
+    if(!c.length){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna gara da refertare</h3><span>Il referto si compila dall’orario d’inizio della gara. Prima importa la designazione.</span><a class="btn btn-primary" href="#importa">+ Importa designazione</a></div>`; return; }
     body.innerHTML = `<div class="eyebrow">Scegli la gara</div><ul class="list">${c.map(garaCard).join('')}</ul>`;
     body.querySelectorAll('.gara').forEach(b => b.onclick = () => openReferto(b.dataset.id));
     return;
   }
+  if(!iniziata(g) && !g.referto){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Gara non ancora iniziata</h3><span>Il referto di ${esc(g.casa || '')} – ${esc(g.ospite || '')} si compila dall’orario d’inizio${g.ora ? `: ${esc(fmtShort(g.data))} alle ${esc(g.ora)}` : ''}.</span></div>`; return; }
   if(!draft){
     const r = g.referto ? JSON.parse(JSON.stringify(g.referto)) : {};
     const [rc, ro] = String(g.risultato || '').split('-');
@@ -1224,6 +1227,7 @@ function renderRefForm(g){
   $('#rfOther').onclick = () => openReferto(null);
   $('#rfSave').onclick = async () => {
     readDraft();
+    if(!iniziata(g) && !g.referto){ toast(`Il referto si compila dalle ${g.ora}.`); return; }
     const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length};
     if(d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}`;
     const btn = $('#rfSave'); btn.disabled = true;
@@ -1549,7 +1553,7 @@ function openSheet(id, edit=false){
     </div>
     <div class="row">
       <button class="btn btn-ghost" data-act="edit">${isPast(g) && g.stato !== 'disputata' ? 'Segna risultato e voto' : 'Modifica'}</button>
-      ${g.data && g.data <= todayIso() ? `<button class="btn btn-ghost" data-act="ref">${g.referto ? 'Apri referto' : 'Compila referto'}</button>` : ''}
+      ${iniziata(g) || g.referto ? `<button class="btn btn-ghost" data-act="ref">${g.referto ? 'Apri referto' : 'Compila referto'}</button>` : g.data === todayIso() && g.ora ? `<span class="note" style="align-self:center">Referto dalle ${esc(g.ora)}</span>` : ''}
       <button class="btn btn-ghost" data-act="spesa">Rimborso e km</button>
       <button class="btn btn-danger" data-act="del">Elimina</button>
     </div>
@@ -1822,16 +1826,18 @@ function renderDati(edit){
 /* -- designatori: totale da pagare a ogni arbitro, per mese (C5 25 €, C7 30 €) -- */
 const tariffaDes = d => /c\s*7|calcio a 7/i.test(d.categoria || '') ? 30 : /c\s*5|calcio a 5|futsal/i.test(d.categoria || '') ? 25 : toNum(d.rimborso);
 const giocata = d => { const t = todayIso(); if(!d.data) return false; if(d.data !== t) return d.data < t; const n = new Date(); return (d.ora || '23:59') <= `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; };
+const conReferto = d => Object.keys(d.referti || {}).length > 0;
+const fatta = d => giocata(d) || conReferto(d);
 function renderPay(){
   const box = $('#payBox'); if(!box) return;
   if(!(ACC.user && ACC.isAdmin)){ box.innerHTML = ''; box.hidden = true; return; }
   box.hidden = false;
   const [y, m] = PAY.mese.split('-').map(Number), lbl = MESI[m - 1][0].toUpperCase() + MESI[m - 1].slice(1) + ' ' + y;
   const per = new Map();
-  DS.gare.filter(d => (d.data || '').startsWith(PAY.mese) && giocata(d)).forEach(d => (d.ufficiali || []).forEach(u => {
+  DS.gare.filter(d => (d.data || '').startsWith(PAY.mese) && fatta(d)).forEach(d => (d.ufficiali || []).forEach(u => {
     if((rispOf(d, u.uid) || {}).stato !== 'accettata') return;
     const o = per.get(u.uid) || {uid: u.uid, nome: u.nome, gare: [], tot: 0, senza: []};
-    if(!(d.referti && d.referti[u.uid])){ o.senza.push(d); per.set(u.uid, o); return; }
+    if(!(d.referti && d.referti[u.uid])){ if(giocata(d)){ o.senza.push(d); per.set(u.uid, o); } return; }
     o.gare.push(d); o.tot += tariffaDes(d); per.set(u.uid, o);
   }));
   const rows = [...per.values()].map(o => ({...o, a: DS.arbitri.find(x => x.id === o.uid), p: DS.pag.find(x => x.id === `${o.uid}_${PAY.mese}`)})).sort((a, b) => nomeArb(a.a || {nome: a.nome}).localeCompare(nomeArb(b.a || {nome: b.nome})));
@@ -2036,7 +2042,7 @@ function renderDesigna(){
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
 function dsCard(d){
   const dt = parseD(d.data), uff = d.ufficiali || [];
-  const played = giocata(d);
+  const played = fatta(d);
   const chips = uff.map(u => { const r = rispOf(d, u.uid); let [t, cls] = RISP[r ? r.stato : ''];
     if(played && r && r.stato === 'accettata'){ const ok = d.referti && d.referti[u.uid]; t = ok ? 'Referto ✓' : 'Manca referto'; cls = ok ? 'done' : 'wait'; } return `<span class="ds-chip ${cls}" title="${esc(t)}"><i></i>${esc(u.ruolo === 'Arbitro' ? '' : (u.ruolo || '').replace('Assistente ', 'AA') + ' ')}${esc(nomeArb(DS.arbitri.find(a => a.id === u.uid)) || u.nome)} · ${esc(t)}</span>`; }).join('');
   return `<li><button class="gara" data-ds="${esc(d.id)}">
@@ -2051,7 +2057,7 @@ const DSF_FILTRI = {tutte: ['Tutte', () => true], attesa: ['In attesa', d => (d.
 function renderDsGare(){
   const el = $('#dsList');
   if(!DS.loaded){ el.innerHTML = '<div class="status"><span class="spin"></span>Carico le designazioni…</div>'; return; }
-  const past = !!DS.past, base = DS.gare.filter(d => past ? giocata(d) : !giocata(d));
+  const past = !!DS.past, base = DS.gare.filter(d => past ? fatta(d) : !fatta(d));
   const att = base.reduce((n, d) => n + (d.ufficiali || []).filter(u => !rispOf(d, u.uid)).length, 0);
   const rif = base.filter(DSF_FILTRI.rifiuti[1]).length, senzaRef = base.filter(DSF_FILTRI.referto[1]).length, senza = base.filter(DSF_FILTRI.senza[1]).length;
   const filtri = past ? ['tutte', 'referto', 'senza'] : ['tutte', 'attesa', 'rifiuti', 'senza'];
@@ -2272,7 +2278,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261112193059';
+const APP_BUILD = '20261112195401';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
