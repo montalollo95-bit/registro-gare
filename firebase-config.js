@@ -1,12 +1,9 @@
-// Dati del tuo progetto Firebase: incolla qui il blocco "firebaseConfig"
-// (Impostazioni progetto > Le tue app > App web).
 window.FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyCk•••••••••••••••••••••••••••••••",
+  authDomain: "registro-gare-11d97.firebaseapp.com",
+  projectId: "registro-gare-11d97",
+  storageBucket: "registro-gare-11d97.firebasestorage.app",
+  messagingSenderId: "610492631016",
+  appId: "1:610492631016:web:0025bbb8215dcca539465d"
 };
-// Email dei designatori (admin). Devono essere le stesse scritte nelle regole di Firestore.
-window.FIREBASE_ADMINS = ["lollo.monta.95@gmail.com", "EMAIL_SECONDO_DESIGNATORE"];
+window.FIREBASE_ADMINS = ["lollo.monta.95@gmail.com", "antoecry04@gmail.com"];
