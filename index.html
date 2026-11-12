@@ -5,7 +5,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Registro Gare">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#1E6A47">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
@@ -263,7 +263,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* app shell: il body non scorre (su iPhone la barra in basso resta ferma), scorre solo #scroller */
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-body{position:fixed;top:0;left:0;right:0;bottom:auto;height:var(--app-h,100lvh);padding:0!important;margin:0}
+body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!important;margin:0}
 #scroller{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
@@ -318,15 +318,6 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:var(--app-h,100lvh);
 </style>
 </head><body>
 <div id="scroller">
-<script>
-/* altezza reale dello schermo: su iPhone, aperta dalla Home, il browser a volte la calcola più corta */
-(function(){ function fixH(){ var h = window.innerHeight;
-  var st = navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
-  if(st && screen && screen.height){ var land = window.matchMedia && matchMedia('(orientation: landscape)').matches;
-    var sh = land ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height); if(sh > h) h = sh; }
-  document.documentElement.style.setProperty('--app-h', h + 'px'); }
-  fixH(); addEventListener('resize', fixH); addEventListener('orientationchange', function(){ setTimeout(fixH, 300); }); })();
-</script>
 
 
 <!-- ===== OGGI ===== -->
