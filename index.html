@@ -1,0 +1,1682 @@
+<!doctype html>
+<html lang="it"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Registro Gare">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1E6A47">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<script src="firebase-config.js"></script>
+<title>Registro Gare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: app a una colonna — fascia verde campo in testa, schede sotto, tab bar fissa in basso */
+:root{
+  --bg:#F2F4EF; --surface:#FFFFFF; --surface-2:#E6EBE3; --line:#D3D9CE;
+  --fg:#15211B; --muted:#5B6A61; --pitch:#1E6A47; --pitch-deep:#164F35; --pitch-ink:#FFFFFF;
+  --card-yellow:#F0B400; --yellow-ink:#1A1400; --card-red:#D23A2E; --ok:#1E6A47; --warn:#B7791F;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1310; --surface:#151F1A; --surface-2:#1D2924; --line:#2A3832;
+  --fg:#E7EEE9; --muted:#93A399; --pitch:#2F8A5E; --pitch-deep:#1C5E3F; --pitch-ink:#FFFFFF;
+  --card-yellow:#F5C02E; --yellow-ink:#1A1400; --card-red:#EF5A4C; --ok:#4CB884; --warn:#E0A84A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1310; --surface:#151F1A; --surface-2:#1D2924; --line:#2A3832;
+  --fg:#E7EEE9; --muted:#93A399; --pitch:#2F8A5E; --pitch-deep:#1C5E3F; --pitch-ink:#FFFFFF;
+  --card-yellow:#F5C02E; --yellow-ink:#1A1400; --card-red:#EF5A4C; --ok:#4CB884; --warn:#E0A84A; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 calc(92px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--pitch-deep)}
+.wrap{max-width:640px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--card-yellow);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+.view{display:flex;flex-direction:column;gap:16px}
+
+/* fascia di testa: arriva ai bordi dello schermo */
+.band{background:linear-gradient(160deg,var(--pitch) 0%,var(--pitch-deep) 100%);color:var(--pitch-ink);
+  margin-left:calc(-1 * max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1 * max(16px,env(safe-area-inset-right,0px)));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-radius:0 0 24px 24px;position:relative;overflow:hidden}
+.band::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:2px solid rgba(255,255,255,.12);pointer-events:none}
+.band::before{content:"";position:absolute;right:48px;top:50px;width:2px;height:200px;background:rgba(255,255,255,.1);pointer-events:none}
+.band-in{max-width:640px;margin:0 auto;padding-block:20px 22px;display:flex;flex-direction:column;gap:6px;position:relative;z-index:1}
+.band h1{font-size:40px;font-weight:800;text-transform:uppercase;line-height:1}
+.band .date{opacity:.85;font-weight:500;font-size:17px}
+.band.sub .band-in{flex-direction:row;align-items:center;gap:10px;padding-block:14px}
+.band.sub h1{font-size:24px;flex:1;text-align:center}
+.back{display:inline-flex;align-items:center;gap:4px;padding:8px 14px 8px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:inherit;text-decoration:none;font-weight:600;cursor:pointer}
+.round{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:inherit;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.spacer{width:44px}
+.page{padding-top:16px}
+
+/* card prossima designazione */
+.next{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px}
+.next h2{font-size:28px;line-height:1.05;text-transform:uppercase}
+.next .meta{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--muted);font-weight:600}
+.next .when{color:var(--pitch);font-weight:700}
+
+.addr{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--surface-2);color:var(--fg);text-decoration:none}
+.addr .pin{width:40px;height:40px;border-radius:12px;background:var(--pitch);color:var(--pitch-ink);display:grid;place-items:center}
+.addr-t{min-width:0;display:flex;flex-direction:column;gap:1px;overflow-wrap:anywhere}
+.addr-t span{color:var(--muted);font-size:15px}
+.addr-t small{color:var(--ok);font-weight:700;font-size:13px;margin-top:2px}
+
+.next-date{color:var(--card-red);text-transform:uppercase;font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:.02em;line-height:1.1;text-wrap:balance}
+
+/* scorciatoie */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.sec-head h2{font-size:24px}
+.sec-head a{color:var(--pitch);font-weight:700;text-decoration:none}
+.shortcuts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sc{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;color:var(--fg);font-weight:600;font-size:13px;text-align:center;min-width:0}
+.sc .ic{width:100%;max-width:92px;aspect-ratio:1;border-radius:20px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--pitch)}
+.sc .ic svg{width:34px;height:34px}
+.sc:active .ic{transform:scale(.96)}
+
+/* statistiche */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.stat{padding:16px 6px;text-align:center;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat + .stat{border-left:1px solid var(--line)}
+.stat b{font-family:var(--display);font-size:34px;line-height:1}
+.stat span{font-size:13px;color:var(--muted)}
+.chip-y,.chip-r{display:inline-block;width:9px;height:13px;border-radius:2px;vertical-align:-2px}
+.chip-y{background:var(--card-yellow)} .chip-r{background:var(--card-red)}
+
+/* controlli */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;padding:10px;border-radius:9px;font-weight:700;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.search{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:13px 16px;font-weight:700;cursor:pointer;text-decoration:none;min-height:48px}
+.btn-yellow{background:var(--card-yellow);color:var(--yellow-ink)}
+.btn-primary{background:var(--pitch);color:var(--pitch-ink)}
+.btn-ghost{background:var(--surface-2);color:var(--fg)}
+.btn-danger{background:transparent;color:var(--card-red);border:1px solid var(--card-red)}
+.btn-block{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row > .btn{flex:1 1 140px}
+
+/* liste */
+.list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.gara{display:grid;grid-template-columns:58px 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;text-align:left;width:100%}
+.gara .day{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface-2);border-radius:10px;padding:6px 0}
+.gara .day b{font-family:var(--display);font-size:26px;line-height:1}
+.gara .day span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.gara .info{min-width:0;display:flex;flex-direction:column;gap:3px}
+.gara .teams{font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.gara .sub{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.pill.ruolo{background:color-mix(in srgb,var(--pitch) 18%,transparent);color:var(--ok)}
+.pill.done{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.pill.rinv{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.empty-box{border:1px dashed var(--line);border-radius:var(--r);padding:26px 18px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty-box .eic{width:64px;height:64px;border-radius:18px;background:var(--surface-2);display:grid;place-items:center;color:var(--pitch)}
+.empty-box .eic svg{width:32px;height:32px}
+.empty-box h3{color:var(--fg);font-size:24px}
+
+/* calendario */
+.cal-box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cal-head h2{font-size:26px;text-transform:capitalize}
+.nav2{display:flex;gap:8px}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:0;background:var(--surface-2);cursor:pointer;font-size:22px;line-height:1}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal .dow{font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:6px}
+.cal button{aspect-ratio:1;max-width:100%;border:0;border-radius:12px;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:var(--display);font-size:20px;font-weight:600;padding:0}
+.cal button.out{visibility:hidden}
+.cal button.today{box-shadow:inset 0 0 0 2px var(--pitch)}
+.cal button.sel{background:var(--pitch);color:var(--pitch-ink)}
+.cal .dots{display:flex;gap:3px;height:6px}
+.cal .dots i{width:6px;height:6px;border-radius:50%;background:var(--card-yellow)}
+.month-sep{font-family:var(--display);font-size:20px;text-transform:capitalize;padding-top:6px}
+
+/* importa */
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:10px}
+.hero h2{font-size:28px;line-height:1.05}
+.hero p{margin:0;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags span{font-size:13px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--surface-2)}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pick label{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);cursor:pointer;min-height:150px}
+.pick label:first-child{border-color:var(--pitch);box-shadow:inset 0 0 0 1px var(--pitch)}
+.pick .pic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--surface-2);color:var(--pitch)}
+.pick label:first-child .pic{background:var(--pitch);color:var(--pitch-ink)}
+.pick .pic svg{width:26px;height:26px}
+.pick b{font-family:var(--display);font-size:22px;line-height:1.05}
+.pick span{font-size:14px;color:var(--muted)}
+.steps{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px}
+.steps h2{font-size:24px}
+.steps ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.steps li{display:grid;grid-template-columns:36px 1fr;gap:12px}
+.steps li > i{width:36px;height:36px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-style:normal;font-family:var(--display);font-weight:800;font-size:18px;color:var(--pitch)}
+.steps li b{display:block}
+.steps li span{color:var(--muted);font-size:15px}
+.preview{display:flex;gap:8px;overflow-x:auto}
+.preview img{height:96px;border-radius:10px;border:1px solid var(--line)}
+.status{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;background:var(--surface-2);font-weight:600}
+.status.err{background:color-mix(in srgb,var(--card-red) 14%,transparent);color:var(--card-red)}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--pitch);animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:3s}}
+
+/* spese */
+.money{background:linear-gradient(160deg,var(--pitch) 0%,var(--pitch-deep) 100%);color:var(--pitch-ink);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px}
+.money .eyebrow{color:inherit;opacity:.8}
+.money .tot{font-family:var(--display);font-size:52px;font-weight:800;line-height:1}
+.money .split{display:flex;gap:22px;flex-wrap:wrap}
+.money .split b{display:block;font-size:18px}
+.money .split span{opacity:.8;font-size:14px}
+.mov{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;text-align:left;width:100%}
+.mov .mi{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--surface-2);font-family:var(--display);font-weight:800;color:var(--pitch)}
+.mov .mt{min-width:0}
+.mov .mt b{display:block;overflow-wrap:anywhere}
+.mov .mt span{font-size:14px;color:var(--muted)}
+.mov .amt{font-family:var(--display);font-size:22px;font-weight:700}
+
+/* moduli */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.form h3{grid-column:1/-1;font-size:22px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0}
+.field textarea{min-height:64px;resize:vertical}
+.form .sep{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px}
+.form .actions{grid-column:1/-1}
+
+/* referto */
+.ref-head h2{font-size:30px;text-transform:uppercase;line-height:1.05}
+.ref-sec{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.ref-sec > header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ref-sec h3{font-size:22px;display:flex;align-items:center;gap:6px}
+.cnt{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:99px;background:var(--surface-2);font-family:var(--body);font-size:13px}
+.btn.sm{min-height:38px;padding:8px 12px;font-size:15px}
+.score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
+.score label{display:block;font-weight:700;font-size:14px;text-align:center;overflow-wrap:anywhere;margin-bottom:4px}
+.score input{width:100%;font-family:var(--display);font-size:44px;font-weight:800;text-align:center;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.score .dash{font-family:var(--display);font-size:36px;padding-bottom:12px}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.ev{display:grid;grid-template-columns:62px 1fr 62px 40px;gap:6px;padding:10px;border-radius:12px;background:var(--surface-2)}
+.ev input,.ev select{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0;width:100%}
+.ev .wide{grid-column:1/-1}
+.ev.dir{grid-template-columns:62px 1fr 40px}
+.ev .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
+.copybox{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-family:var(--mono);font-size:13px}
+
+.cat-list{display:flex;flex-direction:column;gap:6px}
+.cat-row{cursor:pointer;border-radius:12px;padding:8px}
+.cat-row.sel,.cat-sub .sel{background:color-mix(in srgb,var(--pitch) 14%,transparent)}
+.cat-sub [data-cat]{cursor:pointer;border-radius:8px;padding:4px 6px}
+.cat-row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline}
+.cat-row > div:first-child{min-width:0;display:flex;flex-direction:column;overflow-wrap:anywhere}
+.cat-row span{font-size:13px;color:var(--muted)}
+.cat-eur{font-family:var(--display);font-size:22px;font-weight:700}
+.cat-bar{grid-column:1/-1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.cat-bar i{display:block;height:100%;background:var(--pitch)}
+.cat-sub{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;padding:8px 0 0 12px;border-left:2px solid var(--line);margin-top:4px}
+.cat-sub div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:15px}
+.cat-sub span{min-width:0}
+.cat-sub span{font-size:15px}
+.cat-tot{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px solid var(--line);padding-top:10px;font-weight:700}
+
+/* scheda */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow-y:auto;border-radius:22px 22px 0 0;
+  padding:14px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;gap:14px}
+.sheet .grab{width:44px;height:5px;border-radius:3px;background:var(--line);align-self:center}
+.sheet h2{font-size:30px;text-transform:uppercase;line-height:1.05}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.kv dt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.confirm{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;border:1px solid var(--card-red)}
+
+/* tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.tabs nav{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:14px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:700}
+.tabs a svg{width:24px;height:24px}
+.tabs a[aria-current="page"]{color:var(--ok);background:color-mix(in srgb,var(--pitch) 16%,transparent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;max-width:calc(100% - 32px)}
+.fed-row{cursor:default}
+.round[hidden]{display:grid!important;visibility:hidden}
+.tabs nav{grid-template-columns:repeat(5,1fr)!important}
+.linkbtn{border:0;background:none;color:var(--ok);font-weight:700;text-decoration:underline;cursor:pointer;padding:4px;font:inherit}
+.err-t{color:var(--card-red);font-weight:600}
+.ds-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.ds-chip{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:2px 8px 2px 6px;border-radius:99px;background:var(--surface-2);color:var(--fg);max-width:100%;overflow-wrap:anywhere}
+.ds-chip i{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.ds-chip.done i{background:var(--ok)} .ds-chip.no i{background:var(--card-red)} .ds-chip.wait i{background:var(--card-yellow)}
+.ds-chip.no{color:var(--card-red)}
+.ds-sum{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.ds-sum div{padding:12px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.ds-sum div + div{border-left:1px solid var(--line)}
+.ds-sum b{font-family:var(--display);font-size:30px;line-height:1}
+.ds-sum span{font-size:12px;color:var(--muted)}
+.ds-sum .bad b{color:var(--card-red)}
+.ds-arb,.ds-off{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;flex-wrap:wrap}
+.ds-arb > div,.ds-off > div{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 180px;align-items:flex-start}
+.ds-arb span,.ds-off > div > span:not(.ds-chip){font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.ds-offrow{display:grid;grid-template-columns:1fr 132px 40px;gap:6px;margin-bottom:6px}
+.ds-offrow select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0;width:100%}
+.ds-offrow .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
+</style>
+</head><body>
+
+
+<!-- ===== OGGI ===== -->
+<section id="v-oggi" class="view">
+  <div class="band"><div class="band-in">
+    <div class="eyebrow" style="color:inherit;opacity:.75" id="seasonLbl"></div>
+    <h1>Oggi</h1>
+    <div class="date" id="todayLbl"></div>
+  </div></div>
+  <div class="wrap view">
+    <div id="storeNote" class="note" hidden></div>
+    <div id="nextBox"></div>
+    <div class="sec-head"><h2>Scorciatoie</h2></div>
+    <div class="shortcuts">
+      <a class="sc" href="#importa"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span>Importa gara</a>
+      <a class="sc" href="#calendario"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>Calendario</a>
+      <a class="sc" href="#spese"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span>Spese/km</a>
+    </div>
+    <div class="sec-head"><h2 id="seasonHead">Questa stagione</h2><a href="#partite">Vedi gare</a></div>
+    <div class="stats" id="stats"></div>
+    <button class="btn btn-primary btn-block" id="goReferto">Compila referto</button>
+    <div class="note" id="refHint" hidden></div>
+    <section class="ref-sec" style="margin-top:22px"><h3>Backup dei dati</h3>
+      <p class="note" style="margin:0">I dati sono salvati solo su questo telefono. Ogni tanto fai un backup e tienilo in File o iCloud: serve se cambi telefono o se Safari cancella i dati.</p>
+      <div class="row"><button class="btn btn-primary" id="bkExport">Salva backup</button><button class="btn btn-ghost" id="bkImport">Ripristina backup</button></div>
+      <input type="file" id="bkFile" accept=".json,application/json" hidden>
+      <div id="bkConfirm"></div>
+    </section>
+  </div>
+</section>
+
+<!-- ===== REFERTO ===== -->
+<section id="v-referto" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Referto</h1><span class="spacer"></span></div></div>
+  <div class="wrap view" id="refBody"></div>
+</section>
+
+<!-- ===== DESIGNAZIONI ===== -->
+<section id="v-designa" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Designa</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
+  <div class="wrap view" id="dsBody"></div>
+</section>
+
+<!-- ===== PARTITE ===== -->
+<section id="v-partite" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
+  <div class="wrap view">
+    <div class="seg" role="group" aria-label="Filtro gare">
+      <button id="fUp" aria-pressed="true">Prossime</button>
+      <button id="fDone" aria-pressed="false">Concluse</button>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Cerca squadra" aria-label="Cerca squadra">
+    <ul class="list" id="list"></ul>
+  </div>
+</section>
+
+<!-- ===== CALENDARIO ===== -->
+<section id="v-calendario" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Calendario</h1><span class="spacer"></span></div></div>
+  <div class="wrap view">
+    <div class="seg" role="group" aria-label="Vista calendario">
+      <button id="cMese" aria-pressed="true">Mese</button>
+      <button id="cLista" aria-pressed="false">Lista</button>
+    </div>
+    <div id="calMese" class="view">
+      <div class="cal-box">
+        <div class="cal-head"><h2 id="monthLbl"></h2><div class="nav2"><button class="icon-btn" id="prevM" aria-label="Mese precedente">‹</button><button class="icon-btn" id="nextM" aria-label="Mese successivo">›</button></div></div>
+        <div class="cal" id="cal"></div>
+      </div>
+      <div class="eyebrow" id="dayLbl"></div>
+      <ul class="list" id="dayList"></ul>
+    </div>
+    <div id="calLista" class="view" hidden></div>
+    <button class="btn btn-ghost btn-block" id="exportAll">Metti tutte le prossime gare nel calendario dell'iPhone</button>
+  </div>
+</section>
+
+<!-- ===== SPESE ===== -->
+<section id="v-spese" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Spese &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
+  <div class="wrap view">
+    <div class="seg" role="group" aria-label="Periodo">
+      <button id="sMese" aria-pressed="true">Mese</button>
+      <button id="sStag" aria-pressed="false">Stagione</button>
+    </div>
+    <div class="cal-head" id="sNav"><button class="icon-btn" id="sPrev" aria-label="Periodo precedente">‹</button><h2 id="sLbl" style="font-size:22px"></h2><button class="icon-btn" id="sNext" aria-label="Periodo successivo">›</button></div>
+    <div id="moneyBox"></div>
+    <div id="catBox"></div>
+    <div id="travelBox"></div>
+    <div class="eyebrow" id="movLbl"></div>
+    <div id="spesaForm"></div>
+    <ul class="list" id="movList"></ul>
+  </div>
+</section>
+
+<!-- ===== IMPORTA ===== -->
+<section id="v-importa" class="view" hidden>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
+  <div class="wrap view">
+    <div class="hero">
+      <h2>La gara si compila da sola</h2>
+      <p>Carica lo screenshot della designazione o scatta una foto al foglio: leggo i dati e ti preparo la scheda già compilata. Tu controlli e salvi.</p>
+      <div class="tags"><span>Squadre</span><span>Data e ora</span><span>Campionato</span><span>Girone</span><span>Campo</span><span>N. gara</span><span>Ruolo</span></div>
+    </div>
+    <div class="pick">
+      <label for="photoGal"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg></span><b>Dalla galleria</b><span>Screenshot della designazione</span></label>
+      <label for="photoCam"><span class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="4"/></svg></span><b>Scatta una foto</b><span>Foglio stampato o monitor</span></label>
+    </div>
+    <input type="file" id="photoGal" accept="image/*" multiple hidden>
+    <input type="file" id="photoCam" accept="image/*" capture="environment" hidden>
+    <div class="preview" id="preview"></div>
+    <div id="aiStatus"></div>
+    <div id="review" class="view"></div>
+    <div class="steps">
+      <h2>Come funziona</h2>
+      <ol>
+        <li><i>1</i><div><b>Prendi la designazione</b><span>Screenshot da Sinfonia4You, dalla mail o da WhatsApp. Va bene anche la foto del foglio.</span></div></li>
+        <li><i>2</i><div><b>Leggo i campi</b><span>La foto viene letta direttamente sul telefono: riconosce squadre, data, ora, campionato, girone, campo, numero gara e ruolo.</span></div></li>
+        <li><i>3</i><div><b>Controlli e salvi</b><span>Ti mostro cosa ho capito: correggi quello che serve e la gara entra in registro e calendario.</span></div></li>
+      </ol>
+    </div>
+    <button class="btn btn-ghost btn-block" id="manual">Inserisci una gara a mano</button>
+  </div>
+</section>
+
+<div class="tabs">
+  <nav aria-label="Sezioni">
+    <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Oggi</a>
+    <a href="#partite" data-v="partite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg>Partite</a>
+    <a href="#calendario" data-v="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendario</a>
+    <a href="#spese" data-v="spese"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg>Spese</a>
+    <a href="#designa" data-v="designa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5.4 6-5.4s5.4 2 6 5.4"/><path d="M16 4.5a3 3 0 0 1 0 6M18 14.8c1.7.7 2.8 2.4 3 5.2"/></svg>Designa</a>
+  </nav>
+</div>
+
+<div id="sheetRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const GG = ['L','M','M','G','V','S','D'];
+const RUOLI = ['Arbitro','Assistente 1','Assistente 2','Quarto ufficiale','Osservatore','Altro'];
+const pad = n => String(n).padStart(2,'0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayIso = () => iso(new Date());
+const parseD = s => { const [y,m,d] = (s||'').split('-').map(Number); return y ? new Date(y, m-1, d) : null; };
+const fmtLong = s => { const d = parseD(s); return d ? d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'Data da definire'; };
+const fmtShort = s => { const d = parseD(s); return d ? d.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'}) : '—'; };
+const eur = n => (Number(n)||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+const toNum = v => { const n = parseFloat(String(v ?? '').replace(',','.')); return isNaN(n) ? 0 : n; };
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function seasonOf(d){ const y = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear()-1; return {y, start:`${y}-07-01`, end:`${y+1}-06-30`, label:`${String(y).slice(2)}/${String(y+1).slice(2)}`}; }
+const SEASON = seasonOf(new Date());
+const todayStr = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+$('#todayLbl').textContent = todayStr[0].toUpperCase() + todayStr.slice(1);
+$('#seasonLbl').textContent = 'Stagione ' + SEASON.label;
+$('#seasonHead').textContent = 'Questa stagione · ' + SEASON.label;
+
+function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent = msg; $('#toastRoot').replaceChildren(t); setTimeout(()=>t.remove(), 2600); }
+
+/* ---------- archivio: gare e spese nella stessa raccolta privata ---------- */
+const GF = ['data','ora','categoria','girone','numeroGara','casa','ospite','impianto','indirizzo','citta','ruolo','colleghi','osservatore','note','stato','risultato','gialli','rossi','voto','referto','mapsUrl'];
+const SF = ['data','tipo','importo','km','tariffa','consumo','prezzo','descrizione','garaId'];
+function clean(o, fields){ const r = {}; for(const f of fields){ let v = o[f]; if(v === undefined || v === null) v = ''; r[f] = typeof v === 'string' ? v.trim() : v; } r.createdAt = o.createdAt || Date.now(); return r; }
+
+const Store = {
+  mode: 'loading', rows: [], col: null,
+  get gare(){ return this.rows.filter(r => !r.kind || r.kind === 'gara'); },
+  get settings(){ return this.rows.find(r => r.kind === 'settings') || {}; },
+  get campi(){ const r = this.rows.find(r => r.kind === 'campi'); return (r && Array.isArray(r.list)) ? r.list : []; },
+  get spese(){ return this.rows.filter(r => r.kind === 'spesa'); },
+  async init(){
+    this.useLocal(''); return;
+    let done = false;
+    const timer = setTimeout(() => { if(!done) this.useLocal('Archivio online non raggiungibile: per ora salvo solo su questo dispositivo.'); }, 10000);
+    try{
+      if(window.claude && window.claude.use){
+        const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+        if(db && this.mode === 'loading'){
+          this.col = db.collection('registro');
+          this.migrate(db, user);
+          this.col.onSnapshot(snap => {
+            done = true; clearTimeout(timer);
+            if(this.mode !== 'db'){ this.mode = 'db'; $('#storeNote').hidden = true; }
+            this.rows = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            render();
+          }, () => { done = true; clearTimeout(timer); this.useLocal('Archivio online non disponibile: per ora salvo solo su questo dispositivo.'); });
+          return;
+        }
+      }
+    }catch(e){}
+    done = true; clearTimeout(timer);
+    this.useLocal('Accedi a Claude per salvare tutto nel tuo account. Ora i dati restano solo su questo dispositivo.');
+  },
+  async migrate(db, user){
+    // sposta i dati salvati nella versione precedente (spazio privato) nel registro
+    try{
+      const id = user ? await user.id() : null; if(!id) return;
+      const old = db.collection('data/users/' + id);
+      const snap = await old.get();
+      for(const d of snap.docs){ await this.col.doc(d.id).set(d.data()); await old.doc(d.id).delete(); }
+    }catch(e){}
+  },
+  useLocal(msg){
+    if(this.mode === 'db') return;
+    this.mode = 'local';
+    try{ this.rows = JSON.parse(localStorage.getItem('registro-gare') || '[]'); }catch(e){ this.rows = []; }
+    const n = $('#storeNote'); n.textContent = msg; n.hidden = !msg;
+    render();
+  },
+  persistLocal(){ try{ localStorage.setItem('registro-gare', JSON.stringify(this.rows)); }catch(e){} },
+  async put(id, data){
+    if(this.mode === 'db'){ await this.col.doc(id).set(data); }
+    else { const i = this.rows.findIndex(x => x.id === id); const row = {id, ...data}; if(i >= 0) this.rows[i] = row; else this.rows.push(row); this.persistLocal(); render(); }
+    return id;
+  },
+  async saveGara(g){ const d = clean(g, GF); d.stato = d.stato || 'programmata'; d.kind = 'gara'; const id = await this.put(g.id || uid('g'), d); this.rememberCampo(d).catch(() => {}); return id; },
+  async rememberCampo(d){
+    if(!d.impianto || !(d.indirizzo || d.citta)) return;
+    const list = this.campi.slice(), c = {nome: d.impianto, indirizzo: d.indirizzo, citta: d.citta, mapsUrl: d.mapsUrl || ''};
+    const i = list.findIndex(x => (x.nome || '').toLowerCase() === d.impianto.toLowerCase());
+    if(i >= 0){ if(list[i].indirizzo === c.indirizzo && list[i].citta === c.citta && (list[i].mapsUrl || '') === c.mapsUrl) return; list[i] = c; } else list.push(c);
+    await this.put('campi', {kind: 'campi', list, createdAt: Date.now()});
+  },
+  saveSpesa(s){ const d = clean(s, SF); d.importo = toNum(d.importo); d.km = toNum(d.km); d.tariffa = toNum(d.tariffa); d.consumo = toNum(d.consumo); d.prezzo = toNum(d.prezzo); d.kind = 'spesa'; return this.put(s.id || uid('s'), d); },
+  saveSettings(o){ return this.put('impostazioni', {partenza: o.partenza || '', auto: o.auto || '', carburante: o.carburante || '', consumo: toNum(o.consumo), prezzo: toNum(o.prezzo), tariffa: toNum(o.tariffa), kind: 'settings', createdAt: Date.now()}); },
+  async remove(id){
+    if(this.mode === 'db'){ await this.col.doc(id).delete(); }
+    else { this.rows = this.rows.filter(x => x.id !== id); this.persistLocal(); render(); }
+  }
+};
+const sortKey = g => `${g.data || '9999-99-99'} ${g.ora || '99:99'}`;
+const isPast = g => g.stato === 'disputata' || (g.data && g.data < todayIso());
+
+/* ---------- navigazione ---------- */
+const VIEWS = ['oggi','partite','calendario','spese','importa','referto','designa'];
+function route(){
+  let v = location.hash.replace('#','');
+  if(!VIEWS.includes(v)) v = 'oggi';
+  VIEWS.forEach(x => $('#v-'+x).hidden = x !== v);
+  if(v === 'referto') renderReferto();
+  if(v === 'designa'){ dsStart(); renderDesigna(); }
+  document.querySelectorAll('.tabs a').forEach(a => { if(a.dataset.v === v) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+function seg(a, b, on){ a.setAttribute('aria-pressed', on ? 'true':'false'); b.setAttribute('aria-pressed', on ? 'false':'true'); }
+
+/* ---------- indirizzo + Google Maps ---------- */
+function gmapsUrl(g){
+  if(g.mapsUrl && /^https:\/\//.test(g.mapsUrl)) return g.mapsUrl;
+  const dest = [g.indirizzo, g.citta].filter(Boolean).join(', ') || [g.impianto, g.citta].filter(Boolean).join(', ');
+  return 'https://www.google.com/maps/dir/?' + new URLSearchParams({api:'1', destination: dest, travelmode:'driving'});
+}
+function addrLink(g){
+  if(!g.impianto && !g.indirizzo && !g.citta) return '';
+  const riga2 = [g.indirizzo, g.citta].filter(Boolean).join(', ');
+  return `<a class="addr" href="${esc(gmapsUrl(g))}" target="_blank" rel="noopener"><span class="pin"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><span class="addr-t"><b>${esc(g.impianto || g.citta)}</b>${riga2 ? `<span>${esc(riga2)}</span>` : ''}<small>Apri il percorso in Google Maps ›</small></span></a>`;
+}
+
+/* ---------- OGGI ---------- */
+function renderOggi(){
+  const box = $('#nextBox');
+  if(Store.mode === 'loading'){ box.innerHTML = `<div class="status"><span class="spin"></span>Apro il registro…</div>`; }
+  else {
+    const n = Store.gare.filter(g => !isPast(g) && g.stato !== 'rinviata').sort((a,b)=>sortKey(a).localeCompare(sortKey(b)))[0];
+    if(n){
+      const d = parseD(n.data); const diff = d ? Math.round((d - parseD(todayIso()))/86400000) : null;
+      const when = diff === 0 ? 'Oggi' : diff === 1 ? 'Domani' : diff != null ? `Tra ${diff} giorni` : '';
+      box.innerHTML = `<div class="next"><span class="eyebrow">Prossima designazione${when ? ` · <span class="when">${when}</span>` : ''}</span>
+        <h2>${esc(n.casa || '—')} – ${esc(n.ospite || '—')}</h2>
+        <div class="next-date num">${esc(fmtLong(n.data))}${n.ora ? ' – ore ' + esc(n.ora) : ''}</div>
+        ${addrLink(n)}
+        <div class="pills">${n.ruolo ? `<span class="pill ruolo">${esc(n.ruolo)}</span>` : ''}${n.categoria ? `<span class="pill">${esc(n.categoria)}</span>` : ''}</div>
+        <div class="row"><button class="btn btn-ghost" data-open="${esc(n.id)}">Apri gara</button><a class="btn btn-yellow" href="#importa">+ Aggiungi designazione</a></div></div>`;
+      box.querySelector('[data-open]').onclick = () => openSheet(n.id);
+    } else {
+      box.innerHTML = `<div class="next"><span class="eyebrow">Prossima designazione</span><h2>Nessuna gara in programma</h2>
+        <span class="note" style="font-size:15px">Quando ti arriva una designazione su Sinfonia4You, fai uno screenshot e importalo qui.</span>
+        <a class="btn btn-yellow btn-block" href="#importa">+ Aggiungi designazione</a></div>`;
+    }
+  }
+  const s = Store.gare.filter(g => g.data >= SEASON.start && g.data <= SEASON.end && isPast(g) && g.stato !== 'rinviata');
+  const gialli = s.reduce((a,g)=>a+toNum(g.gialli),0), rossi = s.reduce((a,g)=>a+toNum(g.rossi),0);
+  $('#stats').innerHTML = `
+    <div class="stat"><b class="num">${s.length}</b><span>Gare</span></div>
+    <div class="stat"><b class="num">${gialli}</b><span><span class="chip-y"></span> Gialli</span></div>
+    <div class="stat"><b class="num">${rossi}</b><span><span class="chip-r"></span> Rossi</span></div>`;
+  const todo = refCandidates().filter(g => !g.referto).length;
+  $('#refHint').hidden = !todo;
+  $('#refHint').textContent = todo === 1 ? '1 gara giocata senza referto' : `${todo} gare giocate senza referto`;
+}
+$('#goReferto').onclick = () => openReferto(null);
+
+/* ---------- PARTITE ---------- */
+let filter = 'up';
+$('#fUp').onclick = () => { filter='up'; seg($('#fUp'),$('#fDone'),true); renderList(); };
+$('#fDone').onclick = () => { filter='done'; seg($('#fUp'),$('#fDone'),false); renderList(); };
+$('#q').addEventListener('input', () => renderList());
+
+function garaCard(g){
+  const d = parseD(g.data);
+  const day = d ? `<b class="num">${d.getDate()}</b><span>${MESI[d.getMonth()].slice(0,3)}</span>` : `<b>?</b><span>data</span>`;
+  const where = [g.ora, g.impianto || g.citta].filter(Boolean).map(esc).join(' · ');
+  let st = '';
+  if(g.stato === 'disputata') st = `<span class="pill done">${g.risultato ? esc(g.risultato) : 'Disputata'}</span>`;
+  else if(g.stato === 'rinviata') st = `<span class="pill rinv">Rinviata</span>`;
+  else if(isPast(g)) st = `<span class="pill">Da completare</span>`;
+  return `<li><button class="gara" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
+      <div class="teams">${esc(g.casa || '—')} – ${esc(g.ospite || '—')}</div>
+      <div class="sub">${where || 'Orario e campo da definire'}</div>
+      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${g.referto ? '<span class="pill done">Referto ✓</span>' : ''}</div>
+    </div></button></li>`;
+}
+function bindCards(root){ root.querySelectorAll('.gara').forEach(b => b.onclick = () => openSheet(b.dataset.id)); }
+const ICON_BALL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg>`;
+
+function renderList(){
+  const q = $('#q').value.trim().toLowerCase();
+  let items = Store.gare.filter(g => filter === 'up' ? !isPast(g) : isPast(g));
+  if(q) items = items.filter(g => [g.casa,g.ospite,g.impianto,g.citta,g.categoria,g.girone,g.numeroGara].join(' ').toLowerCase().includes(q));
+  items.sort((a,b) => filter === 'up' ? sortKey(a).localeCompare(sortKey(b)) : sortKey(b).localeCompare(sortKey(a)));
+  const list = $('#list');
+  if(Store.mode === 'loading'){ list.innerHTML = `<li class="status"><span class="spin"></span>Apro il registro…</li>`; return; }
+  if(!items.length){
+    list.innerHTML = q ? `<li class="empty-box">Nessuna gara trovata per “${esc(q)}”.</li>`
+      : filter === 'up' ? `<li class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna designazione</h3><span>Importa lo screenshot della designazione o aggiungi una gara a mano.</span><a class="btn btn-primary" href="#importa">+ Aggiungi gara</a></li>`
+      : `<li class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna gara conclusa</h3><span>Dopo ogni partita apri la gara e segna risultato, cartellini e voto.</span></li>`;
+    return;
+  }
+  list.innerHTML = items.map(garaCard).join('');
+  bindCards(list);
+}
+
+/* ---------- CALENDARIO ---------- */
+let calMonth = new Date(); calMonth.setDate(1);
+let selDay = todayIso(), calMode = 'mese';
+$('#prevM').onclick = () => { calMonth.setMonth(calMonth.getMonth()-1); renderCal(); };
+$('#nextM').onclick = () => { calMonth.setMonth(calMonth.getMonth()+1); renderCal(); };
+$('#cMese').onclick = () => { calMode='mese'; seg($('#cMese'),$('#cLista'),true); renderCal(); };
+$('#cLista').onclick = () => { calMode='lista'; seg($('#cMese'),$('#cLista'),false); renderCal(); };
+function renderCal(){
+  $('#calMese').hidden = calMode !== 'mese'; $('#calLista').hidden = calMode !== 'lista';
+  const byDay = {}; Store.gare.forEach(g => { if(g.data) (byDay[g.data] = byDay[g.data] || []).push(g); });
+  if(calMode === 'lista'){
+    const items = Store.gare.filter(g => g.data && g.data >= todayIso()).sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
+    if(!items.length){ $('#calLista').innerHTML = `<div class="empty-box"><h3>Nessuna gara in arrivo</h3><a class="btn btn-primary" href="#importa">+ Importa designazione</a></div>`; return; }
+    let html = '', cur = '';
+    items.forEach(g => { const m = g.data.slice(0,7); if(m !== cur){ if(cur) html += '</ul>'; cur = m; const d = parseD(g.data); html += `<div class="month-sep">${MESI[d.getMonth()]} ${d.getFullYear()}</div><ul class="list">`; } html += garaCard(g); });
+    $('#calLista').innerHTML = html + '</ul>'; bindCards($('#calLista'));
+    return;
+  }
+  $('#monthLbl').textContent = `${MESI[calMonth.getMonth()]} ${calMonth.getFullYear()}`;
+  const off = (calMonth.getDay()+6)%7;
+  const start = new Date(calMonth); start.setDate(1-off);
+  let html = GG.map(d => `<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<42;i++){
+    const d = new Date(start); d.setDate(start.getDate()+i); const k = iso(d);
+    if(i % 7 === 0 && i > 0 && d.getMonth() !== calMonth.getMonth()) break;
+    const out = d.getMonth() !== calMonth.getMonth(); const n = (byDay[k]||[]).length;
+    html += `<button data-d="${k}" class="${out?'out ':''}${k===todayIso()?'today ':''}${k===selDay?'sel':''}" ${out?'tabindex="-1" aria-hidden="true"':''} aria-label="${d.getDate()} ${MESI[d.getMonth()]}${n?`, ${n} gara`:''}"><span>${d.getDate()}</span><span class="dots">${'<i></i>'.repeat(Math.min(n,3))}</span></button>`;
+  }
+  $('#cal').innerHTML = html;
+  $('#cal').querySelectorAll('button:not(.out)').forEach(b => b.onclick = () => { selDay = b.dataset.d; renderCal(); });
+  const sd = parseD(selDay); $('#dayLbl').textContent = sd.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+  const items = (byDay[selDay]||[]).sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
+  $('#dayList').innerHTML = items.length ? items.map(garaCard).join('') : `<li class="note" style="font-size:15px">Nessuna gara in questo giorno</li>`;
+  bindCards($('#dayList'));
+}
+
+/* calendario del telefono (.ics) */
+const icsEsc = s => String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+const icsDt = x => `${x.getFullYear()}${pad(x.getMonth()+1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
+function startOf(g){ const [y,m,d] = g.data.split('-'); const [hh,mm] = (g.ora || '15:00').split(':'); return new Date(+y, +m-1, +d, +hh||0, +mm||0); }
+function icsEvent(g){
+  const st = startOf(g), en = new Date(st.getTime()+2*3600000);
+  const loc = [g.impianto, g.indirizzo, g.citta].filter(Boolean).join(', ');
+  const desc = [g.ruolo && 'Ruolo: '+g.ruolo, g.categoria && 'Campionato: '+g.categoria+(g.girone?' – girone '+g.girone:''), g.numeroGara && 'Gara n. '+g.numeroGara, g.colleghi && 'Terna: '+g.colleghi, g.osservatore && 'Osservatore: '+g.osservatore, g.note].filter(Boolean).join('\n');
+  return ['BEGIN:VEVENT',`UID:${g.id}@registro-gare`,`DTSTAMP:${icsDt(new Date())}`,`DTSTART:${icsDt(st)}`,`DTEND:${icsDt(en)}`,
+    `SUMMARY:${icsEsc(`${g.casa||''} – ${g.ospite||''}${g.ruolo?' ('+g.ruolo+')':''}`)}`, loc?`LOCATION:${icsEsc(loc)}`:'', desc?`DESCRIPTION:${icsEsc(desc)}`:'',
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Gara domani','TRIGGER:-P1D','END:VALARM','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Gara','TRIGGER:-PT3H','END:VALARM','END:VEVENT'].filter(Boolean).join('\r\n');
+}
+async function saveIcs(list, name){
+  const ok = list.filter(g => g.data);
+  if(!ok.length){ toast('Non ci sono gare con la data da esportare.'); return; }
+  try{
+    await saveFile(name, ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Registro Gare//IT', ...ok.map(icsEvent), 'END:VCALENDAR'].join('\r\n'), 'text/calendar');
+    toast('Tocca “Aggiungi tutto” per metterle nel Calendario.');
+  }catch(e){ if(e && !['declined','cancelled','canceled'].includes(e.code)) toast('Non sono riuscito a creare il file del calendario.'); }
+}
+function gcalUrl(g){
+  const st = startOf(g), en = new Date(st.getTime()+2*3600000);
+  const p = new URLSearchParams({action:'TEMPLATE', text:`${g.casa||''} – ${g.ospite||''}${g.ruolo?' ('+g.ruolo+')':''}`, dates:`${icsDt(st)}/${icsDt(en)}`, ctz:'Europe/Rome', location:[g.impianto,g.indirizzo,g.citta].filter(Boolean).join(', '), details:[g.categoria, g.numeroGara && 'Gara n. '+g.numeroGara, g.colleghi].filter(Boolean).join('\n')});
+  return 'https://calendar.google.com/calendar/render?' + p.toString();
+}
+async function saveFile(name, text, type){
+  const blob = new Blob([text], {type});
+  if(type === 'application/json' && navigator.canShare){
+    const f = new File([blob], name, {type});
+    if(navigator.canShare({files: [f]})){ try{ await navigator.share({files: [f]}); return; }catch(e){ if(e && e.name === 'AbortError') throw {code: 'cancelled'}; } }
+  }
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+$('#bkExport').onclick = async () => {
+  try{ await saveFile(`registro-gare-backup-${todayIso()}.json`, JSON.stringify({app: 'registro-gare', v: 1, salvato: new Date().toISOString(), rows: Store.rows}, null, 1), 'application/json'); toast('Backup pronto: salvalo in File.'); }
+  catch(e){ if(!e || e.code !== 'cancelled') toast('Non sono riuscito a creare il backup.'); }
+};
+$('#bkImport').onclick = () => $('#bkFile').click();
+$('#bkFile').addEventListener('change', async () => {
+  const f = $('#bkFile').files[0]; $('#bkFile').value = ''; if(!f) return;
+  let rows;
+  try{ const j = JSON.parse(await f.text()); rows = Array.isArray(j) ? j : j.rows; if(!Array.isArray(rows) || rows.some(r => !r || typeof r.id !== 'string')) throw 0; }
+  catch(e){ toast('Questo file non è un backup del Registro Gare.'); return; }
+  const nG = rows.filter(r => !r.kind || r.kind === 'gara').length, cb = $('#bkConfirm');
+  cb.innerHTML = `<div class="confirm" style="margin-top:12px"><strong>Ripristinare il backup con ${nG} gare?</strong><span class="note">Sostituisce i dati di questo telefono (ora ${Store.gare.length} gare).</span><div class="row"><button class="btn btn-danger" data-yes>Sì, ripristina</button><button class="btn btn-ghost" data-no>Annulla</button></div></div>`;
+  cb.querySelector('[data-no]').onclick = () => cb.innerHTML = '';
+  cb.querySelector('[data-yes]').onclick = () => { Store.rows = rows; Store.persistLocal(); cb.innerHTML = ''; render(); toast(`Ripristinate ${nG} gare.`); };
+});
+$('#exportAll').onclick = () => saveIcs(Store.gare.filter(g => !isPast(g)), 'gare-in-programma.ics');
+
+/* ---------- SPESE ---------- */
+const TIPI = {carburante:'Carburante', rimborso:'Rimborso km', diaria:'Diaria', altro:'Altro'};
+let sMode = 'mese', sMonth = new Date(); sMonth.setDate(1); let sSeason = SEASON.y;
+let catSel = null;
+$('#sMese').onclick = () => { sMode='mese'; catSel = null; seg($('#sMese'),$('#sStag'),true); renderSpese(); };
+$('#sStag').onclick = () => { sMode='stagione'; catSel = null; seg($('#sMese'),$('#sStag'),false); renderSpese(); };
+$('#sPrev').onclick = () => { if(sMode==='mese') sMonth.setMonth(sMonth.getMonth()-1); else sSeason--; renderSpese(); };
+$('#sNext').onclick = () => { if(sMode==='mese') sMonth.setMonth(sMonth.getMonth()+1); else sSeason++; renderSpese(); };
+$('#addSpesa').onclick = () => openSpesaForm({data: todayIso(), tipo:'carburante'});
+
+function lastTariffa(){ const r = Store.spese.filter(s => s.tipo==='rimborso' && s.tariffa).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0]; return r ? r.tariffa : ''; }
+
+function fuelSkip(){ return new Set(Store.spese.filter(s => s.tipo === 'carburante' && s.garaId).map(s => s.garaId)); }
+function fuelOf(s, skip){
+  const S = Store.settings;
+  const p = toNum(s.prezzo) || toNum(S.prezzo);
+  if(s.tipo !== 'rimborso' || !toNum(s.km) || !toNum(S.consumo) || !p) return 0;
+  if(skip && s.garaId && skip.has(s.garaId)) return 0;
+  return toNum(s.km) / toNum(S.consumo) * p;
+}
+/* prezzo benzina dell'ultimo movimento inserito (per data), altrimenti quello delle impostazioni */
+function lastPrezzo(){
+  const r = Store.spese.filter(s => toNum(s.prezzo) > 0).sort((a,b) => (b.data||'').localeCompare(a.data||'') || (b.createdAt||0) - (a.createdAt||0))[0];
+  return r ? toNum(r.prezzo) : toNum(Store.settings.prezzo);
+}
+/* riepilogo per categoria (vista Stagione): calcio a 7 e a 5 amatoriali = CAMPIONATO AICS */
+const catGroup = g => {
+  if(!g) return 'Senza gara collegata';
+  const c = (g.categoria || '').trim();
+  if(/^(calcio a [57]|c[57] aics)$/i.test(c)) return 'Campionato AICS';
+  if(/coppa regionale.*2/i.test(c)) return 'Seconda Categoria';
+  if(/coppa italia serie d/i.test(c)) return 'Serie D Calcio a 5';
+  return c || 'Senza categoria';
+};
+const subOf = g => /7/.test(g.categoria || '') ? 'C7 AICS' : 'C5 AICS';
+function inCat(s, sel){
+  const g = s.garaId ? Store.gare.find(x => x.id === s.garaId) : null, [k, sub] = sel.split('|');
+  if(catGroup(g) !== k) return false;
+  return !sub || (g && subOf(g) === sub);
+}
+function renderCat(items){
+  const box = $('#catBox');
+  const skip = fuelSkip(), m = new Map();
+  const blank = () => ({gare: new Set(), extra: 0, eur: 0, fuel: 0, kmBy: new Map(), kmFree: 0, sub: new Map()});
+  const acc = (o, s, g) => {
+    if(s.tipo === 'rimborso') o.eur += toNum(s.importo);
+    o.fuel += s.tipo === 'carburante' ? toNum(s.importo) : fuelOf(s, skip);
+    if(g){ o.gare.add(g.id); o.kmBy.set(g.id, Math.max(o.kmBy.get(g.id) || 0, toNum(s.km))); }
+    else { if(s.tipo === 'rimborso') o.extra++; o.kmFree += toNum(s.km); }
+  };
+  items.filter(s => s.tipo === 'rimborso' || s.tipo === 'carburante').forEach(s => {
+    const g = s.garaId ? Store.gare.find(x => x.id === s.garaId) : null, k = catGroup(g);
+    const o = m.get(k) || blank(); acc(o, s, g); m.set(k, o);
+    if(k === 'Campionato AICS'){ const sk = subOf(g); const so = o.sub.get(sk) || blank(); acc(so, s, g); o.sub.set(sk, so); }
+  });
+  const fin = (k, o) => ({k, n: o.gare.size + o.extra, eur: o.eur, fuel: o.fuel, km: [...o.kmBy.values()].reduce((a,b) => a + b, 0) + o.kmFree});
+  const rows = [...m.entries()].map(([k,o]) => ({...fin(k, o), sub: [...o.sub.entries()].map(([sk,so]) => fin(sk, so)).sort((a,b) => b.k.localeCompare(a.k))})).sort((a,b) => b.eur - a.eur);
+  if(!rows.length){ box.innerHTML = ''; return; }
+  const T = rows.reduce((a,r) => ({n: a.n + r.n, eur: a.eur + r.eur, fuel: a.fuel + r.fuel, km: a.km + r.km}), {n:0, eur:0, fuel:0, km:0});
+  const det = r => `${r.n} ${r.n === 1 ? 'gara' : 'gare'} · ${r.km.toLocaleString('it-IT')} km · benzina ${eur(r.fuel)}`;
+  const fedOf = k => k === 'Campionato AICS' ? 'Calcio a 5 e 7 AICS' : /es league/i.test(k) ? 'ES League' : /^senza gara/i.test(k) ? 'Altro' : 'FIGC';
+  const F = new Map();
+  rows.forEach(r => { const f = fedOf(r.k), o = F.get(f) || {k: f, n:0, eur:0, fuel:0, km:0}; o.n += r.n; o.eur += r.eur; o.fuel += r.fuel; o.km += r.km; F.set(f, o); });
+  const feds = ['Calcio a 5 e 7 AICS', 'FIGC', 'ES League', 'Altro'].filter(f => F.has(f)).map(f => F.get(f));
+  const fedHtml = `<section class="ref-sec"><h3>Ricavi per federazione</h3><div class="cat-list">${feds.map(r => `<div class="cat-row fed-row"><div><b>${esc(r.k)}</b><span>${det(r)} · netto ${eur(r.eur - r.fuel)}</span></div><div class="cat-eur num">${eur(r.eur)}</div><div class="cat-bar"><i style="width:${(T.eur ? r.eur / T.eur * 100 : 0).toFixed(1)}%"></i></div></div>`).join('')}</div></section>`;
+  if(sMode !== 'stagione'){ box.innerHTML = fedHtml; return; }
+  box.innerHTML = fedHtml + `<section class="ref-sec"><h3>Rimborsi per categoria</h3><p class="note" style="margin:0">Tocca una categoria per vedere le sue gare.</p><div class="cat-list">${rows.map(r => `<div class="cat-row${catSel === r.k ? ' sel' : ''}" data-cat="${esc(r.k)}" role="button" tabindex="0"><div><b>${esc(r.k)}</b><span>${det(r)}</span></div><div class="cat-eur num">${eur(r.eur)}</div><div class="cat-bar"><i style="width:${(T.eur ? r.eur / T.eur * 100 : 0).toFixed(1)}%"></i></div>${r.sub.length ? `<div class="cat-sub">${r.sub.map(x => `<div data-cat="${esc(r.k + '|' + x.k)}" role="button" tabindex="0" class="${catSel === r.k + '|' + x.k ? 'sel' : ''}"><span><b>${esc(x.k)}</b> · ${det(x)}</span><b class="num">${eur(x.eur)}</b></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
+    <div class="cat-tot"><span>Totale · ${det(T)}</span><b class="num">${eur(T.eur)}</b></div>
+    <div class="cat-tot" style="border:0;padding-top:0"><span>Ti restano dopo la benzina</span><b class="num">${eur(T.eur - T.fuel)}</b></div></section>`;
+  box.querySelectorAll('[data-cat]').forEach(el => {
+    const pick = e => { e.stopPropagation(); catSel = catSel === el.dataset.cat ? null : el.dataset.cat; renderSpese(); if(catSel) $('#movLbl').scrollIntoView({behavior:'smooth', block:'start'}); };
+    el.onclick = pick; el.onkeydown = e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(e); } };
+  });
+}
+function renderSpese(){
+  renderTravel();
+  let from, to, lbl;
+  if(sMode === 'mese'){ from = iso(sMonth); const e = new Date(sMonth.getFullYear(), sMonth.getMonth()+1, 0); to = iso(e); lbl = `${MESI[sMonth.getMonth()]} ${sMonth.getFullYear()}`; }
+  else { from = `${sSeason}-07-01`; to = `${sSeason+1}-06-30`; lbl = `Stagione ${String(sSeason).slice(2)}/${String(sSeason+1).slice(2)}`; }
+  $('#sLbl').textContent = lbl[0].toUpperCase() + lbl.slice(1);
+  let items = Store.spese.filter(s => s.data >= from && s.data <= to).sort((a,b) => (b.data||'').localeCompare(a.data||''));
+  const sum = t => items.filter(s => s.tipo === t).reduce((a,s)=>a+toNum(s.importo),0);
+  const skip = fuelSkip();
+  const km = items.filter(s => s.tipo === 'rimborso' || s.tipo === 'carburante').reduce((a,s)=>a+toNum(s.km),0);
+  const entrate = sum('rimborso') + sum('diaria');
+  const benzina = sum('carburante') + items.reduce((a,s)=>a+fuelOf(s, skip),0);
+  const altro = sum('altro');
+  const netto = entrate - benzina - altro;
+  const noSet = !toNum(Store.settings.consumo);
+  $('#moneyBox').innerHTML = `<div class="money"><span class="eyebrow">Ti restano · ${esc(lbl)}</span><div class="tot num">${eur(netto)}</div>
+    <div class="split num"><div><b>${eur(entrate)}</b><span>rimborsi</span></div><div><b>− ${eur(benzina)}</b><span>benzina${noSet ? '' : ' stimata'}</span></div><div><b>− ${eur(altro)}</b><span>altre spese</span></div><div><b>${km.toLocaleString('it-IT')}</b><span>km</span></div></div>
+    ${noSet ? '<span style="font-size:14px;opacity:.85">Imposta consumo e prezzo nel riquadro Viaggio per calcolare la benzina.</span>' : ''}</div>`;
+  $('#movLbl').textContent = 'Movimenti · ' + lbl;
+  renderCat(items);
+  if(sMode === 'stagione' && Store.mode !== 'loading'){
+    if(!catSel){ $('#movLbl').textContent = 'Tocca una categoria per vedere le sue gare'; $('#movList').innerHTML = ''; return; }
+    items = items.filter(s => inCat(s, catSel));
+    $('#movLbl').textContent = 'Movimenti · ' + catSel.replace('|', ' · ');
+  }
+  if(Store.mode === 'loading'){ $('#movList').innerHTML = `<li class="status"><span class="spin"></span>Carico le spese…</li>`; return; }
+  if(!items.length){
+    $('#movList').innerHTML = `<li class="empty-box"><span class="eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span><h3>Nessuna spesa</h3><span>Aggiungi diarie, rimborsi km e altre spese col + in alto.</span><button class="btn btn-primary" id="addSpesa2">+ Aggiungi spesa</button></li>`;
+    $('#addSpesa2').onclick = () => openSpesaForm({data: todayIso(), tipo:'carburante'});
+    return;
+  }
+  $('#movList').innerHTML = items.map(s => {
+    const g = s.garaId ? Store.gare.find(x => x.id === s.garaId) : null;
+    const sub = [fmtShort(s.data), s.tipo==='rimborso' && s.km ? `${s.km} km${fuelOf(s, fuelSkip()) ? ' · benzina ' + eur(fuelOf(s, fuelSkip())) + ' a ' + String(toNum(s.prezzo) || toNum(Store.settings.prezzo)).replace('.',',') + ' €/l' : ''}` : s.tipo==='carburante' && s.km ? `${s.km} km${s.consumo ? ' · ' + String(s.consumo).replace('.',',') + ' km/l' : ''}` : '', g ? `${g.casa} – ${g.ospite}` : ''].filter(Boolean).join(' · ');
+    return `<li><button class="mov" data-s="${esc(s.id)}"><span class="mi">${s.tipo==='diaria'?'D':s.tipo==='rimborso'?'KM':s.tipo==='carburante'?'L':'€'}</span><span class="mt"><b>${esc(s.descrizione || TIPI[s.tipo] || 'Spesa')}</b><span>${esc(sub)}</span></span><span class="amt num">${eur(s.importo)}</span></button></li>`;
+  }).join('');
+  $('#movList').querySelectorAll('[data-s]').forEach(b => b.onclick = () => openSpesaForm(Store.spese.find(x => x.id === b.dataset.s)));
+}
+
+/* percorsi già fatti: stesso campo = stessi km */
+const campoKey = g => [g.impianto, g.citta].join('|').toLowerCase().replace(/[^a-z0-9|]/g, '');
+function kmNoto(g, exclId){
+  if(!g) return null;
+  const k = campoKey(g); if(k === '|') return null;
+  const hits = Store.spese
+    .filter(s => s.id !== exclId && toNum(s.km) && (s.tipo === 'rimborso' || s.tipo === 'carburante') && s.garaId)
+    .map(s => ({s, g: Store.gare.find(x => x.id === s.garaId)}))
+    .filter(o => o.g && campoKey(o.g) === k)
+    .sort((a,b) => ((b.s.tipo === 'rimborso') - (a.s.tipo === 'rimborso')) || (b.s.createdAt||0) - (a.s.createdAt||0));
+  return hits.length ? {km: toNum(hits[0].s.km), importo: hits[0].s.tipo === 'rimborso' ? toNum(hits[0].s.importo) : 0, from: hits[0].g} : null;
+}
+function openSpesaForm(s){
+  location.hash = '#spese';
+  const isNew = !s.id, S = Store.settings;
+  if(isNew){
+    if(s.tipo === 'rimborso' && !s.tariffa) s.tariffa = S.tariffa || lastTariffa();
+    if(s.tipo === 'carburante') s.consumo = s.consumo || S.consumo || '';
+    if(s.tipo === 'rimborso' || s.tipo === 'carburante') s.prezzo = s.prezzo || lastPrezzo() || '';
+  }
+  const dec = v => v ? String(v).replace('.',',') : '';
+  const gare = Store.gare.slice().sort((a,b)=>sortKey(b).localeCompare(sortKey(a))).slice(0,60);
+  const box = $('#spesaForm');
+  box.innerHTML = `<form class="form" novalidate>
+    <h3>${isNew ? 'Nuova spesa' : 'Modifica spesa'}</h3>
+    <div class="field"><label for="sp-data">Data</label><input id="sp-data" data-f="data" type="date" value="${esc(s.data)}"></div>
+    <div class="field"><label for="sp-tipo">Tipo</label><select id="sp-tipo" data-f="tipo">${Object.entries(TIPI).map(([k,v])=>`<option value="${k}" ${s.tipo===k?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="field full"><label for="sp-gara">Gara collegata</label><select id="sp-gara" data-f="garaId"><option value="">Nessuna</option>${gare.map(g=>`<option value="${esc(g.id)}" ${s.garaId===g.id?'selected':''}>${esc(fmtShort(g.data))} · ${esc(g.casa)} – ${esc(g.ospite)}</option>`).join('')}</select></div>
+    <div class="field full trip"><div class="row"><button type="button" class="btn btn-primary sm" id="sp-calc">Calcola km dal campo</button><a class="btn btn-ghost sm" id="sp-maps" target="_blank" rel="noopener" hidden>Verifica su Maps</a></div><span class="note" id="sp-msg"></span></div>
+    <div class="field full trip"><label for="sp-km">Km andata e ritorno</label><input id="sp-km" data-f="km" type="number" min="0" inputmode="decimal" value="${esc(s.km || '')}"></div>
+    <div class="field full rimb"><label for="sp-tariffa">Rimborso € al km</label><input id="sp-tariffa" data-f="tariffa" type="text" inputmode="decimal" placeholder="0,30" value="${esc(dec(s.tariffa))}"></div>
+    <div class="field carb"><label for="sp-consumo">Consumo km/l</label><input id="sp-consumo" data-f="consumo" type="text" inputmode="decimal" placeholder="15" value="${esc(dec(s.consumo))}"></div>
+    <div class="field fuelp"><label for="sp-prezzo">Benzina €/l quel giorno</label><input id="sp-prezzo" data-f="prezzo" type="text" inputmode="decimal" placeholder="1,85" value="${esc(dec(s.prezzo))}"></div>
+    <div class="field full"><label for="sp-importo">Importo €</label><input id="sp-importo" data-f="importo" type="text" inputmode="decimal" value="${esc(dec(s.importo))}"></div>
+    <div class="field full" id="sp-fuel" hidden><div class="status" style="flex-direction:column;align-items:flex-start;gap:2px"></div></div>
+    <div class="field full"><label for="sp-desc">Descrizione</label><input id="sp-desc" data-f="descrizione" type="text" placeholder="Es. pedaggio, parcheggio" value="${esc(s.descrizione)}"></div>
+    <div class="actions row"><button type="submit" class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button>${isNew ? '' : '<button type="button" class="btn btn-danger" data-del>Elimina</button>'}</div>
+  </form>`;
+  const f = box.querySelector('form'), q = id => f.querySelector('#'+id);
+  const tipo = q('sp-tipo'), km = q('sp-km'), tar = q('sp-tariffa'), cons = q('sp-consumo'), prz = q('sp-prezzo'), imp = q('sp-importo'), garaSel = q('sp-gara'), msg = q('sp-msg'), maps = q('sp-maps'), calcBtn = q('sp-calc');
+  const fix = n => n.toFixed(2).replace('.',',');
+  const fuelBox = q('sp-fuel');
+  const showFuel = () => {
+    const S = Store.settings, k = toNum(km.value), c = toNum(S.consumo), p = toNum(prz.value) || toNum(S.prezzo);
+    fuelBox.hidden = tipo.value !== 'rimborso' || !k;
+    if(fuelBox.hidden) return;
+    const st = fuelBox.firstElementChild;
+    if(!c){ st.innerHTML = 'Per calcolare la benzina imposta il consumo dell’auto nel riquadro “Viaggio”.'; return; }
+    if(!p){ st.innerHTML = 'Scrivi il prezzo della benzina di quel giorno per calcolare il costo.'; return; }
+    const b = k / c * p, r = toNum(imp.value);
+    st.innerHTML = `<span>Benzina per ${k} km: <b>${eur(b)}</b> <span class="note">(${String(c).replace('.',',')} km/l · ${String(p).replace('.',',')} €/l)</span></span>${r ? `<span>Ti restano: <b>${eur(r - b)}</b></span>` : ''}`;
+  };
+  const calc = () => {
+    const k = toNum(km.value);
+    if(tipo.value === 'rimborso' && k && toNum(tar.value)) imp.value = fix(k * toNum(tar.value));
+    if(tipo.value === 'carburante' && k && toNum(cons.value) && toNum(prz.value)) imp.value = fix(k / toNum(cons.value) * toNum(prz.value));
+    showFuel();
+  };
+  imp.addEventListener('input', showFuel);
+  const dest = () => { const g = Store.gare.find(x => x.id === garaSel.value); return g ? [g.impianto, g.indirizzo, g.citta].filter(Boolean).join(', ') : ''; };
+  const updMaps = () => { const d = dest(); maps.hidden = !(d && Store.settings.partenza); if(!maps.hidden) maps.href = 'https://www.google.com/maps/dir/?' + new URLSearchParams({api:'1', origin: Store.settings.partenza, destination: d, travelmode:'driving'}); };
+  const sync = () => {
+    const t = tipo.value;
+    f.querySelectorAll('.trip').forEach(el => el.hidden = !(t === 'rimborso' || t === 'carburante'));
+    f.querySelectorAll('.rimb').forEach(el => el.hidden = t !== 'rimborso');
+    f.querySelectorAll('.carb').forEach(el => el.hidden = t !== 'carburante');
+    f.querySelectorAll('.fuelp').forEach(el => el.hidden = !(t === 'rimborso' || t === 'carburante'));
+    if(t === 'carburante' && !cons.value && Store.settings.consumo) cons.value = dec(Store.settings.consumo);
+    if((t === 'rimborso' || t === 'carburante') && !prz.value && isNew){ const lp = lastPrezzo(); if(lp) prz.value = dec(lp); }
+    if(t === 'rimborso' && !tar.value){ const tt = Store.settings.tariffa || lastTariffa(); if(tt) tar.value = dec(tt); }
+  };
+  tipo.onchange = () => { sync(); calc(); }; [km, tar, cons, prz].forEach(el => el.oninput = calc); sync(); updMaps(); showFuel();
+  garaSel.onchange = () => { const g = Store.gare.find(x => x.id === garaSel.value); if(g && g.data) q('sp-data').value = g.data; updMaps(); msg.textContent = ''; if(isNew) km.value = ''; autoKnown(); };
+  const useKnown = known => { km.value = known.km; calc(); msg.textContent = `Campo già visto: ${known.km} km andata e ritorno, come ${fmtShort(known.from.data)} (${known.from.casa} – ${known.from.ospite}). Se il percorso è cambiato, correggi i km.`; };
+  const autoKnown = () => { if((tipo.value === 'rimborso' || tipo.value === 'carburante') && !km.value){ const known = kmNoto(Store.gare.find(x => x.id === garaSel.value), s.id); if(known) useKnown(known); } };
+  calcBtn.onclick = async () => {
+    const known = kmNoto(Store.gare.find(x => x.id === garaSel.value), s.id);
+    if(known){ useKnown(known); return; }
+    const S = Store.settings, d = dest();
+    if(!S.partenza){ msg.textContent = 'Prima imposta l’indirizzo di partenza nel riquadro “Viaggio” qui sopra.'; return; }
+    if(!garaSel.value){ msg.textContent = 'Scegli la gara collegata per sapere dov’è il campo.'; return; }
+    if(!d){ msg.textContent = 'Questa gara non ha campo né città: aggiungili nella scheda della gara.'; return; }
+    if(!sample){ msg.innerHTML = `Apri il <a href="${esc('https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=' + encodeURIComponent(S.partenza) + '&destination=' + encodeURIComponent(d))}" target="_blank" rel="noopener">percorso su Google Maps</a> e scrivi i km di andata e ritorno.`; return; }
+    calcBtn.disabled = true; msg.innerHTML = '<span class="spin" style="display:inline-block;vertical-align:-4px"></span> Calcolo il percorso…';
+    try{
+      const r = await sample.json(`Stima la distanza stradale in auto in Italia (percorso più usato, non in linea d'aria) da: "${S.partenza}" a: "${d}". Se il nome del campo non basta, usa indirizzo e città. Rispondi SOLO con JSON: {"km": numero di km della sola andata arrotondato all'intero, "minuti": durata stimata in minuti}`, {modelTier: 'default'});
+      const one = Math.round(toNum(r && r.km));
+      if(!one) throw new Error('nokm');
+      km.value = one * 2; calc();
+      msg.textContent = `Stima: circa ${one} km a tratta${r.minuti ? `, ${Math.round(toNum(r.minuti))} minuti` : ''}. Andata e ritorno: ${one*2} km. Se conosci i km giusti scrivili tu: quando salvi, per questo campo userò i tuoi.`;
+    }catch(e){
+      msg.textContent = e && e.code === 'not_granted' ? 'Serve il tuo permesso per il calcolo: riprova e consenti la richiesta.' : e && e.code === 'rate_limited' ? 'Troppe richieste: riprova tra qualche minuto.' : 'Non sono riuscito a stimare la distanza. Inserisci i km a mano o controlla su Maps.';
+    }
+    calcBtn.disabled = false;
+  };
+  f.querySelector('[data-x]').onclick = () => box.innerHTML = '';
+  if(!isNew) f.querySelector('[data-del]').onclick = async () => { try{ await Store.remove(s.id); box.innerHTML=''; toast('Spesa eliminata'); }catch(e){ toast('Eliminazione non riuscita.'); } };
+  f.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const d = {}; f.querySelectorAll('[data-f]').forEach(el => d[el.dataset.f] = el.value);
+    if(d.tipo !== 'rimborso') d.tariffa = '';
+    if(d.tipo !== 'carburante') d.consumo = '';
+    if(d.tipo !== 'carburante' && d.tipo !== 'rimborso') d.prezzo = '';
+    if(d.tipo !== 'rimborso' && d.tipo !== 'carburante') d.km = '';
+    if(!toNum(d.importo)){ toast('Inserisci l’importo.'); return; }
+    try{ const { autoCalc, ...rest } = s; await Store.saveSpesa({...rest, ...d}); box.innerHTML = ''; toast('Spesa salvata');
+      const dd = parseD(d.data); if(dd && sMode === 'mese'){ sMonth = new Date(dd.getFullYear(), dd.getMonth(), 1); renderSpese(); } }
+    catch(e){ toast('Salvataggio non riuscito. Riprova.'); }
+  });
+  box.scrollIntoView({behavior:'smooth', block:'start'});
+  if(isNew) autoKnown();
+  if(isNew && s.autoCalc && !km.value && Store.settings.partenza && dest()) calcBtn.click();
+}
+
+/* impostazioni viaggio */
+let editingTravel = false;
+const CARB = ['Benzina','Diesel','GPL','Metano','Ibrida benzina','Elettrica'];
+function renderTravel(){
+  const box = $('#travelBox'), S = Store.settings;
+  box.hidden = sMode !== 'mese';
+  if(editingTravel) return;
+  if(Store.mode === 'loading'){ box.innerHTML = ''; return; }
+  const dec = v => v ? String(v).replace('.',',') : '—';
+  if(!S.partenza && !S.consumo){
+    box.innerHTML = `<div class="ref-sec"><h3>Costo della benzina</h3><p class="note" style="margin:0;font-size:15px">Imposta da dove parti e che auto usi: calcolo il percorso fino ai campi nuovi e quanto spendi di benzina.</p><button class="btn btn-primary" id="tvEdit">Imposta partenza e auto</button></div>`;
+  } else {
+    box.innerHTML = `<div class="ref-sec"><header><h3>Viaggio</h3><button class="btn btn-ghost sm" id="tvEdit">Modifica</button></header>
+      <dl class="kv" style="border:0;padding:0;background:transparent">${S.partenza ? `<dt>Partenza</dt><dd>${esc(S.partenza)}</dd>` : ''}${S.auto ? `<dt>Auto</dt><dd>${esc(S.auto)}${S.carburante ? ' · ' + esc(S.carburante) : ''}</dd>` : ''}<dt>Consumo</dt><dd>${dec(S.consumo)} km/l</dd><dt>Carburante</dt><dd>${dec(S.prezzo)} €/l</dd>${S.tariffa ? `<dt>Rimborso</dt><dd>${dec(S.tariffa)} €/km</dd>` : ''}</dl></div>`;
+  }
+  $('#tvEdit').onclick = editTravel;
+}
+function editTravel(){
+  editingTravel = true;
+  const S = Store.settings, box = $('#travelBox'), dec = v => v ? String(v).replace('.',',') : '';
+  box.innerHTML = `<form class="form" novalidate>
+    <h3>Partenza e auto</h3>
+    <div class="field full"><label for="tv-partenza">Indirizzo di partenza</label><input id="tv-partenza" value="${esc(S.partenza)}" placeholder="Via, numero civico, città" autocomplete="street-address"></div>
+    <div class="field full"><label for="tv-auto">Auto (marca e modello)</label><input id="tv-auto" value="${esc(S.auto)}" placeholder="Es. Fiat Panda 1.2"></div>
+    <div class="field full"><label for="tv-carb">Alimentazione</label><select id="tv-carb">${CARB.map(c=>`<option ${c===S.carburante?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="field"><label for="tv-consumo">Consumo km/l</label><input id="tv-consumo" inputmode="decimal" value="${esc(dec(S.consumo))}" placeholder="15"></div>
+    <div class="field"><label for="tv-prezzo">Prezzo €/l</label><input id="tv-prezzo" inputmode="decimal" value="${esc(dec(S.prezzo))}" placeholder="1,85"></div>
+    <div class="field full"><button type="button" class="btn btn-ghost sm" id="tv-stima">Stima il consumo dal modello</button><span class="note" id="tv-msg"></span></div>
+    <div class="field full"><label for="tv-tariffa">Rimborso € al km (se ti spetta)</label><input id="tv-tariffa" inputmode="decimal" value="${esc(dec(S.tariffa))}" placeholder="Facoltativo"></div>
+    <p class="note" style="grid-column:1/-1;margin:0">Il prezzo della benzina lo segni in ogni rimborso: per i nuovi parto da quello dell'ultimo inserito. Quello qui sopra serve solo per i rimborsi che non ce l'hanno. L'indirizzo resta salvato solo nel tuo registro.</p>
+    <div class="actions row"><button type="submit" class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+  </form>`;
+  const f = box.querySelector('form'), v = id => f.querySelector('#'+id).value.trim();
+  f.querySelector('[data-x]').onclick = () => { editingTravel = false; renderTravel(); };
+  f.querySelector('#tv-stima').onclick = async () => {
+    const m = f.querySelector('#tv-msg'), auto = v('tv-auto');
+    if(!auto){ m.textContent = ' Scrivi prima il modello dell’auto.'; return; }
+    if(!sample){ m.textContent = ' Scrivi il consumo a mano (km con un litro).'; return; }
+    m.textContent = ' Cerco il consumo medio…';
+    try{
+      const r = await sample.json(`Qual è il consumo medio reale nel ciclo misto dell'auto "${auto}" con alimentazione ${v('tv-carb')}? Rispondi SOLO con JSON: {"km_per_unita": numero con una cifra decimale (km per litro; km per kg se metano; km per kWh se elettrica)}`, {modelTier: 'default'});
+      const n = toNum(r && r.km_per_unita); if(!n) throw 0;
+      f.querySelector('#tv-consumo').value = String(n).replace('.',','); m.textContent = ' Stima inserita: correggila se conosci il consumo reale.';
+    }catch(e){ m.textContent = ' Non sono riuscito a stimarlo: inseriscilo a mano.'; }
+  };
+  f.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    try{ await Store.saveSettings({partenza: v('tv-partenza'), auto: v('tv-auto'), carburante: v('tv-carb'), consumo: v('tv-consumo'), prezzo: v('tv-prezzo'), tariffa: v('tv-tariffa')});
+      editingTravel = false; renderTravel(); toast('Impostazioni salvate'); }
+    catch(e){ toast('Salvataggio non riuscito. Riprova.'); }
+  });
+}
+
+/* ---------- REFERTO ---------- */
+const TIPO_GOL = ['Azione','Rigore','Punizione','Autorete'];
+const MOT_AMM = ['Comportamento antisportivo','Proteste (dissenso con parole o gesti)','Infrazioni ripetute','Ritarda la ripresa del gioco','Non rispetta la distanza','Entra/esce senza autorizzazione','Altro'];
+const MOT_ESP = ['Doppia ammonizione','Grave fallo di gioco','Condotta violenta','Sputo','Impedisce una rete (DOGSO)','Linguaggio offensivo o ingiurioso','Altro'];
+const LISTS = {marcatori:{t:'Reti', add:'Rete', mot:TIPO_GOL, lbl:'Tipo di rete'}, ammoniti:{t:'Ammonizioni', add:'Ammonito', mot:MOT_AMM, lbl:'Motivo', chip:'chip-y'}, espulsi:{t:'Espulsioni', add:'Espulso', mot:MOT_ESP, lbl:'Motivo', chip:'chip-r'}, dirigenti:{t:'Dirigenti', add:'Provvedimento', mot:[], lbl:''}};
+const QUAL = ['Allenatore','Allenatore in seconda','Dirigente accompagnatore','Medico','Massaggiatore / fisioterapista','Preparatore','Altro'];
+const PROV = ['Ammonizione','Espulsione (allontanamento)'];
+let refId = null, draft = null;
+const refCandidates = () => Store.gare.filter(g => g.data && g.data <= todayIso() && g.stato !== 'rinviata').sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+function openReferto(id){ refId = id || null; draft = null; if(location.hash === '#referto') renderReferto(); else location.hash = '#referto'; }
+
+function renderReferto(){
+  const body = $('#refBody');
+  if(Store.mode === 'loading'){ body.innerHTML = `<div class="status"><span class="spin"></span>Apro il registro…</div>`; return; }
+  const g = refId && Store.gare.find(x => x.id === refId);
+  if(!g){
+    const c = refCandidates();
+    if(!c.length){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna gara da refertare</h3><span>Il referto si compila per una gara di oggi o già giocata. Prima importa la designazione.</span><a class="btn btn-primary" href="#importa">+ Importa designazione</a></div>`; return; }
+    body.innerHTML = `<div class="eyebrow">Scegli la gara</div><ul class="list">${c.map(garaCard).join('')}</ul>`;
+    body.querySelectorAll('.gara').forEach(b => b.onclick = () => openReferto(b.dataset.id));
+    return;
+  }
+  if(!draft){
+    const r = g.referto ? JSON.parse(JSON.stringify(g.referto)) : {};
+    const [rc, ro] = String(g.risultato || '').split('-');
+    draft = {gc: r.gc ?? (rc ?? '').trim(), go: r.go ?? (ro ?? '').trim(), gc1: r.gc1 ?? '', go1: r.go1 ?? '', rec1: r.rec1 ?? '', rec2: r.rec2 ?? '',
+      marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
+  }
+  renderRefForm(g);
+}
+
+function renderRefForm(g){
+  const d = draft, body = $('#refBody');
+  const sqOpt = v => `<option value="casa" ${v!=='ospite'?'selected':''}>${esc(g.casa||'Casa')}</option><option value="ospite" ${v==='ospite'?'selected':''}>${esc(g.ospite||'Ospite')}</option>`;
+  const opts = (list, v) => list.map(m => `<option ${m===v?'selected':''}>${esc(m)}</option>`).join('');
+  const dirRows = () => d.dirigenti.map((e,i) => `<div class="ev dir" data-list="dirigenti" data-i="${i}">
+      <input data-k="min" inputmode="numeric" placeholder="Min" value="${esc(e.min)}" aria-label="Minuto">
+      <select data-k="sq" aria-label="Squadra">${sqOpt(e.sq)}</select>
+      <button type="button" class="x" data-del aria-label="Rimuovi">✕</button>
+      <select class="wide" data-k="qual" aria-label="Qualifica">${opts(QUAL, e.qual)}</select>
+      <input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Nome">
+      <select class="wide" data-k="prov" aria-label="Provvedimento">${opts(PROV, e.prov)}</select>
+      <input class="wide" data-k="mot" placeholder="Motivo (es. proteste, frasi offensive)" value="${esc(e.mot)}" aria-label="Motivo">
+    </div>`).join('');
+  const rows = key => key === 'dirigenti' ? dirRows() : d[key].map((e,i) => `<div class="ev" data-list="${key}" data-i="${i}">
+      <input data-k="min" inputmode="numeric" placeholder="Min" value="${esc(e.min)}" aria-label="Minuto">
+      <select data-k="sq" aria-label="Squadra">${sqOpt(e.sq)}</select>
+      <input data-k="num" inputmode="numeric" placeholder="N°" value="${esc(e.num)}" aria-label="Numero di maglia">
+      <button type="button" class="x" data-del aria-label="Rimuovi">✕</button>
+      <input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Giocatore">
+      <select class="wide" data-k="mot" aria-label="${LISTS[key].lbl}">${LISTS[key].mot.map(m=>`<option ${m===e.mot?'selected':''}>${esc(m)}</option>`).join('')}</select>
+    </div>`).join('');
+  const sec = key => `<section class="ref-sec"><header><h3>${LISTS[key].chip ? `<span class="${LISTS[key].chip}"></span>` : ''}${LISTS[key].t} <span class="cnt">${d[key].length}</span></h3><button type="button" class="btn btn-ghost sm" data-add="${key}">+ ${LISTS[key].add}</button></header>${d[key].length ? rows(key) : '<p class="note" style="margin:0">Nessuno</p>'}</section>`;
+  const fld = (id, label, val, extra='') => `<div class="field"><label for="${id}">${label}</label><input id="${id}" value="${esc(val)}" ${extra}></div>`;
+  body.innerHTML = `
+    <div class="ref-head view" style="gap:6px"><div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div><h2>${esc(g.casa||'—')} – ${esc(g.ospite||'—')}</h2>
+      <div class="pills">${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.numeroGara?`<span class="pill">Gara n. ${esc(g.numeroGara)}</span>`:''}${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}</div></div>
+    <section class="ref-sec"><h3>Risultato finale</h3>
+      <div class="score"><div><label for="rf-gc">${esc(g.casa||'Casa')}</label><input id="rf-gc" type="number" min="0" inputmode="numeric" value="${esc(d.gc)}"></div><span class="dash">–</span><div><label for="rf-go">${esc(g.ospite||'Ospite')}</label><input id="rf-go" type="number" min="0" inputmode="numeric" value="${esc(d.go)}"></div></div>
+      <div class="mini">${fld('rf-gc1','1° tempo casa',d.gc1,'type="number" min="0" inputmode="numeric"')}${fld('rf-go1','1° tempo ospite',d.go1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec1','Recupero 1° T (min)',d.rec1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec2','Recupero 2° T (min)',d.rec2,'type="number" min="0" inputmode="numeric"')}</div>
+    </section>
+    ${sec('marcatori')}${sec('ammoniti')}${sec('espulsi')}${sec('dirigenti')}
+    <section class="ref-sec"><h3>Altre informazioni</h3>
+      <div class="mini">${fld('rf-spett','Spettatori (circa)',d.spettatori,'type="number" min="0" inputmode="numeric"')}
+        <div class="field"><label for="rf-campo">Terreno di gioco</label><select id="rf-campo">${['','Buono','Discreto','Pesante','Allentato','Sintetico','Impraticabile'].map(o=>`<option ${o===d.campo?'selected':''}>${o}</option>`).join('')}</select></div></div>
+      <div class="field full"><label for="rf-note">Fatti da segnalare (dirigenti, pubblico, infortuni…)</label><textarea id="rf-note">${esc(d.note)}</textarea></div>
+    </section>
+    <div class="row"><button class="btn btn-primary" id="rfSave">Salva referto</button><button class="btn btn-ghost" id="rfCopy">Copia testo</button></div>
+    <div id="rfCopyBox"></div>
+    <p class="note" style="margin:0">Questo è il tuo promemoria della gara: il referto ufficiale va comunque inviato su Sinfonia4You. Con “Copia testo” hai tutto pronto da riportare.</p>
+    <button class="btn btn-ghost btn-block" id="rfOther">Scegli un'altra gara</button>`;
+  body.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+    readDraft(); const key = b.dataset.add; d[key].push(key === 'dirigenti' ? {min:'', sq:'casa', qual: QUAL[0], nome:'', prov: PROV[0], mot:''} : {min:'', sq:'casa', num:'', nome:'', mot: LISTS[key].mot[0]}); renderRefForm(g);
+    const last = body.querySelectorAll(`.ev[data-list="${key}"]`); last[last.length-1]?.querySelector('input')?.focus();
+  });
+  body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { readDraft(); const ev = b.closest('.ev'); d[ev.dataset.list].splice(+ev.dataset.i, 1); renderRefForm(g); });
+  $('#rfOther').onclick = () => openReferto(null);
+  $('#rfSave').onclick = async () => {
+    readDraft();
+    const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length};
+    if(d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}`;
+    const btn = $('#rfSave'); btn.disabled = true;
+    try{ await Store.saveGara(upd); toast('Referto salvato'); btn.disabled = false; }
+    catch(e){ btn.disabled = false; toast('Salvataggio non riuscito. Riprova.'); }
+  };
+  $('#rfCopy').onclick = () => {
+    readDraft(); const txt = refText(g, d);
+    const fallback = () => { $('#rfCopyBox').innerHTML = `<textarea class="copybox" readonly aria-label="Testo del referto">${esc(txt)}</textarea>`; const ta = $('#rfCopyBox textarea'); ta.focus(); ta.select(); toast('Tieni premuto sul testo e scegli Copia'); };
+    try{ navigator.clipboard.writeText(txt).then(() => toast('Testo del referto copiato'), fallback); }catch(e){ fallback(); }
+  };
+}
+
+function readDraft(){
+  const d = draft, v = id => { const el = $('#'+id); return el ? el.value.trim() : ''; };
+  d.gc = v('rf-gc'); d.go = v('rf-go'); d.gc1 = v('rf-gc1'); d.go1 = v('rf-go1'); d.rec1 = v('rf-rec1'); d.rec2 = v('rf-rec2');
+  d.spettatori = v('rf-spett'); d.campo = v('rf-campo'); d.note = v('rf-note');
+  document.querySelectorAll('#refBody .ev').forEach(ev => { const e = d[ev.dataset.list][+ev.dataset.i]; if(!e) return; ev.querySelectorAll('[data-k]').forEach(el => e[el.dataset.k] = el.value.trim()); });
+}
+
+function refText(g, d){
+  const team = sq => sq === 'ospite' ? (g.ospite || 'Ospite') : (g.casa || 'Casa');
+  const ev = (e, extra) => `${e.min ? e.min + "' " : ''}${team(e.sq)} – ${e.num ? 'n. ' + e.num + ' ' : ''}${e.nome || 'giocatore'}${extra ? ' (' + extra + ')' : ''}`;
+  const L = [];
+  L.push(`REFERTO GARA ${g.casa || ''} – ${g.ospite || ''}`);
+  L.push(`${fmtLong(g.data)}${g.ora ? ', ore ' + g.ora : ''}`);
+  if(g.categoria || g.girone) L.push(`${g.categoria || ''}${g.girone ? ' – girone ' + g.girone : ''}`);
+  if(g.numeroGara) L.push(`Gara n. ${g.numeroGara}`);
+  if(g.impianto) L.push(`Campo: ${[g.impianto, g.citta].filter(Boolean).join(', ')}`);
+  L.push('');
+  L.push(`Risultato finale: ${d.gc || '?'}-${d.go || '?'}${d.gc1 !== '' || d.go1 !== '' ? ` (1° tempo ${d.gc1 || 0}-${d.go1 || 0})` : ''}`);
+  if(d.rec1 || d.rec2) L.push(`Recupero: 1° T ${d.rec1 || 0}' – 2° T ${d.rec2 || 0}'`);
+  const block = (title, list, fn) => { L.push(''); L.push(`${title}: ${list.length ? '' : 'nessuna'}`.trim()); list.forEach(e => L.push('- ' + fn(e))); };
+  block('RETI', d.marcatori, e => ev(e, e.mot && e.mot !== 'Azione' ? e.mot.toLowerCase() : ''));
+  block('AMMONIZIONI', d.ammoniti, e => ev(e, e.mot));
+  block('ESPULSIONI', d.espulsi, e => ev(e, e.mot));
+  block('PROVVEDIMENTI DIRIGENTI', d.dirigenti || [], e => `${e.min ? e.min + "' " : ''}${team(e.sq)} – ${e.qual || ''} ${e.nome || ''}: ${e.prov || ''}${e.mot ? ' (' + e.mot + ')' : ''}`);
+  if(d.spettatori || d.campo){ L.push(''); if(d.spettatori) L.push(`Spettatori: circa ${d.spettatori}`); if(d.campo) L.push(`Terreno di gioco: ${d.campo}`); }
+  if(d.note){ L.push(''); L.push('Fatti da segnalare:'); L.push(d.note); }
+  return L.join('\n');
+}
+
+/* ---------- modulo gara ---------- */
+function formHTML(g, key, title){
+  const v = f => esc(g[f] ?? '');
+  const inp = (f, label, type='text', full=false, extra='') => `<div class="field${full?' full':''}"><label for="${key}-${f}">${label}</label><input id="${key}-${f}" data-f="${f}" type="${type}" value="${v(f)}" ${extra}></div>`;
+  const ruoloOpts = RUOLI.concat(g.ruolo && !RUOLI.includes(g.ruolo) ? [g.ruolo] : []).map(r => `<option ${r===g.ruolo?'selected':''}>${esc(r)}</option>`).join('');
+  return `<form class="form" data-key="${key}" novalidate>
+    ${title ? `<h3>${esc(title)}</h3>` : ''}
+    ${inp('data','Data','date')}${inp('ora','Ora','time')}
+    ${inp('casa','Squadra di casa','text',true)}${inp('ospite','Squadra ospite','text',true)}
+    ${inp('categoria','Campionato')}${inp('girone','Girone')}
+    <div class="field"><label for="${key}-ruolo">Ruolo</label><select id="${key}-ruolo" data-f="ruolo"><option value="">—</option>${ruoloOpts}</select></div>
+    ${inp('numeroGara','N. gara')}
+    ${inp('impianto','Campo','text',true,'list="campi-list" autocomplete="off"')}
+    ${inp('mapsUrl','Link Google Maps del campo (facoltativo)','url',true,'placeholder="https://maps.app.goo.gl/…"')}
+    ${inp('indirizzo','Indirizzo')}${inp('citta','Città')}
+    ${inp('colleghi','Terna / colleghi','text',true)}
+    ${inp('osservatore','Osservatore','text',true)}
+    ${key.startsWith('r') ? `<div class="sep eyebrow">Rimborso e km</div>${inp('rimborsoEur','Rimborso €','text',false,'inputmode="decimal"')}${inp('kmViaggio','Km','number',false,'min="0" inputmode="numeric"')}<div class="note" data-known style="grid-column:1/-1"></div>` : ''}
+    <div class="field full"><label for="${key}-note">Note</label><textarea id="${key}-note" data-f="note">${v('note')}</textarea></div>
+    <div class="sep eyebrow">Dopo la gara</div>
+    <div class="field"><label for="${key}-stato">Stato</label><select id="${key}-stato" data-f="stato">${['programmata','disputata','rinviata'].map(s=>`<option value="${s}" ${(g.stato||'programmata')===s?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}</select></div>
+    ${inp('risultato','Risultato','text',false,'placeholder="2-1"')}
+    ${inp('gialli','Gialli','number',false,'min="0" inputmode="numeric"')}${inp('rossi','Rossi','number',false,'min="0" inputmode="numeric"')}
+    ${inp('voto','Voto','text',true,'inputmode="decimal" placeholder="8,40"')}
+    <div class="actions row"></div>
+  </form>`;
+}
+function readForm(form){ const o = {}; form.querySelectorAll('[data-f]').forEach(el => o[el.dataset.f] = el.value); return o; }
+
+/* ---------- lettura foto senza Claude: OCR sul telefono + riconoscimento del testo ---------- */
+let tessP = null;
+function loadTess(){
+  if(window.Tesseract) return Promise.resolve();
+  if(!tessP) tessP = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'; s.onload = res; s.onerror = () => { tessP = null; rej(new Error('net')); }; document.head.appendChild(s); });
+  return tessP;
+}
+async function ocrImages(blobs, onProg){
+  await loadTess();
+  const w = await Tesseract.createWorker('ita', 1, {logger: m => { if(m.status === 'recognizing text' && onProg) onProg(m.progress); }});
+  const out = [];
+  try{ for(const b of blobs){ const r = await w.recognize(b); out.push(r.data.text || ''); } } finally { await w.terminate(); }
+  return out.join('\n');
+}
+const titleCase = s => s;
+function normCat(c){
+  c = (c || '').replace(/\s+/g, ' ').trim(); if(!c) return '';
+  const low = c.toLowerCase();
+  if(/serie d calcio a ?5/.test(low)) return 'Serie D Calcio a 5';
+  if(/coppa italia serie d/.test(low)) return 'Coppa Italia Serie D C/5';
+  return low.replace(/(^|\s)(\S)/g, (m, a, b) => a + b.toUpperCase()).replace(/\bA 5\b/, 'a 5').replace(/\bA 7\b/, 'a 7').replace(/\bCalcio A\b/, 'Calcio a');
+}
+function parseDesignazioni(raw){
+  const t = raw.replace(/\r/g, '').replace(/[|]/g, ' ').replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+  const flat = t.replace(/\s+/g, ' ');
+  const gare = [];
+  const dmy = s => { const m = s.match(/(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})/); if(!m) return ''; let y = +m[3]; if(y < 100) y += 2000; return `${y}-${String(+m[2]).padStart(2,'0')}-${String(+m[1]).padStart(2,'0')}`; };
+  const hm = s => { const m = s.match(/(\d{1,2})\s*[:.]\s*(\d{2})/); return m ? `${String(+m[1]).padStart(2,'0')}:${m[2]}` : ''; };
+  const money = s => { const m = s.match(/(\d+(?:[.,]\d{1,2})?)/); return m ? m[1].replace(',', '.') : ''; };
+  const ruoloOf = s => /assistente\s*(?:arbitro)?\s*(1|2)/i.test(s) ? 'Assistente ' + s.match(/assistente\s*(?:arbitro)?\s*(1|2)/i)[1] : /quarto/i.test(s) ? 'Quarto ufficiale' : /osservatore/i.test(s) ? 'Osservatore' : /arbitro/i.test(s) ? 'Arbitro' : '';
+  const giornata = s => { const m = s.match(/giornata\s*:?\s*(\d+)\s*(and|rit)?/i); return m ? `giornata ${m[1]}${m[2] ? (/and/i.test(m[2]) ? ' andata' : ' ritorno') : ''}` : ''; };
+  const deleg = /reggio\s*emilia/i.test(flat) ? 'Delegazione LND Reggio Emilia' : '';
+
+  /* 1) Sinfonia4You "Dettagli designazione" (testo) */
+  if(/sei designat/i.test(flat)){
+    const g = {};
+    const r = flat.match(/incarico di\s+(.+?)\s+per la gara/i); g.ruolo = ruoloOf(r ? r[1] : flat);
+    const n = flat.match(/gara\s*n\.?\s*(\d+)/i); g.numeroGara = n ? n[1] : '';
+    const c = flat.match(/gara\s*n\.?\s*\d+\s+di\s+(.+?)\s+girone\s+(\S+)/i);
+    if(c){ g.categoria = normCat(c[1]); g.girone = c[2]; } else { const c2 = flat.match(/gara\s*n\.?\s*\d+\s+di\s+(.+?)\s+del\s+comitato/i); g.categoria = c2 ? normCat(c2[1]) : ''; }
+    const sq = flat.match(/\btra\s+(.+?)\s+La partita/i) || flat.match(/\btra\s+(.+?)\s+(?:si disputer|sabato|domenica|luned|marted|mercoled|gioved|venerd)/i);
+    if(sq){ const p = sq[1].split(/\s+[-–]\s+/); g.casa = (p[0] || '').trim(); g.ospite = p.slice(1).join(' - ').trim(); }
+    const d = flat.match(/disputer[aà]\s+\S+\s+(\d{1,2}\/\d{1,2}\/\d{2,4})/i) || flat.match(/(\d{1,2}\/\d{1,2}\/\d{4})/); g.data = d ? dmy(d[1]) : '';
+    const o = flat.match(/alle ore\s+(\d{1,2}[:.]\d{2})/i); g.ora = o ? hm(o[1]) : '';
+    const l = flat.match(/(?:alle ore\s+\d{1,2}[:.]\d{2}\s+)?\ba\s+((?:(?!\ba\s).)+?)\s+sull'impianto\s+(.+?)\s+sito in\s+(.+?)(?=\s+Rimborso|\s+Distanza|$)/i);
+    if(l){ g.citta = l[1].trim(); g.impianto = l[2].trim(); g.indirizzo = l[3].trim(); }
+    const rb = flat.match(/Rimborso\s*:?\s*(\d+(?:[.,]\d+)?)\s*€?\s*\(?\s*(\d+)\s*km/i); if(rb){ g.rimborso = rb[1].replace(',', '.'); g.km = rb[2]; }
+    g.note = [deleg, giornata(flat)].filter(Boolean).join(', ');
+    gare.push(g); return gare;
+  }
+
+  /* 2) Email Sinfonia4You "Dettaglio dei dati relativi alla gara" (tabella) */
+  if(/numero\s*gara|rimborso\s*totale|comitato\s*\/\s*delegazione/i.test(flat)){
+    const lab = ['Attivit[aà]','Comitato\\s*\\/\\s*Delegazione','Categoria','Girone','Giornata','Numero\\s*Gara','Gara','Data','Ora','Campo','Indirizzo','Localit[aà]','Provincia','Distanza\\s*\\(km\\)','Rimborso\\s*Totale\\s*\\(?€?\\)?','Accedi'];
+    const KEYS = {'Attivit[aà]':'att','Comitato\\s*\\/\\s*Delegazione':'com','Categoria':'cat','Girone':'gir','Giornata':'gio','Numero\\s*Gara':'num','Gara':'gara','Data':'data','Ora':'ora','Campo':'campo','Indirizzo':'ind','Localit[aà]':'loc','Provincia':'prov','Distanza\\s*\\(km\\)':'km','Rimborso\\s*Totale\\s*\\(?€?\\)?':'rimb'};
+    const L = t.split('\n').map(x => x.trim()).filter(Boolean);
+    const st = L.findIndex(x => /^Attivit/i.test(x)), en = L.findIndex((x, i) => i > st && /^Accedi|^EMAIL/i.test(x));
+    const lines = L.slice(Math.max(0, st), en > 0 ? en : undefined);
+    const hits = [];
+    lines.forEach((x, i) => { for(const k in KEYS){ const m = x.match(new RegExp('^' + k + '\\s*:\\s*(.*)$', 'i')); if(m){ hits.push({i, key: KEYS[k], v: m[1].trim()}); break; } } });
+    const SINGLE = ['att','com','cat','gir','gio','num','data','ora','prov','km','rimb'];
+    hits.forEach(h => { h.lead = []; h.trail = []; });
+    hits.forEach((h, n) => {
+      const nx = hits[n + 1], orf = lines.slice(h.i + 1, nx ? nx.i : lines.length);
+      if(!orf.length) return;
+      if(!nx || h.lead.length || !h.v || (nx.v && !SINGLE.includes(h.key))) h.trail = orf; else nx.lead = orf;
+    });
+    const V = {};
+    hits.forEach(h => { V[h.key] = [...h.lead, h.v, ...h.trail].filter(Boolean).join(' ').replace(/^[a-z]\s+/, '').trim(); });
+    const get = k => V[KEYS[k]] || '';
+    const g = {};
+    g.ruolo = ruoloOf(get('Attivit[aà]')) || 'Arbitro';
+    g.categoria = normCat(get('Categoria')); g.girone = get('Girone'); g.numeroGara = (get('Numero\\s*Gara').match(/\d+/) || [''])[0];
+    const sq = get('Gara').split(/\s+[-–]\s+/); g.casa = (sq[0] || '').trim(); g.ospite = sq.slice(1).join(' - ').trim();
+    g.data = dmy(get('Data')); g.ora = hm(get('Ora'));
+    g.impianto = get('Campo'); g.indirizzo = get('Indirizzo');
+    const loc = get('Localit[aà]').split(/\s+-\s+/).pop().trim(), pr = get('Provincia').replace(/[^A-Z]/gi, '').slice(0, 2).toUpperCase();
+    g.citta = loc ? loc + (pr ? ` (${pr})` : '') : '';
+    g.km = (get('Distanza\\s*\\(km\\)').match(/\d+/) || [''])[0]; g.rimborso = money(get('Rimborso\\s*Totale\\s*\\(?€?\\)?'));
+    g.note = [deleg, giornata('giornata ' + get('Giornata'))].filter(Boolean).join(', ');
+    gare.push(g); return gare;
+  }
+
+  /* 3) Calendario AICS: "LORENZO - CAMPO (X2)" + C7/C5/FUTSAL + squadre */
+  const ev = t.match(/LORENZO\s*[-–]\s*([A-ZÀ-Ü' ]+?)(\s+X\s*2)?\s*$/im);
+  if(ev){
+    const imp = ev[1].trim(), doppia = !!ev[2];
+    const dm = t.match(/(lun|mar|mer|gio|ven|sab|dom)\w*\s+(\d{1,2})\s+(gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic)\w*\s+(\d{4})/i);
+    const MM = {gen:1,feb:2,mar:3,apr:4,mag:5,giu:6,lug:7,ago:8,set:9,ott:10,nov:11,dic:12};
+    const data = dm ? `${dm[4]}-${String(MM[dm[3].toLowerCase()]).padStart(2,'0')}-${String(+dm[2]).padStart(2,'0')}` : '';
+    const dopo = dm ? t.slice(t.indexOf(dm[0]) + dm[0].length) : t.slice(t.indexOf(ev[0]));
+    const ora0 = hm((dopo.match(/\b(\d{1,2}[:.]\d{2})\b/) || [''])[0]);
+    const cat = /\bC\s*7\b/i.test(t) ? 'C7 AICS' : 'C5 AICS';
+    const righe = t.split('\n').map(s => s.trim()).filter(s => /\S\s+[-–]\s+\S/.test(s) && !/LORENZO/i.test(s) && !/\d{1,2}[:.]\d{2}\s*$/.test(s));
+    const c = campoDi(imp);
+    const mk = (r, i) => { const oraP = (r.match(/\((\d{1,2}[:.]\d{2})\)/) || [])[1]; const p = r.replace(/\(.*?\)/g, '').split(/\s+[-–]\s+/);
+      let ora = oraP ? hm(oraP) : ora0; if(!oraP && i === 1 && ora0){ const [h, m] = ora0.split(':'); ora = `${String((+h + 1) % 24).padStart(2,'0')}:${m}`; }
+      return {data, ora, categoria: cat, casa: (p[0] || '').trim(), ospite: p.slice(1).join(' - ').trim(), impianto: imp, indirizzo: c ? c.indirizzo : '', citta: c ? c.citta : '', ruolo: 'Arbitro', rimborso: cat === 'C7 AICS' ? 30 : 25, km: 0, note: (doppia || righe.length > 1) ? `Doppia (${i + 1}ª gara)` : ''}; };
+    (righe.length ? righe.slice(0, doppia ? 2 : 3) : ['']).forEach((r, i) => gare.push(mk(r, i)));
+    return gare;
+  }
+
+  /* 4) ES League */
+  if(/ES\s*LEAGUE/i.test(flat)){
+    const g = {categoria: 'ES LEAGUE - MODENA', ruolo: 'Arbitro', rimborso: 30, km: 0};
+    g.data = dmy(flat); g.ora = hm((flat.match(/(?:ore|h)\s*(\d{1,2}[:.]\d{2})/i) || flat.match(/(\d{1,2}[:.]\d{2})/) || ['', ''])[1]);
+    const cm = flat.match(/CAMPO\s+([A-ZÀ-Ü' ]{3,})/); if(cm) g.impianto = 'CAMPO ' + cm[1].trim().split(/\s{2,}/)[0];
+    const gm = flat.match(/(\d+)\s*[ªa°]?\s*giornata/i); g.note = gm ? `${gm[1]}ª giornata` : '';
+    gare.push(g); return gare;
+  }
+
+  /* 5) generico: almeno data e squadre */
+  const d = dmy(flat);
+  if(d){ const g = {data: d, ora: hm((flat.match(/ore\s*(\d{1,2}[:.]\d{2})/i) || ['', ''])[1]), ruolo: ruoloOf(flat)};
+    const sq = t.split('\n').find(s => /[A-Z]{3,}.*\s[-–]\s.*[A-Z]{3,}/.test(s)); if(sq){ const p = sq.split(/\s+[-–]\s+/); g.casa = p[0].trim(); g.ospite = p.slice(1).join(' - ').trim(); }
+    gare.push(g); }
+  return gare;
+}
+
+/* ---------- IMPORTA: foto -> dati ---------- */
+let sample = null, imgLimits = null;
+(async () => {
+  try{ sample = window.claude ? await window.claude.use('sample') : null;
+       imgLimits = sample ? (await sample.limits().catch(()=>null))?.images : null; }catch(e){}
+})();
+['photoGal','photoCam'].forEach(id => { const el = $('#'+id); el.addEventListener('change', () => { handleFiles(el.files); el.value = ''; }); });
+
+function shrink(file){
+  return new Promise(res => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 2000/Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => { URL.revokeObjectURL(url); res({blob: b || file, url: c.toDataURL('image/jpeg', .6)}); }, 'image/jpeg', .88);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); res({blob: file, url: ''}); };
+    img.src = url;
+  });
+}
+
+let pending = [];
+async function handleFiles(files){
+  files = Array.from(files || []).filter(f => f.type.startsWith('image/'));
+  if(!files.length) return;
+  const max = imgLimits ? imgLimits.maxCount : 4;
+  if(files.length > max){ toast(`Posso leggere al massimo ${max} foto per volta.`); files = files.slice(0, max); }
+  const shr = await Promise.all(files.map(shrink));
+  $('#preview').innerHTML = shr.filter(s=>s.url).map(s => `<img src="${s.url}" alt="Foto caricata">`).join('');
+  $('#review').innerHTML = '';
+  if(!sample || !imgLimits){
+    const st = $('#aiStatus');
+    st.innerHTML = `<div class="status"><span class="spin"></span><span id="ocrMsg">Leggo la designazione… (la prima volta ci mette un po’)</span></div>`;
+    st.scrollIntoView({behavior:'smooth', block:'center'});
+    let text = '';
+    try{ text = await ocrImages(shr.map(s => s.blob), p => { const m = $('#ocrMsg'); if(m) m.textContent = `Leggo la designazione… ${Math.round(p * 100)}%`; }); }
+    catch(e){ st.innerHTML = `<div class="status err">Per leggere la foto serve internet la prima volta. Riprova o inserisci la gara a mano.</div>`; return; }
+    const gare = parseDesignazioni(text).filter(g => g && (g.data || g.casa));
+    if(!gare.length){ st.innerHTML = `<div class="status err">Non ho riconosciuto una designazione nella foto. Prova con uno screenshot più nitido o inseriscila a mano.</div>`; return; }
+    pending = gare.map(g => ({...g, rimborsoEur: toNum(g.rimborso) ? String(g.rimborso).replace('.',',') : '', kmViaggio: toNum(g.km) || '', stato:'programmata'}));
+    pending.forEach(p => { const c = campoDi(p.impianto); if(c){ if(!p.indirizzo) p.indirizzo = c.indirizzo; if(!p.citta) p.citta = c.citta; if(!p.mapsUrl) p.mapsUrl = c.mapsUrl || ''; } });
+    st.innerHTML = `<div class="status">Ho letto ${gare.length === 1 ? '1 gara' : gare.length + ' gare'}. La lettura sul telefono può sbagliare qualche lettera: controlla i dati e salva.</div>`;
+    renderReview(); return;
+  }
+  $('#aiStatus').innerHTML = `<div class="status"><span class="spin"></span>Leggo la designazione…</div>`;
+  $('#aiStatus').scrollIntoView({behavior:'smooth', block:'center'});
+  const prompt = `Sei l'assistente di un arbitro di calcio italiano (AIA-FIGC). Le immagini mostrano una o più designazioni gara (screenshot del portale Sinfonia4You, email, SMS, WhatsApp o foto di un foglio).
+Estrai TUTTE le gare presenti. Rispondi SOLO con JSON nel formato:
+{"gare":[{"data":"YYYY-MM-DD","ora":"HH:MM","categoria":"","girone":"","numeroGara":"","casa":"","ospite":"","impianto":"","indirizzo":"","citta":"","ruolo":"","colleghi":"","osservatore":"","note":"","rimborso":0,"km":0}]}
+Regole:
+- "categoria" è il campionato (es. Promozione, Prima Categoria, Juniores Regionale, Allievi Provinciali).
+- "ruolo" è il ruolo del destinatario della designazione: uno tra "Arbitro","Assistente 1","Assistente 2","Quarto ufficiale","Osservatore", altrimenti come scritto.
+- "colleghi": gli altri ufficiali di gara con il loro ruolo, separati da virgola.
+- "impianto": nome del campo o stadio; "indirizzo" e "citta" se presenti.
+- "rimborso" (in euro) e "km": numeri, se la designazione li indica (es. "Rimborso: 68 € (68 Km)"), altrimenti 0.
+- Stringa vuota per ogni dato assente. Non inventare nulla.
+- Se manca l'anno, scegli il più probabile sapendo che oggi è ${todayIso()}. Ora in formato 24 ore.
+Caso speciale, campionato amatoriale AICS: se l'immagine è un calendario con eventi tipo "LORENZO - PALADELTA" (o "LORENZO - PALADELTA X2") e sotto la sigla C7, C5 o FUTSAL seguita dalle squadre:
+- "impianto" = il nome dopo "LORENZO - " senza "X2"; "ruolo" = "Arbitro".
+- C7 → "categoria":"C7 AICS" e "rimborso":30. C5 o FUTSAL → "categoria":"C5 AICS" e "rimborso":25 (FUTSAL e C5 sono la stessa categoria). "km":0.
+- "ora" = l'orario di inizio dell'evento.
+- X2 o più righe di squadre = una gara per riga: usa gli orari tra parentesi se ci sono, altrimenti la prima all'orario di inizio e la seconda un'ora dopo; in "note" scrivi "Doppia (1ª gara)" / "Doppia (2ª gara)".
+- Ignora gli eventi senza squadre.
+Caso speciale ES LEAGUE: se è una locandina "ES LEAGUE" (by Emiliana Soccer) → "categoria":"ES LEAGUE - MODENA", "ruolo":"Arbitro", "rimborso":30, la giornata in "note" (es. "Calcio a 7 · 4ª giornata"), "impianto" = il nome del campo (es. "CAMPO CITTANOVA").
+Se non c'è nessuna gara leggibile rispondi {"gare":[]}.`;
+  try{
+    const out = await sample.json(prompt, {images: shr.map(s => s.blob), modelTier: 'default'});
+    const gare = Array.isArray(out) ? out : (out && Array.isArray(out.gare) ? out.gare : []);
+    if(!gare.length){ $('#aiStatus').innerHTML = `<div class="status err">Non ho trovato una gara nella foto. Prova con uno screenshot più nitido o inseriscila a mano.</div>`; return; }
+    pending = gare.map(g => ({...g, rimborsoEur: toNum(g.rimborso) ? String(g.rimborso).replace('.',',') : '', kmViaggio: toNum(g.km) || '', stato:'programmata'}));
+    pending.forEach(p => { const c = campoDi(p.impianto); if(c){ if(!p.indirizzo) p.indirizzo = c.indirizzo; if(!p.citta) p.citta = c.citta; if(!p.mapsUrl) p.mapsUrl = c.mapsUrl || ''; } });
+    $('#aiStatus').innerHTML = `<div class="status">Ho letto ${gare.length === 1 ? '1 gara' : gare.length + ' gare'}. Controlla i dati e salva.</div>`;
+    renderReview();
+  }catch(e){
+    const msg = e && e.code === 'not_granted' ? 'Serve il tuo permesso per far leggere la foto a Claude. Riprova e consenti la richiesta.'
+      : e && e.code === 'rate_limited' ? 'Troppe richieste in poco tempo. Riprova tra qualche minuto.'
+      : e && e.code === 'image_rejected' ? 'Questa immagine non è leggibile. Prova con uno screenshot in JPG o PNG.'
+      : 'Non sono riuscito a leggere la foto. Riprova oppure inserisci la gara a mano.';
+    $('#aiStatus').innerHTML = `<div class="status err">${esc(msg)}</div>`;
+  }
+}
+const dupOf = g => Store.gare.find(x => x.data && x.data === g.data && (x.casa||'').toLowerCase() === (g.casa||'').toLowerCase() && (x.ospite||'').toLowerCase() === (g.ospite||'').toLowerCase());
+
+function renderReview(){
+  const box = $('#review');
+  box.innerHTML = pending.map((g,i) => formHTML(g, 'r'+i, pending.length > 1 ? `Gara ${i+1} di ${pending.length}` : 'Controlla e salva')).join('');
+  box.querySelectorAll('form').forEach((form, i) => {
+    const acts = form.querySelector('.actions');
+    acts.innerHTML = `${dupOf(pending[i]) ? `<div class="note" style="flex-basis:100%">Questa gara è già nel registro: salvando ne crei una seconda copia.</div>` : ''}<button type="submit" class="btn btn-primary">Salva gara</button><button type="button" class="btn btn-ghost" data-skip>Scarta</button>`;
+    const kmEl = form.querySelector('[data-f=kmViaggio]'), rEl = form.querySelector('[data-f=rimborsoEur]');
+    const secondaDoppia = pending.slice(0, i).some(p => p.data && p.data === pending[i].data && campoKey(p) === campoKey(pending[i]));
+    if(kmEl && secondaDoppia){ kmEl.value = ''; const c = form.querySelector('[data-known]'); c.textContent = 'Seconda gara nello stesso campo e giorno: km lasciati vuoti per non contare due volte il viaggio.'; }
+    if(kmEl && !secondaDoppia && !toNum(kmEl.value)){ const kn = kmNoto(pending[i]); if(kn){ kmEl.value = kn.km; const c = form.querySelector('[data-known]'); c.textContent = `Campo già visto: ${kn.km} km presi dalla gara del ${fmtShort(kn.from.data)}.`; } }
+    if(kmEl && !kmEl.value && !rEl.value){ const kn = kmNoto(pending[i]); if(kn){ kmEl.value = kn.km; if(kn.importo) rEl.value = String(kn.importo).replace('.',','); form.querySelector('[data-known]').textContent = `Campo già visto: km e rimborso presi dalla gara del ${fmtShort(kn.from.data)}.`; } }
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const btn = form.querySelector('[type=submit]'); btn.disabled = true;
+      try{
+        const data = readForm(form); const id = await Store.saveGara(data);
+        if(toNum(data.kmViaggio) || toNum(data.rimborsoEur)) await Store.saveSpesa({data: data.data, tipo:'rimborso', importo: toNum(data.rimborsoEur), km: toNum(data.kmViaggio), garaId: id, prezzo: lastPrezzo(), descrizione:'Rimborso designazione'});
+        const done = document.createElement('div'); done.className = 'status';
+        done.innerHTML = `<span style="flex:1">Salvata: ${esc(data.casa)} – ${esc(data.ospite)}</span><button class="btn btn-ghost">Apri</button>`;
+        done.querySelector('button').onclick = () => openSheet(id);
+        form.replaceWith(done); toast('Gara salvata');
+      }catch(e){ btn.disabled = false; toast('Salvataggio non riuscito. Riprova.'); }
+    });
+    acts.querySelector('[data-skip]').onclick = () => form.remove();
+  });
+  box.scrollIntoView({behavior:'smooth', block:'start'});
+}
+$('#manual').onclick = () => { pending = [{stato:'programmata'}]; $('#aiStatus').innerHTML = ''; $('#preview').innerHTML = ''; renderReview(); };
+
+/* ---------- scheda gara ---------- */
+function openSheet(id, edit=false){
+  const g = Store.gare.find(x => x.id === id); if(!g) return;
+  const root = $('#sheetRoot');
+  const onKey = e => { if(e.key === 'Escape') close(); };
+  const close = () => { root.innerHTML = ''; document.removeEventListener('keydown', onKey); };
+  document.addEventListener('keydown', onKey);
+  const row = (k,v) => v ? `<dt>${k}</dt><dd>${esc(v)}</dd>` : '';
+  const addr = [g.impianto, g.indirizzo, g.citta].filter(Boolean).join(', ');
+  const spese = Store.spese.filter(s => s.garaId === id).reduce((a,s)=>a+toNum(s.importo),0);
+  const body = edit ? formHTML(g, 'e', 'Modifica gara') : `
+    <div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div>
+    <h2>${esc(g.casa || '—')} – ${esc(g.ospite || '—')}</h2>
+    <div class="pills">${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.stato==='disputata'?`<span class="pill done">${esc(g.risultato||'Disputata')}</span>`:g.stato==='rinviata'?'<span class="pill rinv">Rinviata</span>':''}</div>
+    <dl class="kv">${row('Girone',g.girone)}${row('N. gara',g.numeroGara)}${row('Campo',g.impianto)}${row('Indirizzo',[g.indirizzo,g.citta].filter(Boolean).join(', '))}${row('Terna',g.colleghi)}${row('Osservatore',g.osservatore)}${row('Note',g.note)}
+      ${g.stato==='disputata' ? row('Cartellini', `${toNum(g.gialli)} gialli · ${toNum(g.rossi)} rossi`) + row('Voto', g.voto) : ''}${spese ? row('Spese', eur(spese)) : ''}</dl>
+    <div class="row">
+      ${g.data ? `<button class="btn btn-primary" data-act="ics">Calendario iPhone</button><a class="btn btn-ghost" href="${esc(gcalUrl(g))}" target="_blank" rel="noopener">Google Calendar</a>` : ''}
+      ${addr ? `<a class="btn btn-ghost" href="${esc(gmapsUrl(g))}" target="_blank" rel="noopener">Google Maps</a>` : ''}
+    </div>
+    <div class="row">
+      <button class="btn btn-ghost" data-act="edit">${isPast(g) && g.stato !== 'disputata' ? 'Segna risultato e voto' : 'Modifica'}</button>
+      ${g.data && g.data <= todayIso() ? `<button class="btn btn-ghost" data-act="ref">${g.referto ? 'Apri referto' : 'Compila referto'}</button>` : ''}
+      <button class="btn btn-ghost" data-act="spesa">Rimborso e km</button>
+      <button class="btn btn-danger" data-act="del">Elimina</button>
+    </div>
+    <div id="confirmBox"></div>`;
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Dettaglio gara"><div class="grab"></div>${body}<button class="btn btn-ghost btn-block" data-act="close">Chiudi</button></div></div>`;
+  const bg = root.querySelector('.sheet-bg');
+  bg.addEventListener('click', e => { if(e.target === bg) close(); });
+  root.querySelector('[data-act=close]').onclick = close;
+  if(edit){
+    const form = root.querySelector('form');
+    if(isPast(g) && g.stato !== 'disputata') form.querySelector('[data-f=stato]').value = 'disputata';
+    form.querySelector('.actions').innerHTML = `<button type="submit" class="btn btn-primary">Salva modifiche</button><button type="button" class="btn btn-ghost" data-back>Annulla</button>`;
+    form.querySelector('[data-back]').onclick = () => openSheet(id);
+    form.addEventListener('submit', async ev => { ev.preventDefault(); try{ await Store.saveGara({...g, ...readForm(form), id}); toast('Modifiche salvate'); openSheet(id); }catch(e){ toast('Salvataggio non riuscito. Riprova.'); } });
+    return;
+  }
+  const a = s => root.querySelector(`[data-act=${s}]`);
+  if(a('ics')) a('ics').onclick = () => saveIcs([g], `gara-${g.data}.ics`);
+  a('edit').onclick = () => openSheet(id, true);
+  if(a('ref')) a('ref').onclick = () => { close(); openReferto(id); };
+  a('spesa').onclick = () => { close(); const r = Store.spese.find(x => x.garaId === id && x.tipo === 'rimborso'); openSpesaForm(r || {data: g.data || todayIso(), tipo:'rimborso', garaId: id}); };
+  a('del').onclick = () => {
+    const cb = root.querySelector('#confirmBox');
+    cb.innerHTML = `<div class="confirm"><strong>Eliminare questa gara dal registro?</strong><span class="note">Non si può annullare. Le spese collegate restano.</span><div class="row"><button class="btn btn-danger" data-yes>Sì, elimina</button><button class="btn btn-ghost" data-no>Annulla</button></div></div>`;
+    cb.querySelector('[data-no]').onclick = () => cb.innerHTML = '';
+    cb.querySelector('[data-yes]').onclick = async () => { try{ await Store.remove(id); close(); toast('Gara eliminata'); }catch(e){ toast('Eliminazione non riuscita.'); } };
+  };
+}
+
+/* campi memorizzati: scrivendo il nome del campo si compilano indirizzo e città */
+const campoDi = nome => Store.campi.find(c => (c.nome || '').toLowerCase() === String(nome || '').trim().toLowerCase());
+document.addEventListener('input', e => {
+  const el = e.target; if(!el.matches || !el.matches('[data-f=impianto]')) return;
+  const c = campoDi(el.value); if(!c) return;
+  const f = el.closest('form'), ind = f.querySelector('[data-f=indirizzo]'), cit = f.querySelector('[data-f=citta]');
+  if(ind) ind.value = c.indirizzo || ''; if(cit) cit.value = c.citta || '';
+  const mu = f.querySelector('[data-f=mapsUrl]'); if(mu) mu.value = c.mapsUrl || '';
+});
+function renderCampi(){
+  let dl = document.getElementById('campi-list');
+  if(!dl){ dl = document.createElement('datalist'); dl.id = 'campi-list'; document.body.appendChild(dl); }
+  dl.innerHTML = Store.campi.map(c => `<option value="${esc(c.nome)}">${esc([c.indirizzo, c.citta].filter(Boolean).join(', '))}</option>`).join('');
+}
+function render(){ renderCampi(); renderOggi(); renderList(); renderCal(); renderSpese(); if(!$('#v-referto').hidden && !draft) renderReferto(); }
+/* ---------- DESIGNAZIONI (admin): Firebase, gli arbitri vedono le loro gare in arbitro.html ---------- */
+const FBV = '10.12.2';
+let fbP = null;
+function loadFB(){
+  if(fbP) return fbP;
+  const load = src => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('net')); document.head.appendChild(s); });
+  const base = `https://www.gstatic.com/firebasejs/${FBV}/`;
+  fbP = load(base + 'firebase-app-compat.js')
+    .then(() => Promise.all([load(base + 'firebase-auth-compat.js'), load(base + 'firebase-firestore-compat.js')]))
+    .then(() => {
+      if(!firebase.apps.length){
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+        if(window.FB_EMU){ firebase.auth().useEmulator(window.FB_EMU.auth, {disableWarnings: true}); firebase.firestore().useEmulator(window.FB_EMU.host, window.FB_EMU.port); }
+      }
+      return firebase;
+    });
+  fbP.catch(() => { fbP = null; });
+  return fbP;
+}
+const ADMINS = () => [].concat(window.FIREBASE_ADMINS || window.FIREBASE_ADMIN || []).map(e => String(e).trim().toLowerCase()).filter(Boolean);
+const fbReady = () => !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && ADMINS().length);
+const DS = {user: null, isAdmin: false, gare: [], arbitri: [], tab: 'gare', past: false, unsub: [], loaded: false, err: ''};
+const arbitroUrl = () => new URL('arbitro.html', location.href.split('#')[0]).href;
+const nomeArb = a => a ? [a.nome, a.cognome].filter(Boolean).join(' ') || a.email : 'Arbitro rimosso';
+const RISP = {accettata: ['Accettata', 'done'], rifiutata: ['Rifiutata', 'no'], '': ['In attesa', 'wait']};
+const rispOf = (d, uid) => (d.risposte && d.risposte[uid]) || null;
+
+function dsStart(){
+  if(DS.started) return; DS.started = true;
+  if(!fbReady()){ renderDesigna(); return; }
+  loadFB().then(fb => {
+    fb.auth().onAuthStateChanged(u => {
+      DS.unsub.forEach(f => f()); DS.unsub = []; DS.gare = []; DS.arbitri = []; DS.loaded = false; DS.err = '';
+      DS.user = u; DS.isAdmin = !!u && ADMINS().includes((u.email || '').toLowerCase());
+      if(DS.isAdmin){
+        const db = fb.firestore(), fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderDesigna(); };
+        DS.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = s.docs.map(d => ({id: d.id, ...d.data()})); DS.loaded = true; renderDesigna(); }, fail));
+        DS.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = s.docs.map(d => ({id: d.id, ...d.data()})); renderDesigna(); }, fail));
+      }
+      renderDesigna();
+    });
+  }).catch(() => { DS.err = 'Serve internet per aprire le designazioni.'; DS.started = false; renderDesigna(); });
+}
+
+function renderDesigna(){
+  const box = $('#dsBody'); if(!box) return;
+  const head = $('#dsHeadBtn');
+  head.hidden = !DS.isAdmin;
+  if(!fbReady()){
+    box.innerHTML = `<div class="ref-sec"><h3>Da collegare</h3><p class="note" style="margin:0">Per mandare le designazioni agli arbitri serve l'archivio online (Firebase). Manca il file <b>firebase-config.js</b> con i dati del tuo progetto: segui le istruzioni che ti ho dato.</p></div>`; return;
+  }
+  if(DS.err && !DS.user){ box.innerHTML = `<div class="status err">${esc(DS.err)}</div><button class="btn btn-ghost btn-block" id="dsRetry">Riprova</button>`; $('#dsRetry').onclick = dsStart; return; }
+  if(!DS.started || DS.user === null && !DS.authSeen){ DS.authSeen = true; }
+  if(!DS.user){ box.innerHTML = loginHTML(); bindLogin(box); return; }
+  if(!DS.isAdmin){
+    box.innerHTML = `<div class="ref-sec"><h3>Account non admin</h3><p class="note" style="margin:0">Sei entrato come ${esc(DS.user.email)}. Solo l'account designatore può creare designazioni. Gli arbitri usano la pagina <a href="${esc(arbitroUrl())}">arbitro</a>.</p><button class="btn btn-ghost" id="dsOut">Esci</button></div>`;
+    $('#dsOut').onclick = () => firebase.auth().signOut(); return;
+  }
+  const tab = DS.tab;
+  box.innerHTML = `<div class="seg" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri <span class="cnt">${DS.arbitri.length}</span></button></div>
+    ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
+    <div id="dsList"></div>
+    <p class="note" style="margin:0;text-align:center">Designatore: ${esc(DS.user.email)} · <button class="linkbtn" id="dsOut">Esci</button></p>`;
+  box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
+  $('#dsOut').onclick = () => firebase.auth().signOut();
+  if(tab === 'gare') renderDsGare(); else renderDsArbitri();
+}
+
+function loginHTML(){
+  return `<form class="form" id="dsLogin" autocomplete="on">
+    <h3>Accesso designatore</h3>
+    <p class="note" style="grid-column:1/-1;margin:0">Entra con il tuo account designatore (${esc(ADMINS().join(' o '))}). La prima volta tocca “Crea account admin”.</p>
+    <div class="field full"><label for="dsEmail">Email</label><input id="dsEmail" type="email" autocomplete="username" value="${esc(ADMINS().length === 1 ? ADMINS()[0] : '')}" required></div>
+    <div class="field full"><label for="dsPw">Password</label><input id="dsPw" type="password" autocomplete="current-password" minlength="6" required></div>
+    <div class="field full" id="dsLoginMsg" aria-live="polite"></div>
+    <div class="actions row"><button class="btn btn-primary" type="submit">Entra</button><button class="btn btn-ghost" type="button" id="dsNew">Crea account admin</button></div>
+    <button class="linkbtn" type="button" id="dsReset" style="grid-column:1/-1">Password dimenticata?</button>
+  </form>`;
+}
+const fbErr = e => {
+  const c = e && e.code || '';
+  return /invalid-credential|wrong-password|user-not-found|invalid-login/.test(c) ? 'Email o password sbagliate.'
+    : /email-already-in-use/.test(c) ? 'Esiste già un account con questa email: tocca “Entra”.'
+    : /weak-password/.test(c) ? 'La password deve avere almeno 6 caratteri.'
+    : /invalid-email/.test(c) ? 'Email non valida.'
+    : /too-many-requests/.test(c) ? 'Troppi tentativi: riprova tra qualche minuto.'
+    : /network/.test(c) ? 'Nessuna connessione.'
+    : /permission/.test(c) ? 'Permesso negato: controlla le regole di Firestore.'
+    : 'Operazione non riuscita. Riprova.';
+};
+function bindLogin(box){
+  const f = box.querySelector('#dsLogin'), msg = box.querySelector('#dsLoginMsg');
+  const go = async create => {
+    const em = f.querySelector('#dsEmail').value.trim(), pw = f.querySelector('#dsPw').value;
+    if(!em || pw.length < 6){ msg.innerHTML = '<span class="err-t">Scrivi email e una password di almeno 6 caratteri.</span>'; return; }
+    msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
+    try{ const a = firebase.auth(); if(create) await a.createUserWithEmailAndPassword(em, pw); else await a.signInWithEmailAndPassword(em, pw); }
+    catch(e){ msg.innerHTML = `<span class="err-t">${esc(fbErr(e))}</span>`; }
+  };
+  f.onsubmit = e => { e.preventDefault(); go(false); };
+  f.querySelector('#dsNew').onclick = () => go(true);
+  f.querySelector('#dsReset').onclick = async () => {
+    const em = f.querySelector('#dsEmail').value.trim(); if(!em){ msg.textContent = 'Scrivi prima la tua email.'; return; }
+    try{ await firebase.auth().sendPasswordResetEmail(em); msg.textContent = 'Ti ho mandato un’email per cambiare la password.'; }catch(e){ msg.innerHTML = `<span class="err-t">${esc(fbErr(e))}</span>`; }
+  };
+}
+
+const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
+function dsCard(d){
+  const dt = parseD(d.data), uff = d.ufficiali || [];
+  const chips = uff.map(u => { const r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : '']; return `<span class="ds-chip ${cls}" title="${esc(t)}"><i></i>${esc(u.ruolo === 'Arbitro' ? '' : (u.ruolo || '').replace('Assistente ', 'AA') + ' ')}${esc(nomeArb(DS.arbitri.find(a => a.id === u.uid)) || u.nome)}</span>`; }).join('');
+  return `<li><button class="gara" data-ds="${esc(d.id)}">
+    <span class="day"><b>${dt ? dt.getDate() : '?'}</b><span>${dt ? MESI[dt.getMonth()].slice(0, 3) : ''}</span></span>
+    <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</span>
+    <span class="sub">${esc(fmtShort(d.data))}${d.ora ? ' · ' + esc(d.ora) : ''}${d.impianto ? ' · ' + esc(d.impianto) : ''}</span>
+    <span class="pills">${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}</span>
+    <span class="ds-chips">${chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}</span></span></button></li>`;
+}
+function renderDsGare(){
+  const el = $('#dsList'), t = todayIso();
+  if(!DS.loaded){ el.innerHTML = '<div class="status"><span class="spin"></span>Carico le designazioni…</div>'; return; }
+  const up = DS.gare.filter(d => !d.data || d.data >= t).sort(dsSort), past = DS.gare.filter(d => d.data && d.data < t).sort((a, b) => dsSort(b, a));
+  const att = up.reduce((n, d) => n + (d.ufficiali || []).filter(u => !rispOf(d, u.uid)).length, 0);
+  const rif = up.filter(d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'rifiutata')).length;
+  el.innerHTML = `<div class="ds-sum"><div><b>${up.length}</b><span>in programma</span></div><div><b>${att}</b><span>risposte in attesa</span></div><div class="${rif ? 'bad' : ''}"><b>${rif}</b><span>con rifiuti</span></div></div>
+    <button class="btn btn-primary btn-block" id="dsAdd">+ Nuova designazione</button>
+    ${up.length ? `<ul class="list">${up.map(dsCard).join('')}</ul>` : `<div class="empty-box"><h3>Nessuna gara in programma</h3><span>Crea una designazione e scegli gli arbitri: la vedranno nella loro pagina.</span></div>`}
+    ${past.length ? `<button class="btn btn-ghost btn-block" id="dsPast">${DS.past ? 'Nascondi' : 'Mostra'} gare passate (${past.length})</button>${DS.past ? `<ul class="list">${past.map(dsCard).join('')}</ul>` : ''}` : ''}`;
+  $('#dsAdd').onclick = () => openDsForm({});
+  if($('#dsPast')) $('#dsPast').onclick = () => { DS.past = !DS.past; renderDsGare(); };
+  el.querySelectorAll('[data-ds]').forEach(b => b.onclick = () => openDs(b.dataset.ds));
+}
+function renderDsArbitri(){
+  const el = $('#dsList'), t = todayIso();
+  const list = DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
+  const inv = `Ciao! Per ricevere le designazioni registrati qui: ${arbitroUrl()}`;
+  el.innerHTML = `<div class="ref-sec"><h3>Invita gli arbitri</h3><p class="note" style="margin:0">Mandagli questo link: si registrano con nome, telefono, email e password e compaiono qui sotto. Poi li puoi designare.</p>
+      <div class="row"><a class="btn btn-primary" href="https://wa.me/?text=${encodeURIComponent(inv)}" target="_blank" rel="noopener">Invita su WhatsApp</a><button class="btn btn-ghost" id="dsCopy">Copia link</button></div></div>
+    ${list.length ? `<ul class="list">${list.map(a => { const n = DS.gare.filter(d => (d.arbitriIds || []).includes(a.id) && d.data >= t).length;
+      return `<li class="ds-arb"><div><b>${esc(nomeArb(a))}</b><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span></div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
+      : `<div class="empty-box"><h3>Nessun arbitro registrato</h3><span>Quando un arbitro si registra dal link compare qui.</span></div>`}`;
+  $('#dsCopy').onclick = async () => { try{ await navigator.clipboard.writeText(arbitroUrl()); toast('Link copiato'); }catch(e){ toast(arbitroUrl()); } };
+}
+const waUrl = (tel, text) => { let n = String(tel || '').replace(/[^\d+]/g, '').replace(/^\+/, '').replace(/^00/, ''); if(n && n.length <= 10) n = '39' + n; return `https://wa.me/${n}${text ? '?text=' + encodeURIComponent(text) : ''}`; };
+function dsText(d, u){
+  const dt = d.data ? fmtLong(d.data) : 'data da definire';
+  return [`📋 DESIGNAZIONE${u ? ' – ' + (u.ruolo || 'Arbitro') : ''}`, `${d.casa || ''} – ${d.ospite || ''}`, [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · '),
+    `📅 ${dt[0].toUpperCase() + dt.slice(1)}${d.ora ? ' ore ' + d.ora : ''}`, `📍 ${[d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')}`, d.rimborso ? `💶 Rimborso ${eur(d.rimborso)}` : '', d.note || '',
+    '', `Conferma o rifiuta qui: ${arbitroUrl()}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+}
+
+function openDs(id){
+  const d = DS.gare.find(x => x.id === id); if(!d) return;
+  const root = $('#sheetRoot'), close = () => root.innerHTML = '';
+  const uff = d.ufficiali || [];
+  const rows = uff.map(u => { const a = DS.arbitri.find(x => x.id === u.uid), r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : ''];
+    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span><span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}</div>
+      <a class="btn btn-primary sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a></li>`; }).join('');
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
+    <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
+    <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
+    <dl class="kv">${[['Categoria', [d.categoria, d.girone && 'girone ' + d.girone].filter(Boolean).join(' · ')], ['N. gara', d.numeroGara], ['Campo', d.impianto], ['Indirizzo', [d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <section class="ref-sec"><h3>Arbitri designati</h3>${rows ? `<ul class="list">${rows}</ul>` : '<p class="note" style="margin:0">Nessuno: tocca Modifica per aggiungerli.</p>'}</section>
+    <div class="row"><button class="btn btn-ghost" data-a="edit">Modifica</button><button class="btn btn-ghost" data-a="copy">Copia testo</button><button class="btn btn-danger" data-a="del">Elimina</button></div>
+    <div id="dsConfirm"></div>
+    <button class="btn btn-ghost btn-block" data-a="close">Chiudi</button></div></div>`;
+  const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
+  const a = k => root.querySelector(`[data-a=${k}]`);
+  a('close').onclick = close;
+  a('edit').onclick = () => openDsForm(d);
+  a('copy').onclick = async () => { try{ await navigator.clipboard.writeText(dsText(d)); toast('Testo copiato'); }catch(e){ toast('Non riesco a copiare'); } };
+  a('del').onclick = () => {
+    const cb = root.querySelector('#dsConfirm');
+    cb.innerHTML = `<div class="confirm"><strong>Eliminare questa designazione?</strong><span class="note">Sparisce anche dalla pagina degli arbitri.</span><div class="row"><button class="btn btn-danger" data-yes>Sì, elimina</button><button class="btn btn-ghost" data-no>Annulla</button></div></div>`;
+    cb.querySelector('[data-no]').onclick = () => cb.innerHTML = '';
+    cb.querySelector('[data-yes]').onclick = async () => { try{ await firebase.firestore().collection('designazioni').doc(id).delete(); close(); toast('Designazione eliminata'); }catch(e){ toast(fbErr(e)); } };
+  };
+}
+
+const DSF = ['data', 'ora', 'categoria', 'girone', 'numeroGara', 'casa', 'ospite', 'impianto', 'indirizzo', 'citta', 'mapsUrl', 'rimborso', 'note'];
+function openDsForm(d){
+  const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !d.id;
+  const cats = [...new Set([...DS.gare.map(x => x.categoria), ...Store.gare.map(x => x.categoria)].filter(Boolean))].sort();
+  const inp = (f, l, type = 'text', full = false, extra = '') => `<div class="field${full ? ' full' : ''}"><label for="df-${f}">${l}</label><input id="df-${f}" data-f="${f}" type="${type}" value="${esc(d[f] ?? '')}" ${extra}></div>`;
+  const arbOpts = sel => `<option value="">Scegli arbitro…</option>` + DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b))).map(a => `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''}>${esc(nomeArb(a))}</option>`).join('');
+  const offRow = u => `<div class="ds-offrow"><select data-o="uid" aria-label="Arbitro">${arbOpts(u.uid)}</select><select data-o="ruolo" aria-label="Ruolo">${RUOLI.filter(r => r !== 'Altro').map(r => `<option ${r === (u.ruolo || 'Arbitro') ? 'selected' : ''}>${r}</option>`).join('')}</select><button type="button" class="x" aria-label="Togli">✕</button></div>`;
+  const uff = (d.ufficiali && d.ufficiali.length) ? d.ufficiali : [{ruolo: 'Arbitro'}];
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
+    <form class="form" id="dsForm"><h3>${isNew ? 'Nuova designazione' : 'Modifica designazione'}</h3>
+    ${inp('data', 'Data', 'date', false, 'required')}${inp('ora', 'Ora', 'time')}
+    ${inp('casa', 'Squadra di casa', 'text', true, 'required')}${inp('ospite', 'Squadra ospite', 'text', true, 'required')}
+    ${inp('categoria', 'Campionato', 'text', true, 'list="ds-cats"')}<datalist id="ds-cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+    ${inp('girone', 'Girone')}${inp('numeroGara', 'N. gara', 'text', false, 'inputmode="numeric"')}
+    ${inp('impianto', 'Campo', 'text', true, 'list="campi-list"')}${inp('indirizzo', 'Indirizzo')}${inp('citta', 'Città')}
+    ${inp('mapsUrl', 'Link Google Maps (facoltativo)', 'url', true)}
+    ${inp('rimborso', 'Rimborso €', 'text', false, 'inputmode="decimal"')}<div class="field"></div>
+    <div class="field full"><label for="df-note">Note per gli arbitri</label><textarea id="df-note" data-f="note">${esc(d.note || '')}</textarea></div>
+    <div class="sep eyebrow">Arbitri designati</div>
+    <div class="field full" id="dsOffs">${DS.arbitri.length ? uff.map(offRow).join('') : '<p class="note" style="margin:0">Nessun arbitro registrato: invitali dalla scheda Arbitri.</p>'}</div>
+    ${DS.arbitri.length ? '<button type="button" class="btn btn-ghost sm" id="dsAddOff" style="grid-column:1/-1">+ Aggiungi arbitro</button>' : ''}
+    ${isNew ? '' : '<p class="note" style="grid-column:1/-1;margin:0">Se cambi data, ora o campo, le risposte degli arbitri si azzerano e devono riconfermare.</p>'}
+    <div class="field full" id="dsFormMsg" aria-live="polite"></div>
+    <div class="actions row"><button type="submit" class="btn btn-primary">${isNew ? 'Crea designazione' : 'Salva modifiche'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+    </form></div></div>`;
+  const f = root.querySelector('#dsForm'), offs = f.querySelector('#dsOffs');
+  const bindX = () => offs.querySelectorAll('.x').forEach(b => b.onclick = () => b.parentElement.remove());
+  bindX();
+  if(f.querySelector('#dsAddOff')) f.querySelector('#dsAddOff').onclick = () => { offs.insertAdjacentHTML('beforeend', offRow({ruolo: offs.querySelectorAll('.ds-offrow').length ? 'Assistente ' + Math.min(2, offs.querySelectorAll('.ds-offrow').length) : 'Arbitro'})); bindX(); };
+  f.querySelector('[data-x]').onclick = () => isNew ? close() : openDs(d.id);
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const msg = f.querySelector('#dsFormMsg'), btn = f.querySelector('[type=submit]');
+    const o = {}; f.querySelectorAll('[data-f]').forEach(el => o[el.dataset.f] = el.value.trim());
+    o.rimborso = toNum(o.rimborso);
+    const ufficiali = [...offs.querySelectorAll('.ds-offrow')].map(r => ({uid: r.querySelector('[data-o=uid]').value, ruolo: r.querySelector('[data-o=ruolo]').value})).filter(u => u.uid);
+    if(new Set(ufficiali.map(u => u.uid)).size !== ufficiali.length){ msg.innerHTML = '<span class="err-t">Lo stesso arbitro è scelto due volte.</span>'; return; }
+    ufficiali.forEach(u => u.nome = nomeArb(DS.arbitri.find(a => a.id === u.uid)));
+    const ids = ufficiali.map(u => u.uid);
+    let risposte = {...(d.risposte || {})};
+    if(!isNew && ['data', 'ora', 'impianto'].some(k => (d[k] || '') !== o[k])) risposte = {};
+    Object.keys(risposte).forEach(k => { if(!ids.includes(k)) delete risposte[k]; });
+    const doc = {...o, ufficiali, arbitriIds: ids, risposte, updatedAt: Date.now()};
+    if(isNew) doc.createdAt = Date.now();
+    btn.disabled = true; msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
+    try{
+      const col = firebase.firestore().collection('designazioni');
+      const ref = isNew ? col.doc() : col.doc(d.id);
+      await ref.set(doc);
+      toast(isNew ? 'Designazione creata' : 'Modifiche salvate');
+      DS.gare = DS.gare.filter(x => x.id !== ref.id).concat([{id: ref.id, ...doc}]);
+      openDs(ref.id);
+    }catch(err){ btn.disabled = false; msg.innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; }
+  };
+}
+$('#dsHeadBtn').onclick = () => openDsForm({});
+
+route(); render(); Store.init();
+})();
+</script>
+
+</body></html>
