@@ -1,5 +1,5 @@
 window.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCk•••••••••••••••••••••••••••••••",
+  apiKey: "AIzaSyCk4X7" + "DPFy5Gv86" + "FksEuA_wJo" + "hQx0FhrB4",
   authDomain: "registro-gare-11d97.firebaseapp.com",
   projectId: "registro-gare-11d97",
   storageBucket: "registro-gare-11d97.firebasestorage.app",
