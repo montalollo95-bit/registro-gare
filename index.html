@@ -393,7 +393,7 @@ body.gated .tabs,body.gated #scroller{visibility:hidden}
 .stat-btn{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
 .stat-alert b{color:var(--card-red)}
 .pill.ref-todo{background:var(--card-red)!important;color:#fff!important;border-color:var(--card-red)!important}
-.score-in{display:inline-block;margin-left:8px;padding:0 8px;border-radius:8px;background:var(--pitch);color:#fff;font-family:var(--display);font-weight:800;white-space:nowrap}
+.score-in{font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap;margin-left:.45em}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -525,6 +525,7 @@ body.lock .ro-flex{display:flex!important}
     <div class="eyebrow" id="movLbl"></div>
     <div id="spesaForm"></div>
     <ul class="list" id="movList"></ul>
+    <button class="btn btn-primary btn-block" id="addSpesa3">+ Aggiungi spesa</button>
   </div>
 </section>
 
@@ -916,6 +917,7 @@ $('#sStag').onclick = () => { sMode='stagione'; catSel = null; seg($('#sMese'),$
 $('#sPrev').onclick = () => { if(sMode==='mese') sMonth.setMonth(sMonth.getMonth()-1); else sSeason--; renderSpese(); };
 $('#sNext').onclick = () => { if(sMode==='mese') sMonth.setMonth(sMonth.getMonth()+1); else sSeason++; renderSpese(); };
 $('#addSpesa').onclick = () => openSpesaForm({data: todayIso(), tipo:'carburante'});
+$('#addSpesa3').onclick = () => openSpesaForm({data: todayIso(), tipo:'altro'});
 
 function lastTariffa(){ const r = Store.spese.filter(s => s.tipo==='rimborso' && s.tariffa).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0]; return r ? r.tariffa : ''; }
 
@@ -1062,7 +1064,7 @@ function openSpesaForm(s){
     <div class="field fuelp"><label for="sp-prezzo">Benzina €/l quel giorno</label><input id="sp-prezzo" data-f="prezzo" type="text" inputmode="decimal" placeholder="1,85" value="${esc(dec(s.prezzo))}"></div>
     <div class="field full"><label for="sp-importo">Importo €</label><input id="sp-importo" data-f="importo" type="text" inputmode="decimal" value="${esc(dec(s.importo))}"></div>
     <div class="field full" id="sp-fuel" hidden><div class="status" style="flex-direction:column;align-items:flex-start;gap:2px"></div></div>
-    <div class="field full"><label for="sp-desc">Descrizione</label><input id="sp-desc" data-f="descrizione" type="text" placeholder="Es. pedaggio, parcheggio" value="${esc(s.descrizione)}"></div>
+    <div class="field full"><label for="sp-desc">Note: che spesa hai fatto?</label><textarea id="sp-desc" data-f="descrizione" rows="2" placeholder="Es. pedaggio autostrada, parcheggio, cena dopo la gara">${esc(s.descrizione || '')}</textarea></div>
     <div class="actions row"><button type="submit" class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button>${isNew ? '' : '<button type="button" class="btn btn-danger" data-del>Elimina</button>'}</div>
   </form>`;
   const f = box.querySelector('form'), q = id => f.querySelector('#'+id);
@@ -1938,7 +1940,7 @@ function renderPay(){
   DS.gare.filter(d => (d.data || '').startsWith(PAY.mese) && fatta(d)).forEach(d => (d.ufficiali || []).forEach(u => {
     if((rispOf(d, u.uid) || {}).stato !== 'accettata') return;
     const o = per.get(u.uid) || {uid: u.uid, nome: u.nome, gare: [], tot: 0, senza: []};
-    if(!(d.referti && d.referti[u.uid])){ if(giocata(d)){ o.senza.push(d); per.set(u.uid, o); } return; }
+    if(!(d.referti && d.referti[u.uid] && !d.referti[u.uid].sbloccato)){ if(giocata(d)){ o.senza.push(d); per.set(u.uid, o); } return; }
     o.gare.push(d); o.tot += tariffaDes(d); per.set(u.uid, o);
   }));
   DS.anticipi.filter(x => (x.data || '').startsWith(PAY.mese)).forEach(x => { const o = per.get(x.uid) || {uid: x.uid, nome: x.nome, gare: [], tot: 0, senza: []}; (o.ant = o.ant || []).push(x); per.set(x.uid, o); });
@@ -1957,7 +1959,7 @@ function renderPay(){
       PAY.cards[r.uid] = `<div class="ds-arb pay${ok ? ' paid' : ''}"><div><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>
         <span>${r.gare.length} ${r.gare.length === 1 ? 'gara' : 'gare'}${n5 ? ` · ${n5} C5` : ''}${n7 ? ` · ${n7} C7` : ''}</span>
         <span class="pay-calc"><span>Spettante per le gare</span><b>${eur(r.lordo)}</b><span>Già anticipato</span><b>− ${eur(r.antTot)}</b></span>
-        ${r.senza.length ? `<span class="err-t">${r.senza.length === 1 ? '1 gara' : r.senza.length + ' gare'} senza referto: non conteggiate</span>` : ''}
+        ${r.senza.length ? `<span class="err-t">${r.senza.length === 1 ? '1 gara' : r.senza.length + ' gare'} con referto non compilato: non conteggiate</span>` : ''}
         <span>${r.a && r.a.iban ? 'IBAN ' + esc(ibanFmt(r.a.iban)) : '<span class="err-t">IBAN non inserito</span>'}</span>
         ${r.p ? `<span class="ds-chip done"><i></i>Pagato ${eur(pg)} il ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</span>${pg < r.tot ? `<span class="err-t">Mancano ${eur(r.tot - pg)}</span>` : ''}` : ''}
         <details><summary class="note">Vedi dettagli</summary><span>${r.gare.sort(dsSort).map(d => `${esc(fmtShort(d.data))} · ${esc(d.casa)} – ${esc(d.ospite)} · ${eur(tariffaDes(d))}`).concat(r.ant.map(x => `${esc(fmtShort(x.data))} · Anticipo ricevuto${x.descrizione ? ' (' + esc(x.descrizione) + ')' : ''} · − ${eur(x.importo)}`)).join('<br>')}</span></details></div>
@@ -2211,20 +2213,23 @@ function renderDesigna(){
 }
 
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
+/* risultato del referto ricevuto (non sbloccato), accanto alle squadre */
+const desRis = d => { const uff = d.ufficiali || [], refs = d.referti || {}, ord = [...uff.filter(u => u.ruolo === 'Arbitro'), ...uff.filter(u => u.ruolo !== 'Arbitro')];
+  const r = ord.map(u => refs[u.uid]).find(x => x && x.risultato && !x.sbloccato); return r ? `<span class="score-in">${esc(r.risultato)}</span>` : ''; };
 function dsCard(d){
   const dt = parseD(d.data), uff = d.ufficiali || [];
   const played = fatta(d);
   const chips = uff.map(u => { const r = rispOf(d, u.uid); let [t, cls] = RISP[r ? r.stato : ''];
-    if(played && r && r.stato === 'accettata'){ const ok = d.referti && d.referti[u.uid]; t = ok ? 'Referto ✓' : 'Manca referto'; cls = ok ? 'done' : 'wait'; } return `<span class="ds-chip ${cls}" title="${esc(t)}"><i></i>${esc(u.ruolo === 'Arbitro' ? '' : (u.ruolo || '').replace('Assistente ', 'AA') + ' ')}${esc(nomeArb(DS.arbitri.find(a => a.id === u.uid)) || u.nome)} · ${esc(t)}</span>`; }).join('');
+    if(played && r && r.stato === 'accettata'){ const ok = d.referti && d.referti[u.uid] && !d.referti[u.uid].sbloccato; t = ok ? 'Referto ✓' : 'Referto non compilato'; cls = ok ? 'done' : 'no'; } return `<span class="ds-chip ${cls}" title="${esc(t)}"><i></i>${esc(u.ruolo === 'Arbitro' ? '' : (u.ruolo || '').replace('Assistente ', 'AA') + ' ')}${esc(nomeArb(DS.arbitri.find(a => a.id === u.uid)) || u.nome)} · ${esc(t)}</span>`; }).join('');
   return `<li><button class="gara" data-ds="${esc(d.id)}">
     <span class="day"><b>${dt ? dt.getDate() : '?'}</b><span>${dt ? MESI[dt.getMonth()].slice(0, 3) : ''}</span></span>
-    <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</span>
+    <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</span>
     <span class="sub">${esc(fmtShort(d.data))}${d.ora ? ' · ' + esc(d.ora) : ''}${d.impianto ? ' · ' + esc(d.impianto) : ''}</span>
     <span class="pills">${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}</span>
     <span class="ds-chips">${chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}</span></span></button></li>`;
 }
 const DSF_FILTRI = {tutte: ['Tutte', () => true], attesa: ['In attesa', d => (d.ufficiali || []).some(u => !rispOf(d, u.uid))], rifiuti: ['Rifiutate', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'rifiutata')],
-  senza: ['Senza arbitro', d => !(d.ufficiali || []).length], referto: ['Manca referto', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'accettata' && !(d.referti && d.referti[u.uid]))]};
+  senza: ['Senza arbitro', d => !(d.ufficiali || []).length], referto: ['Referto non compilato', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'accettata' && !(d.referti && d.referti[u.uid] && !d.referti[u.uid].sbloccato))]};
 function renderDsGare(){
   const el = $('#dsList');
   if(!DS.loaded){ el.innerHTML = '<div class="status"><span class="spin"></span>Carico le designazioni…</div>'; return; }
@@ -2234,7 +2239,7 @@ function renderDsGare(){
   const filtri = past ? ['tutte', 'referto', 'senza'] : ['tutte', 'attesa', 'rifiuti', 'senza'];
   if(!filtri.includes(DS.f)) DS.f = 'tutte';
   el.innerHTML = `<div class="seg" role="group" aria-label="Periodo"><button data-p="0" aria-pressed="${!past}">Prossime</button><button data-p="1" aria-pressed="${past}">Giocate</button></div>
-    <div class="ds-sum">${past ? `<div><b>${base.length}</b><span>giocate</span></div><div class="${senzaRef ? 'bad' : ''}"><b>${senzaRef}</b><span>manca referto</span></div><div class="${senza ? 'bad' : ''}"><b>${senza}</b><span>senza arbitro</span></div>`
+    <div class="ds-sum">${past ? `<div><b>${base.length}</b><span>giocate</span></div><div class="${senzaRef ? 'bad' : ''}"><b>${senzaRef}</b><span>referti non compilati</span></div><div class="${senza ? 'bad' : ''}"><b>${senza}</b><span>senza arbitro</span></div>`
       : `<div><b>${base.length}</b><span>in programma</span></div><div><b>${att}</b><span>risposte in attesa</span></div><div class="${rif || senza ? 'bad' : ''}"><b>${rif + senza}</b><span>rifiuti / senza arbitro</span></div>`}</div>
     ${past ? '' : '<button class="btn btn-primary btn-block" id="dsAdd">+ Nuova designazione</button>'}
     <div class="ds-filtri">${filtri.map(k => `<button class="chip-f" data-f="${k}" aria-pressed="${DS.f === k}">${DSF_FILTRI[k][0]}${k === 'tutte' ? '' : ` <b>${base.filter(DSF_FILTRI[k][1]).length}</b>`}</button>`).join('')}</div>
@@ -2339,7 +2344,7 @@ function openDs(id){
       <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}<a class="btn ${d.referti && d.referti[u.uid] ? 'btn-ghost' : 'btn-primary'} sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a></span></li>`; }).join('');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
-    <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
+    <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</h2>
     <dl class="kv">${[['Categoria', [d.categoria, d.girone && 'girone ' + d.girone].filter(Boolean).join(' · ')], ['N. gara', d.numeroGara], ['Campo', d.impianto], ['Indirizzo', [d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
     <section class="ref-sec"><h3>Arbitri designati</h3>${rows ? `<ul class="list">${rows}</ul>` : '<p class="note" style="margin:0">Nessuno: tocca Modifica per aggiungerli.</p>'}<div id="dsRefBox"></div></section>
     <div class="row"><button class="btn btn-ghost" data-a="edit">Modifica</button><button class="btn btn-ghost" data-a="copy">Copia testo</button><button class="btn btn-danger" data-a="del">Elimina</button></div>
@@ -2453,7 +2458,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113114654';
+const APP_BUILD = '20261113115938';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
