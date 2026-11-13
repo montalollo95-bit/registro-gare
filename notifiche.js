@@ -91,7 +91,9 @@ async function main() {
 
     if (!zitto && !giocata) {
       const nuovi = uids.filter(u => !prima.includes(u) && risp(u).stato !== 'accettata');
-      manda(nuovi, '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}. Apri l’app per accettarla.`, 'des-' + id);
+      const sub = u => (d.subentri || {})[u];
+      manda(nuovi.filter(u => !sub(u)), '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}. Apri l’app per accettarla.`, 'des-' + id);
+      for (const u of nuovi.filter(sub)) manda([u], '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''} · al posto di ${nomi[sub(u).da] || sub(u).daNome || 'un collega'}. Apri l’app per accettarla.`, 'des-' + id);
       const tolti = prima.filter(u => !uids.includes(u)), chiesto = u => !!((s && s.sost || {})[u] || '').startsWith('aperta');
       manda(tolti.filter(u => !chiesto(u)), '❌ Designazione annullata', `Non sei più designato per ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
       manda(tolti.filter(chiesto), '✅ Sostituzione fatta', `Il designatore ha trovato un sostituto: non arbitri più ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
