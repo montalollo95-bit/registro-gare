@@ -37,7 +37,7 @@ const eur = n => Number(n || 0).toLocaleString('it-IT', {minimumFractionDigits: 
 
 async function main() {
   const now = oraRoma(), adesso = minuti(now.data, now.ora);
-  const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap] = await Promise.all(['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi'].map(c => db.collection(c).get()));
+  const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap, indSnap, elSnap] = await Promise.all([...['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi', 'indisponibilita'].map(c => db.collection(c).get()), db.collection('elenco').doc('arbitri').get()]);
   const stati = {}; statiSnap.forEach(s => { stati[s.id] = s.data(); });
   const meta = stati._meta; delete stati._meta;
   const zitto = !meta; // primo giro: registra com'è la situazione senza mandare niente
@@ -65,12 +65,14 @@ async function main() {
     const inizio = d.data ? minuti(d.data, d.ora || '23:59') : null;
     const giocata = inizio !== null && adesso >= inizio;
     const risp = uid => ((d.risposte || {})[uid] || {});
-    const nuovo = {uff: uids, key: chiave(d), risp: {}, ref: {}, prom: {...(s && s.prom || {})}, todo: {...(s && s.todo || {})}, info: {casa: d.casa || '', ospite: d.ospite || '', data: d.data || '', ora: d.ora || ''}};
+    const nuovo = {uff: uids, key: chiave(d), risp: {}, ref: {}, sost: {}, prom: {...(s && s.prom || {})}, todo: {...(s && s.todo || {})}, info: {casa: d.casa || '', ospite: d.ospite || '', data: d.data || '', ora: d.ora || ''}};
 
     if (!zitto && !giocata) {
       const nuovi = uids.filter(u => !prima.includes(u) && risp(u).stato !== 'accettata');
       manda(nuovi, '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}. Apri l’app per accettarla.`, 'des-' + id);
-      manda(prima.filter(u => !uids.includes(u)), '❌ Designazione annullata', `Non sei più designato per ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
+      const tolti = prima.filter(u => !uids.includes(u)), chiesto = u => !!((s && s.sost || {})[u] || '').startsWith('aperta');
+      manda(tolti.filter(u => !chiesto(u)), '❌ Designazione annullata', `Non sei più designato per ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
+      manda(tolti.filter(chiesto), '✅ Sostituzione fatta', `Il designatore ha trovato un sostituto: non arbitri più ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
       if (s && s.key !== nuovo.key) manda(uids.filter(u => prima.includes(u)), '✏️ Partita modificata', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}`, 'des-' + id);
     }
     for (const u of uff) {
@@ -80,6 +82,15 @@ async function main() {
         if (st === 'accettata') aiDesignatori('✅ Designazione accettata', `${nomi[u.uid] || u.nome || 'Un arbitro'} · ${squadre(d)} · ${quando(d)}`, 'risp-' + id, u.uid);
         if (st === 'rifiutata') aiDesignatori('❌ Designazione rifiutata', `${nomi[u.uid] || u.nome || 'Un arbitro'} · ${squadre(d)} · ${quando(d)}${r.motivo ? ' · “' + r.motivo + '”' : ''}`, 'risp-' + id, u.uid);
       }
+    }
+    // richieste di sostituzione
+    for (const [uid, r] of Object.entries(d.sostituzioni || {})) {
+      if (!r || !uids.includes(uid)) continue;
+      const firma = (r.esito === 'no' ? 'no:' : 'aperta:') + (r.at || 1) + (r.proposto ? ':' + r.proposto : '');
+      nuovo.sost[uid] = firma;
+      if (zitto || giocata || firma === ((s && s.sost || {})[uid] || '')) continue;
+      if (r.esito === 'no') manda([uid], '↩️ Sostituzione non accolta', `${squadre(d)} di ${giorno(d.data)} resta tua: il designatore non ti ha sostituito.`, 'sost-' + id, './index.html#partite');
+      else aiDesignatori('🔁 Richiesta di sostituzione', `${nomi[uid] || 'Un arbitro'} chiede di essere sostituito${r.proposto ? ' e propone ' + (nomi[r.proposto] || r.propostoNome || 'un collega') : ''} · ${squadre(d)} · ${quando(d)}${r.motivo ? ' · “' + r.motivo + '”' : ''}`, 'sost-' + id, uid);
     }
     for (const [uid, r] of Object.entries(d.referti || {})) {
       if (!r) continue;
@@ -122,6 +133,11 @@ async function main() {
     const x = a.data();
     aiDesignatori('💶 Nuovo anticipo', `${x.nome || nomi[x.uid] || 'Un arbitro'}: ${eur(x.importo)}${x.descrizione ? ' · ' + x.descrizione : ''}`, 'ant-' + a.id, x.uid);
   });
+
+  // elenco dei colleghi per chi propone un sostituto (solo nomi e giorni di indisponibilità)
+  const t0 = now.data, elenco = arbSnap.docs.filter(a => attivo(a.id)).map(a => ({uid: a.id, nome: nomi[a.id],
+    ind: indSnap.docs.map(x => x.data()).filter(x => x.uid === a.id && x.al >= t0 && x.dal).map(x => x.dal + '|' + x.al).sort()})).sort((a, b) => a.nome.localeCompare(b.nome));
+  if (!DRY && JSON.stringify(elenco) !== JSON.stringify(elSnap.exists ? elSnap.data().list || [] : null)) await db.collection('elenco').doc('arbitri').set({list: elenco, at: Date.now()});
 
   // nuovi arbitri da approvare
   const inAttesa = arbSnap.docs.filter(a => !adminUid.includes(a.id) && !acc[a.id]).map(a => a.id), giaAvvisati = new Set(meta && meta.richieste || []);
