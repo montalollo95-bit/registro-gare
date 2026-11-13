@@ -394,6 +394,8 @@ body.gated .tabs,body.gated #scroller{visibility:hidden}
 .stat-alert b{color:var(--card-red)}
 .pill.ref-todo{background:var(--card-red)!important;color:#fff!important;border-color:var(--card-red)!important}
 .score-in{font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap;margin-left:.45em}
+.notif-home{border-color:var(--pitch)}
+.seg.seg3{grid-template-columns:1fr 1fr 1fr}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -432,6 +434,7 @@ body.lock .ro-flex{display:flex!important}
   </div></div>
   <div class="wrap view">
     <div id="storeNote" class="note" hidden></div>
+    <div id="notifHint" hidden></div>
     <div id="desHint" hidden></div>
     <div id="avvisiBox" hidden></div>
     <div id="nextBox"></div>
@@ -1214,7 +1217,7 @@ let refId = null, draft = null;
 const oraNow = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
 const iniziata = g => !!g.data && (g.data < todayIso() || (g.data === todayIso() && (!g.ora || g.ora <= oraNow())));
 const refSbloccato = g => { const r = refInviato(g); return !!(r && r.sbloccato); };
-const refDaFare = g => iniziata(g) && g.stato !== 'rinviata' && !refNonMio(g) && (refSbloccato(g) || (!g.referto && !refInviato(g)));
+const refDaFare = g => iniziata(g) && (g.stato !== 'rinviata' || refSbloccato(g)) && !refNonMio(g) && (refSbloccato(g) || (!g.referto && !refInviato(g)));
 const refCandidates = () => Store.gare.filter(refDaFare).sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
 const risOk = g => g.risultato && !refDaFare(g) ? `<span class="score-in">${esc(g.risultato)}</span>` : '';
 function openReferto(id){ refId = id || null; draft = null; if(location.hash === '#referto') renderReferto(); else location.hash = '#referto'; }
@@ -1247,7 +1250,7 @@ function renderReferto(){
     const r = g.referto ? JSON.parse(JSON.stringify(g.referto)) : {};
     const [rc, ro] = String(g.risultato || '').split('-');
     draft = {gc: r.gc ?? (rc ?? '').trim(), go: r.go ?? (ro ?? '').trim(), gc1: r.gc1 ?? '', go1: r.go1 ?? '', rec1: r.rec1 ?? '', rec2: r.rec2 ?? '',
-      marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
+      esito: r.esito || '', minSosp: r.minSosp ?? '', motivo: r.motivo ?? '', marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
   }
   renderRefForm(g);
 }
@@ -1278,11 +1281,16 @@ function renderRefForm(g){
   body.innerHTML = `
     <div class="ref-head view" style="gap:6px"><div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div><h2>${esc(g.casa||'—')} – ${esc(g.ospite||'—')}</h2>
       <div class="pills">${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.numeroGara?`<span class="pill">Gara n. ${esc(g.numeroGara)}</span>`:''}${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}</div></div>
-    <section class="ref-sec"><h3>Risultato finale</h3>
+    <section class="ref-sec"><h3>Esito della gara</h3>
+      <div class="seg seg3" role="group" aria-label="Esito della gara">${[['', 'Regolare'], ['sospesa', 'Sospesa'], ['rinviata', 'Rinviata']].map(([k, t]) => `<button type="button" data-esito="${k}" aria-pressed="${(d.esito || '') === k}">${t}</button>`).join('')}</div>
+      ${d.esito === 'sospesa' ? `<div class="mini">${fld('rf-minsosp', 'Minuto della sospensione', d.minSosp, 'type="number" min="0" inputmode="numeric" placeholder="Es. 32"')}</div>` : ''}
+      ${d.esito ? `<div class="field full"><label for="rf-motivo">Motivo ${d.esito === 'sospesa' ? 'della sospensione' : 'del rinvio'}</label><textarea id="rf-motivo" rows="2" placeholder="${d.esito === 'sospesa' ? 'Es. infortunio grave, rissa, impianto di illuminazione guasto' : 'Es. campo impraticabile, squadra assente, maltempo'}">${esc(d.motivo)}</textarea></div>` : ''}
+    </section>
+    ${d.esito === 'rinviata' ? '' : `<section class="ref-sec"><h3>${d.esito === 'sospesa' ? 'Risultato al momento della sospensione' : 'Risultato finale'}</h3>
       <div class="score"><div><label for="rf-gc">${esc(g.casa||'Casa')}</label><input id="rf-gc" type="number" min="0" inputmode="numeric" value="${esc(d.gc)}"></div><span class="dash">–</span><div><label for="rf-go">${esc(g.ospite||'Ospite')}</label><input id="rf-go" type="number" min="0" inputmode="numeric" value="${esc(d.go)}"></div></div>
       <div class="mini">${fld('rf-gc1','1° tempo casa',d.gc1,'type="number" min="0" inputmode="numeric"')}${fld('rf-go1','1° tempo ospite',d.go1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec1','Recupero 1° T (min)',d.rec1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec2','Recupero 2° T (min)',d.rec2,'type="number" min="0" inputmode="numeric"')}</div>
-    </section>
-    ${sec('marcatori')}${sec('ammoniti')}${sec('espulsi')}${sec('dirigenti')}
+    </section>`}
+    ${d.esito === 'rinviata' ? '' : sec('marcatori') + sec('ammoniti') + sec('espulsi')}${sec('dirigenti')}
     <section class="ref-sec"><h3>Altre informazioni</h3>
       <div class="mini">${fld('rf-spett','Spettatori (circa)',d.spettatori,'type="number" min="0" inputmode="numeric"')}
         <div class="field"><label for="rf-campo">Terreno di gioco</label><select id="rf-campo">${['','Buono','Discreto','Pesante','Allentato','Sintetico','Impraticabile'].map(o=>`<option ${o===d.campo?'selected':''}>${o}</option>`).join('')}</select></div></div>
@@ -1298,12 +1306,19 @@ function renderRefForm(g){
   });
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { readDraft(); const ev = b.closest('.ev'); d[ev.dataset.list].splice(+ev.dataset.i, 1); renderRefForm(g); });
   $('#rfOther').onclick = () => openReferto(null);
+  body.querySelectorAll('[data-esito]').forEach(b => b.onclick = () => { readDraft(); d.esito = b.dataset.esito; renderRefForm(g); });
   $('#rfSave').onclick = async () => {
     readDraft();
+    if(d.esito === 'sospesa' && d.minSosp === ''){ toast('Scrivi il minuto della sospensione.'); $('#rf-minsosp').focus(); return; }
+    if(d.esito && !d.motivo){ toast(d.esito === 'sospesa' ? 'Scrivi il motivo della sospensione.' : 'Scrivi il motivo del rinvio.'); $('#rf-motivo').focus(); return; }
     if(!iniziata(g) && !g.referto){ toast(`Il referto si compila dalle ${g.ora}.`); return; }
     if(refBloccato(g) || refNonMio(g)){ toast('Referto bloccato: chiedi a un designatore di sbloccarlo.'); refId = g.id; draft = null; renderReferto(); return; }
-    const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length};
-    if(d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}`;
+    const rinv = d.esito === 'rinviata';
+    if(rinv){ d.gc = d.go = d.gc1 = d.go1 = d.rec1 = d.rec2 = ''; d.marcatori = []; d.ammoniti = []; d.espulsi = []; }
+    if(d.esito !== 'sospesa') d.minSosp = '';
+    if(!d.esito) d.motivo = '';
+    const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: rinv ? 'rinviata' : 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length, risultato: ''};
+    if(!rinv && d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}${d.esito === 'sospesa' ? ` (sosp. ${d.minSosp}')` : ''}`;
     const btn = $('#rfSave'); btn.disabled = true;
     try{ await Store.saveGara(upd); toast(upd.desId ? 'Referto salvato e inviato ai designatori' : 'Referto salvato'); btn.disabled = false; if(upd.desId) inviaReferto(upd.desId, upd); }
     catch(e){ btn.disabled = false; toast('Salvataggio non riuscito. Riprova.'); }
@@ -1317,6 +1332,7 @@ function renderRefForm(g){
 
 function readDraft(){
   const d = draft, v = id => { const el = $('#'+id); return el ? el.value.trim() : ''; };
+  if($('#rf-minsosp')) d.minSosp = v('rf-minsosp'); if($('#rf-motivo')) d.motivo = v('rf-motivo');
   d.gc = v('rf-gc'); d.go = v('rf-go'); d.gc1 = v('rf-gc1'); d.go1 = v('rf-go1'); d.rec1 = v('rf-rec1'); d.rec2 = v('rf-rec2');
   d.spettatori = v('rf-spett'); d.campo = v('rf-campo'); d.note = v('rf-note');
   document.querySelectorAll('#refBody .ev').forEach(ev => { const e = d[ev.dataset.list][+ev.dataset.i]; if(!e) return; ev.querySelectorAll('[data-k]').forEach(el => e[el.dataset.k] = el.value.trim()); });
@@ -1332,12 +1348,16 @@ function refText(g, d){
   if(g.numeroGara) L.push(`Gara n. ${g.numeroGara}`);
   if(g.impianto) L.push(`Campo: ${[g.impianto, g.citta].filter(Boolean).join(', ')}`);
   L.push('');
-  L.push(`Risultato finale: ${d.gc || '?'}-${d.go || '?'}${d.gc1 !== '' || d.go1 !== '' ? ` (1° tempo ${d.gc1 || 0}-${d.go1 || 0})` : ''}`);
-  if(d.rec1 || d.rec2) L.push(`Recupero: 1° T ${d.rec1 || 0}' – 2° T ${d.rec2 || 0}'`);
   const block = (title, list, fn) => { L.push(''); L.push(`${title}: ${list.length ? '' : 'nessuna'}`.trim()); list.forEach(e => L.push('- ' + fn(e))); };
-  block('RETI', d.marcatori, e => ev(e, e.mot && e.mot !== 'Azione' ? e.mot.toLowerCase() : ''));
-  block('AMMONIZIONI', d.ammoniti, e => ev(e, e.mot));
-  block('ESPULSIONI', d.espulsi, e => ev(e, e.mot));
+  if(d.esito === 'rinviata'){ L.push('GARA RINVIATA'); if(d.motivo) L.push(`Motivo: ${d.motivo}`); }
+  else {
+    if(d.esito === 'sospesa'){ L.push(`GARA SOSPESA al ${d.minSosp || '?'}'`); if(d.motivo) L.push(`Motivo: ${d.motivo}`); }
+    L.push(`${d.esito === 'sospesa' ? 'Risultato al momento della sospensione' : 'Risultato finale'}: ${d.gc || '?'}-${d.go || '?'}${d.gc1 !== '' || d.go1 !== '' ? ` (1° tempo ${d.gc1 || 0}-${d.go1 || 0})` : ''}`);
+    if(d.rec1 || d.rec2) L.push(`Recupero: 1° T ${d.rec1 || 0}' – 2° T ${d.rec2 || 0}'`);
+    block('RETI', d.marcatori, e => ev(e, e.mot && e.mot !== 'Azione' ? e.mot.toLowerCase() : ''));
+    block('AMMONIZIONI', d.ammoniti, e => ev(e, e.mot));
+    block('ESPULSIONI', d.espulsi, e => ev(e, e.mot));
+  }
   block('PROVVEDIMENTI DIRIGENTI', d.dirigenti || [], e => `${e.min ? e.min + "' " : ''}${team(e.sq)} – ${e.qual || ''} ${e.nome || ''}: ${e.prov || ''}${e.mot ? ' (' + e.mot + ')' : ''}`);
   if(d.spettatori || d.campo){ L.push(''); if(d.spettatori) L.push(`Spettatori: circa ${d.spettatori}`); if(d.campo) L.push(`Terreno di gioco: ${d.campo}`); }
   if(d.note){ L.push(''); L.push('Fatti da segnalare:'); L.push(d.note); }
@@ -1804,11 +1824,13 @@ function renderAccount(){
   const p = ACC.profilo;
   box.innerHTML = `<div class="acc-head"><span class="avatar">${esc(iniziali(p).toUpperCase())}</span><div><b>${esc(nomeArb(p))}</b><span>${esc(ACC.user.email)}${ACC.isAdmin ? ' · Designatore' : ''}</span></div></div>
     <section class="ref-sec" id="mieBox"></section>
+    <section class="ref-sec" id="notifBox" hidden></section>
     <section class="ref-sec" id="datiBox"></section>
     <section class="ref-sec" id="regBox"></section>
     <button class="btn btn-ghost btn-block" id="accOut">Esci</button>`;
-  $('#accOut').onclick = () => firebase.auth().signOut();
-  renderMie(); renderDati(); renderRegBox();
+  $('#accOut').onclick = async () => { await notifTogli(); firebase.auth().signOut(); };
+  renderMie(); renderDati(); renderRegBox(); renderNotif();
+  if(!NOTIF.init){ NOTIF.init = true; if(notifStato() === 'on') notifAttiva(false); }
 }
 
 /* -- pagina di accesso: chi non è entrato vede solo questa -- */
@@ -2141,7 +2163,7 @@ const refInviati = new Set();
 async function inviaReferto(desId, g){
   if(!ACC.user || !g || !g.referto) return;
   refInviati.add(desId);
-  try{ await firebase.firestore().collection('designazioni').doc(desId).update({[`referti.${ACC.user.uid}`]: {referto: g.referto, risultato: g.risultato || '', gialli: toNum(g.gialli), rossi: toNum(g.rossi), nome: nomeArb(ACC.profilo), at: Date.now()}}); }
+  try{ await firebase.firestore().collection('designazioni').doc(desId).update({[`referti.${ACC.user.uid}`]: {referto: g.referto, risultato: g.risultato || (g.referto.esito === 'rinviata' ? 'Rinviata' : ''), gialli: toNum(g.gialli), rossi: toNum(g.rossi), nome: nomeArb(ACC.profilo), at: Date.now()}}); }
   catch(e){ refInviati.delete(desId); toast('Referto salvato, ma non ancora inviato ai designatori: riprovo quando riapri l’app.'); }
 }
 function syncAccettate(){
@@ -2160,8 +2182,75 @@ function syncAccettate(){
     if(sp && toNum(sp.importo) !== toNum(d.rimborso)) Store.saveSpesa({...sp, importo: toNum(d.rimborso)});
   });
 }
+/* -- notifiche push: ogni dispositivo registra il suo codice, GitHub spedisce le notifiche -- */
+const NOTIF = {init: false, busy: false, err: ''};
+const notifIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const notifApp = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function notifStato(){
+  if(!window.FIREBASE_VAPID || !fbReady()) return 'off';
+  if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return notifIOS() && !notifApp() ? 'home' : 'nosupp';
+  return Notification.permission === 'granted' ? 'on' : Notification.permission === 'denied' ? 'denied' : 'ask';
+}
+const notifLS = (k, v) => { try{ if(v === undefined) return localStorage.getItem(k); if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} return null; };
+function notifScript(){
+  if(firebase.messaging) return Promise.resolve();
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = `https://www.gstatic.com/firebasejs/${FBV}/firebase-messaging-compat.js`; s.onload = res; s.onerror = () => rej(new Error('net')); document.head.appendChild(s); });
+}
+async function notifAttiva(chiedi){
+  if(NOTIF.busy || !ACC.user) return; NOTIF.busy = true; NOTIF.err = ''; renderNotif();
+  try{
+    if(chiedi && Notification.permission !== 'granted'){ const p = await Notification.requestPermission(); if(p !== 'granted') return; }
+    if(Notification.permission !== 'granted') return;
+    const reg = await navigator.serviceWorker.register('sw.js');
+    await notifScript();
+    const tok = await firebase.messaging().getToken({vapidKey: window.FIREBASE_VAPID, serviceWorkerRegistration: reg});
+    if(!tok) throw new Error('token');
+    const col = firebase.firestore().collection('tokens'), old = notifLS('notifTok');
+    if(old && old !== tok) col.doc(old).delete().catch(() => {});
+    await col.doc(tok).set({uid: ACC.user.uid, at: Date.now(), ua: navigator.userAgent.slice(0, 120)});
+    notifLS('notifTok', tok);
+    if(chiedi) toast('Notifiche attivate');
+  }catch(e){ NOTIF.err = 'Non riesco ad attivare le notifiche. Controlla la connessione e riprova.'; }
+  finally{ NOTIF.busy = false; renderNotif(); }
+}
+async function notifTogli(){
+  const tok = notifLS('notifTok'); if(!tok) return;
+  try{ await firebase.firestore().collection('tokens').doc(tok).delete(); }catch(e){}
+  notifLS('notifTok', null);
+}
+function notifTesto(st){
+  return st === 'on' ? (notifLS('notifTok') ? '✓ Notifiche attive su questo telefono: ti avviso per designazioni, modifiche, promemoria e referti.' : 'Le notifiche sono consentite: tocca “Attiva notifiche” per collegare questo telefono.')
+    : st === 'ask' ? 'Attiva le notifiche per sapere subito quando ricevi una designazione, quando una partita cambia e quando c’è un referto da compilare.'
+    : st === 'home' ? 'Per ricevere le notifiche sull’iPhone: in Safari tocca <b>Condividi → Aggiungi alla schermata Home</b>, poi apri l’app dall’icona AICS e attivale da lì.'
+    : st === 'denied' ? 'Le notifiche sono bloccate. Riattivale da <b>Impostazioni → Notifiche → AICS</b>, poi riapri l’app.'
+    : 'Questo browser non supporta le notifiche. Sull’iPhone serve iOS 16.4 o più recente.';
+}
+function renderNotif(){
+  const st = notifStato(), box = $('#notifBox');
+  if(box){
+    box.hidden = st === 'off';
+    if(!box.hidden){
+      box.innerHTML = `<h3>🔔 Notifiche</h3><p class="note" style="margin:0">${notifTesto(st)}</p>${NOTIF.err ? `<p class="note err-t" style="margin:0">${esc(NOTIF.err)}</p>` : ''}
+        ${st === 'ask' || (st === 'on' && (NOTIF.err || !notifLS('notifTok'))) ? `<button class="btn btn-primary btn-block" data-notif ${NOTIF.busy ? 'disabled' : ''}>${NOTIF.busy ? 'Attivo…' : 'Attiva notifiche'}</button>` : ''}
+        ${st === 'on' && notifLS('notifTok') ? '<button class="btn btn-ghost btn-block" id="notifProva">Prova una notifica</button>' : ''}`;
+      const pr = $('#notifProva');
+      if(pr) pr.onclick = async () => { try{ const r = await navigator.serviceWorker.ready; await r.showNotification('AICS', {body: 'Le notifiche funzionano ✓', icon: 'icon-aics.png'}); }catch(e){ toast('Non riesco a mostrare la notifica'); } };
+    }
+  }
+  const h = $('#notifHint');
+  if(h){
+    const show = ACC.user && ACC.profilo && (st === 'ask' || st === 'home') && !notifLS('notifNo');
+    h.hidden = !show;
+    h.innerHTML = show ? `<section class="ref-sec notif-home"><h3>🔔 Attiva le notifiche</h3><p class="note" style="margin:0">${notifTesto(st)}</p>
+      <div class="row">${st === 'ask' ? `<button class="btn btn-primary" data-notif ${NOTIF.busy ? 'disabled' : ''}>${NOTIF.busy ? 'Attivo…' : 'Attiva notifiche'}</button>` : ''}<button class="btn btn-ghost" id="notifNo">Non ora</button></div></section>` : '';
+    const no = $('#notifNo'); if(no) no.onclick = () => { notifLS('notifNo', '1'); renderNotif(); };
+  }
+  document.querySelectorAll('[data-notif]').forEach(b => b.onclick = () => notifAttiva(true));
+}
+
 function renderOggiDes(){
   const el = $('#desHint'); if(!el) return;
+  renderNotif();
   const t = todayIso(), key = d => `${d.data || '9999'} ${d.ora || ''}`;
   const da = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= t) && !rispOf(d, ACC.user.uid)).sort((a, b) => key(a).localeCompare(key(b))) : [];
   el.hidden = !da.length;
@@ -2332,7 +2421,7 @@ function dsText(d, u){
   const dt = d.data ? fmtLong(d.data) : 'data da definire';
   return [`📋 DESIGNAZIONE${u ? ' – ' + (u.ruolo || 'Arbitro') : ''}`, `${d.casa || ''} – ${d.ospite || ''}`, [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · '),
     `📅 ${dt[0].toUpperCase() + dt.slice(1)}${d.ora ? ' ore ' + d.ora : ''}`, `📍 ${[d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')}`, d.rimborso ? `💶 Rimborso ${eur(d.rimborso)}` : '', d.note ? `📝 Note: ${d.note}` : '',
-    '', 'Apri l’app AICS per accettare la designazione.'].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+    '', !u ? '' : (rispOf(d, u.uid) || {}).stato === 'accettata' ? '✅ Designazione già accettata.\n🗺️ Se non conosci la strada, nell’app AICS apri la partita e tocca “Google Maps” per arrivare al campo.' : 'Apri l’app AICS per accettare la designazione.'].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
 
 function openDs(id){
@@ -2458,7 +2547,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113135358';
+const APP_BUILD = '20261113143025';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
