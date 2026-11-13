@@ -37,19 +37,26 @@ const eur = n => Number(n || 0).toLocaleString('it-IT', {minimumFractionDigits: 
 
 async function main() {
   const now = oraRoma(), adesso = minuti(now.data, now.ora);
-  const [desSnap, statiSnap, arbSnap, tokSnap, antSnap] = await Promise.all(['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi'].map(c => db.collection(c).get()));
+  const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap] = await Promise.all(['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi'].map(c => db.collection(c).get()));
   const stati = {}; statiSnap.forEach(s => { stati[s.id] = s.data(); });
   const meta = stati._meta; delete stati._meta;
   const zitto = !meta; // primo giro: registra com'è la situazione senza mandare niente
   const nomi = {}, adminUid = [];
   arbSnap.forEach(a => { const x = a.data(); nomi[a.id] = [x.nome, x.cognome].filter(Boolean).join(' ') || x.email || ''; if (ADMINS.includes(String(x.email || '').toLowerCase())) adminUid.push(a.id); });
+  // accessi: chi non è approvato (o ha l'accesso tolto) non riceve niente
+  const acc = {}; accSnap.forEach(a => { acc[a.id] = a.data().stato || ''; });
+  const scritture = [];
+  if (!('_avvio' in acc)) { // la prima volta chi era già registrato resta dentro
+    arbSnap.forEach(a => { if (!acc[a.id]) { acc[a.id] = 'attivo'; scritture.push(['acc', a.id, {stato: 'attivo', at: Date.now(), da: 'avvio'}]); } });
+    scritture.push(['acc', '_avvio', {at: Date.now()}]); acc._avvio = '';
+  }
+  const attivo = uid => adminUid.includes(uid) || acc[uid] === 'attivo';
   const tokens = {}; tokSnap.forEach(t => { const u = t.data().uid; if (u) (tokens[u] = tokens[u] || []).push(t.id); });
 
   const msg = [];
   const manda = (uids, title, body, tag, url = './index.html') => { for (const uid of new Set(uids)) if (uid) msg.push({uid, title, body, tag, url}); };
   const aiDesignatori = (title, body, tag, tranne) => manda(adminUid.filter(u => u !== tranne), title, body, tag, './index.html#designazioni');
 
-  const scritture = [];
   const visti = new Set();
   desSnap.forEach(doc => {
     const d = doc.data(), id = doc.id, s = stati[id] || null; visti.add(id);
@@ -116,11 +123,15 @@ async function main() {
     aiDesignatori('💶 Nuovo anticipo', `${x.nome || nomi[x.uid] || 'Un arbitro'}: ${eur(x.importo)}${x.descrizione ? ' · ' + x.descrizione : ''}`, 'ant-' + a.id, x.uid);
   });
 
+  // nuovi arbitri da approvare
+  const inAttesa = arbSnap.docs.filter(a => !adminUid.includes(a.id) && !acc[a.id]).map(a => a.id), giaAvvisati = new Set(meta && meta.richieste || []);
+  if (!zitto) for (const uid of inAttesa) if (!giaAvvisati.has(uid)) aiDesignatori('👤 Nuovo arbitro da approvare', `${nomi[uid] || 'Un arbitro'} si è registrato: approvalo nella scheda Arbitri.`, 'acc-' + uid);
+
   // spedizione
   const invii = [];
-  for (const m of msg) for (const token of tokens[m.uid] || []) invii.push({m, token});
+  for (const m of msg) if (attivo(m.uid)) for (const token of tokens[m.uid] || []) invii.push({m, token});
   console.log(`${now.data} ${now.ora} · ${zitto ? 'primo giro (nessun invio)' : msg.length + ' notifiche'} · ${invii.length} invii`);
-  for (const m of msg) console.log(`  → ${nomi[m.uid] || m.uid}: ${m.title} | ${m.body}${(tokens[m.uid] || []).length ? '' : ' (notifiche non attive)'}`);
+  for (const m of msg) console.log(`  → ${nomi[m.uid] || m.uid}: ${m.title} | ${m.body}${!attivo(m.uid) ? ' (accesso non attivo)' : (tokens[m.uid] || []).length ? '' : ' (notifiche non attive)'}`);
   if (invii.length && !DRY) {
     for (let i = 0; i < invii.length; i += 500) {
       const parte = invii.slice(i, i + 500);
@@ -144,11 +155,12 @@ async function main() {
     for (const [op, id, data] of scritture.slice(i, i + 400)) {
       if (op === 'set') b.set(col.doc(id), data);
       else if (op === 'del') b.delete(col.doc(id));
+      else if (op === 'acc') b.set(db.collection('accessi').doc(id), data);
       else b.delete(db.collection('tokens').doc(id));
     }
     await b.commit();
   }
-  await col.doc('_meta').set({anticipi: antIds, ultimoGiro: Date.now(), avviato: meta && meta.avviato || Date.now()});
+  await col.doc('_meta').set({anticipi: antIds, richieste: inAttesa, ultimoGiro: Date.now(), avviato: meta && meta.avviato || Date.now()});
 }
 
 main().then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });

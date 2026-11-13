@@ -421,6 +421,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 .sheet::-webkit-scrollbar-thumb:hover{background-color:var(--muted)}
 .sheet::-webkit-scrollbar-button{display:none;height:0}
 @supports not selector(::-webkit-scrollbar){.sheet{scrollbar-width:thin;scrollbar-color:var(--line) transparent}}
+.logo-back{overflow:hidden}
+.logo-back .logo-img{border-radius:11px}
+.logo-img{background-clip:border-box}
+.acc-row{flex-direction:column;align-items:stretch}
+.acc-row > div:first-child{flex:none;width:100%}
+.ds-arb.acc-row > div.row{flex:none;width:100%;flex-direction:row;align-items:stretch;gap:10px}
+.acc-row .row > .btn{flex:1 1 0}
+.acc-req{border-color:var(--card-yellow)}
+.seg-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;margin-left:4px;border-radius:99px;background:var(--card-red);color:#fff;font-size:12px;font-family:var(--body);vertical-align:1px}
+.acc-wait h3{font-size:24px}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -1772,8 +1782,8 @@ function accStart(){
 }
 async function onUser(u){
   ACC.unsub.forEach(f => f()); ACC.unsub = [];
-  Object.assign(ACC, {ready: false, user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
-  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], loaded: false, err: ''});
+  Object.assign(ACC, {ready: false, user: u, profilo: null, isAdmin: false, accesso: '', regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
+  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], acc: {}, accLoaded: false, arbLoaded: false, loaded: false, err: ''});
   if(!u){ Object.assign(IND, {mie: [], tutte: [], loaded: false}); ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); renderAnticipi(); return; }
   const db = firebase.firestore(), em = myEmail();
   ACC.isAdmin = ADMINS().includes(em);
@@ -1781,6 +1791,17 @@ async function onUser(u){
   try{ const p = await db.collection('arbitri').doc(u.uid).get(); ACC.profilo = p.exists ? p.data() : null; }catch(e){}
   if(!ACC.profilo && ACC.pendingProfile){ const p = {...ACC.pendingProfile, email: em}; try{ await db.collection('arbitri').doc(u.uid).set(p); ACC.profilo = p; }catch(e){} }
   ACC.pendingProfile = null;
+  // chi si registra entra solo dopo l'ok di un designatore (che può anche togliere l'accesso)
+  if(!ACC.isAdmin){
+    const st = await new Promise(res => { let first = true;
+      ACC.unsub.push(db.collection('accessi').doc(u.uid).onSnapshot(s => {
+        const v = s.exists ? (s.data().stato || '') : '';
+        if(first){ first = false; res(v); return; }
+        if((v === 'attivo') !== (ACC.accesso === 'attivo')) onUser(u).catch(() => {}); else { ACC.accesso = v || 'attesa'; renderGate(); }
+      }, () => { if(first){ first = false; res('attivo'); } })); });   // regole vecchie: come prima
+    ACC.accesso = st || 'attesa';
+    if(ACC.accesso !== 'attivo'){ Store.detach(); ACC.ready = true; renderAccount(); renderTab(); renderGate(); return; }
+  } else ACC.accesso = 'attivo';
   // registro personale online (+ registri condivisi con questa email)
   const own = db.collection('registri').doc(u.uid);
   let os = null; try{ os = await own.get(); }catch(e){}
@@ -1799,7 +1820,8 @@ async function onUser(u){
     const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
     const docs = s => s.docs.map(d => ({id: d.id, ...d.data()}));
     ACC.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = docs(s); DS.loaded = true; renderAccount(); renderPay(); }, fail));
-    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = docs(s); renderAccount(); renderPay(); }, fail));
+    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = docs(s); DS.arbLoaded = true; migraAccessi(); renderAccount(); renderPay(); renderOggiDes(); }, fail));
+    ACC.unsub.push(db.collection('accessi').onSnapshot(s => { DS.acc = {}; s.docs.forEach(d => { DS.acc[d.id] = d.data(); }); DS.accLoaded = true; migraAccessi(); renderAccount(); renderOggiDes(); }, () => { DS.accLoaded = true; DS.accErr = true; renderAccount(); }));
     ACC.unsub.push(db.collection('squadre').onSnapshot(s => { DS.squadre = docs(s); if(['squadre'].includes(DS.tab)) renderAccount(); }, fail));
     ACC.unsub.push(db.collection('impianti').onSnapshot(s => { DS.impianti = docs(s); if(['impianti'].includes(DS.tab)) renderAccount(); }, fail));
     ACC.unsub.push(db.collection('pagamenti').onSnapshot(s => { DS.pag = docs(s); renderPay(); }, fail));
@@ -1866,17 +1888,28 @@ function renderAccount(){
 function renderGate(){
   let g = $('#gate');
   if(!fbReady()){ if(g) g.remove(); return; }
-  const show = !ACC.ready || !ACC.user || !ACC.profilo;
+  const fermo = !!(ACC.ready && ACC.user && ACC.profilo && !ACC.isAdmin && ACC.accesso && ACC.accesso !== 'attivo');
+  const show = !ACC.ready || !ACC.user || !ACC.profilo || fermo;
   document.body.classList.toggle('gated', show);
   if(!show){ if(g) g.remove(); return; }
   if(!g){ g = document.createElement('div'); g.id = 'gate'; document.body.appendChild(g); }
   const intro = !ACC.user && !ACC.gateForm && !ACC.err;
-  const was = g.dataset.st, st = !ACC.ready ? 'wait' : intro ? 'intro' : !ACC.user ? 'auth-' + ACC.mode + (ACC.err ? '-e' : '') : 'prof';
+  const was = g.dataset.st, st = !ACC.ready ? 'wait' : intro ? 'intro' : !ACC.user ? 'auth-' + ACC.mode + (ACC.err ? '-e' : '') : fermo ? 'acc-' + ACC.accesso : 'prof';
   if(was === st && st !== 'wait') return;
   g.dataset.st = st;
   if(st === 'intro' || st === 'wait'){
     g.innerHTML = `<div class="gate-in gate-intro"><span class="gate-logo big logo-img" role="img" aria-label="Logo"></span>${st === 'wait' ? '<div class="status" style="align-self:center"><span class="spin"></span>Apro l’app…</div>' : '<button class="btn btn-primary gate-login" id="gLogin">LOGIN</button>'}</div>`;
     if(st === 'intro') $('#gLogin').onclick = () => { ACC.gateForm = true; renderGate(); };
+    return;
+  }
+  if(fermo){
+    const blocc = ACC.accesso === 'bloccato';
+    g.innerHTML = `<div class="gate-in"><span class="gate-logo logo-img" role="img" aria-label="Logo"></span>
+      <section class="ref-sec acc-wait"><h3>${blocc ? '⛔ Accesso non attivo' : '⏳ In attesa di approvazione'}</h3>
+      <p class="note" style="margin:0">${blocc ? 'Il tuo account non è abilitato a usare l’app AICS. Per informazioni contatta il designatore.' : `Ciao ${esc(ACC.profilo.nome || '')}, la tua registrazione è arrivata ai designatori AICS. Appena ti approvano l’app si apre da sola: non serve fare altro.`}</p>
+      <p class="note" style="margin:0">${esc(ACC.user.email || '')}</p></section>
+      <button class="btn btn-ghost btn-block" id="gOut">Esci</button></div>`;
+    $('#gOut').onclick = () => firebase.auth().signOut();
     return;
   }
   g.innerHTML = `<div class="gate-in"><span class="gate-logo logo-img" role="img" aria-label="Logo"></span>
@@ -2282,9 +2315,11 @@ function renderOggiDes(){
   renderNotif();
   const t = todayIso(), key = d => `${d.data || '9999'} ${d.ora || ''}`;
   const da = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= t) && !rispOf(d, ACC.user.uid)).sort((a, b) => key(a).localeCompare(key(b))) : [];
-  el.hidden = !da.length;
-  el.innerHTML = da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3><p class="note" style="margin:0">Tocca la gara per vederla e rispondere.</p><ul class="list">${da.map(mieRow).join('')}</ul></section>` : '';
+  const rich = ACC.isAdmin ? arbInAttesa() : [];
+  el.hidden = !da.length && !rich.length;
+  el.innerHTML = (rich.length ? `<section class="ref-sec des-home"><h3>👤 Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">${esc(rich.slice(0, 3).map(nomeArb).join(', '))}${rich.length > 3 ? '…' : ''} ${rich.length === 1 ? 'si è registrato e aspetta' : 'si sono registrati e aspettano'} il tuo ok.</p><button class="btn btn-primary btn-block" id="goApprova">Vai agli arbitri</button></section>` : '') + (da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3><p class="note" style="margin:0">Tocca la gara per vederla e rispondere.</p><ul class="list">${da.map(mieRow).join('')}</ul></section>` : '');
   if(da.length) bindRows(el);
+  if($('#goApprova')) $('#goApprova').onclick = () => { DS.tab = 'arbitri'; location.hash = '#designazioni'; renderDesigna(); };
   renderTab();
 }
 
@@ -2323,7 +2358,7 @@ function renderDesigna(){
   const box = $('#dsBody'); if(!box) return;
   if(!(ACC.user && ACC.isAdmin)){ box.innerHTML = ACC.ready ? '' : '<div class="status"><span class="spin"></span>Collego l’account…</div>'; return; }
   const tab = DS.tab;
-  box.innerHTML = `<div class="seg seg5" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button><button data-t="ind" aria-pressed="${tab === 'ind'}">Indisponibili</button></div>
+  box.innerHTML = `<div class="seg seg5" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri${arbInAttesa().length ? ` <b class="seg-n">${arbInAttesa().length}</b>` : ''}</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button><button data-t="ind" aria-pressed="${tab === 'ind'}">Indisponibili</button></div>
     ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
     <div id="dsList" class="view"></div>`;
   box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
@@ -2365,7 +2400,7 @@ function renderIndCal(){
 }
 function openInd(x, admin = false){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !x.id;
-  const arbs = DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
+  const arbs = DS.arbitri.filter(a => statoArb(a) === 'attivo' || a.id === x.uid).sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Indisponibilità"><div class="grab"></div>
     <form class="form" id="indForm"><h3>${isNew ? 'Nuova indisponibilità' : 'Modifica indisponibilità'}</h3>
     ${admin ? `<div class="field full"><label for="in-uid">Arbitro</label><select id="in-uid" required ${isNew ? '' : 'disabled'}><option value="">Scegli arbitro…</option>${arbs.map(a => `<option value="${esc(a.id)}" ${a.id === x.uid ? 'selected' : ''}>${esc(nomeArb(a))}</option>`).join('')}</select></div>` : ''}
@@ -2441,6 +2476,23 @@ function renderDsInd(){
   bind();
 }
 
+/* ---------- accesso all'app: approvare, togliere, riattivare ---------- */
+const statoArb = a => !a ? '' : ADMINS().includes(String(a.email || '').toLowerCase()) ? 'attivo' : ((DS.acc || {})[a.id] || {}).stato || 'attesa';
+const arbAttivi = () => DS.arbitri.filter(a => statoArb(a) === 'attivo');
+const arbInAttesa = () => DS.accLoaded && !DS.accErr ? DS.arbitri.filter(a => statoArb(a) === 'attesa').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) : [];
+let MIGRA = false;
+async function migraAccessi(){   // la prima volta: chi era già registrato resta dentro
+  if(MIGRA || !ACC.isAdmin || !DS.accLoaded || DS.accErr || !DS.arbLoaded || (DS.acc || {})._avvio) return;
+  MIGRA = true;
+  const db = firebase.firestore(), b = db.batch();
+  DS.arbitri.forEach(a => { if(!DS.acc[a.id]) b.set(db.collection('accessi').doc(a.id), {stato: 'attivo', at: Date.now(), da: 'avvio'}); });
+  b.set(db.collection('accessi').doc('_avvio'), {at: Date.now()});
+  try{ await b.commit(); }catch(e){ MIGRA = false; }
+}
+async function setAccesso(uid, stato, ok){
+  try{ await firebase.firestore().collection('accessi').doc(uid).set({stato, at: Date.now(), da: myEmail()}); if(ok) toast(ok); return true; }catch(e){ toast(fbErr(e)); return false; }
+}
+
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
 /* risultato del referto ricevuto (non sbloccato), accanto alle squadre */
 const desRis = d => { const uff = d.ufficiali || [], refs = d.referti || {}, ord = [...uff.filter(u => u.ruolo === 'Arbitro'), ...uff.filter(u => u.ruolo !== 'Arbitro')];
@@ -2492,15 +2544,26 @@ function renderDsGareList(base, past){
 }
 function renderDsArbitri(){
   const el = $('#dsList'), t = todayIso();
-  const list = DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
+  const list = arbAttivi().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
+  const rich = arbInAttesa(), tolti = DS.arbitri.filter(a => statoArb(a) === 'bloccato').sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
   const inv = `Ciao! Per ricevere le designazioni registrati qui: ${arbitroUrl()}`;
-  el.innerHTML = `<div class="ref-sec"><h3>Invita gli arbitri</h3><p class="note" style="margin:0">Mandagli questo link: si registrano con nome, telefono, email e password e compaiono qui sotto. Poi li puoi designare.</p>
+  const reg = a => a.createdAt ? 'Registrato il ' + new Date(a.createdAt).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
+  el.innerHTML = `${DS.accErr ? '<div class="status err">Non riesco a leggere gli accessi: pubblica le nuove regole di Firestore.</div>' : ''}
+    ${rich.length ? `<section class="ref-sec acc-req"><h3>Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">Si sono registrati e aspettano il tuo ok: finché non li approvi non vedono niente dell’app.</p>
+      <ul class="list">${rich.map(a => `<li class="ds-arb acc-row"><div><b>${esc(nomeArb(a))}</b><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span>${reg(a) ? `<span>${reg(a)}</span>` : ''}</div><div class="row"><button class="btn btn-primary sm" data-appr="${esc(a.id)}">Approva</button><button class="btn btn-danger sm" data-rifiu="${esc(a.id)}">Rifiuta</button></div></li>`).join('')}</ul></section>` : ''}
+    <div class="ref-sec"><h3>Invita gli arbitri</h3><p class="note" style="margin:0">Mandagli questo link: si registrano con nome, telefono, email e password e compaiono qui sotto. Poi li puoi designare.</p>
       <div class="row"><a class="btn btn-primary" href="https://wa.me/?text=${encodeURIComponent(inv)}" target="_blank" rel="noopener">Invita su WhatsApp</a><button class="btn btn-ghost" id="dsCopy">Copia link</button></div></div>
     ${list.length ? `<ul class="list">${list.map(a => { const n = DS.gare.filter(d => (d.arbitriIds || []).includes(a.id) && d.data >= t).length;
       return `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span></div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
-      : `<div class="empty-box"><h3>Nessun arbitro registrato</h3><span>Quando un arbitro si registra dal link compare qui.</span></div>`}`;
+      : `<div class="empty-box"><h3>Nessun arbitro attivo</h3><span>Quando un arbitro si registra dal link e lo approvi compare qui.</span></div>`}
+    ${tolti.length ? `<section class="ref-sec"><h3>Accesso tolto <span class="cnt">${tolti.length}</span></h3><p class="note" style="margin:0">Non possono entrare nell’app, ma i loro dati restano salvati: se li riattivi ritrovano tutto com’era.</p>
+      <ul class="list">${tolti.map(a => `<li class="ds-arb"><div><b>${esc(nomeArb(a))}</b><span>${esc(a.email || '')}</span></div><button class="btn btn-ghost sm" data-riatt="${esc(a.id)}">Riattiva</button></li>`).join('')}</ul></section>` : ''}`;
   $('#dsCopy').onclick = async () => { try{ await navigator.clipboard.writeText(arbitroUrl()); toast('Link copiato'); }catch(e){ toast(arbitroUrl()); } };
   el.querySelectorAll('[data-arb]').forEach(b => b.onclick = () => openArb(b.dataset.arb));
+  const nm = id => nomeArb(DS.arbitri.find(a => a.id === id));
+  el.querySelectorAll('[data-appr]').forEach(b => b.onclick = () => { b.disabled = true; setAccesso(b.dataset.appr, 'attivo', `${nm(b.dataset.appr)} approvato: ora può entrare`); });
+  el.querySelectorAll('[data-rifiu]').forEach(b => b.onclick = () => { if(confirm(`Rifiutare ${nm(b.dataset.rifiu)}? Non potrà entrare nell’app (puoi sempre riattivarlo dopo).`)) setAccesso(b.dataset.rifiu, 'bloccato', 'Registrazione rifiutata'); });
+  el.querySelectorAll('[data-riatt]').forEach(b => b.onclick = () => { b.disabled = true; setAccesso(b.dataset.riatt, 'attivo', `${nm(b.dataset.riatt)} riattivato: ritrova tutti i suoi dati`); });
 }
 function openArb(id){
   const a = DS.arbitri.find(x => x.id === id); if(!a) return;
@@ -2509,9 +2572,17 @@ function openArb(id){
     <h2>${esc(nomeArb(a))}</h2>${ADMINS().includes((a.email || '').toLowerCase()) ? '<span class="pill ruolo" style="align-self:flex-start">Designatore</span>' : ''}
     ${datiKv(a)}
     <div class="row">${a.iban ? `<button class="btn btn-primary" data-a="iban">Copia IBAN</button>` : '<span class="err-t">IBAN non inserito</span>'}${a.telefono ? `<a class="btn btn-ghost" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-ghost" href="tel:${esc(a.telefono)}">Chiama</a>` : ''}</div>
+    ${ADMINS().includes((a.email || '').toLowerCase()) ? '' : statoArb(a) === 'attivo' ? '<button class="btn btn-danger btn-block" data-a="togli">Togli accesso all’app</button>' : `<button class="btn btn-primary btn-block" data-a="riatt">${statoArb(a) === 'attesa' ? 'Approva' : 'Riattiva accesso'}</button>`}
     <button class="btn btn-ghost btn-block" data-a="close">Chiudi</button></div></div>`;
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   root.querySelector('[data-a=close]').onclick = close;
+  const tg = root.querySelector('[data-a=togli]'), ra = root.querySelector('[data-a=riatt]');
+  if(tg) tg.onclick = async () => {
+    const t = todayIso(), gare = DS.gare.filter(d => (d.arbitriIds || []).includes(id) && d.data >= t).sort(dsSort);
+    if(!confirm(`Togliere l’accesso a ${nomeArb(a)}?\n\nNon potrà più entrare nell’app e non riceverà notifiche. I suoi dati (referti, rimborsi, registro) restano salvati: se lo riattivi ritrova tutto.${gare.length ? `\n\nHa ancora ${gare.length} ${gare.length === 1 ? 'gara' : 'gare'} in programma: ${gare.map(d => `${fmtShort(d.data)} ${d.casa || ''} – ${d.ospite || ''}`).join('; ')}. Ricordati di cambiare arbitro.` : ''}`)) return;
+    if(await setAccesso(id, 'bloccato', 'Accesso tolto')) close();
+  };
+  if(ra) ra.onclick = async () => { if(await setAccesso(id, 'attivo', statoArb(a) === 'attesa' ? 'Arbitro approvato' : 'Accesso riattivato: ritrova tutti i suoi dati')) close(); };
   const ib = root.querySelector('[data-a=iban]'); if(ib) ib.onclick = async () => { try{ await navigator.clipboard.writeText(a.iban); toast('IBAN copiato'); }catch(e){ toast(ibanFmt(a.iban)); } };
 }
 
@@ -2610,7 +2681,7 @@ function openDsForm(d){
   // chi è indisponibile nel giorno della gara non si può scegliere (resta solo se era già designato)
   const giaDes = new Set(d.data ? d.arbitriIds || [] : []), dataDi = () => (root.querySelector('#df-data') || {}).value || d.data || '';
   const indOk = (uid, k) => !indDi(uid, k).length || (k === d.data && giaDes.has(uid));
-  const arbOpts = (sel, k = dataDi()) => `<option value="">Scegli arbitro…</option>` + DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b))).map(a => { const no = indDi(a.id, k).length;
+  const arbOpts = (sel, k = dataDi()) => `<option value="">Scegli arbitro…</option>` + DS.arbitri.filter(a => statoArb(a) === 'attivo' || a.id === sel).sort((a, b) => nomeArb(a).localeCompare(nomeArb(b))).map(a => { const no = indDi(a.id, k).length;
     return `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''} ${no && !indOk(a.id, k) && a.id !== sel ? 'disabled' : ''}>${esc(nomeArb(a))}${no ? ' – indisponibile' : ''}</option>`; }).join('');
   const offRow = u => `<div class="ds-offrow"><select data-o="uid" aria-label="Arbitro">${arbOpts(u.uid)}</select><select data-o="ruolo" aria-label="Ruolo">${RUOLI.filter(r => r !== 'Altro').map(r => `<option ${r === (u.ruolo || 'Arbitro') ? 'selected' : ''}>${r}</option>`).join('')}</select><button type="button" class="x" aria-label="Togli">✕</button></div>`;
   const uff = (d.ufficiali && d.ufficiali.length) ? d.ufficiali : [{ruolo: 'Arbitro'}];
@@ -2658,7 +2729,7 @@ function openDsForm(d){
   const syncInd = () => {
     const k = dataDi(), m = f.querySelector('#dsIndMsg');
     offs.querySelectorAll('[data-o=uid]').forEach(s => { const v = s.value; s.innerHTML = arbOpts(v, k); s.value = v; });
-    const no = k ? DS.arbitri.filter(a => indDi(a.id, k).length).map(nomeArb).sort() : [];
+    const no = k ? arbAttivi().filter(a => indDi(a.id, k).length).map(nomeArb).sort() : [];
     m.hidden = !no.length; m.innerHTML = `<span class="ind-msg">⛔ Indisponibili il ${esc(fmtShort(k))}: ${esc(no.join(', '))}</span>`;
   };
   f.querySelector('#df-data').addEventListener('change', syncInd); f.querySelector('#df-data').addEventListener('input', syncInd);
@@ -2701,7 +2772,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113163008';
+const APP_BUILD = '20261113164821';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
