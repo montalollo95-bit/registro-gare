@@ -26,8 +26,8 @@ function oraRoma() {
 const minuti = (data, ora) => Date.UTC(+data.slice(0, 4), +data.slice(5, 7) - 1, +data.slice(8, 10), +ora.slice(0, 2), +ora.slice(3, 5)) / 60000;
 const giorno = data => {
   if (!data) return 'data da definire';
-  const t = new Date(Date.UTC(+data.slice(0, 4), +data.slice(5, 7) - 1, +data.slice(8, 10))).toLocaleDateString('it-IT', {weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC'});
-  return t[0].toUpperCase() + t.slice(1);
+  const t = new Date(Date.UTC(+data.slice(0, 4), +data.slice(5, 7) - 1, +data.slice(8, 10))).toLocaleDateString('it-IT', {weekday: 'short', timeZone: 'UTC'});
+  return `${t[0].toUpperCase() + t.slice(1)} ${data.slice(8, 10)}/${data.slice(5, 7)}`; // es. Ven 13/11
 };
 const squadre = d => `${d.casa || '—'} – ${d.ospite || '—'}`;
 const quando = d => `${giorno(d.data)}${d.ora ? ' ore ' + d.ora : ''}`;

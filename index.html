@@ -337,11 +337,11 @@ body.adm .tabs a[data-v=calendario]{display:none}
 .tabs a[data-v=designazioni]{font-size:11px;letter-spacing:-.01em}
 .ds-day{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:6px 2px -4px;font-family:var(--display);font-size:18px;text-transform:uppercase}
 .ds-day span{font-family:var(--body);font-size:13px;color:var(--muted);text-transform:none}
-.ds-filtri{display:flex;gap:6px;flex-wrap:wrap}
+.ds-filtri{display:flex;gap:8px;flex-wrap:wrap}
 .chip-f{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:99px;padding:7px 12px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .chip-f[aria-pressed="true"]{background:var(--pitch);border-color:var(--pitch);color:#fff}
 .ds-q{width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font:inherit}
-.ds-off-b{display:flex;gap:6px;flex-wrap:wrap}
+.ds-off-b{display:flex;gap:8px;flex-wrap:wrap}
 .ref-view{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .ref-view pre{white-space:pre-wrap;margin:0;font-family:var(--body);font-size:14px;overflow-wrap:anywhere}
 .gara-new{border-color:var(--card-yellow)!important;box-shadow:inset 0 0 0 1px var(--card-yellow)}
@@ -396,6 +396,25 @@ body.gated .tabs,body.gated #scroller{visibility:hidden}
 .score-in{font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap;margin-left:.45em}
 .notif-home{border-color:var(--pitch)}
 .seg.seg3{grid-template-columns:1fr 1fr 1fr}
+[data-rbox]:not(:empty){display:flex;flex-direction:column;gap:12px;margin-top:4px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;border-color:var(--card-yellow)!important;box-shadow:inset 0 0 0 1px var(--card-yellow)}
+.seg button:focus-visible,.chip-f:focus-visible,.cal button:focus-visible,.tabs a:focus-visible{outline-offset:-2px}
+.cal button.ind{background:color-mix(in srgb,var(--card-red) 15%,transparent);color:var(--card-red)}
+.cal button.ind.sel{background:var(--card-red);color:#fff}
+.cal .ind-n{font-family:var(--body);font-size:11px;font-weight:800;line-height:1;color:var(--card-red)}
+.cal button.ind.sel .ind-n{color:#fff}
+.cal button:has(.ind-n) .dots{height:auto}
+.ind-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--card-red);background:color-mix(in srgb,var(--card-red) 7%,var(--surface))}
+.ind-card b{color:var(--card-red)}
+.ind-list{display:flex;flex-direction:column;gap:8px}
+.ind-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);border-left:4px solid var(--card-red);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer}
+.ind-row > span:first-child{min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.ind-row > span:first-child span{color:var(--muted);font-size:14px}
+.ind-tag{color:var(--pitch);font-weight:700;font-size:14px;flex:none}
+.ind-msg{color:var(--card-red);font-weight:600;font-size:14px}
+.seg.seg5{grid-template-columns:repeat(6,1fr)}
+.seg.seg5 button:nth-child(-n+3){grid-column:span 2}
+.seg.seg5 button:nth-child(n+4){grid-column:span 3}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -503,9 +522,11 @@ body.lock .ro-flex{display:flex!important}
         <div class="cal" id="cal"></div>
       </div>
       <div class="eyebrow" id="dayLbl"></div>
+      <div id="indDay"></div>
       <ul class="list" id="dayList"></ul>
     </div>
     <div id="calLista" class="view" hidden></div>
+    <div id="indBox"></div>
     <button class="btn btn-ghost btn-block" id="exportAll">Metti tutte le prossime gare nel calendario dell'iPhone</button>
   </div>
 </section>
@@ -823,6 +844,7 @@ $('#nextM').onclick = () => { calMonth.setMonth(calMonth.getMonth()+1); renderCa
 $('#cMese').onclick = () => { calMode='mese'; seg($('#cMese'),$('#cLista'),true); renderCal(); };
 $('#cLista').onclick = () => { calMode='lista'; seg($('#cMese'),$('#cLista'),false); renderCal(); };
 function renderCal(){
+  renderIndCal();
   $('#calMese').hidden = calMode !== 'mese'; $('#calLista').hidden = calMode !== 'lista';
   const byDay = {}; Store.gare.forEach(g => { if(g.data) (byDay[g.data] = byDay[g.data] || []).push(g); });
   if(calMode === 'lista'){
@@ -841,14 +863,14 @@ function renderCal(){
     const d = new Date(start); d.setDate(start.getDate()+i); const k = iso(d);
     if(i % 7 === 0 && i > 0 && d.getMonth() !== calMonth.getMonth()) break;
     const out = d.getMonth() !== calMonth.getMonth(); const n = (byDay[k]||[]).length;
-    html += `<button data-d="${k}" class="${out?'out ':''}${k===todayIso()?'today ':''}${k===selDay?'sel':''}" ${out?'tabindex="-1" aria-hidden="true"':''} aria-label="${d.getDate()} ${MESI[d.getMonth()]}${n?`, ${n} gara`:''}"><span>${d.getDate()}</span><span class="dots">${'<i></i>'.repeat(Math.min(n,3))}</span></button>`;
+    html += `<button data-d="${k}" class="${out?'out ':''}${k===todayIso()?'today ':''}${indMio(k)?'ind ':''}${k===selDay?'sel':''}" ${out?'tabindex="-1" aria-hidden="true"':''} aria-label="${d.getDate()} ${MESI[d.getMonth()]}${n?`, ${n} gara`:''}"><span>${d.getDate()}</span><span class="dots">${'<i></i>'.repeat(Math.min(n,3))}</span></button>`;
   }
   $('#cal').innerHTML = html;
   $('#cal').querySelectorAll('button:not(.out)').forEach(b => b.onclick = () => { selDay = b.dataset.d; renderCal(); });
   const sd = parseD(selDay); $('#dayLbl').textContent = sd.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
   const items = (byDay[selDay]||[]).sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
   $('#dayList').innerHTML = items.length ? items.map(garaCard).join('') : `<li class="note" style="font-size:15px">Nessuna gara in questo giorno</li>`;
-  bindCards($('#dayList'));
+  bindCards($('#dayList')); renderIndCal();
 }
 
 /* calendario del telefono (.ics) */
@@ -1746,7 +1768,7 @@ async function onUser(u){
   ACC.unsub.forEach(f => f()); ACC.unsub = [];
   Object.assign(ACC, {ready: false, user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
   Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], loaded: false, err: ''});
-  if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); renderAnticipi(); return; }
+  if(!u){ Object.assign(IND, {mie: [], tutte: [], loaded: false}); ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); renderAnticipi(); return; }
   const db = firebase.firestore(), em = myEmail();
   ACC.isAdmin = ADMINS().includes(em);
   try{ localStorage.setItem('rg-admin', ACC.isAdmin ? '1' : ''); }catch(e){}
@@ -1764,6 +1786,7 @@ async function onUser(u){
   if(!pref && ACC.regs.length > 1){ let vuoto = true; try{ vuoto = (await own.collection('righe').limit(1).get()).empty; }catch(e){} if(vuoto && !hasLegacy()) rid = ACC.regs.find(r => r.id !== u.uid).id; }
   useRegistro(rid);
   // designazioni ricevute
+  indAscolta(db, u);
   ACC.unsub.push(db.collection('anticipi').where('uid', '==', u.uid).onSnapshot(s => { ACC.anticipi = s.docs.map(d => ({id: d.id, ...d.data()})); renderAnticipi(); }, () => {}));
   ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot({includeMetadataChanges: true}, s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; if(!s.metadata.fromCache) ACC.mieServer = true; syncAccettate(); render(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
   if(ACC.isAdmin){
@@ -2294,11 +2317,122 @@ function renderDesigna(){
   const box = $('#dsBody'); if(!box) return;
   if(!(ACC.user && ACC.isAdmin)){ box.innerHTML = ACC.ready ? '' : '<div class="status"><span class="spin"></span>Collego l’account…</div>'; return; }
   const tab = DS.tab;
-  box.innerHTML = `<div class="seg" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button></div>
+  box.innerHTML = `<div class="seg seg5" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button><button data-t="ind" aria-pressed="${tab === 'ind'}">Indisponibili</button></div>
     ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
     <div id="dsList" class="view"></div>`;
   box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
-  ({gare: renderDsGare, arbitri: renderDsArbitri, squadre: renderDsSquadre, impianti: renderDsImpianti})[tab]();
+  ({gare: renderDsGare, arbitri: renderDsArbitri, squadre: renderDsSquadre, impianti: renderDsImpianti, ind: renderDsInd})[tab]();
+}
+
+/* ---------- indisponibilità: giorni in cui un arbitro non può essere designato ---------- */
+const IND = {mie: [], tutte: [], loaded: false, err: false, vista: 'mese', mese: todayIso().slice(0, 7), giorno: todayIso()};
+const indDi = (uid, k) => (ACC.isAdmin ? IND.tutte : IND.mie).filter(x => x.uid === uid && k && x.dal <= k && x.al >= k);
+const indMio = k => !!(ACC.user && IND.mie.some(x => x.dal <= k && x.al >= k));
+const indPer = x => x.dal === x.al ? (t => t[0].toUpperCase() + t.slice(1))(fmtLong(x.dal)) : `Dal ${fmtShort(x.dal)} al ${fmtShort(x.al)}${x.al.slice(0, 4) !== todayIso().slice(0, 4) ? ' ' + x.al.slice(0, 4) : ''}`;
+const indNome = x => nomeArb(DS.arbitri.find(a => a.id === x.uid)) || x.nome || 'Arbitro';
+function indAscolta(db, u){
+  Object.assign(IND, {mie: [], tutte: [], loaded: false, err: false});
+  const q = ACC.isAdmin ? db.collection('indisponibilita') : db.collection('indisponibilita').where('uid', '==', u.uid);
+  ACC.unsub.push(q.onSnapshot(s => {
+    const l = s.docs.map(d => ({id: d.id, ...d.data()})).filter(x => x.dal && x.al);
+    IND.tutte = ACC.isAdmin ? l : []; IND.mie = l.filter(x => x.uid === u.uid); IND.loaded = true; IND.err = false;
+    renderCal(); if(ACC.isAdmin && DS.tab === 'ind') renderDsInd();
+  }, () => { IND.loaded = true; IND.err = true; renderCal(); }));
+}
+/* nel Calendario: il giorno scelto e l'elenco delle mie indisponibilità */
+function renderIndCal(){
+  const day = $('#indDay'), box = $('#indBox'); if(!day || !box) return;
+  if(!fbReady() || !ACC.user){ day.innerHTML = ''; box.innerHTML = fbReady() && ACC.ready ? '<section class="ref-sec"><h3>Indisponibilità</h3><p class="note" style="margin:0">Accedi con il tuo account per segnare i giorni in cui non puoi arbitrare.</p></section>' : ''; return; }
+  const k = selDay, mie = IND.mie.filter(x => x.dal <= k && x.al >= k);
+  day.innerHTML = mie.length ? mie.map(x => `<div class="ind-card"><b>⛔ Non disponibile</b><span>${esc(indPer(x))}${x.note ? ' · ' + esc(x.note) : ''}</span><button class="btn btn-ghost sm" data-ind="${esc(x.id)}">Modifica</button></div>`).join('')
+    : `<button class="btn btn-ghost btn-block" id="indQui">⛔ Segna questo giorno come indisponibile</button>`;
+  const t = todayIso(), prossime = IND.mie.filter(x => x.al >= t).sort((a, b) => a.dal.localeCompare(b.dal));
+  box.innerHTML = `<section class="ref-sec"><h3>Le mie indisponibilità${prossime.length ? ` <span class="cnt">${prossime.length}</span>` : ''}</h3>
+    <p class="note" style="margin:0">Segna i giorni in cui non puoi arbitrare: i designatori li vedono e in quei giorni non possono designarti.</p>
+    ${IND.err ? '<div class="status err">Non riesco a leggere le indisponibilità: controlla le regole di Firestore.</div>' : ''}
+    ${prossime.length ? `<div class="ind-list">${prossime.map(x => `<button class="ind-row" data-ind="${esc(x.id)}"><span><b>${esc(indPer(x))}</b>${x.note ? `<span>${esc(x.note)}</span>` : ''}</span><span class="ind-tag">Modifica ›</span></button>`).join('')}</div>` : ''}
+    <button class="btn btn-primary btn-block" id="indAdd">+ Aggiungi indisponibilità</button></section>`;
+  const apri = id => openInd(IND.mie.find(x => x.id === id) || {});
+  [day, box].forEach(b => b.querySelectorAll('[data-ind]').forEach(x => x.onclick = () => apri(x.dataset.ind)));
+  if($('#indQui')) $('#indQui').onclick = () => openInd({dal: k, al: k});
+  $('#indAdd').onclick = () => openInd({dal: k >= t ? k : t});
+}
+function openInd(x, admin = false){
+  const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !x.id;
+  const arbs = DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b)));
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Indisponibilità"><div class="grab"></div>
+    <form class="form" id="indForm"><h3>${isNew ? 'Nuova indisponibilità' : 'Modifica indisponibilità'}</h3>
+    ${admin ? `<div class="field full"><label for="in-uid">Arbitro</label><select id="in-uid" required ${isNew ? '' : 'disabled'}><option value="">Scegli arbitro…</option>${arbs.map(a => `<option value="${esc(a.id)}" ${a.id === x.uid ? 'selected' : ''}>${esc(nomeArb(a))}</option>`).join('')}</select></div>` : ''}
+    <div class="field"><label for="in-dal">Dal</label><input id="in-dal" type="date" required value="${esc(x.dal || '')}"></div>
+    <div class="field"><label for="in-al">Al (compreso)</label><input id="in-al" type="date" required value="${esc(x.al || x.dal || '')}"></div>
+    <div class="field full"><label for="in-note">Motivo (facoltativo)</label><input id="in-note" maxlength="120" placeholder="Es. lavoro, vacanza, infortunio" value="${esc(x.note || '')}"></div>
+    <p class="note" style="grid-column:1/-1;margin:0">${admin ? 'In questi giorni l’arbitro non si può designare.' : 'In questi giorni i designatori non potranno designarti.'} Per un giorno solo metti la stessa data in “Dal” e “Al”.</p>
+    <div class="field full" id="inMsg" aria-live="polite"></div>
+    <div class="actions row"><button type="submit" class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+    ${isNew ? '' : '<button type="button" class="btn btn-danger" data-del style="grid-column:1/-1">Elimina indisponibilità</button>'}
+    </form></div></div>`;
+  const f = root.querySelector('#indForm'), dal = f.querySelector('#in-dal'), al = f.querySelector('#in-al'), msg = f.querySelector('#inMsg');
+  const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
+  f.querySelector('[data-x]').onclick = close;
+  dal.onchange = () => { if(dal.value && (!al.value || al.value < dal.value)) al.value = dal.value; };
+  const del = f.querySelector('[data-del]');
+  if(del) del.onclick = async () => { if(!confirm('Eliminare questa indisponibilità?')) return; try{ await firebase.firestore().collection('indisponibilita').doc(x.id).delete(); close(); toast('Indisponibilità eliminata'); }catch(e){ toast(fbErr(e)); } };
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const uid = admin ? (isNew ? f.querySelector('#in-uid').value : x.uid) : ACC.user.uid;
+    if(!uid){ msg.innerHTML = '<span class="err-t">Scegli l’arbitro.</span>'; return; }
+    if(!dal.value || !al.value){ msg.innerHTML = '<span class="err-t">Metti le date.</span>'; return; }
+    if(al.value < dal.value){ msg.innerHTML = '<span class="err-t">La data “Al” viene prima di “Dal”.</span>'; return; }
+    // gare già accettate o designate in quei giorni
+    const gare = (admin ? DS.gare.filter(d => (d.arbitriIds || []).includes(uid)) : ACC.mie.filter(d => (rispOf(d, uid) || {}).stato !== 'rifiutata'))
+      .filter(d => d.data && d.data >= dal.value && d.data <= al.value).sort(dsSort);
+    if(gare.length && !confirm(`${admin ? 'L’arbitro è già designato' : 'Sei già designato'} in questi giorni:\n${gare.map(d => `• ${fmtShort(d.data)}: ${d.casa || '—'} – ${d.ospite || '—'}`).join('\n')}\n\n${admin ? 'Ricordati di cambiare arbitro.' : 'Avvisa il designatore.'} Salvo lo stesso?`)) return;
+    const a = admin ? DS.arbitri.find(y => y.id === uid) : ACC.profilo;
+    const doc = {uid, nome: nomeArb(a) || (admin ? '' : ACC.user.email) || '', dal: dal.value, al: al.value, note: f.querySelector('#in-note').value.trim(), at: Date.now()};
+    const btn = f.querySelector('[type=submit]'); btn.disabled = true;
+    try{
+      const col = firebase.firestore().collection('indisponibilita');
+      await (isNew ? col.doc() : col.doc(x.id)).set(doc);
+      close(); toast(isNew ? 'Indisponibilità salvata' : 'Modifiche salvate');
+    }catch(err){ btn.disabled = false; msg.innerHTML = `<span class="err-t">${esc(fbErr(err))}</span>`; }
+  };
+}
+/* designatori: tutte le indisponibilità, nel calendario e come elenco */
+function renderDsInd(){
+  const el = $('#dsList'); if(!el || DS.tab !== 'ind') return;
+  const t = todayIso(), v = IND.vista;
+  el.innerHTML = `<div class="seg" role="group" aria-label="Vista indisponibilità"><button data-iv="mese" aria-pressed="${v === 'mese'}">Calendario</button><button data-iv="lista" aria-pressed="${v === 'lista'}">Elenco</button></div>
+    ${IND.err ? '<div class="status err">Non riesco a leggere le indisponibilità: controlla le regole di Firestore.</div>' : ''}
+    <button class="btn btn-primary btn-block" id="indAddAdm">+ Aggiungi indisponibilità</button>
+    <div id="indAdm" class="view"></div>`;
+  el.querySelectorAll('[data-iv]').forEach(b => b.onclick = () => { IND.vista = b.dataset.iv; renderDsInd(); });
+  $('#indAddAdm').onclick = () => openInd({dal: IND.giorno >= t ? IND.giorno : t}, true);
+  const box = $('#indAdm'), riga = x => `<button class="ind-row" data-indadm="${esc(x.id)}"><span><b>${esc(indNome(x))}</b><span>${esc(indPer(x))}${x.note ? ' · ' + esc(x.note) : ''}</span></span><span class="ind-tag">Modifica ›</span></button>`;
+  const bind = () => box.querySelectorAll('[data-indadm]').forEach(b => b.onclick = () => openInd(IND.tutte.find(x => x.id === b.dataset.indadm) || {}, true));
+  if(!IND.loaded){ box.innerHTML = '<div class="status"><span class="spin"></span>Carico…</div>'; return; }
+  if(v === 'lista'){
+    const l = IND.tutte.filter(x => x.al >= t).sort((a, b) => a.dal.localeCompare(b.dal) || indNome(a).localeCompare(indNome(b)));
+    if(!l.length){ box.innerHTML = '<div class="empty-box"><h3>Nessuna indisponibilità</h3><span>Quando un arbitro segna i giorni in cui non può arbitrare li trovi qui.</span></div>'; return; }
+    let html = '', cur = '';
+    l.forEach(x => { const m = (x.dal < t ? t : x.dal).slice(0, 7); if(m !== cur){ if(cur) html += '</div>'; cur = m; const d = parseD(m + '-01'); html += `<div class="month-sep">${MESI[d.getMonth()]} ${d.getFullYear()}</div><div class="ind-list">`; } html += riga(x); });
+    box.innerHTML = html + '</div>'; bind(); return;
+  }
+  const m0 = parseD(IND.mese + '-01'), off = (m0.getDay() + 6) % 7, start = new Date(m0); start.setDate(1 - off);
+  let cal = GG.map(d => `<div class="dow">${d}</div>`).join('');
+  for(let i = 0; i < 42; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i); const k = iso(d);
+    if(i % 7 === 0 && i > 0 && d.getMonth() !== m0.getMonth()) break;
+    const out = d.getMonth() !== m0.getMonth(), n = IND.tutte.filter(x => x.dal <= k && x.al >= k).length;
+    cal += `<button data-k="${k}" class="${out ? 'out ' : ''}${k === t ? 'today ' : ''}${n ? 'ind ' : ''}${k === IND.giorno ? 'sel' : ''}" ${out ? 'tabindex="-1" aria-hidden="true"' : ''} aria-label="${d.getDate()} ${MESI[d.getMonth()]}${n ? `, ${n} indisponibili` : ''}"><span>${d.getDate()}</span><span class="dots">${n ? `<b class="ind-n">${n}</b>` : ''}</span></button>`;
+  }
+  const oggi = IND.tutte.filter(x => x.dal <= IND.giorno && x.al >= IND.giorno).sort((a, b) => indNome(a).localeCompare(indNome(b)));
+  const lbl = fmtLong(IND.giorno);
+  box.innerHTML = `<div class="cal-box"><div class="cal-head"><h2>${MESI[m0.getMonth()]} ${m0.getFullYear()}</h2><div class="nav2"><button class="icon-btn" data-im="-1" aria-label="Mese precedente">‹</button><button class="icon-btn" data-im="1" aria-label="Mese successivo">›</button></div></div><div class="cal">${cal}</div></div>
+    <div class="eyebrow">${esc(lbl[0].toUpperCase() + lbl.slice(1))}</div>
+    ${oggi.length ? `<div class="ind-list">${oggi.map(riga).join('')}</div>` : '<p class="note" style="margin:0;font-size:15px">Tutti disponibili in questo giorno.</p>'}`;
+  box.querySelectorAll('[data-im]').forEach(b => b.onclick = () => { const d = parseD(IND.mese + '-01'); d.setMonth(d.getMonth() + +b.dataset.im); IND.mese = iso(d).slice(0, 7); renderDsInd(); });
+  box.querySelectorAll('.cal button[data-k]:not(.out)').forEach(b => b.onclick = () => { IND.giorno = b.dataset.k; renderDsInd(); });
+  bind();
 }
 
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
@@ -2429,7 +2563,7 @@ function openDs(id){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   const uff = d.ufficiali || [];
   const rows = uff.map(u => { const a = DS.arbitri.find(x => x.id === u.uid), r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : ''];
-    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span><span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}</div>
+    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span>${indDi(u.uid, d.data).length && !fatta(d) ? '<span class="ds-chip no"><i></i>Indisponibile in questa data</span>' : ''}<span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}</div>
       <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}${fatta(d) ? '' : `<a class="btn btn-primary sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a>`}</span></li>`; }).join('');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
@@ -2467,7 +2601,11 @@ function openDsForm(d){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !d.id;
   const cats = [...new Set([...DS.gare.map(x => x.categoria), ...Store.gare.map(x => x.categoria)].filter(Boolean))].sort();
   const inp = (f, l, type = 'text', full = false, extra = '') => `<div class="field${full ? ' full' : ''}"><label for="df-${f}">${l}</label><input id="df-${f}" data-f="${f}" type="${type}" value="${esc(d[f] ?? '')}" ${extra}></div>`;
-  const arbOpts = sel => `<option value="">Scegli arbitro…</option>` + DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b))).map(a => `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''}>${esc(nomeArb(a))}</option>`).join('');
+  // chi è indisponibile nel giorno della gara non si può scegliere (resta solo se era già designato)
+  const giaDes = new Set(d.data ? d.arbitriIds || [] : []), dataDi = () => (root.querySelector('#df-data') || {}).value || d.data || '';
+  const indOk = (uid, k) => !indDi(uid, k).length || (k === d.data && giaDes.has(uid));
+  const arbOpts = (sel, k = dataDi()) => `<option value="">Scegli arbitro…</option>` + DS.arbitri.slice().sort((a, b) => nomeArb(a).localeCompare(nomeArb(b))).map(a => { const no = indDi(a.id, k).length;
+    return `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''} ${no && !indOk(a.id, k) && a.id !== sel ? 'disabled' : ''}>${esc(nomeArb(a))}${no ? ' – indisponibile' : ''}</option>`; }).join('');
   const offRow = u => `<div class="ds-offrow"><select data-o="uid" aria-label="Arbitro">${arbOpts(u.uid)}</select><select data-o="ruolo" aria-label="Ruolo">${RUOLI.filter(r => r !== 'Altro').map(r => `<option ${r === (u.ruolo || 'Arbitro') ? 'selected' : ''}>${r}</option>`).join('')}</select><button type="button" class="x" aria-label="Togli">✕</button></div>`;
   const uff = (d.ufficiali && d.ufficiali.length) ? d.ufficiali : [{ruolo: 'Arbitro'}];
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
@@ -2484,6 +2622,7 @@ function openDsForm(d){
     ${inp('rimborso', 'Rimborso €', 'text', false, 'inputmode="decimal"')}<div class="field"></div>
     <div class="field full"><label for="df-note">Note per gli arbitri</label><textarea id="df-note" data-f="note">${esc(d.note || '')}</textarea></div>
     <div class="sep eyebrow">Arbitri designati</div>
+    <div class="field full" id="dsIndMsg" hidden></div>
     <div class="field full" id="dsOffs">${DS.arbitri.length ? uff.map(offRow).join('') : '<p class="note" style="margin:0">Nessun arbitro registrato: invitali dalla scheda Arbitri.</p>'}</div>
     ${DS.arbitri.length ? '<button type="button" class="btn btn-ghost sm" id="dsAddOff" style="grid-column:1/-1">+ Aggiungi arbitro</button>' : ''}
     ${isNew ? '' : '<p class="note" style="grid-column:1/-1;margin:0">Se cambi data, ora o campo, le risposte degli arbitri si azzerano e devono riconfermare.</p>'}
@@ -2510,8 +2649,15 @@ function openDsForm(d){
   if(!DS.impianti.length) impSel.closest('.field').hidden = true;
   cSel.onchange = () => { fillSq(); const t = tariffaDes({categoria: cSel.value}); if(t && (!toNum(rimb.value) || [25, 30].includes(toNum(rimb.value)))) rimb.value = t; };
   impSel.onchange = syncImp; fillSq(); syncImp();
+  const syncInd = () => {
+    const k = dataDi(), m = f.querySelector('#dsIndMsg');
+    offs.querySelectorAll('[data-o=uid]').forEach(s => { const v = s.value; s.innerHTML = arbOpts(v, k); s.value = v; });
+    const no = k ? DS.arbitri.filter(a => indDi(a.id, k).length).map(nomeArb).sort() : [];
+    m.hidden = !no.length; m.innerHTML = `<span class="ind-msg">⛔ Indisponibili il ${esc(fmtShort(k))}: ${esc(no.join(', '))}</span>`;
+  };
+  f.querySelector('#df-data').addEventListener('change', syncInd); f.querySelector('#df-data').addEventListener('input', syncInd);
   const bindX = () => offs.querySelectorAll('.x').forEach(b => b.onclick = () => b.parentElement.remove());
-  bindX();
+  bindX(); syncInd();
   if(f.querySelector('#dsAddOff')) f.querySelector('#dsAddOff').onclick = () => { offs.insertAdjacentHTML('beforeend', offRow({ruolo: offs.querySelectorAll('.ds-offrow').length ? 'Assistente ' + Math.min(2, offs.querySelectorAll('.ds-offrow').length) : 'Arbitro'})); bindX(); };
   f.querySelector('[data-x]').onclick = () => isNew ? close() : openDs(d.id);
   f.onsubmit = async e => {
@@ -2524,6 +2670,8 @@ function openDsForm(d){
     const ufficiali = [...offs.querySelectorAll('.ds-offrow')].map(r => ({uid: r.querySelector('[data-o=uid]').value, ruolo: r.querySelector('[data-o=ruolo]').value})).filter(u => u.uid);
     if(new Set(ufficiali.map(u => u.uid)).size !== ufficiali.length){ msg.innerHTML = '<span class="err-t">Lo stesso arbitro è scelto due volte.</span>'; return; }
     ufficiali.forEach(u => u.nome = nomeArb(DS.arbitri.find(a => a.id === u.uid)));
+    const indNo = ufficiali.filter(u => !indOk(u.uid, o.data));
+    if(indNo.length){ msg.innerHTML = `<span class="err-t">${esc(indNo.map(u => u.nome).join(', '))} ${indNo.length > 1 ? 'sono indisponibili' : 'è indisponibile'} il ${esc(fmtShort(o.data))}: scegli un altro arbitro.</span>`; return; }
     const ids = ufficiali.map(u => u.uid);
     let risposte = {...(d.risposte || {})};
     if(!isNew && ['data', 'ora', 'impianto'].some(k => (d[k] || '') !== o[k])) risposte = {};
@@ -2547,7 +2695,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113143025';
+const APP_BUILD = '20261113161435';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
