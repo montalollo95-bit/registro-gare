@@ -7,9 +7,9 @@
 <meta name="apple-mobile-web-app-title" content="AICS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#1677D2">
-<link rel="apple-touch-icon" href="icon.png?v=2">
-<link rel="icon" href="icon.png?v=2">
-<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="apple-touch-icon" href="icon-aics.png">
+<link rel="icon" href="icon-aics.png">
+<link rel="manifest" href="manifest.webmanifest?v=3">
 <script src="firebase-config.js"></script>
 <title>AICS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2458,7 +2458,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113123853';
+const APP_BUILD = '20261113130243';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
