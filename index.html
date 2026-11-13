@@ -324,6 +324,11 @@ body{position:fixed;top:0;left:0;right:0;bottom:auto;height:100%;padding:0!impor
 .ds-offrow select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0;width:100%}
 .ds-offrow .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
 
+/* tutte le finestre al centro dello schermo */
+.sheet-bg{align-items:center!important;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px));box-sizing:border-box}
+.sheet{border-radius:22px!important;max-width:560px;max-height:100%!important;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.sheet .grab{display:none!important}
+.ref-pre{white-space:pre-wrap;margin:0;font-family:var(--body);font-size:15px;overflow-wrap:anywhere}
 
 /* designazioni e avvisi */
 .tabs a.adm-only{display:none}
@@ -349,6 +354,10 @@ body.adm .tabs a[data-v=calendario]{display:none}
 .avv-r > div{display:flex;flex-direction:column;min-width:0;flex:1 1 160px}
 .cnt-red{background:var(--card-red)!important;color:#fff!important}
 .ok-t{color:var(--ok);font-weight:700}
+body.adm #nextBox{display:none}
+.pay-calc{display:grid!important;grid-template-columns:1fr auto;gap:2px 12px;width:100%;max-width:300px;font-size:14px}
+.pay-calc b{text-align:right;font-family:var(--body)!important;font-size:14px!important}
+.pay-calc span:nth-last-child(2),.pay-calc b:last-child{font-weight:800;color:var(--fg)}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -406,25 +415,25 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== REFERTO ===== -->
 <section id="v-referto" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Referto</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Referto</h1><span class="spacer"></span></div></div>
   <div class="wrap view" id="refBody"></div>
 </section>
 
 <!-- ===== ACCOUNT / DESIGNA ===== -->
 <section id="v-account" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1 id="accTitle">Login</h1><span class="round" aria-hidden="true" hidden></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1 id="accTitle">Login</h1><span class="round" aria-hidden="true" hidden></span></div></div>
   <div class="wrap view" id="accBody"></div>
 </section>
 
 <!-- ===== DESIGNAZIONI (designatori) ===== -->
 <section id="v-designazioni" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Oggi</a><h1>Designazioni</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Designazioni</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
   <div class="wrap view" id="dsBody"></div>
 </section>
 
 <!-- ===== PARTITE ===== -->
 <section id="v-partite" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Filtro gare">
       <button id="fUp" aria-pressed="true">Prossime</button>
@@ -437,7 +446,7 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== CALENDARIO ===== -->
 <section id="v-calendario" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Calendario</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Calendario</h1><span class="spacer"></span></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Vista calendario">
       <button id="cMese" aria-pressed="true">Mese</button>
@@ -458,10 +467,11 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== SPESE ===== -->
 <section id="v-spese" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
   <div class="wrap view">
     <div id="payBox" hidden></div>
     <div id="refWait" hidden></div>
+    <div id="antBox" hidden></div>
     <div class="seg" role="group" aria-label="Periodo">
       <button id="sMese" aria-pressed="true">Mese</button>
       <button id="sStag" aria-pressed="false">Stagione</button>
@@ -478,7 +488,7 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== IMPORTA ===== -->
 <section id="v-importa" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ <span class="rw-only">Oggi</span><span class="ro-only">Home</span></a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
   <div class="wrap view">
     <div class="hero">
       <h2>La gara si compila da sola</h2>
@@ -509,7 +519,7 @@ body.lock .ro-flex{display:flex!important}
 </div><!-- /scroller -->
 <div class="tabs">
   <nav aria-label="Sezioni">
-    <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span class="rw-only">Oggi</span><span class="ro-only">Home</span></a>
+    <a href="#oggi" data-v="oggi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
     <a href="#partite" data-v="partite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 5h-5L8 10z"/></svg>Partite</a>
     <a href="#calendario" data-v="calendario"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendario</a>
     <a href="#designazioni" data-v="designazioni" class="adm-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>Designazioni</a>
@@ -919,8 +929,8 @@ function renderCat(items){
   rows.forEach(r => { const f = fedOf(r.k), o = F.get(f) || {k: f, n:0, eur:0, fuel:0, km:0}; o.n += r.n; o.eur += r.eur; o.fuel += r.fuel; o.km += r.km; F.set(f, o); });
   const feds = ['Calcio a 5 e 7 AICS', 'FIGC', 'ES League', 'Altro'].filter(f => F.has(f)).map(f => F.get(f));
   const fedHtml = `<section class="ref-sec"><h3>Ricavi per federazione</h3><div class="cat-list">${feds.map(r => `<div class="cat-row fed-row"><div><b>${esc(r.k)}</b><span>${det(r)} · netto ${eur(r.eur - r.fuel)}</span></div><div class="cat-eur num">${eur(r.eur)}</div><div class="cat-bar"><i style="width:${(T.eur ? r.eur / T.eur * 100 : 0).toFixed(1)}%"></i></div></div>`).join('')}</div></section>`;
-  if(sMode !== 'stagione'){ box.innerHTML = fedHtml; return; }
-  box.innerHTML = fedHtml + `<section class="ref-sec"><h3>Rimborsi per categoria</h3><p class="note" style="margin:0">Tocca una categoria per vedere le sue gare.</p><div class="cat-list">${rows.map(r => `<div class="cat-row${catSel === r.k ? ' sel' : ''}" data-cat="${esc(r.k)}" role="button" tabindex="0"><div><b>${esc(r.k)}</b><span>${det(r)}</span></div><div class="cat-eur num">${eur(r.eur)}</div><div class="cat-bar"><i style="width:${(T.eur ? r.eur / T.eur * 100 : 0).toFixed(1)}%"></i></div>${r.sub.length ? `<div class="cat-sub">${r.sub.map(x => `<div data-cat="${esc(r.k + '|' + x.k)}" role="button" tabindex="0" class="${catSel === r.k + '|' + x.k ? 'sel' : ''}"><span><b>${esc(x.k)}</b> · ${det(x)}</span><b class="num">${eur(x.eur)}</b></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
+  if(sMode !== 'stagione'){ box.innerHTML = ''; return; }
+  box.innerHTML = `<section class="ref-sec"><h3>Rimborsi per categoria</h3><p class="note" style="margin:0">Tocca una categoria per vedere le sue gare.</p><div class="cat-list">${rows.map(r => `<div class="cat-row${catSel === r.k ? ' sel' : ''}" data-cat="${esc(r.k)}" role="button" tabindex="0"><div><b>${esc(r.k)}</b><span>${det(r)}</span></div><div class="cat-eur num">${eur(r.eur)}</div><div class="cat-bar"><i style="width:${(T.eur ? r.eur / T.eur * 100 : 0).toFixed(1)}%"></i></div>${r.sub.length ? `<div class="cat-sub">${r.sub.map(x => `<div data-cat="${esc(r.k + '|' + x.k)}" role="button" tabindex="0" class="${catSel === r.k + '|' + x.k ? 'sel' : ''}"><span><b>${esc(x.k)}</b> · ${det(x)}</span><b class="num">${eur(x.eur)}</b></div>`).join('')}</div>` : ''}</div>`).join('')}</div>
     <div class="cat-tot"><span>Totale · ${det(T)}</span><b class="num">${eur(T.eur)}</b></div>
     <div class="cat-tot" style="border:0;padding-top:0"><span>Ti restano dopo la benzina</span><b class="num">${eur(T.eur - T.fuel)}</b></div></section>`;
   box.querySelectorAll('[data-cat]').forEach(el => {
@@ -938,6 +948,7 @@ function renderSpese(){
   const wait = Store.spese.filter(s => s.data >= from && s.data <= to && attesaRef(s)), rw = $('#refWait');
   rw.hidden = !wait.length;
   rw.innerHTML = wait.length ? `<div class="status"><span style="flex:1">📝 ${wait.length === 1 ? '1 rimborso è' : wait.length + ' rimborsi sono'} in attesa del referto: ${eur(wait.reduce((a, s) => a + toNum(s.importo), 0))} non ancora contati. Compila il referto della gara per contarli.</span></div>` : '';
+  renderAnticipi(from, to);
   let items = Store.spese.filter(s => s.data >= from && s.data <= to && !attesaRef(s)).sort((a,b) => (b.data||'').localeCompare(a.data||''));
   const sum = t => items.filter(s => s.tipo === t).reduce((a,s)=>a+toNum(s.importo),0);
   const skip = fuelSkip();
@@ -959,7 +970,8 @@ function renderSpese(){
   }
   if(Store.mode === 'loading'){ $('#movList').innerHTML = `<li class="status"><span class="spin"></span>Carico le spese…</li>`; return; }
   if(!items.length){
-    $('#movList').innerHTML = `<li class="empty-box"><span class="eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span><h3>Nessuna spesa</h3><span>Aggiungi diarie, rimborsi km e altre spese col + in alto.</span><button class="btn btn-primary" id="addSpesa2">+ Aggiungi spesa</button></li>`;
+    $('#movList').innerHTML = `<li class="empty-box"><span class="eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span><h3>Nessuna spesa</h3><span>Aggiungi diarie, rimborsi km e altre spese col + in alto.</span><div class="row" style="justify-content:center"><button class="btn btn-primary" id="addSpesa2">+ Aggiungi spesa</button><button class="btn btn-ghost" id="addAnt2">+ Aggiungi anticipo</button></div></li>`;
+    $('#addAnt2').onclick = () => openAnticipo({});
     $('#addSpesa2').onclick = () => openSpesaForm({data: todayIso(), tipo:'carburante'});
     return;
   }
@@ -1155,7 +1167,7 @@ const PROV = ['Ammonizione','Espulsione (allontanamento)'];
 let refId = null, draft = null;
 const oraNow = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
 const iniziata = g => !!g.data && (g.data < todayIso() || (g.data === todayIso() && (!g.ora || g.ora <= oraNow())));
-const refCandidates = () => Store.gare.filter(g => iniziata(g) && g.stato !== 'rinviata').sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+const refCandidates = () => Store.gare.filter(g => iniziata(g) && g.stato !== 'rinviata' && !refNonMio(g)).sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
 function openReferto(id){ refId = id || null; draft = null; if(location.hash === '#referto') renderReferto(); else location.hash = '#referto'; }
 
 function renderReferto(){
@@ -1169,6 +1181,18 @@ function renderReferto(){
     body.querySelectorAll('.gara').forEach(b => b.onclick = () => openReferto(b.dataset.id));
     return;
   }
+  if(refBloccato(g) || (refNonMio(g) && g.referto)){
+    const r = refInviato(g), txt = refText(g, g.referto || (r && r.referto) || {});
+    body.innerHTML = `<div class="ref-head view" style="gap:6px"><div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div><h2>${esc(g.casa||'—')} – ${esc(g.ospite||'—')}</h2></div>
+      <div class="status">🔒 ${refNonMio(g) ? 'Il referto di questa gara lo compila l’arbitro designato.' : `Referto inviato ai designatori${r && r.at ? ' il ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'long'}) : ''}: non si può più modificare. Se devi correggerlo chiedi a un designatore di sbloccarlo.`}</div>
+      <section class="ref-sec"><pre class="ref-pre">${esc(txt)}</pre></section>
+      <div class="row"><button class="btn btn-primary" id="rfCopyRO">Copia testo</button></div>
+      <button class="btn btn-ghost btn-block" id="rfOther">Scegli un'altra gara</button>`;
+    $('#rfOther').onclick = () => openReferto(null);
+    $('#rfCopyRO').onclick = async () => { try{ await navigator.clipboard.writeText(txt); toast('Testo del referto copiato'); }catch(e){ toast('Non riesco a copiare'); } };
+    return;
+  }
+  if(refNonMio(g)){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Referto dell’arbitro</h3><span>Il referto di questa gara lo compila solo l’arbitro designato.</span></div>`; return; }
   if(!iniziata(g) && !g.referto){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Gara non ancora iniziata</h3><span>Il referto di ${esc(g.casa || '')} – ${esc(g.ospite || '')} si compila dall’orario d’inizio${g.ora ? `: ${esc(fmtShort(g.data))} alle ${esc(g.ora)}` : ''}.</span></div>`; return; }
   if(!draft){
     const r = g.referto ? JSON.parse(JSON.stringify(g.referto)) : {};
@@ -1228,6 +1252,7 @@ function renderRefForm(g){
   $('#rfSave').onclick = async () => {
     readDraft();
     if(!iniziata(g) && !g.referto){ toast(`Il referto si compila dalle ${g.ora}.`); return; }
+    if(refBloccato(g) || refNonMio(g)){ toast('Referto bloccato: chiedi a un designatore di sbloccarlo.'); refId = g.id; draft = null; renderReferto(); return; }
     const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length};
     if(d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}`;
     const btn = $('#rfSave'); btn.disabled = true;
@@ -1553,7 +1578,7 @@ function openSheet(id, edit=false){
     </div>
     <div class="row">
       <button class="btn btn-ghost" data-act="edit">${isPast(g) && g.stato !== 'disputata' ? 'Segna risultato e voto' : 'Modifica'}</button>
-      ${iniziata(g) || g.referto ? `<button class="btn btn-ghost" data-act="ref">${g.referto ? 'Apri referto' : 'Compila referto'}</button>` : g.data === todayIso() && g.ora ? `<span class="note" style="align-self:center">Referto dalle ${esc(g.ora)}</span>` : ''}
+      ${refNonMio(g) && !g.referto ? '' : iniziata(g) || g.referto ? `<button class="btn btn-ghost" data-act="ref">${refBloccato(g) || refNonMio(g) ? 'Vedi referto' : g.referto ? 'Apri referto' : 'Compila referto'}</button>` : g.data === todayIso() && g.ora ? `<span class="note" style="align-self:center">Referto dalle ${esc(g.ora)}</span>` : ''}
       <button class="btn btn-ghost" data-act="spesa">Rimborso e km</button>
       <button class="btn btn-danger" data-act="del">Elimina</button>
     </div>
@@ -1620,7 +1645,7 @@ function loadFB(){
 }
 const ADMINS = () => [].concat(window.FIREBASE_ADMINS || window.FIREBASE_ADMIN || []).map(e => String(e).trim().toLowerCase()).filter(Boolean);
 const fbReady = () => !!(window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey);
-const DS = {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], tab: 'gare', past: false, loaded: false, err: '', sqCat: 'C5 AICS'};
+const DS = {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], tab: 'gare', past: false, loaded: false, err: '', sqCat: 'C5 AICS'};
 const PAY = {mese: todayIso().slice(0, 7)};
 const ACC = {ready: false, user: null, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], mieLoaded: false, unsub: [], mode: 'login', err: '', pendingProfile: null};
 const arbitroUrl = () => new URL('index.html#account', location.href.split('#')[0]).href;
@@ -1649,9 +1674,9 @@ function accStart(){
 }
 async function onUser(u){
   ACC.unsub.forEach(f => f()); ACC.unsub = [];
-  Object.assign(ACC, {user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], mieLoaded: false, mieServer: false, err: ''});
-  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], loaded: false, err: ''});
-  if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); return; }
+  Object.assign(ACC, {user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
+  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], loaded: false, err: ''});
+  if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); renderAnticipi(); return; }
   const db = firebase.firestore(), em = myEmail();
   ACC.isAdmin = ADMINS().includes(em);
   try{ localStorage.setItem('rg-admin', ACC.isAdmin ? '1' : ''); }catch(e){}
@@ -1669,6 +1694,7 @@ async function onUser(u){
   if(!pref && ACC.regs.length > 1){ let vuoto = true; try{ vuoto = (await own.collection('righe').limit(1).get()).empty; }catch(e){} if(vuoto && !hasLegacy()) rid = ACC.regs.find(r => r.id !== u.uid).id; }
   useRegistro(rid);
   // designazioni ricevute
+  ACC.unsub.push(db.collection('anticipi').where('uid', '==', u.uid).onSnapshot(s => { ACC.anticipi = s.docs.map(d => ({id: d.id, ...d.data()})); renderAnticipi(); }, () => {}));
   ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot({includeMetadataChanges: true}, s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; if(!s.metadata.fromCache) ACC.mieServer = true; syncAccettate(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
   if(ACC.isAdmin){
     const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
@@ -1678,6 +1704,7 @@ async function onUser(u){
     ACC.unsub.push(db.collection('squadre').onSnapshot(s => { DS.squadre = docs(s); if(['squadre'].includes(DS.tab)) renderAccount(); }, fail));
     ACC.unsub.push(db.collection('impianti').onSnapshot(s => { DS.impianti = docs(s); if(['impianti'].includes(DS.tab)) renderAccount(); }, fail));
     ACC.unsub.push(db.collection('pagamenti').onSnapshot(s => { DS.pag = docs(s); renderPay(); }, fail));
+    ACC.unsub.push(db.collection('anticipi').onSnapshot(s => { DS.anticipi = docs(s); renderPay(); }, fail));
   }
   ACC.ready = true; renderAccount(); renderTab();
 }
@@ -1840,24 +1867,30 @@ function renderPay(){
     if(!(d.referti && d.referti[u.uid])){ if(giocata(d)){ o.senza.push(d); per.set(u.uid, o); } return; }
     o.gare.push(d); o.tot += tariffaDes(d); per.set(u.uid, o);
   }));
+  DS.anticipi.filter(x => (x.data || '').startsWith(PAY.mese)).forEach(x => { const o = per.get(x.uid) || {uid: x.uid, nome: x.nome, gare: [], tot: 0, senza: []}; (o.ant = o.ant || []).push(x); per.set(x.uid, o); });
+  per.forEach(o => { o.ant = o.ant || []; o.lordo = o.tot; o.antTot = o.ant.reduce((a, x) => a + toNum(x.importo), 0); o.tot = Math.max(0, o.lordo - o.antTot); });
+  const antMese = [...per.values()].reduce((a, o) => a + o.antTot, 0);
   const rows = [...per.values()].map(o => ({...o, a: DS.arbitri.find(x => x.id === o.uid), p: DS.pag.find(x => x.id === `${o.uid}_${PAY.mese}`)})).sort((a, b) => nomeArb(a.a || {nome: a.nome}).localeCompare(nomeArb(b.a || {nome: b.nome})));
   const tot = rows.reduce((s, r) => s + r.tot, 0), pagato = rows.reduce((s, r) => s + Math.min(r.tot, r.p ? toNum(r.p.importo) : 0), 0);
   box.innerHTML = `<section class="ref-sec"><h3>Da pagare agli arbitri</h3>
     <div class="cal-head"><button class="icon-btn" data-pm="-1" aria-label="Mese precedente">‹</button><h2 style="font-size:22px">${lbl}</h2><button class="icon-btn" data-pm="1" aria-label="Mese successivo">›</button></div>
-    <div class="ds-sum"><div><b class="num">${eur(tot)}</b><span>totale</span></div><div><b class="num">${eur(pagato)}</b><span>pagato</span></div><div class="${tot - pagato > 0 ? 'bad' : ''}"><b class="num">${eur(tot - pagato)}</b><span>da pagare</span></div></div>
+    <div class="ds-sum"><div><b class="num">${eur(tot + antMese)}</b><span>spettanti per le gare</span></div><div><b class="num">− ${eur(antMese)}</b><span>già anticipati</span></div><div class="${tot - pagato > 0 ? 'bad' : ''}"><b class="num">${eur(tot - pagato)}</b><span>da pagare</span></div></div>
+    ${pagato ? `<p class="note" style="margin:0">Già pagati con bonifico: ${eur(pagato)}.</p>` : ''}
     <p class="note" style="margin:0">Conto solo le gare con il referto compilato: 25 € calcio a 5, 30 € calcio a 7.</p>
     ${rows.length ? `<ul class="list">${rows.map(r => {
       const n5 = r.gare.filter(d => tariffaDes(d) === 25).length, n7 = r.gare.filter(d => tariffaDes(d) === 30).length, pg = r.p ? toNum(r.p.importo) : 0, ok = r.p && pg >= r.tot;
       return `<li class="ds-arb pay${ok ? ' paid' : ''}"><div><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>
         <span>${r.gare.length} ${r.gare.length === 1 ? 'gara' : 'gare'}${n5 ? ` · ${n5} C5` : ''}${n7 ? ` · ${n7} C7` : ''}</span>
+        <span class="pay-calc"><span>Spettante per le gare</span><b>${eur(r.lordo)}</b><span>Già anticipato</span><b>− ${eur(r.antTot)}</b><span>Da pagare</span><b>${eur(r.tot)}</b></span>
         ${r.senza.length ? `<span class="err-t">${r.senza.length === 1 ? '1 gara' : r.senza.length + ' gare'} senza referto: non conteggiate</span>` : ''}
         <span>${r.a && r.a.iban ? 'IBAN ' + esc(ibanFmt(r.a.iban)) : '<span class="err-t">IBAN non inserito</span>'}</span>
         ${r.p ? `<span class="ds-chip done"><i></i>Pagato ${eur(pg)} il ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</span>${pg < r.tot ? `<span class="err-t">Mancano ${eur(r.tot - pg)}</span>` : ''}` : ''}
-        <details><summary class="note">Vedi gare</summary><span>${r.gare.sort(dsSort).map(d => `${esc(fmtShort(d.data))} · ${esc(d.casa)} – ${esc(d.ospite)} · ${eur(tariffaDes(d))}`).join('<br>')}</span></details></div>
+        <details><summary class="note">Vedi dettagli</summary><span>${r.gare.sort(dsSort).map(d => `${esc(fmtShort(d.data))} · ${esc(d.casa)} – ${esc(d.ospite)} · ${eur(tariffaDes(d))}`).concat(r.ant.map(x => `${esc(fmtShort(x.data))} · Anticipo ricevuto${x.descrizione ? ' (' + esc(x.descrizione) + ')' : ''} · − ${eur(x.importo)}`)).join('<br>')}</span></details></div>
         <div class="pay-r"><b class="num">${eur(r.tot)}</b>
         ${r.a && r.a.iban ? `<button class="btn btn-ghost sm" data-iban="${esc(r.a.iban)}">Copia IBAN</button>` : ''}
         ${r.tot ? `<button class="btn ${ok ? 'btn-ghost' : 'btn-primary'} sm" data-pay="${esc(r.uid)}" data-imp="${r.tot}" data-n="${r.gare.length}">${ok ? 'Annulla pagato' : 'Segna pagato'}</button>` : ''}</div></li>`; }).join('')}</ul>`
       : '<p class="note" style="margin:0">Nessuna gara giocata in questo mese.</p>'}</section>`;
+
   box.querySelectorAll('[data-pm]').forEach(b => b.onclick = () => { const d = new Date(y, m - 1 + +b.dataset.pm, 1); PAY.mese = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; renderPay(); });
   box.querySelectorAll('[data-iban]').forEach(b => b.onclick = async () => { try{ await navigator.clipboard.writeText(b.dataset.iban); toast('IBAN copiato'); }catch(e){ toast(ibanFmt(b.dataset.iban)); } });
   box.querySelectorAll('[data-pay]').forEach(b => b.onclick = async () => {
@@ -1867,6 +1900,45 @@ function renderPay(){
       else { await ref.set({uid: b.dataset.pay, mese: PAY.mese, importo: imp, gare: +b.dataset.n, at: Date.now(), da: myEmail()}); toast('Segnato come pagato'); }
     }catch(err){ toast(fbErr(err)); }
   });
+}
+
+/* -- anticipi: soldi che l'arbitro ha già ricevuto (li vedono anche i designatori e li tolgono dal dovuto) -- */
+let ANT_P = null;
+function renderAnticipi(from, to){
+  if(from) ANT_P = {from, to};
+  const box = $('#antBox'); if(!box) return;
+  if(!fbReady() || !ACC.user){ box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  const P = ANT_P || {from: '0000', to: '9999'}, list = ACC.anticipi.filter(x => x.data >= P.from && x.data <= P.to).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  const tot = list.reduce((a, x) => a + toNum(x.importo), 0);
+  box.innerHTML = `<section class="ref-sec"><header style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>Anticipi ricevuti</h3>${tot ? `<b class="num">${eur(tot)}</b>` : ''}</header>
+    <p class="note" style="margin:0">Soldi che hai già ricevuto (es. dalla società al campo): i designatori li vedono e li tolgono da quello che ti devono.</p>
+    ${list.length ? `<ul class="list">${list.map(x => `<li><button class="mov" data-ant="${esc(x.id)}"><span class="mi">A</span><span class="mt"><b>${esc(x.descrizione || 'Anticipo')}</b><span>${esc(fmtShort(x.data))}</span></span><span class="amt num">${eur(x.importo)}</span></button></li>`).join('')}</ul>` : ''}
+    <button class="btn btn-ghost" data-addant>+ Aggiungi anticipo</button></section>`;
+  box.querySelectorAll('[data-ant]').forEach(b => b.onclick = () => openAnticipo(ACC.anticipi.find(x => x.id === b.dataset.ant) || {}));
+  box.querySelector('[data-addant]').onclick = () => openAnticipo({});
+}
+function openAnticipo(x){
+  if(!fbReady() || !ACC.user){ toast('Per gli anticipi entra con il tuo account.'); location.hash = '#account'; return; }
+  const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !x.id;
+  const gare = Store.gare.filter(g => g.desId).sort((a, b) => sortKey(b).localeCompare(sortKey(a))).slice(0, 40);
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Anticipo"><form class="form" id="antForm"><h3>${isNew ? 'Nuovo anticipo' : 'Anticipo'}</h3>
+    <div class="field"><label for="an-data2">Data</label><input id="an-data2" type="date" value="${esc(x.data || todayIso())}" required></div>
+    <div class="field"><label for="an-imp">Importo ricevuto €</label><input id="an-imp" inputmode="decimal" value="${esc(x.importo ? String(x.importo).replace('.', ',') : '')}" required></div>
+    <div class="field full"><label for="an-gara">Gara (facoltativo)</label><select id="an-gara"><option value="">Nessuna</option>${gare.map(g => `<option value="${esc(g.id)}" ${g.id === x.garaId ? 'selected' : ''}>${esc(fmtShort(g.data))} · ${esc(g.casa)} – ${esc(g.ospite)}</option>`).join('')}</select></div>
+    <div class="field full"><label for="an-desc">Da chi / note</label><input id="an-desc" value="${esc(x.descrizione || '')}" placeholder="Es. contanti dalla società di casa"></div>
+    <div class="field full" id="an-msg2"></div>
+    <div class="actions row"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button>${isNew ? '' : '<button type="button" class="btn btn-danger" data-del>Elimina</button>'}</div></form></div></div>`;
+  const f = root.querySelector('form'), col = firebase.firestore().collection('anticipi');
+  root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
+  f.querySelector('[data-x]').onclick = close;
+  f.querySelector('#an-gara').onchange = e => { const g = Store.gare.find(y => y.id === e.target.value); if(g && g.data) f.querySelector('#an-data2').value = g.data; };
+  if(!isNew) f.querySelector('[data-del]').onclick = async () => { if(!confirm('Eliminare questo anticipo?')) return; try{ await col.doc(x.id).delete(); close(); toast('Anticipo eliminato'); }catch(err){ toast(fbErr(err)); } };
+  f.onsubmit = async e => { e.preventDefault();
+    const imp = toNum(f.querySelector('#an-imp').value);
+    if(!imp){ f.querySelector('#an-msg2').innerHTML = '<span class="err-t">Scrivi l’importo.</span>'; return; }
+    const o = {uid: ACC.user.uid, nome: nomeArb(ACC.profilo), data: f.querySelector('#an-data2').value || todayIso(), importo: imp, descrizione: f.querySelector('#an-desc').value.trim(), garaId: f.querySelector('#an-gara').value, createdAt: x.createdAt || Date.now()};
+    try{ if(isNew) await col.add(o); else await col.doc(x.id).set(o); close(); toast('Anticipo salvato: lo vedono anche i designatori'); }catch(err){ toast(fbErr(err)); } };
 }
 
 /* -- registro online: quale registro, con chi è condiviso -- */
@@ -1964,6 +2036,11 @@ function mettiInRegistro(d){
     Store.saveSpesa({id: 'sd-' + d.id, data: g.data, tipo: 'rimborso', importo: toNum(d.rimborso), km: kn ? kn.km : 0, garaId: id, prezzo: lastPrezzo(), descrizione: 'Rimborso designazione'});
   }
 }
+/* referto delle gare designate: lo compila solo l'arbitro designato; inviato = bloccato finché un designatore non lo sblocca */
+const desDi = g => g && g.desId && ACC.user ? ACC.mie.find(d => d.id === g.desId) : null;
+const refInviato = g => { const d = desDi(g); return d && d.referti && d.referti[ACC.user.uid] || null; };
+const refBloccato = g => { const r = refInviato(g); return !!(r && !r.sbloccato); };
+const refNonMio = g => !!(g && g.desId && ((g.ruolo && g.ruolo !== 'Arbitro') || !ACC.user || ACC.regId !== ACC.user.uid));
 const refInviati = new Set();
 async function inviaReferto(desId, g){
   if(!ACC.user || !g || !g.referto) return;
@@ -2165,7 +2242,7 @@ function openDs(id){
   const uff = d.ufficiali || [];
   const rows = uff.map(u => { const a = DS.arbitri.find(x => x.id === u.uid), r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : ''];
     return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span><span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}</div>
-      <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>` : ''}<a class="btn ${d.referti && d.referti[u.uid] ? 'btn-ghost' : 'btn-primary'} sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a></span></li>`; }).join('');
+      <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}<a class="btn ${d.referti && d.referti[u.uid] ? 'btn-ghost' : 'btn-primary'} sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a></span></li>`; }).join('');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
     <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
@@ -2177,6 +2254,10 @@ function openDs(id){
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   const a = k => root.querySelector(`[data-a=${k}]`);
   a('close').onclick = close;
+  root.querySelectorAll('[data-unl]').forEach(b => b.onclick = async () => {
+    if(!confirm('Sbloccare il referto? L’arbitro potrà correggerlo e reinviarlo, poi si blocca di nuovo.')) return;
+    try{ await firebase.firestore().collection('designazioni').doc(id).update({[`referti.${b.dataset.unl}.sbloccato`]: true}); toast('Referto sbloccato: l’arbitro può correggerlo'); close(); }catch(err){ toast(fbErr(err)); }
+  });
   root.querySelectorAll('[data-ref]').forEach(b => b.onclick = () => {
     const r = d.referti[b.dataset.ref], txt = refText(d, r.referto || {}), rb = root.querySelector('#dsRefBox');
     rb.innerHTML = `<div class="ref-view"><div class="eyebrow">Referto di ${esc(r.nome || nomeArb(DS.arbitri.find(x => x.id === b.dataset.ref)))}${r.risultato ? ' · ' + esc(r.risultato) : ''} · ${toNum(r.gialli)} gialli · ${toNum(r.rossi)} rossi</div><pre>${esc(txt)}</pre><button class="btn btn-ghost sm" data-cp>Copia testo</button></div>`;
@@ -2278,7 +2359,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261112195401';
+const APP_BUILD = '20261113095538';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
