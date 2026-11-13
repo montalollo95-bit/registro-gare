@@ -474,6 +474,34 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 @media (max-width:400px){.seg.seg6 button{font-size:14px;padding-left:2px;padding-right:2px}}
 .pill.sost-pill{border-radius:10px}
 .sub-list .sost-prop{display:block;margin-top:6px}
+.fit1{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}
+.acc-sum.due{grid-template-columns:repeat(2,1fr)}
+.acc-sum.due .warn b{color:#E8820C}
+.acc-sum .bad b{color:var(--card-red)}
+.mod-info{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--card-yellow);background:color-mix(in srgb,var(--card-yellow) 10%,var(--surface));font-size:14px;line-height:1.4}
+.mod-info b{color:color-mix(in srgb,var(--card-yellow) 75%,var(--fg))}
+.pill.mod-pill{background:color-mix(in srgb,var(--card-yellow) 22%,var(--surface-2));color:var(--fg)}
+.ds-back{align-self:flex-start}
+.ds-offrow select.sel-no{color:var(--muted);border-color:var(--card-red);text-decoration:line-through}
+#dsNoMsg:not([hidden]){margin-top:-4px}
+.mod-info{flex-direction:column;gap:8px;border-width:2px}
+.mod-t{font-size:16px;color:var(--fg)!important}
+.mod-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mod-l li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--card-yellow) 14%,var(--surface))}
+.mod-k{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mod-v{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:15px}
+.mod-v s{color:var(--muted)}
+.mod-v b{color:var(--fg)!important;font-weight:800}
+.mod-arr{color:color-mix(in srgb,var(--card-yellow) 75%,var(--fg));font-weight:800}
+mark.mod-new{background:var(--card-yellow);color:#111;border-radius:4px;padding:0 4px}
+h2.mod-h{text-decoration:underline;text-decoration-color:var(--card-yellow);text-decoration-thickness:3px;text-underline-offset:4px}
+.dz-st.modif{background:var(--card-yellow);color:#111}
+.pill.mod-pill{background:var(--card-yellow)!important;color:#111!important}
+.mod-home{border-color:var(--card-yellow)}
+.ann-info{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;border:2px solid var(--card-red);background:color-mix(in srgb,var(--card-red) 10%,var(--surface));font-size:14px;line-height:1.4}
+.ann-info > b{color:var(--card-red);font-size:15px}
+.inv-t{font-size:13px;font-weight:700;color:var(--ok)!important}
+.inv-t.no{color:var(--muted)!important;font-weight:600}
 .sost-banner.rosso{border-color:var(--card-red);background:color-mix(in srgb,var(--card-red) 12%,var(--surface))}
 .sost-banner.rosso b{color:var(--card-red)}
 .sost-banner.rosso span{background:var(--card-red)}
@@ -878,10 +906,10 @@ function garaCard(g){
   else if(g.stato === 'rinviata') st = `<span class="pill rinv">Rinviata</span>`;
   else if(isPast(g) && !refDaFare(g)) st = `<span class="pill">Da completare</span>`;
   const sNo = sostNoGara(g), sAt = sostAttesaGara(g), sub = desDi(g) && subDi(desDi(g), ACC.user.uid);
-  return `<li><button class="gara${sNo || sAt ? ' gara-sost' : ''}" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
+  return `<li><button class="gara${sNo || sAt ? ' gara-sost' : desDi(g) && modDi(desDi(g)) ? ' gara-new' : ''}" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
       <div class="teams">${esc(g.casa || '—')} – ${esc(g.ospite || '—')}${risOk(g)}</div>
       <div class="sub">${where || 'Orario e campo da definire'}</div>
-      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${refDaFare(g) ? '<span class="pill ref-todo">Referto da compilare</span>' : g.referto ? '<span class="pill done">Referto ✓</span>' : ''}${sAt ? '<span class="pill sost-pill">⏸️ Sospesa · chiesta sostituzione</span>' : ''}${sNo ? '<span class="pill sost-pill">↩️ Sostituzione non accolta · conferma</span>' : ''}${sub ? `<span class="pill sub-pill">🔁 Al posto di ${esc(subNome(sub))}</span>` : ''}</div>
+      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${refDaFare(g) ? '<span class="pill ref-todo">Referto da compilare</span>' : g.referto ? '<span class="pill done">Referto ✓</span>' : ''}${sAt ? '<span class="pill sost-pill">⏸️ Sospesa · chiesta sostituzione</span>' : ''}${desDi(g) && modDi(desDi(g)) ? `<span class="pill mod-pill">✏️ Modificata: ${esc(modElenco(modDi(desDi(g))))} · da riconfermare</span>` : ''}${sNo ? '<span class="pill sost-pill">↩️ Sostituzione non accolta · conferma</span>' : ''}${sub ? `<span class="pill sub-pill">🔁 Al posto di ${esc(subNome(sub))}</span>` : ''}</div>
     </div></button></li>`;
 }
 function bindCards(root){ root.querySelectorAll('.gara').forEach(b => b.onclick = () => openSheet(b.dataset.id)); }
@@ -1756,7 +1784,7 @@ function openSheet(id, edit=false){
   }
   const a = s => root.querySelector(`[data-act=${s}]`);
   if(a('ics')) a('ics').onclick = () => saveIcs([g], `gara-${g.data}.ics`);
-  if(desDi(g) && !refNonMio({...g, ruolo: 'Arbitro'})) { sostRender(root.querySelector('#sostBox'), desDi(g)); const sb = subDi(desDi(g), ACC.user.uid); if(sb) root.querySelector('#sostBox').insertAdjacentHTML('beforebegin', subInfo(sb)); }
+  if(desDi(g) && !refNonMio({...g, ruolo: 'Arbitro'})) { sostRender(root.querySelector('#sostBox'), desDi(g)); const sb = subDi(desDi(g), ACC.user.uid); if(sb) root.querySelector('#sostBox').insertAdjacentHTML('beforebegin', subInfo(sb)); if(modDi(desDi(g))){ root.querySelector('#sostBox').insertAdjacentHTML('beforebegin', modInfo(desDi(g)) + '<button class=btn-primary data-modok>Vedi e conferma di nuovo</button>'); root.querySelector('[data-modok]').className = 'btn btn-primary btn-block'; root.querySelector('[data-modok]').onclick = () => openMie(g.desId); } }
   a('edit').onclick = () => openSheet(id, true);
   if(a('ref')) a('ref').onclick = () => { close(); openReferto(id); };
   a('spesa').onclick = () => { close(); const r = Store.spese.find(x => x.garaId === id && x.tipo === 'rimborso'); openSpesaForm(r || {data: g.data || todayIso(), tipo:'rimborso', garaId: id}); };
@@ -1870,6 +1898,8 @@ async function onUser(u){
   ACC.elenco = [];
   ACC.unsub.push(db.collection('elenco').doc('arbitri').onSnapshot(s => { ACC.elenco = s.exists ? s.data().list || [] : []; ACC.elencoJson = s.exists ? JSON.stringify(s.data().list || []) : ''; if(ACC.isAdmin) elencoSync(); }, () => {}));
   ACC.unsub.push(db.collection('anticipi').where('uid', '==', u.uid).onSnapshot(s => { ACC.anticipi = s.docs.map(d => ({id: d.id, ...d.data()})); renderAnticipi(); }, () => {}));
+  ACC.ex = [];
+  ACC.unsub.push(db.collection('designazioni').where('sostituiti', 'array-contains', u.uid).onSnapshot(s => { ACC.ex = s.docs.map(d => ({id: d.id, ...d.data()})); renderAccount(); }, () => {}));
   ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot({includeMetadataChanges: true}, s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; if(!s.metadata.fromCache) ACC.mieServer = true; syncAccettate(); render(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
   if(ACC.isAdmin){
     const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
@@ -2206,16 +2236,17 @@ function renderMie(){
   if(!ACC.mieLoaded){ box.innerHTML = '<h3>Le mie designazioni</h3><div class="status"><span class="spin"></span>Carico…</div>'; return; }
   const st = d => { const r = rispOf(d, uid); return sostMiaAperta(d) ? 'sost' : !r ? 'att' : r.stato === 'accettata' ? 'acc' : 'rif'; };
   const grp = [['acc', '✓ Accettate'], ['att', '⏳ In attesa di risposta'], ['sost', '🔁 Richiesta sostituzione'], ['rif', '✕ Rifiutate']].map(([k, t]) => [k, t, up.filter(d => st(d) === k)]).filter(g => g[2].length);
-  box.innerHTML = `<h3>Le mie designazioni <span class="cnt">${up.length}</span></h3>${up.length ? grp.map(([k, t, l]) => `<h4 class="mie-h mie-${k}">${t} <span class="cnt">${l.length}</span></h4><ul class="list">${l.map(mieRow).join('')}</ul>`).join('') : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
+  const tutte = [...ACC.mie, ...(ACC.ex || []).filter(x => !ACC.mie.some(y => y.id === x.id))];
+  box.innerHTML = `<h3>Le mie designazioni <span class="cnt">${up.length}</span></h3>${contaBox(contaArb(uid, tutte))}${up.length ? grp.map(([k, t, l]) => `<h4 class="mie-h mie-${k}">${t} <span class="cnt">${l.length}</span></h4><ul class="list">${l.map(mieRow).join('')}</ul>`).join('') : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
   bindRows(box);
 }
 function mieRow(d){
   const dt = parseD(d.data), r = rispOf(d, ACC.user.uid), mine = (d.ufficiali || []).find(u => u.uid === ACC.user.uid) || {};
   const st = r ? (r.stato === 'accettata' ? '<span class="ds-chip done"><i></i>Accettata</span>' : '<span class="ds-chip no"><i></i>Rifiutata</span>') : '<span class="ds-chip wait"><i></i>Da confermare</span>';
   const sNo = sostNoDaVedere(d), sAt = sostMiaAperta(d), sub = subDi(d, ACC.user.uid);
-  return `<li><button class="gara${sNo || sAt ? ' gara-sost' : r ? '' : ' gara-new'}" data-mie="${esc(d.id)}"><span class="day"><b>${dt ? dt.getDate() : '?'}</b><span>${dt ? MESI[dt.getMonth()].slice(0, 3) : ''}</span></span>
+  return `<li><button class="gara${sNo || sAt ? ' gara-sost' : modDi(d) ? ' gara-new gara-mod' : r ? '' : ' gara-new'}" data-mie="${esc(d.id)}"><span class="day"><b>${dt ? dt.getDate() : '?'}</b><span>${dt ? MESI[dt.getMonth()].slice(0, 3) : ''}</span></span>
     <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</span><span class="sub">${esc(fmtShort(d.data))}${d.ora ? ' · ' + esc(d.ora) : ''}${d.impianto ? ' · ' + esc(d.impianto) : ''}</span>
-    <span class="pills"><span class="pill ruolo">${esc(mine.ruolo || 'Arbitro')}</span>${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}${sAt ? '' : st}${sAt ? '<span class="pill sost-pill">⏸️ Sospesa · chiesta sostituzione</span>' : ''}${sNo ? '<span class="pill sost-pill">↩️ Sostituzione non accolta · conferma</span>' : ''}${sub ? `<span class="pill sub-pill">🔁 Al posto di ${esc(subNome(sub))}</span>` : ''}</span></span></button></li>`;
+    <span class="pills"><span class="pill ruolo">${esc(mine.ruolo || 'Arbitro')}</span>${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}${sAt ? '' : st}${sAt ? '<span class="pill sost-pill">⏸️ Sospesa · chiesta sostituzione</span>' : ''}${sNo ? '<span class="pill sost-pill">↩️ Sostituzione non accolta · conferma</span>' : ''}${sub ? `<span class="pill sub-pill">🔁 Al posto di ${esc(subNome(sub))}</span>` : ''}${modDi(d) ? `<span class="pill mod-pill">✏️ Modificata: ${esc(modElenco(modDi(d)))}</span>` : ''}</span></span></button></li>`;
 }
 function bindRows(box){ box.querySelectorAll('[data-mie]').forEach(b => b.onclick = () => openMie(b.dataset.mie)); }
 function openMie(id){
@@ -2232,13 +2263,13 @@ function openMie(id){
 }
 function mieCard(d){
     const uid = ACC.user.uid, r = rispOf(d, uid), mine = (d.ufficiali || []).find(u => u.uid === uid) || {}, altri = (d.ufficiali || []).filter(u => u.uid !== uid);
-    const st = sostMiaAperta(d) ? '<span class="dz-st sosp">⏸️ Sospesa · hai chiesto la sostituzione</span>' : r ? (r.stato === 'accettata' ? '<span class="dz-st done">✓ Accettata · è nel tuo registro</span>' : '<span class="dz-st no">✕ Rifiutata</span>') : '<span class="dz-st wait">● Da confermare</span>';
+    const st = sostMiaAperta(d) ? '<span class="dz-st sosp">⏸️ Sospesa · hai chiesto la sostituzione</span>' : modDi(d) ? '<span class="dz-st modif">✏️ Modificata · da riconfermare</span>' : r ? (r.stato === 'accettata' ? '<span class="dz-st done">✓ Accettata · è nel tuo registro</span>' : '<span class="dz-st no">✕ Rifiutata</span>') : '<span class="dz-st wait">● Da confermare</span>';
     const ref = d.referti && d.referti[uid];
-    return `<article class="dz${r ? '' : ' new'}">${st}
-      <div class="dz-date">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
-      <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
-      ${subInfo(subDi(d, uid))}
-      <dl class="kv">${[['Ruolo', mine.ruolo || 'Arbitro'], ['Campionato', [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · ')], ['Campo', [d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Con', altri.map(u => `${u.nome} (${u.ruolo})`).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    return `<article class="dz${r ? '' : ' new'}${modDi(d) ? ' mod' : ''}">${st}
+      <div class="dz-date">${modCampo(d, 'giorno') ? `<mark class="mod-new">${esc(fmtLong(d.data))}</mark>` : esc(fmtLong(d.data))}${d.ora ? ' · ' + (modCampo(d, 'ora') ? `<mark class="mod-new">ore ${esc(d.ora)}</mark>` : 'ore ' + esc(d.ora)) : ''}</div>
+      <h2${modCampo(d, 'squadre') ? ' class="mod-h"' : ''}>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</h2>
+      ${subInfo(subDi(d, uid))}${modInfo(d)}
+      <dl class="kv">${[['Ruolo', mine.ruolo || 'Arbitro'], ['Campionato', [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · ')], ['Campo', [d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Con', altri.map(u => `${u.nome} (${u.ruolo})`).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${k === 'Campo' && modCampo(d, 'campo') ? `<mark class="mod-new">${esc(v)}</mark>` : esc(v)}</dd>`).join('')}</dl>
       ${r && r.stato === 'accettata' ? `<p class="note" style="margin:0">${ref ? '✓ Referto inviato ai designatori.' : 'Dopo la gara compila il referto: il rimborso si conta solo con il referto.'} Se non puoi più arbitrarla tocca “Chiedi sostituzione”.</p>`
         : `<div class="row">${!r ? `<button class="btn btn-primary" data-acc="${esc(d.id)}">Accetto</button>` : `<button class="btn btn-primary" data-acc="${esc(d.id)}">Accetto</button>`}${!r ? `<button class="btn btn-danger" data-rif="${esc(d.id)}">Rifiuto</button>` : ''}</div>`}<div data-rbox="${esc(d.id)}"></div></article>`;
 }
@@ -2298,7 +2329,11 @@ function syncAccettate(){
     Store.remove(g.id); Store.spese.filter(s => s.garaId === g.id).forEach(s => Store.remove(s.id));
   });
   ACC.mie.forEach(d => {
-    const r = rispOf(d, ACC.user.uid); if(!r || r.stato !== 'accettata') return;
+    const r = rispOf(d, ACC.user.uid);
+    if(!r || r.stato !== 'accettata'){   // modificata e da riconfermare: nel registro tengo già i dati nuovi
+      const g0 = !r && Store.gare.find(x => x.id === 'd-' + d.id); if(g0){ const n = garaDaDes(d); if(Object.keys(n).some(k => (g0[k] || '') !== (n[k] || ''))) Store.saveGara({...g0, ...n}); }
+      return;
+    }
     const g = Store.gare.find(x => x.id === 'd-' + d.id);
     if(!g){ mettiInRegistro(d); return; }
     if(g.referto && !(d.referti && d.referti[ACC.user.uid]) && !refInviati.has(d.id)) inviaReferto(d.id, g);
@@ -2377,17 +2412,34 @@ function renderOggiDes(){
   const el = $('#desHint'); if(!el) return;
   renderNotif();
   const t = todayIso(), key = d => `${d.data || '9999'} ${d.ora || ''}`;
-  const da = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= t) && !rispOf(d, ACC.user.uid)).sort((a, b) => key(a).localeCompare(key(b))) : [];
+  const da0 = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= t) && !rispOf(d, ACC.user.uid)).sort((a, b) => key(a).localeCompare(key(b))) : [], modif = da0.filter(modDi), da = da0.filter(d => !modDi(d));
   const rich = ACC.isAdmin ? arbInAttesa() : [];
   const noSost = ACC.user ? ACC.mie.filter(sostNoDaVedere).sort((a, b) => key(a).localeCompare(key(b))) : [];
   const sost = ACC.isAdmin && DS.loaded ? sostRichieste() : [];
-  el.hidden = !da.length && !rich.length && !sost.length && !noSost.length;
-  el.innerHTML = (noSost.length ? `<section class="ref-sec des-home sost-home"><h3>↩️ Sostituzione non accolta <span class="cnt">${noSost.length}</span></h3><p class="note" style="margin:0">Il designatore ha risposto: la gara resta tua. Apri la gara e conferma di averlo letto.</p><ul class="list">${noSost.map(mieRow).join('')}</ul></section>` : '') + (sost.length ? `<section class="ref-sec des-home sost-home"><h3>🔁 Richieste di sostituzione <span class="cnt">${sost.length}</span></h3><p class="note" style="margin:0">Tocca la gara per scegliere chi mandare al posto dell’arbitro.</p><ul class="list">${sost.map(dsCard).join('')}</ul></section>` : '') + (rich.length ? `<section class="ref-sec des-home"><h3>👤 Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">${esc(rich.slice(0, 3).map(nomeArb).join(', '))}${rich.length > 3 ? '…' : ''} ${rich.length === 1 ? 'si è registrato e aspetta' : 'si sono registrati e aspettano'} il tuo ok.</p><button class="btn btn-primary btn-block" id="goApprova">Vai agli arbitri</button></section>` : '') + (da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3><p class="note" style="margin:0">Tocca la gara per vederla e rispondere.</p><ul class="list">${da.map(mieRow).join('')}</ul></section>` : '');
-  if(da.length || noSost.length) bindRows(el);
+  el.hidden = !da.length && !modif.length && !rich.length && !sost.length && !noSost.length;
+  el.innerHTML = (modif.length ? `<section class="ref-sec des-home mod-home"><h3>✏️ Partite modificate <span class="cnt">${modif.length}</span></h3><p class="note" style="margin:0">Il designatore ha cambiato qualcosa: apri la gara, guarda cosa è cambiato e conferma di nuovo.</p><ul class="list">${modif.map(mieRow).join('')}</ul></section>` : '') + (noSost.length ? `<section class="ref-sec des-home sost-home"><h3>↩️ Sostituzione non accolta <span class="cnt">${noSost.length}</span></h3><p class="note" style="margin:0">Il designatore ha risposto: la gara resta tua. Apri la gara e conferma di averlo letto.</p><ul class="list">${noSost.map(mieRow).join('')}</ul></section>` : '') + (sost.length ? `<section class="ref-sec des-home sost-home"><h3>🔁 Richieste di sostituzione <span class="cnt">${sost.length}</span></h3><p class="note" style="margin:0">Tocca la gara per scegliere chi mandare al posto dell’arbitro.</p><ul class="list">${sost.map(dsCard).join('')}</ul></section>` : '') + (rich.length ? `<section class="ref-sec des-home"><h3>👤 Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">${esc(rich.slice(0, 3).map(nomeArb).join(', '))}${rich.length > 3 ? '…' : ''} ${rich.length === 1 ? 'si è registrato e aspetta' : 'si sono registrati e aspettano'} il tuo ok.</p><button class="btn btn-primary btn-block" id="goApprova">Vai agli arbitri</button></section>` : '') + (da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3><p class="note" style="margin:0">Tocca la gara per vederla e rispondere.</p><ul class="list">${da.map(mieRow).join('')}</ul></section>` : '');
+  if(da.length || noSost.length || modif.length) bindRows(el);
   el.querySelectorAll('[data-ds]').forEach(b => b.onclick = () => openDs(b.dataset.ds));
   if($('#goApprova')) $('#goApprova').onclick = () => { DS.tab = 'arbitri'; location.hash = '#designazioni'; renderDesigna(); };
   renderTab();
 }
+
+/* nomi delle squadre sempre su una riga: il carattere si rimpicciolisce finché entra */
+function fitSquadre(){
+  document.querySelectorAll('.teams, h2').forEach(el => {
+    if(!/ – /.test(el.textContent)) return;
+    if(!el.classList.contains('fit1')){ el.classList.add('fit1'); FIT_RO.observe(el); }   // si riadatta quando diventa visibile o cambia larghezza
+    el.style.fontSize = '';
+    const w = el.clientWidth; if(!w || el.scrollWidth <= w) return;
+    const base = parseFloat(getComputedStyle(el).fontSize), min = Math.max(10, base * 0.45); let fs = base;
+    while(el.scrollWidth > w && fs > min){ fs -= 0.5; el.style.fontSize = fs + 'px'; }
+    if(fs > min){ fs -= 0.5; el.style.fontSize = fs + 'px'; }   // mezzo punto di margine contro gli arrotondamenti
+  });
+}
+let FIT = 0; const fitDopo = () => { cancelAnimationFrame(FIT); FIT = requestAnimationFrame(fitSquadre); };
+const FIT_W = new WeakMap(), FIT_RO = new ResizeObserver(l => { if(l.some(x => FIT_W.get(x.target) !== x.contentRect.width && (FIT_W.set(x.target, x.contentRect.width), true))) fitDopo(); });
+new MutationObserver(fitDopo).observe(document.body, {childList: true, subtree: true, attributes: true, attributeFilter: ['hidden']});
+addEventListener('resize', fitDopo); addEventListener('hashchange', () => setTimeout(fitDopo, 50));
 
 /* -- funzioni designatore -- */
 /* -- Home dei designatori: avvisi da mandare agli arbitri delle gare del giorno -- */
@@ -2427,7 +2479,7 @@ function renderDesigna(){
   box.innerHTML = `<div class="seg seg6" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare${DS.loaded && dsDaGuardare().length ? ` <b class="seg-n">${dsDaGuardare().length}</b>` : ''}</button><button data-t="sost" aria-pressed="${tab === 'sost'}">Sostituzioni${DS.loaded && sostRichieste().length ? ` <b class="seg-n">${sostRichieste().length}</b>` : ''}</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri${arbInAttesa().length ? ` <b class="seg-n">${arbInAttesa().length}</b>` : ''}</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button><button data-t="ind" aria-pressed="${tab === 'ind'}">Indisponibili</button></div>
     ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
     <div id="dsList" class="view"></div>`;
-  box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
+  box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; DS.focus = null; renderDesigna(); });
   ({gare: renderDsGare, sost: renderDsSost, arbitri: renderDsArbitri, squadre: renderDsSquadre, impianti: renderDsImpianti, ind: renderDsInd})[tab]();
 }
 /* sezione Sostituzione arbitro: richieste da decidere, risposte da confermare, cambi fatti */
@@ -2435,12 +2487,12 @@ function renderDsSost(){
   const el = $('#dsList');
   if(!DS.loaded){ el.innerHTML = '<div class="status"><span class="spin"></span>Carico le designazioni…</div>'; return; }
   const rich = sostRichieste(), nov = sostNonViste(), fatte = sostFatte();
-  const subRiga = d => (d.ufficiali || []).filter(u => subDi(d, u.uid)).map(u => `<span class="sost-prop">🔁 <b>${esc(nomeArb(DS.arbitri.find(a => a.id === u.uid)) || u.nome)}</b> al posto di <b>${esc(subNome(subDi(d, u.uid)))}</b> · ${esc(sostQuando(subDi(d, u.uid).at))}</span>`).join('');
-  el.innerHTML = `<div class="acc-sum"><div class="${rich.length ? 'bad' : ''}"><b>${rich.length}</b><span>da approvare</span></div><div><b>${nov.length}</b><span>non accolte da leggere</span></div><div><b>${fatte.length}</b><span>sostituzioni fatte</span></div></div>
+  const subRiga = d => (d.storico || []).length ? d.storico.map(x => storicoRiga(x, true)).join('') : (d.sostituiti || []).map(x => `<span class="sost-prop">🔁 Ha lasciato la gara: <b>${esc(exNome(x))}</b></span>`).join('');
+  el.innerHTML = `<div class="acc-sum"><div class="${rich.length ? 'bad' : ''}"><b>${rich.length}</b><span>da approvare</span></div><div><b>${nov.length}</b><span>non accolte da leggere</span></div><div><b>${fatte.length}</b><span>partite sostituite</span></div></div>
     <h3 class="acc-h">🔁 Da approvare</h3>
     ${rich.length ? `<p class="note" style="margin:0">Tocca la gara: puoi approvare il collega proposto, scegliere un altro arbitro o non accogliere la richiesta.</p><ul class="list">${rich.map(dsCard).join('')}</ul>` : '<p class="note ok-t" style="margin:0">✓ Nessuna sostituzione da approvare.</p>'}
     ${nov.length ? `<h3 class="acc-h">↩️ Non accolte · l’arbitro deve ancora leggere</h3><ul class="list">${nov.map(dsCard).join('')}</ul>` : ''}
-    ${fatte.length ? `<h3 class="acc-h">✅ Sostituzioni fatte</h3><ul class="list sub-list">${fatte.map(d => dsCard(d).replace('</span></button></li>', `${subRiga(d)}</span></button></li>`)).join('')}</ul>` : ''}`;
+    ${fatte.length ? `<h3 class="acc-h">✅ Partite sostituite</h3><ul class="list sub-list">${fatte.map(d => dsCard(d).replace('</span></button></li>', `${subRiga(d)}</span></button></li>`)).join('')}</ul>` : ''}`;
   el.querySelectorAll('[data-ds]').forEach(b => b.onclick = () => openDs(b.dataset.ds));
 }
 
@@ -2586,9 +2638,36 @@ const sostAttesaGara = g => sostMiaAperta(desDi(g));
 const subDi = (d, uid) => { const s = d && (d.subentri || {})[uid]; return s && s.sost && (d.arbitriIds || []).includes(uid) ? s : null; };   // gara passata a me da un collega
 const subNome = s => { if(!s) return ''; const a = DS.arbitri.find(x => x.id === s.da); return (a && nomeArb(a)) || s.daNome || 'un collega'; };
 const subInfo = s => s ? `<div class="sub-info">🔁 <span>Prima questa designazione era di <b>${esc(subNome(s))}</b>${s.at ? ` · passata a te il ${esc(sostQuando(s.at))}` : ''}</span></div>` : '';
+const storicoA = (d, uid) => [...(d && d.storico || [])].reverse().find(x => x.a === uid && (d.arbitriIds || []).includes(uid));
+const exNome = (uid, nome) => { const a = DS.arbitri.find(x => x.id === uid); return (a && nomeArb(a)) || nome || 'arbitro'; };
+const TIPO_EX = {rifiuto: 'aveva rifiutato', sost: 'aveva chiesto la sostituzione', cambio: 'cambiato dal designatore'};
+const storicoRiga = (x, conA) => `<span class="sost-prop">🔁 ${conA ? (x.a ? `<b>${esc(exNome(x.a, x.aNome))}</b> al posto di ` : 'Tolto ') : 'Al posto di '}<b>${esc(exNome(x.da, x.daNome))}</b> · ${esc(TIPO_EX[x.tipo] || '')}${x.at ? ' · ' + esc(sostQuando(x.at)) : ''}</span>`;
+/* quante gare un arbitro ha rifiutato o lasciato (sostituito) */
+function contaArb(uid, gare){
+  let rif = 0, sost = 0;
+  gare.forEach(d => {
+    if((d.arbitriIds || []).includes(uid) && (rispOf(d, uid) || {}).stato === 'rifiutata') rif++;
+    const st = (d.storico || []).filter(x => x.da === uid);
+    st.forEach(x => { if(x.tipo === 'rifiuto') rif++; else sost++; });
+    if(!st.length && (d.sostituiti || []).includes(uid)) sost++;
+  });
+  return {rif, sost};
+}
+const contaBox = c => `<div class="acc-sum due"><div class="${c.rif ? 'bad' : ''}"><b>${c.rif}</b><span>partite rifiutate</span></div><div class="${c.sost ? 'warn' : ''}"><b>${c.sost}</b><span>partite sostituite</span></div></div>`;
+/* partita modificata dal designatore: cosa è cambiato */
+const MOD_L = {data: 'giorno', ora: 'ora', casa: 'squadre', ospite: 'squadre', impianto: 'campo'};
+const modDi = d => { const m = d && d.modifiche; return m && (m.campi || []).length && ACC.user && !rispOf(d, ACC.user.uid) && (!m.per || m.per.includes(ACC.user.uid)) ? m : null; };   // solo a chi era già designato
+const modVoci = m => [...new Set(m.campi.map(k => MOD_L[k]).filter(Boolean))];
+const modElenco = m => { const l = modVoci(m); return l.length > 1 ? l.slice(0, -1).join(', ') + ' e ' + l[l.length - 1] : l[0]; };
+const modPrima = m => { const p = m.prima || {}; return modVoci(m).map(v => v === 'giorno' ? fmtShort(p.data) : v === 'ora' ? `ore ${p.ora || '—'}` : v === 'squadre' ? `${p.casa || '—'} – ${p.ospite || '—'}` : `campo ${p.impianto || '—'}`).join(' · '); };
+const modCoppia = (v, p, d) => v === 'giorno' ? [fmtShort(p.data), fmtShort(d.data)] : v === 'ora' ? [p.ora || '—', d.ora || '—'] : v === 'squadre' ? [`${p.casa || '—'} – ${p.ospite || '—'}`, `${d.casa || '—'} – ${d.ospite || '—'}`] : [p.impianto || '—', d.impianto || '—'];
+const modInfo = d => { const m = modDi(d); if(!m) return '';
+  const righe = modVoci(m).map(v => { const [pr, nu] = modCoppia(v, m.prima || {}, d); return `<li><span class="mod-k">${v[0].toUpperCase() + v.slice(1)}</span><span class="mod-v"><s>${esc(pr)}</s><span class="mod-arr">→</span><b>${esc(nu)}</b></span></li>`; }).join('');
+  return `<div class="mod-info"><b class="mod-t">✏️ Il designatore ha modificato la partita</b><ul class="mod-l">${righe}</ul><span class="note">Controlla i nuovi dati e conferma di nuovo: finché non rispondi la gara resta da confermare.</span></div>`; };
+const modCampo = (d, v) => { const m = modDi(d); return !!(m && modVoci(m).includes(v)); };
 const sostNonViste = () => DS.gare.filter(d => !iniziata(d) && (d.ufficiali || []).some(u => { const r = sostDi(d, u.uid); return r && r.esito === 'no' && !r.visto; })).sort(dsSort);
 const dsDaGuardare = () => DS.gare.filter(d => !fatta(d) && ['attesa', 'rifiuti', 'senza'].some(k => DSF_FILTRI[k][1](d)));   // gare non ancora a posto
-const sostFatte = () => DS.gare.filter(d => !fatta(d) && (d.ufficiali || []).some(u => subDi(d, u.uid))).sort(dsSort);
+const sostFatte = () => { const l = DS.gare.filter(d => (d.storico || []).length || (d.sostituiti || []).length); return [...l.filter(d => !fatta(d)).sort(dsSort), ...l.filter(fatta).sort((a, b) => dsSort(b, a))]; };
 const sostQuando = t => new Date(t).toLocaleString('it-IT', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}).replace(',', ' alle');
 /* lato arbitro: tasto nella scheda della partita */
 function sostRender(box, d){
@@ -2670,19 +2749,30 @@ function dsCard(d){
     <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</span>
     <span class="sub">${esc(fmtShort(d.data))}${d.ora ? ' · ' + esc(d.ora) : ''}${d.impianto ? ' · ' + esc(d.impianto) : ''}</span>
     <span class="pills">${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}</span>
-    <span class="ds-chips">${chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}</span></span></button></li>`;
+    <span class="ds-chips">${d.annullata && !uff.length ? '<span class="ds-chip no"><i></i>🔄 Annullata · da riprogrammare</span>' : chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}</span></span></button></li>`;
 }
 const DSF_FILTRI = {tutte: ['Tutte', () => true], attesa: ['In attesa', d => (d.ufficiali || []).some(u => !rispOf(d, u.uid) || sostAperta(d, u.uid))], rifiuti: ['Rifiutate', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'rifiutata')],
   senza: ['Senza arbitro', d => !(d.ufficiali || []).length], sost: ['Sostituzioni', d => (d.ufficiali || []).some(u => sostAperta(d, u.uid))], referto: ['Referto non compilato', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'accettata' && !(d.referti && d.referti[u.uid] && !d.referti[u.uid].sbloccato))]};
+const DS_FOCUS = {attesa: ['⏳ In attesa di conferma', d => (d.ufficiali || []).some(u => !rispOf(d, u.uid)), 'Gli arbitri non hanno ancora risposto. Tocca la gara per mandare la designazione su WhatsApp.'],
+  rifiuti: ['✕ Partite rifiutate', d => DSF_FILTRI.rifiuti[1](d), 'Tocca la gara e premi “Sostituisci” per mandare un altro arbitro.'],
+  senza: ['⚠️ Senza arbitro', d => DSF_FILTRI.senza[1](d), 'Tocca la gara e premi “Modifica” per scegliere l’arbitro.']};
+function renderDsFocus(){
+  const el = $('#dsList'), [t, fn, nota] = DS_FOCUS[DS.focus], l = DS.gare.filter(d => !fatta(d) && fn(d)).sort(dsSort);
+  el.innerHTML = `<button class="btn btn-ghost sm ds-back" id="dsBack">← Tutte le gare</button><h3 class="acc-h">${t} <span class="cnt">${l.length}</span></h3>
+    ${l.length ? `<p class="note" style="margin:0">${nota}</p><ul class="list">${l.map(dsCard).join('')}</ul>` : '<p class="note ok-t" style="margin:0">✓ Nessuna gara qui: è tutto a posto.</p>'}`;
+  $('#dsBack').onclick = () => { DS.focus = null; renderDsGare(); };
+  el.querySelectorAll('[data-ds]').forEach(b => b.onclick = () => openDs(b.dataset.ds));
+}
 function dsBanner(base){
   const n1 = base.filter(d => (d.ufficiali || []).some(u => !rispOf(d, u.uid))).length, n2 = base.filter(d => (d.ufficiali || []).some(u => sostAperta(d, u.uid))).length;
   const n3 = base.filter(DSF_FILTRI.rifiuti[1]).length, n4 = base.filter(DSF_FILTRI.senza[1]).length, g = n => n === 1 ? '1 gara' : n + ' gare';
   return [[n1, 'attesa', '', `⏳ ${g(n1)} in attesa di conferma`], [n2, 'sost', '', `🔁 ${n2 === 1 ? '1 sostituzione arbitro' : n2 + ' sostituzioni arbitro'} da approvare`],
-    [n3, 'rifiuti', ' rosso', `✕ ${n3 === 1 ? '1 gara rifiutata' : n3 + ' gare rifiutate'}: scegli un altro arbitro`], [n4, 'senza', ' rosso', `⚠️ ${g(n4)} senza arbitro`]]
+    [n3, 'rifiuti', ' rosso', `✕ ${n3 === 1 ? '1 gara rifiutata' : n3 + ' gare rifiutate'}: scegli un altro arbitro`], [n4, 'senza', ' rosso', `⚠️ ${g(n4)} senza arbitro${base.some(d => d.annullata && !(d.ufficiali || []).length) ? ` (${base.filter(d => d.annullata && !(d.ufficiali || []).length).length} da riprogrammare)` : ''}`]]
     .filter(x => x[0]).map(([, k, c, t]) => `<button class="sost-banner${c}" data-ban="${k}"><b>${t}</b><span>Apri</span></button>`).join('');
 }
 function renderDsGare(){
   const el = $('#dsList');
+  if(DS.focus && DS_FOCUS[DS.focus] && DS.loaded){ renderDsFocus(); return; }
   if(!DS.loaded){ el.innerHTML = '<div class="status"><span class="spin"></span>Carico le designazioni…</div>'; return; }
   const past = !!DS.past, base = DS.gare.filter(d => past ? fatta(d) : !fatta(d));
   const att = past ? 0 : base.reduce((n, d) => n + (d.ufficiali || []).filter(u => !rispOf(d, u.uid) || sostAperta(d, u.uid)).length, 0);
@@ -2697,10 +2787,10 @@ function renderDsGare(){
     <div class="ds-filtri">${filtri.map(k => `<button class="chip-f" data-f="${k}" aria-pressed="${DS.f === k}">${DSF_FILTRI[k][0]}${k === 'tutte' ? '' : ` <b>${base.filter(DSF_FILTRI[k][1]).length}</b>`}</button>`).join('')}</div>
     <input class="ds-q" id="dsQ" type="search" placeholder="Cerca squadra, campo o arbitro" value="${esc(DS.q || '')}" aria-label="Cerca">
     <div id="dsGareList" class="view"></div>`;
-  el.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { DS.past = b.dataset.p === '1'; DS.f = 'tutte'; renderDsGare(); });
+  el.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { DS.past = b.dataset.p === '1'; DS.f = 'tutte'; DS.focus = null; renderDsGare(); });
   el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { DS.f = b.dataset.f; renderDsGare(); });
   if($('#dsAdd')) $('#dsAdd').onclick = () => openDsForm({});
-  el.querySelectorAll('[data-ban]').forEach(b => b.onclick = () => { if(b.dataset.ban === 'sost'){ DS.tab = 'sost'; renderDesigna(); return; } DS.f = b.dataset.ban; renderDsGare(); });
+  el.querySelectorAll('[data-ban]').forEach(b => b.onclick = () => { if(b.dataset.ban === 'sost') DS.tab = 'sost'; else DS.focus = b.dataset.ban; renderDesigna(); scrollTo(0, 0); });
   $('#dsQ').oninput = e => { DS.q = e.target.value; renderDsGareList(base, past); };
   renderDsGareList(base, past);
 }
@@ -2751,7 +2841,7 @@ function openArb(id){
   const a = DS.arbitri.find(x => x.id === id); if(!a) return;
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Dati arbitro"><div class="grab"></div>
-    <h2>${esc(nomeArb(a))}</h2>${accChip(a)}<p class="note" style="margin:0">${esc(accInfo(a))}</p>
+    <h2>${esc(nomeArb(a))}</h2>${accChip(a)}<p class="note" style="margin:0">${esc(accInfo(a))}</p>${contaBox(contaArb(a.id, DS.gare))}
     ${datiKv(a)}
     <div class="row">${a.iban ? `<button class="btn btn-primary" data-a="iban">Copia IBAN</button>` : '<span class="err-t">IBAN non inserito</span>'}${a.telefono ? `<a class="btn btn-ghost" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-ghost" href="tel:${esc(a.telefono)}">Chiama</a>` : ''}</div>
     ${ADMINS().includes((a.email || '').toLowerCase()) ? '' : statoArb(a) === 'attivo' ? '<button class="btn btn-danger btn-block" data-a="togli">Togli accesso all’app</button>' : `<button class="btn btn-primary btn-block" data-a="riatt">${statoArb(a) === 'attesa' ? 'Approva' : 'Riattiva accesso'}</button>`}
@@ -2819,24 +2909,41 @@ function dsText(d, u){
     '', !u ? '' : (rispOf(d, u.uid) || {}).stato === 'accettata' ? '✅ Designazione già accettata.\n🗺️ Se non conosci la strada, nell’app AICS apri la partita e tocca “Google Maps” per arrivare al campo.' : 'Apri l’app AICS per accettare la designazione.'].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
 
+const invQuando = t => { const x = new Date(t); return (x.toDateString() === new Date().toDateString() ? 'oggi' : 'il ' + x.toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit'})) + ' alle ' + x.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}); };
 function openDs(id){
   const d = DS.gare.find(x => x.id === id); if(!d) return;
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   const uff = d.ufficiali || [];
   const rows = uff.map(u => { const a = DS.arbitri.find(x => x.id === u.uid), r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : ''];
-    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span>${indDi(u.uid, d.data).length && !fatta(d) ? '<span class="ds-chip no"><i></i>Indisponibile in questa data</span>' : ''}${subDi(d, u.uid) ? `<span class="sost-prop">🔁 Al posto di <b>${esc(subNome(subDi(d, u.uid)))}</b></span>` : ''}<span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}${!fatta(d) && sostDi(d, u.uid) && sostDi(d, u.uid).esito === 'no' ? `<span class="sost-prop">↩️ Sostituzione non accolta · ${sostDi(d, u.uid).visto ? `<b class="ok-t">✓ letto e confermato il ${esc(sostQuando(sostDi(d, u.uid).visto))}</b>` : '<b class="sost-wait">non ha ancora confermato di averlo letto</b>'}</span>` : ''}${!fatta(d) && sostAperta(d, u.uid) ? `<span class="sost-req">🔁 Chiede di essere sostituito · ${esc(sostQuando(sostAperta(d, u.uid).at))}${sostAperta(d, u.uid).motivo ? ` · “${esc(sostAperta(d, u.uid).motivo)}”` : ''}</span>${sostAperta(d, u.uid).proposto ? `<span class="sost-prop">Propone <b>${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)) || sostAperta(d, u.uid).propostoNome)}</b>${propOk(d, sostAperta(d, u.uid).proposto) ? '' : ` · <span class="err-t">${esc(propOk(d, sostAperta(d, u.uid).proposto, true))}</span>`}</span>` : ''}` : ''}</div>
-      <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}${fatta(d) ? '' : `${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto && propOk(d, sostAperta(d, u.uid).proposto) ? `<button class="btn btn-primary sm" data-sprop="${esc(u.uid)}">Approva ${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)))}</button>` : ''}${sostAperta(d, u.uid) || (r && r.stato === 'rifiutata') ? `<button class="btn ${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto && propOk(d, sostAperta(d, u.uid).proposto) ? 'btn-ghost' : 'btn-primary'} sm" data-sost="${esc(u.uid)}">${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto ? 'Scegli un altro' : 'Sostituisci'}</button>` : ''}${sostAperta(d, u.uid) ? `<button class="btn btn-ghost sm" data-sign="${esc(u.uid)}">Non accogliere</button>` : ''}<a class="btn ${sostAperta(d, u.uid) ? 'btn-ghost' : 'btn-primary'} sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a>`}</span><div class="sost-pick" data-spick="${esc(u.uid)}"></div></li>`; }).join('');
+    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span>${indDi(u.uid, d.data).length && !fatta(d) ? '<span class="ds-chip no"><i></i>Indisponibile in questa data</span>' : ''}${storicoA(d, u.uid) ? storicoRiga(storicoA(d, u.uid)) : subDi(d, u.uid) ? `<span class="sost-prop">🔁 Al posto di <b>${esc(subNome(subDi(d, u.uid)))}</b> · aveva chiesto la sostituzione</span>` : ''}<span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${d.inviate && d.inviate[u.uid] ? `<span class="inv-t">✓ Designazione inviata ${esc(invQuando(d.inviate[u.uid]))}</span>` : !fatta(d) && !(r && r.stato) ? '<span class="inv-t no">Designazione non ancora inviata su WhatsApp</span>' : ''}${d.avvisi && d.avvisi[u.uid] ? `<span class="inv-t">⏰ Promemoria inviato ${esc(invQuando(d.avvisi[u.uid]))}</span>` : ''}${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}${!fatta(d) && sostDi(d, u.uid) && sostDi(d, u.uid).esito === 'no' ? `<span class="sost-prop">↩️ Sostituzione non accolta · ${sostDi(d, u.uid).visto ? `<b class="ok-t">✓ letto e confermato il ${esc(sostQuando(sostDi(d, u.uid).visto))}</b>` : '<b class="sost-wait">non ha ancora confermato di averlo letto</b>'}</span>` : ''}${!fatta(d) && sostAperta(d, u.uid) ? `<span class="sost-req">🔁 Chiede di essere sostituito · ${esc(sostQuando(sostAperta(d, u.uid).at))}${sostAperta(d, u.uid).motivo ? ` · “${esc(sostAperta(d, u.uid).motivo)}”` : ''}</span>${sostAperta(d, u.uid).proposto ? `<span class="sost-prop">Propone <b>${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)) || sostAperta(d, u.uid).propostoNome)}</b>${propOk(d, sostAperta(d, u.uid).proposto) ? '' : ` · <span class="err-t">${esc(propOk(d, sostAperta(d, u.uid).proposto, true))}</span>`}</span>` : ''}` : ''}</div>
+      <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}${fatta(d) ? '' : `${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto && propOk(d, sostAperta(d, u.uid).proposto) ? `<button class="btn btn-primary sm" data-sprop="${esc(u.uid)}">Approva ${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)))}</button>` : ''}${sostAperta(d, u.uid) || (r && r.stato === 'rifiutata') ? `<button class="btn ${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto && propOk(d, sostAperta(d, u.uid).proposto) ? 'btn-ghost' : 'btn-primary'} sm" data-sost="${esc(u.uid)}">${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto ? 'Scegli un altro' : 'Sostituisci'}</button>` : ''}${sostAperta(d, u.uid) ? `<button class="btn btn-ghost sm" data-sign="${esc(u.uid)}">Non accogliere</button>` : ''}${sostAperta(d, u.uid) || (r && r.stato === 'rifiutata') ? '' : `<a class="btn ${d.inviate && d.inviate[u.uid] ? 'btn-ghost' : 'btn-primary'} sm" data-inv="${esc(u.uid)}" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">${d.inviate && d.inviate[u.uid] ? 'Rimanda su WhatsApp' : 'Invia su WhatsApp'}</a>`}`}</span><div class="sost-pick" data-spick="${esc(u.uid)}"></div></li>`; }).join('');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
     <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</h2>
+    ${d.annullata ? `<div class="ann-info"><b>🔄 Partita annullata · da riprogrammare</b><span>Annullata il ${esc(sostQuando(d.annullata.at))}${d.annullata.motivo ? ` · “${esc(d.annullata.motivo)}”` : ''}. Tocca <b>Modifica</b>, metti la nuova data e scegli gli arbitri: la riceveranno come una designazione nuova.</span></div>` : ''}
     <dl class="kv">${[['Categoria', [d.categoria, d.girone && 'girone ' + d.girone].filter(Boolean).join(' · ')], ['N. gara', d.numeroGara], ['Campo', d.impianto], ['Indirizzo', [d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
     <section class="ref-sec"><h3>Arbitri designati</h3>${rows ? `<ul class="list">${rows}</ul>` : '<p class="note" style="margin:0">Nessuno: tocca Modifica per aggiungerli.</p>'}<div id="dsRefBox"></div></section>
     <div class="row"><button class="btn btn-ghost" data-a="edit">Modifica</button><button class="btn btn-ghost" data-a="copy">Copia testo</button><button class="btn btn-danger" data-a="del">Elimina</button></div>
+    ${fatta(d) ? '' : d.annullata && !uff.length ? '' : '<button class="btn btn-warn btn-block" data-a="annulla">🔄 Annulla partita · da riprogrammare</button>'}
     <div id="dsConfirm"></div>
     <button class="btn btn-ghost btn-block" data-a="close">Chiudi</button></div></div>`;
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   const a = k => root.querySelector(`[data-a=${k}]`);
   a('close').onclick = close;
+  root.querySelectorAll('[data-inv]').forEach(x => x.addEventListener('click', () => {   // salvo l'ora in cui ho mandato la designazione
+    const t = Date.now(), sh = root.querySelector('.sheet'), sc = sh ? sh.scrollTop : 0;
+    d.inviate = {...(d.inviate || {}), [x.dataset.inv]: t};
+    firebase.firestore().collection('designazioni').doc(d.id).update({['inviate.' + x.dataset.inv]: t}).catch(err => toast(fbErr(err)));
+    setTimeout(() => { if(!root.querySelector('.sheet')) return; openDs(d.id); const s2 = root.querySelector('.sheet'); if(s2) s2.scrollTop = sc; }, 300);
+  }));
+  if(a('annulla')) a('annulla').onclick = async () => {
+    const nomi = uff.map(u => nomeArb(DS.arbitri.find(x => x.id === u.uid)) || u.nome).filter(Boolean);
+    if(!confirm(`Annullare ${d.casa || ''} – ${d.ospite || ''}?\n\n${nomi.length ? `Vengono tolti ${nomi.join(', ')} e ricevono l’avviso che la partita è annullata.\n` : ''}La partita resta in elenco SENZA ARBITRI, da riprogrammare: con Modifica metti la nuova data e designi da capo.`)) return;
+    const motivo = (prompt('Motivo (facoltativo), es. palestra non disponibile', '') || '').trim().slice(0, 140);
+    const upd = {ufficiali: [], arbitriIds: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], modifiche: null, annullata: {at: Date.now(), motivo, arbitri: nomi}, updatedAt: Date.now()};
+    try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); toast('Partita annullata: ora è da riprogrammare'); openDs(d.id); }
+    catch(e){ toast(fbErr(e)); }
+  };
   root.querySelectorAll('[data-unl]').forEach(b => b.onclick = async () => {
     if(!confirm('Sbloccare il referto? L’arbitro potrà correggerlo e reinviarlo, poi si blocca di nuovo.')) return;
     try{ await firebase.firestore().collection('designazioni').doc(id).update({[`referti.${b.dataset.unl}.sbloccato`]: true}); toast('Referto sbloccato: l’arbitro può correggerlo'); close(); }catch(err){ toast(fbErr(err)); }
@@ -2878,7 +2985,7 @@ function openDs(id){
 async function sostituisci(d, old, nuovo, btn){
   const uff = d.ufficiali || [], na = DS.arbitri.find(x => x.id === nuovo), ufn = uff.map(x => x.uid === old ? {uid: nuovo, ruolo: x.ruolo || 'Arbitro', nome: nomeArb(na)} : x);
   const senza = m => { const o = {...(m || {})}; delete o[old]; return o; };
-  const upd = {ufficiali: ufn, arbitriIds: ufn.map(x => x.uid), risposte: senza(d.risposte), referti: senza(d.referti), avvisi: senza(d.avvisi), sostituzioni: senza(d.sostituzioni), sostituiti: [...new Set([...(d.sostituiti || []), old])], subentri: {...senza(d.subentri), ...(sostAperta(d, old) ? {[nuovo]: {da: old, daNome: nomeArb(DS.arbitri.find(x => x.id === old)) || (uff.find(x => x.uid === old) || {}).nome || '', at: Date.now(), sost: true}} : {})}, updatedAt: Date.now()};
+  const upd = {ufficiali: ufn, arbitriIds: ufn.map(x => x.uid), risposte: senza(d.risposte), referti: senza(d.referti), avvisi: senza(d.avvisi), inviate: senza(d.inviate), sostituzioni: senza(d.sostituzioni), sostituiti: [...new Set([...(d.sostituiti || []), old])], storico: [...(d.storico || []), {da: old, daNome: exNome(old, (uff.find(x => x.uid === old) || {}).nome), a: nuovo, aNome: nomeArb(na), at: Date.now(), tipo: sostAperta(d, old) ? 'sost' : (rispOf(d, old) || {}).stato === 'rifiutata' ? 'rifiuto' : 'cambio'}], subentri: {...senza(d.subentri), ...(sostAperta(d, old) ? {[nuovo]: {da: old, daNome: nomeArb(DS.arbitri.find(x => x.id === old)) || (uff.find(x => x.uid === old) || {}).nome || '', at: Date.now(), sost: true}} : {})}, updatedAt: Date.now()};
   if(btn) btn.disabled = true;
   try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); toast(`Fatto: ${nomeArb(na)} riceve la designazione da accettare`); openDs(d.id); }
   catch(err){ if(btn) btn.disabled = false; toast(fbErr(err)); }
@@ -2895,9 +3002,12 @@ function openDsForm(d){
   const giaDes = new Set(d.data ? d.arbitriIds || [] : []), dataDi = () => (root.querySelector('#df-data') || {}).value || d.data || '';
   const indOk = (uid, k) => !indDi(uid, k).length || (k === d.data && giaDes.has(uid));
   const fuori = sostEsclusi(d);
+  const lascia = uid => isNew ? '' : sostAperta(d, uid) ? 'ha chiesto la sostituzione' : (rispOf(d, uid) || {}).stato === 'rifiutata' ? 'ha rifiutato' : '';
   const arbOpts = (sel, k = dataDi()) => `<option value="">Scegli arbitro…</option>` + DS.arbitri.filter(a => statoArb(a) === 'attivo' || a.id === sel).sort((a, b) => nomeArb(a).localeCompare(nomeArb(b))).map(a => { const no = indDi(a.id, k).length;
-    const via = fuori.has(a.id);
-    return `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''} ${(no && !indOk(a.id, k) || via) && a.id !== sel ? 'disabled' : ''}>${esc(nomeArb(a))}${via ? ' – ha lasciato questa gara' : no ? ' – indisponibile' : ''}</option>`; }).join('');
+    const via = fuori.has(a.id), ls = lascia(a.id);
+    return `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''} ${((no && !indOk(a.id, k) || via) && a.id !== sel) || ls ? 'disabled' : ''}>${esc(nomeArb(a))}${ls ? ' – ' + ls : via ? ' – ha lasciato questa gara' : no ? ' – indisponibile' : ''}</option>`; }).join('');
+  const segnaNo = () => { const l = []; offs.querySelectorAll('[data-o=uid]').forEach(s => { const ls = s.value && lascia(s.value); s.classList.toggle('sel-no', !!ls); if(ls) l.push(`${nomeArb(DS.arbitri.find(a => a.id === s.value))} ${ls}`); });
+    const m = f.querySelector('#dsNoMsg'); m.hidden = !l.length; m.innerHTML = `<span class="ind-msg">${esc(l.join(' · '))}: scegli un altro arbitro al suo posto.</span>`; };
   const offRow = u => `<div class="ds-offrow"><select data-o="uid" aria-label="Arbitro">${arbOpts(u.uid)}</select><select data-o="ruolo" aria-label="Ruolo">${RUOLI.filter(r => r !== 'Altro').map(r => `<option ${r === (u.ruolo || 'Arbitro') ? 'selected' : ''}>${r}</option>`).join('')}</select><button type="button" class="x" aria-label="Togli">✕</button></div>`;
   const uff = (d.ufficiali && d.ufficiali.length) ? d.ufficiali : [{ruolo: 'Arbitro'}];
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
@@ -2914,7 +3024,7 @@ function openDsForm(d){
     ${inp('rimborso', 'Rimborso €', 'text', false, 'inputmode="decimal"')}<div class="field"></div>
     <div class="field full"><label for="df-note">Note per gli arbitri</label><textarea id="df-note" data-f="note">${esc(d.note || '')}</textarea></div>
     <div class="sep eyebrow">Arbitri designati</div>
-    <div class="field full" id="dsIndMsg" hidden></div>
+    <div class="field full" id="dsIndMsg" hidden></div><div class="field full" id="dsNoMsg" hidden></div>
     <div class="field full" id="dsOffs">${DS.arbitri.length ? uff.map(offRow).join('') : '<p class="note" style="margin:0">Nessun arbitro registrato: invitali dalla scheda Arbitri.</p>'}</div>
     ${DS.arbitri.length ? '<button type="button" class="btn btn-ghost sm" id="dsAddOff" style="grid-column:1/-1">+ Aggiungi arbitro</button>' : ''}
     ${isNew ? '' : '<p class="note" style="grid-column:1/-1;margin:0">Se cambi data, ora o campo, le risposte degli arbitri si azzerano e devono riconfermare.</p>'}
@@ -2943,13 +3053,13 @@ function openDsForm(d){
   impSel.onchange = syncImp; fillSq(); syncImp();
   const syncInd = () => {
     const k = dataDi(), m = f.querySelector('#dsIndMsg');
-    offs.querySelectorAll('[data-o=uid]').forEach(s => { const v = s.value; s.innerHTML = arbOpts(v, k); s.value = v; });
+    offs.querySelectorAll('[data-o=uid]').forEach(s => { const v = s.value; s.innerHTML = arbOpts(v, k); s.value = v; }); if(f.querySelector('#dsNoMsg')) segnaNo();
     const no = k ? arbAttivi().filter(a => indDi(a.id, k).length).map(nomeArb).sort() : [];
     m.hidden = !no.length; m.innerHTML = `<span class="ind-msg">⛔ Indisponibili il ${esc(fmtShort(k))}: ${esc(no.join(', '))}</span>`;
   };
   f.querySelector('#df-data').addEventListener('change', syncInd); f.querySelector('#df-data').addEventListener('input', syncInd);
   const bindX = () => offs.querySelectorAll('.x').forEach(b => b.onclick = () => b.parentElement.remove());
-  bindX(); syncInd();
+  bindX(); syncInd(); segnaNo(); offs.addEventListener('change', segnaNo);
   if(f.querySelector('#dsAddOff')) f.querySelector('#dsAddOff').onclick = () => { offs.insertAdjacentHTML('beforeend', offRow({ruolo: offs.querySelectorAll('.ds-offrow').length ? 'Assistente ' + Math.min(2, offs.querySelectorAll('.ds-offrow').length) : 'Arbitro'})); bindX(); };
   f.querySelector('[data-x]').onclick = () => isNew ? close() : openDs(d.id);
   f.onsubmit = async e => {
@@ -2966,15 +3076,30 @@ function openDsForm(d){
     if(viaNo.length){ msg.innerHTML = `<span class="err-t">${esc(viaNo.map(u => u.nome).join(', '))} ha lasciato questa gara (sostituzione o rifiuto): scegli un altro arbitro.</span>`; return; }
     const indNo = ufficiali.filter(u => !indOk(u.uid, o.data));
     if(indNo.length){ msg.innerHTML = `<span class="err-t">${esc(indNo.map(u => u.nome).join(', '))} ${indNo.length > 1 ? 'sono indisponibili' : 'è indisponibile'} il ${esc(fmtShort(o.data))}: scegli un altro arbitro.</span>`; return; }
-    const ids = ufficiali.map(u => u.uid);
+    const ids = ufficiali.map(u => u.uid), CAMPI = ['data', 'ora', 'casa', 'ospite', 'impianto'];
+    const cambiati = isNew ? [] : CAMPI.filter(k => (d[k] || '') !== (o[k] || ''));
     let risposte = {...(d.risposte || {})};
-    if(!isNew && ['data', 'ora', 'impianto'].some(k => (d[k] || '') !== o[k])) risposte = {};
+    if(cambiati.length) risposte = {};
     let avvisi = {...(d.avvisi || {})};
     const referti = {...(d.referti || {})};
-    if(!isNew && ['data', 'ora', 'impianto'].some(k => (d[k] || '') !== o[k])) avvisi = {};
+    if(cambiati.length) avvisi = {};
+    let inviate = {...(d.inviate || {})};
+    if(cambiati.length) inviate = {};
     const sostituzioni = {...(d.sostituzioni || {})}, subentri = {...(d.subentri || {})};
-    [risposte, avvisi, referti, sostituzioni, subentri].forEach(m => Object.keys(m).forEach(k => { if(!ids.includes(k)) delete m[k]; }));
-    const doc = {...o, ufficiali, arbitriIds: ids, risposte, referti, avvisi, sostituzioni, subentri, sostituiti: d.sostituiti || [], updatedAt: Date.now()};
+    [risposte, avvisi, inviate, referti, sostituzioni, subentri].forEach(m => Object.keys(m).forEach(k => { if(!ids.includes(k)) delete m[k]; }));
+    // chi esce dalla gara: resta nello storico (e se aveva rifiutato o chiesto il cambio non si può più scegliere)
+    const storico = [...(d.storico || [])], sostituiti = [...(d.sostituiti || [])], prima = d.arbitriIds || [];
+    (d.ufficiali || []).filter(u => !ids.includes(u.uid)).forEach(u => {
+      const tipo = sostAperta(d, u.uid) ? 'sost' : (rispOf(d, u.uid) || {}).stato === 'rifiutata' ? 'rifiuto' : 'cambio', n = ufficiali.find(x => x.ruolo === (u.ruolo || 'Arbitro') && !prima.includes(x.uid));
+      if(tipo === 'cambio' && !n) return;
+      storico.push({da: u.uid, daNome: exNome(u.uid, u.nome), a: n ? n.uid : '', aNome: n ? n.nome : '', at: Date.now(), tipo});
+      if(tipo !== 'cambio' && !sostituiti.includes(u.uid)) sostituiti.push(u.uid);
+      if(tipo === 'sost' && n) subentri[n.uid] = {da: u.uid, daNome: exNome(u.uid, u.nome), at: Date.now(), sost: true};
+    });
+    // cosa è cambiato: l'arbitro lo vede quando deve riconfermare
+    const vecchia = !d.annullata && d.modifiche && !Object.values(d.risposte || {}).some(r => r && r.at > d.modifiche.at) ? d.modifiche : null;
+    const modifiche = d.annullata ? null : cambiati.length ? {at: Date.now(), campi: [...new Set([...(vecchia ? vecchia.campi : []), ...cambiati])], prima: vecchia ? vecchia.prima : Object.fromEntries(CAMPI.map(k => [k, d[k] || ''])), per: ids.filter(x => prima.includes(x) && (!vecchia || !vecchia.per || vecchia.per.includes(x)))} : d.modifiche || null;
+    const doc = {...o, ufficiali, arbitriIds: ids, risposte, referti, avvisi, inviate, sostituzioni, subentri, sostituiti, storico, ...(modifiche ? {modifiche} : {}), updatedAt: Date.now()};
     if(isNew) doc.createdAt = Date.now();
     btn.disabled = true; msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
     try{
@@ -2990,7 +3115,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113204538';
+const APP_BUILD = '20261113220523';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;

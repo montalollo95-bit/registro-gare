@@ -30,6 +30,8 @@ const giorno = data => {
   return `${t[0].toUpperCase() + t.slice(1)} ${data.slice(8, 10)}/${data.slice(5, 7)}`; // es. Ven 13/11
 };
 const squadre = d => `${d.casa || '—'} – ${d.ospite || '—'}`;
+const MOD_L = {data: 'giorno', ora: 'ora', casa: 'squadre', ospite: 'squadre', impianto: 'campo'};
+const cambio = d => { const l = [...new Set(((d.modifiche || {}).campi || []).map(k => MOD_L[k]).filter(Boolean))]; return l.length ? `Cambiato ${l.length > 1 ? l.slice(0, -1).join(', ') + ' e ' + l[l.length - 1] : l[0]} · ` : ''; };
 const quando = d => `${giorno(d.data)}${d.ora ? ' ore ' + d.ora : ''}`;
 const dove = d => d.impianto || [d.indirizzo, d.citta].filter(Boolean).join(', ');
 const chiave = d => [d.data, d.ora, d.impianto, d.indirizzo, d.citta, d.casa, d.ospite].map(x => x || '').join('|');
@@ -95,9 +97,9 @@ async function main() {
       manda(nuovi.filter(u => !sub(u)), '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}. Apri l’app per accettarla.`, 'des-' + id);
       for (const u of nuovi.filter(sub)) manda([u], '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''} · al posto di ${nomi[sub(u).da] || sub(u).daNome || 'un collega'}. Apri l’app per accettarla.`, 'des-' + id);
       const tolti = prima.filter(u => !uids.includes(u)), chiesto = u => !!((s && s.sost || {})[u] || '').startsWith('aperta');
-      manda(tolti.filter(u => !chiesto(u)), '❌ Designazione annullata', `Non sei più designato per ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
+      manda(tolti.filter(u => !chiesto(u)), d.annullata ? '❌ Partita annullata' : '❌ Designazione annullata', d.annullata ? `${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)} è stata annullata e verrà riprogrammata: non sei più designato.${d.annullata.motivo ? ' Motivo: ' + d.annullata.motivo : ''}` : `Non sei più designato per ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
       manda(tolti.filter(chiesto), '✅ Sostituzione fatta', `Il designatore ha trovato un sostituto: non arbitri più ${squadre((s && s.info) || d)} di ${giorno(((s && s.info) || d).data)}.`, 'des-' + id);
-      if (s && s.key !== nuovo.key) manda(uids.filter(u => prima.includes(u)), '✏️ Partita modificata', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}`, 'des-' + id);
+      if (s && s.key !== nuovo.key) manda(uids.filter(u => prima.includes(u)), '✏️ Partita modificata', `${cambio(d)}${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}${(d.modifiche || {}).campi ? '. Apri l’app e conferma di nuovo.' : ''}`, 'des-' + id);
     }
     for (const u of uff) {
       const r = risp(u.uid), st = r.stato || '';
