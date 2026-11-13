@@ -2177,8 +2177,8 @@ function avvisoText(d, u, g){
   const dt = fmtLong(d.data);
   return [`⏰ PROMEMORIA GARA DI ${g ? 'DOMANI' : 'OGGI'}`, `${d.casa || ''} – ${d.ospite || ''}`, d.categoria || '',
     `🕘 ${dt[0].toUpperCase() + dt.slice(1)}${d.ora ? ' ore ' + d.ora : ''}`, `📍 ${[d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')}`,
-    [d.impianto, d.indirizzo, d.citta].some(Boolean) ? `🗺️ ${gmapsUrl(d)}` : '', `👤 Ruolo: ${u.ruolo || 'Arbitro'}`, '',
-    `Dopo la gara ricordati di compilare il referto nell’app: ${arbitroUrl()}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+    `👤 Ruolo: ${u.ruolo || 'Arbitro'}`, '',
+    'Dopo la gara ricordati di compilare il referto nell’app AICS.'].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
 function renderAvvisi(){
   const box = $('#avvisiBox'); if(!box) return;
@@ -2331,8 +2331,8 @@ const waUrl = (tel, text) => { let n = String(tel || '').replace(/[^\d+]/g, '').
 function dsText(d, u){
   const dt = d.data ? fmtLong(d.data) : 'data da definire';
   return [`📋 DESIGNAZIONE${u ? ' – ' + (u.ruolo || 'Arbitro') : ''}`, `${d.casa || ''} – ${d.ospite || ''}`, [d.categoria, d.girone && 'girone ' + d.girone, d.numeroGara && 'gara n. ' + d.numeroGara].filter(Boolean).join(' · '),
-    `📅 ${dt[0].toUpperCase() + dt.slice(1)}${d.ora ? ' ore ' + d.ora : ''}`, `📍 ${[d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')}`, d.rimborso ? `💶 Rimborso ${eur(d.rimborso)}` : '', d.note || '',
-    '', `Conferma o rifiuta qui: ${arbitroUrl()}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+    `📅 ${dt[0].toUpperCase() + dt.slice(1)}${d.ora ? ' ore ' + d.ora : ''}`, `📍 ${[d.impianto, d.indirizzo, d.citta].filter(Boolean).join(', ')}`, d.rimborso ? `💶 Rimborso ${eur(d.rimborso)}` : '', d.note ? `📝 Note: ${d.note}` : '',
+    '', 'Apri l’app AICS per accettare la designazione.'].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
 }
 
 function openDs(id){
@@ -2341,7 +2341,7 @@ function openDs(id){
   const uff = d.ufficiali || [];
   const rows = uff.map(u => { const a = DS.arbitri.find(x => x.id === u.uid), r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : ''];
     return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span><span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}</div>
-      <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}<a class="btn ${d.referti && d.referti[u.uid] ? 'btn-ghost' : 'btn-primary'} sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a></span></li>`; }).join('');
+      <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}${fatta(d) ? '' : `<a class="btn btn-primary sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a>`}</span></li>`; }).join('');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
     <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</h2>
@@ -2458,7 +2458,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113130243';
+const APP_BUILD = '20261113135358';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
