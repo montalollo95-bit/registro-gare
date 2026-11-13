@@ -1,1 +1,1 @@
-{"name": "Registro Gare", "short_name": "Registro Gare", "start_url": "./", "display": "standalone", "background_color": "#F0F5FA", "theme_color": "#1677D2", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
+{"name": "AICS", "short_name": "AICS", "start_url": "./", "display": "standalone", "background_color": "#F0F5FA", "theme_color": "#1677D2", "icons": [{"src": "icon.png?v=2", "sizes": "512x512", "type": "image/png"}]}
