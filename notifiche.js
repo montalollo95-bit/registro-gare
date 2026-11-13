@@ -35,7 +35,25 @@ const dove = d => d.impianto || [d.indirizzo, d.citta].filter(Boolean).join(', '
 const chiave = d => [d.data, d.ora, d.impianto, d.indirizzo, d.citta, d.casa, d.ospite].map(x => x || '').join('|');
 const eur = n => Number(n || 0).toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
 
+// arbitri eliminati dai designatori: cancella account di accesso e dati personali
+async function eliminazioni() {
+  const el = await db.collection('eliminazioni').get();
+  for (const doc of el.docs) {
+    const uid = doc.id, nome = doc.data().nome || uid;
+    if (DRY) { console.log(`  [prova] eliminerei ${nome}`); continue; }
+    try { await admin.auth().deleteUser(uid); } catch (e) { if (e.code !== 'auth/user-not-found') { console.log(`  ! non riesco a eliminare l'account di ${nome}: ${e.code}`); continue; } }
+    const reg = db.collection('registri').doc(uid);
+    const daCancellare = [db.collection('arbitri').doc(uid), reg];
+    for (const q of [reg.collection('righe'), db.collection('tokens').where('uid', '==', uid), db.collection('indisponibilita').where('uid', '==', uid)])
+      (await q.get()).forEach(d => daCancellare.push(d.ref));
+    for (let i = 0; i < daCancellare.length; i += 400) { const b = db.batch(); daCancellare.slice(i, i + 400).forEach(x => b.delete(x)); await b.commit(); }
+    await doc.ref.delete();
+    console.log(`  ✕ eliminato ${nome} (${daCancellare.length} documenti)`);
+  }
+}
+
 async function main() {
+  await eliminazioni();
   const now = oraRoma(), adesso = minuti(now.data, now.ora);
   const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap, indSnap, elSnap] = await Promise.all([...['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi', 'indisponibilita'].map(c => db.collection(c).get()), db.collection('elenco').doc('arbitri').get()]);
   const stati = {}; statiSnap.forEach(s => { stati[s.id] = s.data(); });

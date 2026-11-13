@@ -446,6 +446,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 .sost-prop{font-size:14px}
 .sost-prop b,.sost-col{color:var(--fg)}
 [data-scol]:not([hidden]){display:flex;flex-direction:column}
+.gara.gara-sost{border-color:#E8820C;box-shadow:inset 4px 0 0 #E8820C}
+.pill.sost-pill{background:#E8820C;color:#fff}
+.sost-card.da-vedere{border-color:#E8820C;background:color-mix(in srgb,#E8820C 8%,var(--surface))}
+.sost-card.da-vedere > b:first-child{color:#E8820C}
+.sost-wait{color:#E8820C}
+.ok-t{color:var(--ok)}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -841,10 +847,11 @@ function garaCard(g){
   if(g.stato === 'disputata') st = g.risultato ? '' : `<span class="pill done">Disputata</span>`;
   else if(g.stato === 'rinviata') st = `<span class="pill rinv">Rinviata</span>`;
   else if(isPast(g) && !refDaFare(g)) st = `<span class="pill">Da completare</span>`;
-  return `<li><button class="gara" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
+  const sNo = sostNoGara(g);
+  return `<li><button class="gara${sNo ? ' gara-sost' : ''}" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
       <div class="teams">${esc(g.casa || '—')} – ${esc(g.ospite || '—')}${risOk(g)}</div>
       <div class="sub">${where || 'Orario e campo da definire'}</div>
-      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${refDaFare(g) ? '<span class="pill ref-todo">Referto da compilare</span>' : g.referto ? '<span class="pill done">Referto ✓</span>' : ''}</div>
+      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${refDaFare(g) ? '<span class="pill ref-todo">Referto da compilare</span>' : g.referto ? '<span class="pill done">Referto ✓</span>' : ''}${sNo ? '<span class="pill sost-pill">↩️ Sostituzione non accolta · conferma</span>' : ''}</div>
     </div></button></li>`;
 }
 function bindCards(root){ root.querySelectorAll('.gara').forEach(b => b.onclick = () => openSheet(b.dataset.id)); }
@@ -1863,7 +1870,7 @@ function renderTab(){
   a.setAttribute('aria-label', !p ? 'Login' : 'Account di ' + nomeArb(p));
   const note = $('#storeNote');
   if(note && fbReady() && ACC.ready){ const off = !ACC.user; note.hidden = !off; if(off) note.innerHTML = 'Non sei entrato: i dati restano solo su questo telefono. <a href="#account">Accedi</a> per salvarli online.'; }
-  const n = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)).length : 0;
+  const n = ACC.user ? ACC.mie.filter(d => ((!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)) || sostNoDaVedere(d)).length : 0;
   a.querySelector('.tab-badge').hidden = !n; a.querySelector('.tab-badge').textContent = n;
 }
 /* solo i designatori inseriscono e modificano le gare: gli altri vedono, accettano e segnano km e benzina */
@@ -1906,7 +1913,7 @@ function renderAccount(){
 function renderGate(){
   let g = $('#gate');
   if(!fbReady()){ if(g) g.remove(); return; }
-  const fermo = !!(ACC.ready && ACC.user && ACC.profilo && !ACC.isAdmin && ACC.accesso && ACC.accesso !== 'attivo');
+  const fermo = !!(ACC.ready && ACC.user && !ACC.isAdmin && ACC.accesso && ACC.accesso !== 'attivo' && (ACC.profilo || ACC.accesso !== 'attesa'));
   const show = !ACC.ready || !ACC.user || !ACC.profilo || fermo;
   document.body.classList.toggle('gated', show);
   if(!show){ if(g) g.remove(); return; }
@@ -1921,10 +1928,10 @@ function renderGate(){
     return;
   }
   if(fermo){
-    const blocc = ACC.accesso === 'bloccato';
+    const blocc = ACC.accesso !== 'attesa';
     g.innerHTML = `<div class="gate-in"><span class="gate-logo logo-img" role="img" aria-label="Logo"></span>
       <section class="ref-sec acc-wait"><h3>${blocc ? '⛔ Accesso non attivo' : '⏳ In attesa di approvazione'}</h3>
-      <p class="note" style="margin:0">${blocc ? 'Il tuo account non è abilitato a usare l’app AICS. Per informazioni contatta il designatore.' : `Ciao ${esc(ACC.profilo.nome || '')}, la tua registrazione è arrivata ai designatori AICS. Appena ti approvano l’app si apre da sola: non serve fare altro.`}</p>
+      <p class="note" style="margin:0">${blocc ? 'Il tuo account non è abilitato a usare l’app AICS. Per informazioni contatta il designatore.' : `Ciao ${esc((ACC.profilo || {}).nome || '')}, la tua registrazione è arrivata ai designatori AICS. Appena ti approvano l’app si apre da sola: non serve fare altro.`}</p>
       <p class="note" style="margin:0">${esc(ACC.user.email || '')}</p></section>
       <button class="btn btn-ghost btn-block" id="gOut">Esci</button></div>`;
     $('#gOut').onclick = () => firebase.auth().signOut();
@@ -2336,10 +2343,11 @@ function renderOggiDes(){
   const t = todayIso(), key = d => `${d.data || '9999'} ${d.ora || ''}`;
   const da = ACC.user ? ACC.mie.filter(d => (!d.data || d.data >= t) && !rispOf(d, ACC.user.uid)).sort((a, b) => key(a).localeCompare(key(b))) : [];
   const rich = ACC.isAdmin ? arbInAttesa() : [];
+  const noSost = ACC.user ? ACC.mie.filter(sostNoDaVedere).sort((a, b) => key(a).localeCompare(key(b))) : [];
   const sost = ACC.isAdmin && DS.loaded ? sostRichieste() : [];
-  el.hidden = !da.length && !rich.length && !sost.length;
-  el.innerHTML = (sost.length ? `<section class="ref-sec des-home sost-home"><h3>🔁 Richieste di sostituzione <span class="cnt">${sost.length}</span></h3><p class="note" style="margin:0">Tocca la gara per scegliere chi mandare al posto dell’arbitro.</p><ul class="list">${sost.map(dsCard).join('')}</ul></section>` : '') + (rich.length ? `<section class="ref-sec des-home"><h3>👤 Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">${esc(rich.slice(0, 3).map(nomeArb).join(', '))}${rich.length > 3 ? '…' : ''} ${rich.length === 1 ? 'si è registrato e aspetta' : 'si sono registrati e aspettano'} il tuo ok.</p><button class="btn btn-primary btn-block" id="goApprova">Vai agli arbitri</button></section>` : '') + (da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3><p class="note" style="margin:0">Tocca la gara per vederla e rispondere.</p><ul class="list">${da.map(mieRow).join('')}</ul></section>` : '');
-  if(da.length) bindRows(el);
+  el.hidden = !da.length && !rich.length && !sost.length && !noSost.length;
+  el.innerHTML = (noSost.length ? `<section class="ref-sec des-home sost-home"><h3>↩️ Sostituzione non accolta <span class="cnt">${noSost.length}</span></h3><p class="note" style="margin:0">Il designatore ha risposto: la gara resta tua. Apri la gara e conferma di averlo letto.</p><ul class="list">${noSost.map(mieRow).join('')}</ul></section>` : '') + (sost.length ? `<section class="ref-sec des-home sost-home"><h3>🔁 Richieste di sostituzione <span class="cnt">${sost.length}</span></h3><p class="note" style="margin:0">Tocca la gara per scegliere chi mandare al posto dell’arbitro.</p><ul class="list">${sost.map(dsCard).join('')}</ul></section>` : '') + (rich.length ? `<section class="ref-sec des-home"><h3>👤 Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">${esc(rich.slice(0, 3).map(nomeArb).join(', '))}${rich.length > 3 ? '…' : ''} ${rich.length === 1 ? 'si è registrato e aspetta' : 'si sono registrati e aspettano'} il tuo ok.</p><button class="btn btn-primary btn-block" id="goApprova">Vai agli arbitri</button></section>` : '') + (da.length ? `<section class="ref-sec des-home"><h3>📋 Da confermare <span class="cnt">${da.length}</span></h3><p class="note" style="margin:0">Tocca la gara per vederla e rispondere.</p><ul class="list">${da.map(mieRow).join('')}</ul></section>` : '');
+  if(da.length || noSost.length) bindRows(el);
   el.querySelectorAll('[data-ds]').forEach(b => b.onclick = () => openDs(b.dataset.ds));
   if($('#goApprova')) $('#goApprova').onclick = () => { DS.tab = 'arbitri'; location.hash = '#designazioni'; renderDesigna(); };
   renderTab();
@@ -2518,6 +2526,8 @@ async function setAccesso(uid, stato, ok){
 /* ---------- sostituzioni: l'arbitro chiede di essere sostituito, il designatore sceglie un altro ---------- */
 const sostDi = (d, uid) => { const r = d && (d.sostituzioni || {})[uid]; return r && (d.arbitriIds || []).includes(uid) ? r : null; };
 const sostAperta = (d, uid) => { const r = sostDi(d, uid); return r && !r.esito ? r : null; };
+const sostNoDaVedere = d => { const r = ACC.user && sostDi(d, ACC.user.uid); return !!(r && r.esito === 'no' && !r.visto && !iniziata(d)); };
+const sostNoGara = g => { const d = desDi(g); return !!(d && sostNoDaVedere(d)); };
 const sostQuando = t => new Date(t).toLocaleString('it-IT', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}).replace(',', ' alle');
 /* lato arbitro: tasto nella scheda della partita */
 function sostRender(box, d){
@@ -2534,7 +2544,12 @@ function sostRender(box, d){
     box.querySelector('[data-sx]').onclick = () => { if(confirm('Annullare la richiesta di sostituzione? La gara resta tua.')) scrivi(null, 'Richiesta annullata'); };
     return;
   }
-  box.innerHTML = `${r && r.esito === 'no' ? `<div class="sost-card no"><b>↩️ Sostituzione non accolta</b><span class="note">Il designatore ha risposto alla tua richiesta: la gara resta tua.</span></div>` : ''}
+  if(r && r.esito === 'no' && !r.visto){
+    box.innerHTML = `<div class="sost-card no da-vedere"><b>↩️ Sostituzione non accolta</b><span>Il designatore ha risposto alla tua richiesta: <b>la gara resta tua</b>.</span><span class="note">Conferma di averlo letto: il designatore vedrà la tua conferma.</span><button class="btn btn-primary btn-block" data-svisto>✓ Ho letto</button></div>`;
+    box.querySelector('[data-svisto]').onclick = e => { e.target.disabled = true; scrivi({...r, visto: Date.now()}, 'Confermato: la gara resta tua'); renderOggiDes(); if(typeof render === 'function') render(); };
+    return;
+  }
+  box.innerHTML = `${r && r.esito === 'no' ? `<div class="sost-card no"><b>↩️ Sostituzione non accolta</b><span class="note">La gara resta tua${r.visto ? ` · hai confermato il ${esc(sostQuando(r.visto))}` : ''}.</span></div>` : ''}
     <button class="btn btn-warn btn-block" data-sost>🔁 ${r ? 'Chiedi di nuovo la sostituzione' : 'Chiedi sostituzione'}</button><div data-sform></div>`;
   box.querySelector('[data-sost]').onclick = () => {
     const f = box.querySelector('[data-sform]'), esc2 = sostEsclusi(d), giaIn = new Set(d.arbitriIds || []);
@@ -2566,6 +2581,18 @@ function elencoSync(){   // nomi dei colleghi (e giorni di indisponibilità, sen
   }, 800);
 }
 const sostRichieste = () => DS.gare.filter(d => !iniziata(d) && (d.ufficiali || []).some(u => sostAperta(d, u.uid))).sort(dsSort);
+
+async function eliminaArbitro(a){
+  const t = todayIso(), gare = DS.gare.filter(d => (d.arbitriIds || []).includes(a.id) && !fatta(d)).sort(dsSort);
+  if(gare.length){ alert(`Prima di eliminare ${nomeArb(a)} toglilo da queste gare (Sostituisci o Modifica):\n\n${gare.map(d => `• ${fmtShort(d.data)}: ${d.casa || '—'} – ${d.ospite || '—'}`).join('\n')}`); return false; }
+  if(!confirm(`Eliminare DEFINITIVAMENTE ${nomeArb(a)}?\n\nSi cancellano il suo account di accesso, il profilo (anche IBAN), il suo registro con referti e rimborsi, le indisponibilità e le notifiche.\nRestano solo le gare già giocate nello storico delle designazioni e i pagamenti già segnati.\n\nNON si può annullare. Se vuoi solo bloccarlo usa “Togli accesso”.`)) return false;
+  if(prompt(`Per confermare scrivi ELIMINA`) !== 'ELIMINA'){ toast('Eliminazione annullata'); return false; }
+  const db = firebase.firestore(), b = db.batch();
+  b.set(db.collection('eliminazioni').doc(a.id), {nome: nomeArb(a), email: a.email || '', at: Date.now(), da: myEmail()});
+  b.set(db.collection('accessi').doc(a.id), {stato: 'eliminato', at: Date.now(), da: myEmail()});
+  b.delete(db.collection('arbitri').doc(a.id));
+  try{ await b.commit(); toast(`${nomeArb(a)} eliminato: l’account di accesso si cancella entro 5 minuti`); return true; }catch(e){ toast(fbErr(e)); return false; }
+}
 
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
 /* risultato del referto ricevuto (non sbloccato), accanto alle squadre */
@@ -2625,14 +2652,14 @@ function renderDsArbitri(){
   const reg = a => a.createdAt ? 'Registrato il ' + new Date(a.createdAt).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
   el.innerHTML = `${DS.accErr ? '<div class="status err">Non riesco a leggere gli accessi: pubblica le nuove regole di Firestore.</div>' : ''}
     ${rich.length ? `<section class="ref-sec acc-req"><h3>Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">Si sono registrati e aspettano il tuo ok: finché non li approvi non vedono niente dell’app.</p>
-      <ul class="list">${rich.map(a => `<li class="ds-arb acc-row"><div><b>${esc(nomeArb(a))}</b><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span>${reg(a) ? `<span>${reg(a)}</span>` : ''}</div><div class="row"><button class="btn btn-primary sm" data-appr="${esc(a.id)}">Approva</button><button class="btn btn-danger sm" data-rifiu="${esc(a.id)}">Rifiuta</button></div></li>`).join('')}</ul></section>` : ''}
+      <ul class="list">${rich.map(a => `<li class="ds-arb acc-row"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span>${reg(a) ? `<span>${reg(a)}</span>` : ''}</div><div class="row"><button class="btn btn-primary sm" data-appr="${esc(a.id)}">Approva</button><button class="btn btn-danger sm" data-rifiu="${esc(a.id)}">Rifiuta</button></div></li>`).join('')}</ul></section>` : ''}
     <div class="ref-sec"><h3>Invita gli arbitri</h3><p class="note" style="margin:0">Mandagli questo link: si registrano con nome, telefono, email e password e compaiono qui sotto. Poi li puoi designare.</p>
       <div class="row"><a class="btn btn-primary" href="https://wa.me/?text=${encodeURIComponent(inv)}" target="_blank" rel="noopener">Invita su WhatsApp</a><button class="btn btn-ghost" id="dsCopy">Copia link</button></div></div>
     ${list.length ? `<ul class="list">${list.map(a => { const n = DS.gare.filter(d => (d.arbitriIds || []).includes(a.id) && d.data >= t).length;
       return `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span></div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
       : `<div class="empty-box"><h3>Nessun arbitro attivo</h3><span>Quando un arbitro si registra dal link e lo approvi compare qui.</span></div>`}
     ${tolti.length ? `<section class="ref-sec"><h3>Accesso tolto <span class="cnt">${tolti.length}</span></h3><p class="note" style="margin:0">Non possono entrare nell’app, ma i loro dati restano salvati: se li riattivi ritrovano tutto com’era.</p>
-      <ul class="list">${tolti.map(a => `<li class="ds-arb"><div><b>${esc(nomeArb(a))}</b><span>${esc(a.email || '')}</span></div><button class="btn btn-ghost sm" data-riatt="${esc(a.id)}">Riattiva</button></li>`).join('')}</ul></section>` : ''}`;
+      <ul class="list">${tolti.map(a => `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}</span></div><button class="btn btn-ghost sm" data-riatt="${esc(a.id)}">Riattiva</button></li>`).join('')}</ul></section>` : ''}`;
   $('#dsCopy').onclick = async () => { try{ await navigator.clipboard.writeText(arbitroUrl()); toast('Link copiato'); }catch(e){ toast(arbitroUrl()); } };
   el.querySelectorAll('[data-arb]').forEach(b => b.onclick = () => openArb(b.dataset.arb));
   const nm = id => nomeArb(DS.arbitri.find(a => a.id === id));
@@ -2648,9 +2675,11 @@ function openArb(id){
     ${datiKv(a)}
     <div class="row">${a.iban ? `<button class="btn btn-primary" data-a="iban">Copia IBAN</button>` : '<span class="err-t">IBAN non inserito</span>'}${a.telefono ? `<a class="btn btn-ghost" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-ghost" href="tel:${esc(a.telefono)}">Chiama</a>` : ''}</div>
     ${ADMINS().includes((a.email || '').toLowerCase()) ? '' : statoArb(a) === 'attivo' ? '<button class="btn btn-danger btn-block" data-a="togli">Togli accesso all’app</button>' : `<button class="btn btn-primary btn-block" data-a="riatt">${statoArb(a) === 'attesa' ? 'Approva' : 'Riattiva accesso'}</button>`}
+    ${ADMINS().includes((a.email || '').toLowerCase()) ? '' : '<button class="linkbtn err-t" data-a="elim" style="align-self:center">Elimina definitivamente</button>'}
     <button class="btn btn-ghost btn-block" data-a="close">Chiudi</button></div></div>`;
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   root.querySelector('[data-a=close]').onclick = close;
+  const el = root.querySelector('[data-a=elim]'); if(el) el.onclick = async () => { if(await eliminaArbitro(a)) close(); };
   const tg = root.querySelector('[data-a=togli]'), ra = root.querySelector('[data-a=riatt]');
   if(tg) tg.onclick = async () => {
     const t = todayIso(), gare = DS.gare.filter(d => (d.arbitriIds || []).includes(id) && d.data >= t).sort(dsSort);
@@ -2715,7 +2744,7 @@ function openDs(id){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   const uff = d.ufficiali || [];
   const rows = uff.map(u => { const a = DS.arbitri.find(x => x.id === u.uid), r = rispOf(d, u.uid), [t, cls] = RISP[r ? r.stato : ''];
-    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span>${indDi(u.uid, d.data).length && !fatta(d) ? '<span class="ds-chip no"><i></i>Indisponibile in questa data</span>' : ''}<span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}${!fatta(d) && sostAperta(d, u.uid) ? `<span class="sost-req">🔁 Chiede di essere sostituito · ${esc(sostQuando(sostAperta(d, u.uid).at))}${sostAperta(d, u.uid).motivo ? ` · “${esc(sostAperta(d, u.uid).motivo)}”` : ''}</span>${sostAperta(d, u.uid).proposto ? `<span class="sost-prop">Propone <b>${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)) || sostAperta(d, u.uid).propostoNome)}</b>${propOk(d, sostAperta(d, u.uid).proposto) ? '' : ` · <span class="err-t">${esc(propOk(d, sostAperta(d, u.uid).proposto, true))}</span>`}</span>` : ''}` : ''}</div>
+    return `<li class="ds-off"><div><b>${esc(nomeArb(a) || u.nome)}</b><span>${esc(u.ruolo || 'Arbitro')}</span>${indDi(u.uid, d.data).length && !fatta(d) ? '<span class="ds-chip no"><i></i>Indisponibile in questa data</span>' : ''}<span class="ds-chip ${cls}"><i></i>${t}${r && r.at ? ' · ' + new Date(r.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'}) : ''}</span>${r && r.motivo ? `<span class="note">“${esc(r.motivo)}”</span>` : ''}${!fatta(d) && sostDi(d, u.uid) && sostDi(d, u.uid).esito === 'no' ? `<span class="sost-prop">↩️ Sostituzione non accolta · ${sostDi(d, u.uid).visto ? `<b class="ok-t">✓ letto e confermato il ${esc(sostQuando(sostDi(d, u.uid).visto))}</b>` : '<b class="sost-wait">non ha ancora confermato di averlo letto</b>'}</span>` : ''}${!fatta(d) && sostAperta(d, u.uid) ? `<span class="sost-req">🔁 Chiede di essere sostituito · ${esc(sostQuando(sostAperta(d, u.uid).at))}${sostAperta(d, u.uid).motivo ? ` · “${esc(sostAperta(d, u.uid).motivo)}”` : ''}</span>${sostAperta(d, u.uid).proposto ? `<span class="sost-prop">Propone <b>${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)) || sostAperta(d, u.uid).propostoNome)}</b>${propOk(d, sostAperta(d, u.uid).proposto) ? '' : ` · <span class="err-t">${esc(propOk(d, sostAperta(d, u.uid).proposto, true))}</span>`}</span>` : ''}` : ''}</div>
       <span class="ds-off-b">${d.referti && d.referti[u.uid] ? `<button class="btn btn-primary sm" data-ref="${esc(u.uid)}">Vedi referto</button>${d.referti[u.uid].sbloccato ? '<span class="ds-chip wait"><i></i>Sbloccato: in correzione</span>' : `<button class="btn btn-ghost sm" data-unl="${esc(u.uid)}">Sblocca referto</button>`}` : ''}${fatta(d) ? '' : `${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto && propOk(d, sostAperta(d, u.uid).proposto) ? `<button class="btn btn-primary sm" data-sprop="${esc(u.uid)}">Approva ${esc(nomeArb(DS.arbitri.find(x => x.id === sostAperta(d, u.uid).proposto)))}</button>` : ''}${sostAperta(d, u.uid) || (r && r.stato === 'rifiutata') ? `<button class="btn ${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto && propOk(d, sostAperta(d, u.uid).proposto) ? 'btn-ghost' : 'btn-primary'} sm" data-sost="${esc(u.uid)}">${sostAperta(d, u.uid) && sostAperta(d, u.uid).proposto ? 'Scegli un altro' : 'Sostituisci'}</button>` : ''}${sostAperta(d, u.uid) ? `<button class="btn btn-ghost sm" data-sign="${esc(u.uid)}">Non accogliere</button>` : ''}<a class="btn ${sostAperta(d, u.uid) ? 'btn-ghost' : 'btn-primary'} sm" href="${esc(waUrl(a && a.telefono, dsText(d, u)))}" target="_blank" rel="noopener">Invia su WhatsApp</a>`}</span><div class="sost-pick" data-spick="${esc(u.uid)}"></div></li>`; }).join('');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>
     <div class="eyebrow">${esc(fmtLong(d.data))}${d.ora ? ' · ore ' + esc(d.ora) : ''}</div>
@@ -2881,7 +2910,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113173315';
+const APP_BUILD = '20261113181919';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
