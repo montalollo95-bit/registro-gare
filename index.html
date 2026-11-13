@@ -385,8 +385,14 @@ body.gated .tabs,body.gated #scroller{visibility:hidden}
 .pay-row b{flex:1}
 .pay-row em{font-style:normal;font-size:14px;font-weight:700;color:var(--ok);white-space:nowrap}
 .pay-row.done{background:color-mix(in srgb,var(--ok) 8%,var(--surface))}
+.pay-row em.due{color:var(--card-red);font-family:var(--display);font-size:20px}
+.pay-row em.due.wait{font-family:var(--body);font-size:13px;color:var(--warn)}
 .wait-ref{font-style:normal;font-size:12px;font-weight:700;color:var(--warn)}
 .mov .mt em.wait-ref{display:block}
+.stats{grid-template-columns:repeat(2,1fr)!important}
+.stat-btn{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.stat-alert b{color:var(--card-red)}
+.pill.ref-todo{background:var(--card-red)!important;color:#fff!important;border-color:var(--card-red)!important}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -751,12 +757,13 @@ function renderOggi(){
         <a class="btn btn-yellow btn-block" href="#importa">+ Aggiungi designazione</a></div>`;
     }
   }
-  const s = Store.gare.filter(g => g.data >= SEASON.start && g.data <= SEASON.end && isPast(g) && g.stato !== 'rinviata');
-  const gialli = s.reduce((a,g)=>a+toNum(g.gialli),0), rossi = s.reduce((a,g)=>a+toNum(g.rossi),0);
+  const s = Store.gare.filter(g => g.data >= SEASON.start && g.data <= SEASON.end && iniziata(g) && g.stato !== 'rinviata');
+  const daFare = Store.gare.filter(refDaFare).length;
   $('#stats').innerHTML = `
-    <div class="stat"><b class="num">${s.length}</b><span>Gare</span></div>
-    <div class="stat"><b class="num">${gialli}</b><span><span class="chip-y"></span> Gialli</span></div>
-    <div class="stat"><b class="num">${rossi}</b><span><span class="chip-r"></span> Rossi</span></div>`;
+    <button class="stat stat-btn" id="stArb"><b class="num">${s.length}</b><span>Partite arbitrate</span></button>
+    <button class="stat stat-btn${daFare ? ' stat-alert' : ''}" id="stRef"><b class="num">${daFare}</b><span>Referti da inviare</span></button>`;
+  $('#stArb').onclick = () => { filter = 'done'; seg($('#fUp'), $('#fDone'), false); location.hash = '#partite'; renderList(); };
+  $('#stRef').onclick = () => openReferto(null);
   const todo = refCandidates().filter(g => !g.referto).length;
   $('#refHint').hidden = !todo;
   $('#refHint').textContent = todo === 1 ? '1 gara giocata senza referto' : `${todo} gare giocate senza referto`;
@@ -776,11 +783,11 @@ function garaCard(g){
   let st = '';
   if(g.stato === 'disputata') st = `<span class="pill done">${g.risultato ? esc(g.risultato) : 'Disputata'}</span>`;
   else if(g.stato === 'rinviata') st = `<span class="pill rinv">Rinviata</span>`;
-  else if(isPast(g)) st = `<span class="pill">Da completare</span>`;
+  else if(isPast(g) && !refDaFare(g)) st = `<span class="pill">Da completare</span>`;
   return `<li><button class="gara" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
       <div class="teams">${esc(g.casa || '—')} – ${esc(g.ospite || '—')}</div>
       <div class="sub">${where || 'Orario e campo da definire'}</div>
-      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${g.referto ? '<span class="pill done">Referto ✓</span>' : ''}</div>
+      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${g.referto ? '<span class="pill done">Referto ✓</span>' : refDaFare(g) ? '<span class="pill ref-todo">Referto da fare</span>' : ''}</div>
     </div></button></li>`;
 }
 function bindCards(root){ root.querySelectorAll('.gara').forEach(b => b.onclick = () => openSheet(b.dataset.id)); }
@@ -1203,6 +1210,7 @@ const PROV = ['Ammonizione','Espulsione (allontanamento)'];
 let refId = null, draft = null;
 const oraNow = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
 const iniziata = g => !!g.data && (g.data < todayIso() || (g.data === todayIso() && (!g.ora || g.ora <= oraNow())));
+const refDaFare = g => iniziata(g) && !g.referto && g.stato !== 'rinviata' && !refNonMio(g) && !refInviato(g);
 const refCandidates = () => Store.gare.filter(g => iniziata(g) && g.stato !== 'rinviata' && !refNonMio(g)).sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
 function openReferto(id){ refId = id || null; draft = null; if(location.hash === '#referto') renderReferto(); else location.hash = '#referto'; }
 
@@ -1953,7 +1961,7 @@ function renderPay(){
         <div class="pay-r"><div class="pay-tot"><span>Da pagare</span><b class="num">${eur(r.tot)}</b></div><div class="pay-btns">
         ${r.a && r.a.iban ? `<button class="btn btn-ghost sm" data-iban="${esc(r.a.iban)}">Copia IBAN</button>` : ''}
         ${r.tot ? `<button class="btn ${ok ? 'btn-ghost' : 'btn-primary'} sm" data-pay="${esc(r.uid)}" data-imp="${r.tot}" data-n="${r.gare.length}">${ok ? 'Annulla pagato' : 'Segna pagato'}</button>` : ''}</div></div></div>`;
-      return {ok: !!ok, li: `<li><button class="pay-row${ok ? ' done' : ''}" data-payopen="${esc(r.uid)}"><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>${ok ? `<em>✓ ${eur(pg)} · ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</em>` : ''}<span aria-hidden="true">›</span></button></li>`}; }))
+      return {ok: !!ok, li: `<li><button class="pay-row${ok ? ' done' : ''}" data-payopen="${esc(r.uid)}"><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>${ok ? `<em>✓ ${eur(pg)} · ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</em>` : r.tot ? `<em class="due">${eur(r.tot)}</em>` : '<em class="due wait">manca referto</em>'}<span aria-hidden="true">›</span></button></li>`}; }))
       : '<p class="note" style="margin:0">Nessuna gara giocata in questo mese.</p>'}</section>`;
 
   box.querySelectorAll('[data-pm]').forEach(b => b.onclick = () => { const d = new Date(y, m - 1 + +b.dataset.pm, 1); PAY.mese = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; renderPay(); });
@@ -2442,7 +2450,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113103237';
+const APP_BUILD = '20261113113110';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
