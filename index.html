@@ -431,6 +431,14 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 .acc-req{border-color:var(--card-yellow)}
 .seg-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;margin-left:4px;border-radius:99px;background:var(--card-red);color:#fff;font-size:12px;font-family:var(--body);vertical-align:1px}
 .acc-wait h3{font-size:24px}
+.acc-sum{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.acc-sum > div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px;text-align:center}
+.acc-sum > div + div{border-left:1px solid var(--line)}
+.acc-sum b{font-family:var(--display);font-size:26px;line-height:1}
+.acc-sum span{font-size:13px;color:var(--muted)}
+.acc-sum .warn b{color:var(--card-yellow)}
+.acc-h{font-size:20px;margin-top:4px}
+.acc-chip{align-self:flex-start}
 .btn-warn{background:transparent;color:var(--card-orange,#E8820C);border:1px solid currentColor}
 .sost-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px 14px;border-radius:12px;border:1px solid #E8820C;background:color-mix(in srgb,#E8820C 8%,var(--surface))}
 .sost-card b{color:#E8820C}
@@ -446,7 +454,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 .sost-prop{font-size:14px}
 .sost-prop b,.sost-col{color:var(--fg)}
 [data-scol]:not([hidden]){display:flex;flex-direction:column}
-.gara.gara-sost{border-color:#E8820C;box-shadow:inset 4px 0 0 #E8820C}
+.gara.gara-sost{border-color:#E8820C!important;box-shadow:inset 0 0 0 1px #E8820C}
 .pill.sost-pill{background:#E8820C;color:#fff}
 .sost-card.da-vedere{border-color:#E8820C;background:color-mix(in srgb,#E8820C 8%,var(--surface))}
 .sost-card.da-vedere > b:first-child{color:#E8820C}
@@ -1806,7 +1814,7 @@ function accStart(){
 async function onUser(u){
   ACC.unsub.forEach(f => f()); ACC.unsub = [];
   Object.assign(ACC, {ready: false, user: u, profilo: null, isAdmin: false, accesso: '', regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
-  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], acc: {}, accLoaded: false, arbLoaded: false, loaded: false, err: ''});
+  Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], acc: {}, accLoaded: false, arbLoaded: false, accServer: false, arbServer: false, loaded: false, err: ''});
   if(!u){ Object.assign(IND, {mie: [], tutte: [], loaded: false}); ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); renderAnticipi(); return; }
   const db = firebase.firestore(), em = myEmail();
   ACC.isAdmin = ADMINS().includes(em);
@@ -1844,9 +1852,9 @@ async function onUser(u){
   if(ACC.isAdmin){
     const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
     const docs = s => s.docs.map(d => ({id: d.id, ...d.data()}));
-    ACC.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = docs(s); DS.loaded = true; renderAccount(); renderPay(); renderOggiDes(); }, fail));
-    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = docs(s); DS.arbLoaded = true; migraAccessi(); elencoSync(); renderAccount(); renderPay(); renderOggiDes(); }, fail));
-    ACC.unsub.push(db.collection('accessi').onSnapshot(s => { DS.acc = {}; s.docs.forEach(d => { DS.acc[d.id] = d.data(); }); DS.accLoaded = true; migraAccessi(); elencoSync(); renderAccount(); renderOggiDes(); }, () => { DS.accLoaded = true; DS.accErr = true; renderAccount(); }));
+    ACC.unsub.push(db.collection('designazioni').onSnapshot(s => { DS.gare = docs(s); DS.loaded = true; correggiAvvio(); renderAccount(); renderPay(); renderOggiDes(); }, fail));
+    ACC.unsub.push(db.collection('arbitri').onSnapshot(s => { DS.arbitri = docs(s); DS.arbLoaded = true; if(!s.metadata.fromCache) DS.arbServer = true; correggiAvvio(); elencoSync(); renderAccount(); renderPay(); renderOggiDes(); }, fail));
+    ACC.unsub.push(db.collection('accessi').onSnapshot(s => { DS.acc = {}; s.docs.forEach(d => { DS.acc[d.id] = d.data(); }); DS.accLoaded = true; if(!s.metadata.fromCache) DS.accServer = true; correggiAvvio(); elencoSync(); renderAccount(); renderOggiDes(); }, () => { DS.accLoaded = true; DS.accErr = true; renderAccount(); }));
     ACC.unsub.push(db.collection('squadre').onSnapshot(s => { DS.squadre = docs(s); if(['squadre'].includes(DS.tab)) renderAccount(); }, fail));
     ACC.unsub.push(db.collection('impianti').onSnapshot(s => { DS.impianti = docs(s); if(['impianti'].includes(DS.tab)) renderAccount(); }, fail));
     ACC.unsub.push(db.collection('pagamenti').onSnapshot(s => { DS.pag = docs(s); renderPay(); }, fail));
@@ -2178,9 +2186,10 @@ function renderMie(){
 function mieRow(d){
   const dt = parseD(d.data), r = rispOf(d, ACC.user.uid), mine = (d.ufficiali || []).find(u => u.uid === ACC.user.uid) || {};
   const st = r ? (r.stato === 'accettata' ? '<span class="ds-chip done"><i></i>Accettata</span>' : '<span class="ds-chip no"><i></i>Rifiutata</span>') : '<span class="ds-chip wait"><i></i>Da confermare</span>';
-  return `<li><button class="gara${r ? '' : ' gara-new'}" data-mie="${esc(d.id)}"><span class="day"><b>${dt ? dt.getDate() : '?'}</b><span>${dt ? MESI[dt.getMonth()].slice(0, 3) : ''}</span></span>
+  const sNo = sostNoDaVedere(d);
+  return `<li><button class="gara${sNo ? ' gara-sost' : r ? '' : ' gara-new'}" data-mie="${esc(d.id)}"><span class="day"><b>${dt ? dt.getDate() : '?'}</b><span>${dt ? MESI[dt.getMonth()].slice(0, 3) : ''}</span></span>
     <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}</span><span class="sub">${esc(fmtShort(d.data))}${d.ora ? ' · ' + esc(d.ora) : ''}${d.impianto ? ' · ' + esc(d.impianto) : ''}</span>
-    <span class="pills"><span class="pill ruolo">${esc(mine.ruolo || 'Arbitro')}</span>${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}${st}</span></span></button></li>`;
+    <span class="pills"><span class="pill ruolo">${esc(mine.ruolo || 'Arbitro')}</span>${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}${st}${sNo ? '<span class="pill sost-pill">↩️ Sostituzione non accolta · conferma</span>' : ''}</span></span></button></li>`;
 }
 function bindRows(box){ box.querySelectorAll('[data-mie]').forEach(b => b.onclick = () => openMie(b.dataset.mie)); }
 function openMie(id){
@@ -2510,14 +2519,18 @@ function renderDsInd(){
 const statoArb = a => !a ? '' : ADMINS().includes(String(a.email || '').toLowerCase()) ? 'attivo' : ((DS.acc || {})[a.id] || {}).stato || 'attesa';
 const arbAttivi = () => DS.arbitri.filter(a => statoArb(a) === 'attivo');
 const arbInAttesa = () => DS.accLoaded && !DS.accErr ? DS.arbitri.filter(a => statoArb(a) === 'attesa').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) : [];
-let MIGRA = false;
-async function migraAccessi(){   // la prima volta: chi era già registrato resta dentro
-  if(MIGRA || !ACC.isAdmin || !DS.accLoaded || DS.accErr || !DS.arbLoaded || (DS.acc || {})._avvio) return;
-  MIGRA = true;
+let CORR = false;
+/* correzione una tantum: chi era stato abilitato in automatico per sbaglio (appena iscritto e mai designato) torna da approvare */
+async function correggiAvvio(){
+  if(CORR || !ACC.isAdmin || !DS.accServer || DS.accErr || !DS.arbServer || !DS.loaded) return;
+  const av = (DS.acc || {})._avvio; if(!av || av.corretto) return;
+  CORR = true;
+  const designati = new Set(DS.gare.flatMap(d => d.arbitriIds || [])), lim = (av.at || Date.now()) - 24 * 3600 * 1000;
   const db = firebase.firestore(), b = db.batch();
-  DS.arbitri.forEach(a => { if(!DS.acc[a.id]) b.set(db.collection('accessi').doc(a.id), {stato: 'attivo', at: Date.now(), da: 'avvio'}); });
-  b.set(db.collection('accessi').doc('_avvio'), {at: Date.now()});
-  try{ await b.commit(); }catch(e){ MIGRA = false; }
+  DS.arbitri.forEach(a => { const x = DS.acc[a.id];
+    if(x && x.stato === 'attivo' && x.da === 'avvio' && !ADMINS().includes(String(a.email || '').toLowerCase()) && !designati.has(a.id) && a.createdAt && a.createdAt > lim) b.delete(db.collection('accessi').doc(a.id)); });
+  b.set(db.collection('accessi').doc('_avvio'), {corretto: Date.now()}, {merge: true});
+  try{ await b.commit(); }catch(e){ CORR = false; }
 }
 async function setAccesso(uid, stato, ok){
   try{ await firebase.firestore().collection('accessi').doc(uid).set({stato, at: Date.now(), da: myEmail()}); if(ok) toast(ok); return true; }catch(e){ toast(fbErr(e)); return false; }
@@ -2651,12 +2664,15 @@ function renderDsArbitri(){
   const inv = `Ciao! Per ricevere le designazioni registrati qui: ${arbitroUrl()}`;
   const reg = a => a.createdAt ? 'Registrato il ' + new Date(a.createdAt).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
   el.innerHTML = `${DS.accErr ? '<div class="status err">Non riesco a leggere gli accessi: pubblica le nuove regole di Firestore.</div>' : ''}
+    <div class="acc-sum"><div class="${rich.length ? 'warn' : ''}"><b>${rich.length}</b><span>da approvare</span></div><div><b>${list.length}</b><span>attivi</span></div><div><b>${tolti.length}</b><span>accesso tolto</span></div></div>
+    ${rich.length ? '' : '<p class="note" style="margin:0">✓ Nessun arbitro da approvare. Quando qualcuno si registra ti arriva una notifica e lo trovi qui in alto, nel riquadro giallo “Da approvare”.</p>'}
     ${rich.length ? `<section class="ref-sec acc-req"><h3>Da approvare <span class="cnt">${rich.length}</span></h3><p class="note" style="margin:0">Si sono registrati e aspettano il tuo ok: finché non li approvi non vedono niente dell’app.</p>
       <ul class="list">${rich.map(a => `<li class="ds-arb acc-row"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span>${reg(a) ? `<span>${reg(a)}</span>` : ''}</div><div class="row"><button class="btn btn-primary sm" data-appr="${esc(a.id)}">Approva</button><button class="btn btn-danger sm" data-rifiu="${esc(a.id)}">Rifiuta</button></div></li>`).join('')}</ul></section>` : ''}
     <div class="ref-sec"><h3>Invita gli arbitri</h3><p class="note" style="margin:0">Mandagli questo link: si registrano con nome, telefono, email e password e compaiono qui sotto. Poi li puoi designare.</p>
       <div class="row"><a class="btn btn-primary" href="https://wa.me/?text=${encodeURIComponent(inv)}" target="_blank" rel="noopener">Invita su WhatsApp</a><button class="btn btn-ghost" id="dsCopy">Copia link</button></div></div>
+    <h3 class="acc-h">Arbitri attivi</h3>
     ${list.length ? `<ul class="list">${list.map(a => { const n = DS.gare.filter(d => (d.arbitriIds || []).includes(a.id) && d.data >= t).length;
-      return `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span></div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
+      return `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}${a.telefono ? ' · ' + esc(a.telefono) : ''}</span><span>${n ? n + (n === 1 ? ' gara in programma' : ' gare in programma') : 'Nessuna gara in programma'}</span>${accChip(a)}</div>${a.telefono ? `<a class="btn btn-ghost sm" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</li>`; }).join('')}</ul>`
       : `<div class="empty-box"><h3>Nessun arbitro attivo</h3><span>Quando un arbitro si registra dal link e lo approvi compare qui.</span></div>`}
     ${tolti.length ? `<section class="ref-sec"><h3>Accesso tolto <span class="cnt">${tolti.length}</span></h3><p class="note" style="margin:0">Non possono entrare nell’app, ma i loro dati restano salvati: se li riattivi ritrovano tutto com’era.</p>
       <ul class="list">${tolti.map(a => `<li class="ds-arb"><div><button class="linkbtn" style="padding:0;text-align:left" data-arb="${esc(a.id)}"><b>${esc(nomeArb(a))}</b></button><span>${esc(a.email || '')}</span></div><button class="btn btn-ghost sm" data-riatt="${esc(a.id)}">Riattiva</button></li>`).join('')}</ul></section>` : ''}`;
@@ -2667,11 +2683,18 @@ function renderDsArbitri(){
   el.querySelectorAll('[data-rifiu]').forEach(b => b.onclick = () => { if(confirm(`Rifiutare ${nm(b.dataset.rifiu)}? Non potrà entrare nell’app (puoi sempre riattivarlo dopo).`)) setAccesso(b.dataset.rifiu, 'bloccato', 'Registrazione rifiutata'); });
   el.querySelectorAll('[data-riatt]').forEach(b => b.onclick = () => { b.disabled = true; setAccesso(b.dataset.riatt, 'attivo', `${nm(b.dataset.riatt)} riattivato: ritrova tutti i suoi dati`); });
 }
+const accChip = a => { const st = statoArb(a); return ADMINS().includes(String(a.email || '').toLowerCase()) ? '<span class="ds-chip done acc-chip"><i></i>Designatore</span>'
+  : st === 'attivo' ? '<span class="ds-chip done acc-chip"><i></i>Approvato</span>' : st === 'bloccato' ? '<span class="ds-chip no acc-chip"><i></i>Accesso tolto</span>' : '<span class="ds-chip wait acc-chip"><i></i>Da approvare</span>'; };
+const accInfo = a => { if(ADMINS().includes(String(a.email || '').toLowerCase())) return 'Designatore: entra sempre.';
+  const x = (DS.acc || {})[a.id] || {}, quando = x.at ? new Date(x.at).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
+  const reg = a.createdAt ? ` Registrato il ${new Date(a.createdAt).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'})}.` : '';
+  return (x.stato === 'attivo' ? (x.da === 'avvio' ? `Già iscritto e designato prima dell’approvazione degli arbitri: abilitato il ${quando}.` : `Approvato${x.da ? ' da ' + x.da : ''} il ${quando}.`)
+    : x.stato === 'bloccato' ? `Accesso tolto${x.da ? ' da ' + x.da : ''} il ${quando}.` : 'In attesa della tua approvazione.') + reg; };
 function openArb(id){
   const a = DS.arbitri.find(x => x.id === id); if(!a) return;
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Dati arbitro"><div class="grab"></div>
-    <h2>${esc(nomeArb(a))}</h2>${ADMINS().includes((a.email || '').toLowerCase()) ? '<span class="pill ruolo" style="align-self:flex-start">Designatore</span>' : ''}
+    <h2>${esc(nomeArb(a))}</h2>${accChip(a)}<p class="note" style="margin:0">${esc(accInfo(a))}</p>
     ${datiKv(a)}
     <div class="row">${a.iban ? `<button class="btn btn-primary" data-a="iban">Copia IBAN</button>` : '<span class="err-t">IBAN non inserito</span>'}${a.telefono ? `<a class="btn btn-ghost" href="${esc(waUrl(a.telefono, ''))}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-ghost" href="tel:${esc(a.telefono)}">Chiama</a>` : ''}</div>
     ${ADMINS().includes((a.email || '').toLowerCase()) ? '' : statoArb(a) === 'attivo' ? '<button class="btn btn-danger btn-block" data-a="togli">Togli accesso all’app</button>' : `<button class="btn btn-primary btn-block" data-a="riatt">${statoArb(a) === 'attesa' ? 'Approva' : 'Riattiva accesso'}</button>`}
@@ -2910,7 +2933,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113181919';
+const APP_BUILD = '20261113185937';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;

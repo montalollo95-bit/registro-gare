@@ -64,9 +64,13 @@ async function main() {
   // accessi: chi non è approvato (o ha l'accesso tolto) non riceve niente
   const acc = {}; accSnap.forEach(a => { acc[a.id] = a.data().stato || ''; });
   const scritture = [];
-  if (!('_avvio' in acc)) { // la prima volta chi era già registrato resta dentro
-    arbSnap.forEach(a => { if (!acc[a.id]) { acc[a.id] = 'attivo'; scritture.push(['acc', a.id, {stato: 'attivo', at: Date.now(), da: 'avvio'}]); } });
-    scritture.push(['acc', '_avvio', {at: Date.now()}]); acc._avvio = '';
+  // correzione una tantum: chi era stato abilitato in automatico per sbaglio (appena iscritto e mai designato) torna da approvare
+  const av = accSnap.docs.find(a => a.id === '_avvio');
+  if (av && !av.data().corretto) {
+    const designati = new Set(desSnap.docs.flatMap(d => d.data().arbitriIds || [])), lim = (av.data().at || Date.now()) - 24 * 3600 * 1000;
+    accSnap.forEach(x => { const a = arbSnap.docs.find(y => y.id === x.id), c = a && a.data().createdAt;
+      if (a && x.data().stato === 'attivo' && x.data().da === 'avvio' && !ADMINS.includes(String(a.data().email || '').toLowerCase()) && !designati.has(x.id) && c && c > lim) { delete acc[x.id]; scritture.push(['accdel', x.id]); } });
+    scritture.push(['accmerge', '_avvio', {corretto: Date.now()}]);
   }
   const attivo = uid => adminUid.includes(uid) || acc[uid] === 'attivo';
   const tokens = {}; tokSnap.forEach(t => { const u = t.data().uid; if (u) (tokens[u] = tokens[u] || []).push(t.id); });
@@ -190,6 +194,8 @@ async function main() {
       if (op === 'set') b.set(col.doc(id), data);
       else if (op === 'del') b.delete(col.doc(id));
       else if (op === 'acc') b.set(db.collection('accessi').doc(id), data);
+      else if (op === 'accdel') b.delete(db.collection('accessi').doc(id));
+      else if (op === 'accmerge') b.set(db.collection('accessi').doc(id), data, {merge: true});
       else b.delete(db.collection('tokens').doc(id));
     }
     await b.commit();
