@@ -10,7 +10,7 @@ self.addEventListener('push', e => {
   e.waitUntil(self.registration.showNotification(d.title || n.title || 'AICS', {
     body: d.body || n.body || '',
     icon: 'icon-aics.png',
-    badge: 'icon-aics.png',
+    badge: 'badge-aics.png',
     tag: d.tag || undefined,
     data: {url: d.url || './'}
   }));
