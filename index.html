@@ -355,9 +355,24 @@ body.adm .tabs a[data-v=calendario]{display:none}
 .cnt-red{background:var(--card-red)!important;color:#fff!important}
 .ok-t{color:var(--ok);font-weight:700}
 body.adm #nextBox{display:none}
+#gate{position:absolute;inset:0;z-index:200;background:var(--bg);overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) 16px max(24px,env(safe-area-inset-bottom,0px));box-sizing:border-box}
+#gate{display:flex;flex-direction:column}
+#gate .gate-in{width:100%;max-width:440px;margin:auto;display:flex;flex-direction:column;gap:14px}
+#gate .gate-logo{width:170px;height:170px;object-fit:contain;background:#fff;border-radius:28px;padding:12px;align-self:center;margin-top:8px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+#gate .gate-logo.big{width:min(260px,62vw);height:auto;aspect-ratio:1;border-radius:36px;padding:18px}
+#gate .gate-intro{align-items:center;gap:32px}
+#gate .gate-login{min-width:220px;font-size:20px;letter-spacing:.08em;padding:16px 28px}
+#gate h1{text-align:center;font-size:38px;text-transform:uppercase;color:var(--pitch)}
+#gate .gate-sub{text-align:center;margin:-10px 0 4px;color:var(--muted)}
+body.gated .tabs,body.gated #scroller{visibility:hidden}
 .pay-calc{display:grid!important;grid-template-columns:1fr auto;gap:2px 12px;width:100%;max-width:300px;font-size:14px}
 .pay-calc b{text-align:right;font-family:var(--body)!important;font-size:14px!important}
-.pay-calc span:nth-last-child(2),.pay-calc b:last-child{font-weight:800;color:var(--fg)}
+.pay-calc span{font-weight:400}
+
+.logo-back{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);flex:none}
+.logo-back img{width:42px;height:42px;object-fit:contain}
+.band-home{padding-left:84px}
+.band-home .band-logo{position:absolute;left:0;top:50%;transform:translateY(-50%);width:68px;height:68px;object-fit:contain;background:#fff;border-radius:18px;padding:4px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -368,9 +383,14 @@ body.lock .ro-flex{display:flex!important}
 .des-home{border-color:var(--card-yellow)}
 .des-home .cnt{font-size:14px}
 .wrap{width:100%;box-sizing:border-box}
-.ds-arb.pay .pay-r{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%}
-.ds-arb.pay .pay-r b{margin-right:auto}
-.ds-arb.pay .pay-r b{font-family:var(--display);font-size:24px}
+.ds-arb.pay{flex-direction:column;align-items:stretch}
+.ds-arb.pay > div:first-child{flex:none;width:100%}
+.ds-arb.pay > .pay-r{display:flex;flex:none;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;width:100%;border-top:1px solid var(--line);padding-top:10px}
+.ds-arb.pay .pay-tot{display:flex;flex-direction:column;align-items:flex-start;line-height:1.1}
+.ds-arb.pay .pay-tot span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ds-arb.pay .pay-tot b{font-family:var(--display);font-size:28px}
+.ds-arb.pay .pay-btns{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.ds-arb.pay .pay-btns .btn,.empty-box .btn{white-space:nowrap}
 .ds-arb.pay.paid{opacity:.75}
 .ds-arb details{font-size:14px;color:var(--muted)}
 .ds-arb summary{cursor:pointer;padding:2px 0}
@@ -383,7 +403,8 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== OGGI ===== -->
 <section id="v-oggi" class="view">
-  <div class="band"><div class="band-in">
+  <div class="band"><div class="band-in band-home">
+    <img src="logo.png" alt="" class="band-logo">
     <div class="eyebrow" style="color:inherit;opacity:.75" id="seasonLbl"></div>
     <h1>Oggi</h1>
     <div class="date" id="todayLbl"></div>
@@ -415,25 +436,25 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== REFERTO ===== -->
 <section id="v-referto" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Referto</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1>Referto</h1><span class="spacer"></span></div></div>
   <div class="wrap view" id="refBody"></div>
 </section>
 
 <!-- ===== ACCOUNT / DESIGNA ===== -->
 <section id="v-account" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1 id="accTitle">Login</h1><span class="round" aria-hidden="true" hidden></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1 id="accTitle">Login</h1><span class="round" aria-hidden="true" hidden></span></div></div>
   <div class="wrap view" id="accBody"></div>
 </section>
 
 <!-- ===== DESIGNAZIONI (designatori) ===== -->
 <section id="v-designazioni" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Designazioni</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1>Designazioni</h1><button class="round" id="dsHeadBtn" aria-label="Nuova designazione" hidden>+</button></div></div>
   <div class="wrap view" id="dsBody"></div>
 </section>
 
 <!-- ===== PARTITE ===== -->
 <section id="v-partite" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1>Partite</h1><a class="round" href="#importa" aria-label="Aggiungi gara">+</a></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Filtro gare">
       <button id="fUp" aria-pressed="true">Prossime</button>
@@ -446,7 +467,7 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== CALENDARIO ===== -->
 <section id="v-calendario" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Calendario</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1>Calendario</h1><span class="spacer"></span></div></div>
   <div class="wrap view">
     <div class="seg" role="group" aria-label="Vista calendario">
       <button id="cMese" aria-pressed="true">Mese</button>
@@ -467,7 +488,7 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== SPESE ===== -->
 <section id="v-spese" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1>Rimborsi &amp; km</h1><button class="round" id="addSpesa" aria-label="Aggiungi spesa">+</button></div></div>
   <div class="wrap view">
     <div id="payBox" hidden></div>
     <div id="refWait" hidden></div>
@@ -488,7 +509,7 @@ body.lock .ro-flex{display:flex!important}
 
 <!-- ===== IMPORTA ===== -->
 <section id="v-importa" class="view" hidden>
-  <div class="band sub"><div class="band-in"><a class="back" href="#oggi">‹ Home</a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
+  <div class="band sub"><div class="band-in"><a class="logo-back" href="#oggi" aria-label="Torna alla Home"><img src="logo.png" alt=""></a><h1>Importa designazione</h1><span class="spacer"></span></div></div>
   <div class="wrap view">
     <div class="hero">
       <h2>La gara si compila da sola</h2>
@@ -970,7 +991,7 @@ function renderSpese(){
   }
   if(Store.mode === 'loading'){ $('#movList').innerHTML = `<li class="status"><span class="spin"></span>Carico le spese…</li>`; return; }
   if(!items.length){
-    $('#movList').innerHTML = `<li class="empty-box"><span class="eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span><h3>Nessuna spesa</h3><span>Aggiungi diarie, rimborsi km e altre spese col + in alto.</span><div class="row" style="justify-content:center"><button class="btn btn-primary" id="addSpesa2">+ Aggiungi spesa</button><button class="btn btn-ghost" id="addAnt2">+ Aggiungi anticipo</button></div></li>`;
+    $('#movList').innerHTML = `<li class="empty-box"><span class="eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5a4 4 0 1 0 0 7M7 11h6M7 13.5h6"/></svg></span><h3>Nessuna spesa o rimborso</h3><span>Aggiungi diarie, rimborsi km e altre spese col + in alto.</span><div class="row" style="justify-content:center"><button class="btn btn-primary" id="addSpesa2">+ Aggiungi spesa</button><button class="btn btn-ghost" id="addAnt2">+ Aggiungi anticipo</button></div></li>`;
     $('#addAnt2').onclick = () => openAnticipo({});
     $('#addSpesa2').onclick = () => openSpesaForm({data: todayIso(), tipo:'carburante'});
     return;
@@ -1668,13 +1689,14 @@ const fbErr = e => {
 
 function accStart(){
   if(ACC.started) return; ACC.started = true;
+  renderGate();
   if(!fbReady()){ ACC.ready = true; renderAccount(); renderTab(); return; }
   loadFB().then(fb => fb.auth().onAuthStateChanged(u => onUser(u).catch(e => { ACC.err = fbErr(e); ACC.ready = true; renderAccount(); renderTab(); })))
     .catch(() => { ACC.started = false; ACC.ready = true; ACC.err = 'Serve internet per accedere. Riprova.'; renderAccount(); renderTab(); });
 }
 async function onUser(u){
   ACC.unsub.forEach(f => f()); ACC.unsub = [];
-  Object.assign(ACC, {user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
+  Object.assign(ACC, {ready: false, user: u, profilo: null, isAdmin: false, regs: [], regId: null, mie: [], anticipi: [], mieLoaded: false, mieServer: false, err: ''});
   Object.assign(DS, {gare: [], arbitri: [], squadre: [], impianti: [], pag: [], anticipi: [], loaded: false, err: ''});
   if(!u){ ACC.ready = true; Store.detach(); renderAccount(); renderTab(); renderOggiDes(); renderPay(); renderAnticipi(); return; }
   const db = firebase.firestore(), em = myEmail();
@@ -1749,8 +1771,8 @@ function renderAccount(){
   renderDesigna(); renderAvvisi();
   if(!fbReady()){ box.innerHTML = `<div class="ref-sec"><h3>Da collegare</h3><p class="note" style="margin:0">Manca il file <b>firebase-config.js</b> con i dati del progetto Firebase.</p></div>`; return; }
   if(!ACC.ready){ box.innerHTML = '<div class="status"><span class="spin"></span>Collego l’account…</div>'; return; }
-  if(!ACC.user){ box.innerHTML = (ACC.err ? `<div class="status err">${esc(ACC.err)}</div>` : '') + authHTML(); bindAuth(); return; }
-  if(!ACC.profilo){ box.innerHTML = profileHTML(); bindProfile(); return; }
+  renderGate();
+  if(!ACC.user || !ACC.profilo){ box.innerHTML = ''; return; }
   const p = ACC.profilo;
   box.innerHTML = `<div class="acc-head"><span class="avatar">${esc(iniziali(p).toUpperCase())}</span><div><b>${esc(nomeArb(p))}</b><span>${esc(ACC.user.email)}${ACC.isAdmin ? ' · Designatore' : ''}</span></div></div>
     <section class="ref-sec" id="mieBox"></section>
@@ -1759,6 +1781,32 @@ function renderAccount(){
     <button class="btn btn-ghost btn-block" id="accOut">Esci</button>`;
   $('#accOut').onclick = () => firebase.auth().signOut();
   renderMie(); renderDati(); renderRegBox();
+}
+
+/* -- pagina di accesso: chi non è entrato vede solo questa -- */
+function renderGate(){
+  let g = $('#gate');
+  if(!fbReady()){ if(g) g.remove(); return; }
+  const show = !ACC.ready || !ACC.user || !ACC.profilo;
+  document.body.classList.toggle('gated', show);
+  if(!show){ if(g) g.remove(); return; }
+  if(!g){ g = document.createElement('div'); g.id = 'gate'; document.body.appendChild(g); }
+  const intro = !ACC.user && !ACC.gateForm && !ACC.err;
+  const was = g.dataset.st, st = !ACC.ready ? 'wait' : intro ? 'intro' : !ACC.user ? 'auth-' + ACC.mode + (ACC.err ? '-e' : '') : 'prof';
+  if(was === st && st !== 'wait') return;
+  g.dataset.st = st;
+  if(st === 'intro' || st === 'wait'){
+    g.innerHTML = `<div class="gate-in gate-intro"><img src="logo.png" alt="Logo" class="gate-logo big">${st === 'wait' ? '<div class="status" style="align-self:center"><span class="spin"></span>Apro l’app…</div>' : '<button class="btn btn-primary gate-login" id="gLogin">LOGIN</button>'}</div>`;
+    if(st === 'intro') $('#gLogin').onclick = () => { ACC.gateForm = true; renderGate(); };
+    return;
+  }
+  g.innerHTML = `<div class="gate-in"><img src="logo.png" alt="Logo" class="gate-logo">
+    ${!ACC.user ? '<button class="linkbtn" id="gBack" style="align-self:flex-start">‹ Indietro</button>' : ''}
+    ${!ACC.user ? (ACC.err ? `<div class="status err">${esc(ACC.err)}</div><button class="btn btn-ghost btn-block" id="gRetry">Riprova</button>` : '') + authHTML() : profileHTML()}</div>`;
+  if(!ACC.ready) return;
+  if($('#gBack')) $('#gBack').onclick = () => { ACC.gateForm = false; ACC.err = ''; renderGate(); };
+  if(!ACC.user){ bindAuth(); const r = $('#gRetry'); if(r) r.onclick = () => { ACC.err = ''; ACC.ready = false; renderGate(); accStart(); }; }
+  else bindProfile();
 }
 
 /* -- login / registrazione -- */
@@ -1778,7 +1826,7 @@ function authHTML(){
   </form>`;
 }
 function bindAuth(){
-  document.querySelectorAll('#accBody [data-m]').forEach(b => b.onclick = () => { ACC.mode = b.dataset.m; ACC.err = ''; renderAccount(); });
+  document.querySelectorAll('#gate [data-m]').forEach(b => b.onclick = () => { ACC.mode = b.dataset.m; ACC.err = ''; renderAccount(); });
   const f = $('#auth'), msg = $('#a-msg'), v = id => (f.querySelector('#' + id) || {value: ''}).value.trim();
   f.onsubmit = async e => {
     e.preventDefault(); msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
@@ -1881,14 +1929,14 @@ function renderPay(){
       const n5 = r.gare.filter(d => tariffaDes(d) === 25).length, n7 = r.gare.filter(d => tariffaDes(d) === 30).length, pg = r.p ? toNum(r.p.importo) : 0, ok = r.p && pg >= r.tot;
       return `<li class="ds-arb pay${ok ? ' paid' : ''}"><div><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>
         <span>${r.gare.length} ${r.gare.length === 1 ? 'gara' : 'gare'}${n5 ? ` · ${n5} C5` : ''}${n7 ? ` · ${n7} C7` : ''}</span>
-        <span class="pay-calc"><span>Spettante per le gare</span><b>${eur(r.lordo)}</b><span>Già anticipato</span><b>− ${eur(r.antTot)}</b><span>Da pagare</span><b>${eur(r.tot)}</b></span>
+        <span class="pay-calc"><span>Spettante per le gare</span><b>${eur(r.lordo)}</b><span>Già anticipato</span><b>− ${eur(r.antTot)}</b></span>
         ${r.senza.length ? `<span class="err-t">${r.senza.length === 1 ? '1 gara' : r.senza.length + ' gare'} senza referto: non conteggiate</span>` : ''}
         <span>${r.a && r.a.iban ? 'IBAN ' + esc(ibanFmt(r.a.iban)) : '<span class="err-t">IBAN non inserito</span>'}</span>
         ${r.p ? `<span class="ds-chip done"><i></i>Pagato ${eur(pg)} il ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</span>${pg < r.tot ? `<span class="err-t">Mancano ${eur(r.tot - pg)}</span>` : ''}` : ''}
         <details><summary class="note">Vedi dettagli</summary><span>${r.gare.sort(dsSort).map(d => `${esc(fmtShort(d.data))} · ${esc(d.casa)} – ${esc(d.ospite)} · ${eur(tariffaDes(d))}`).concat(r.ant.map(x => `${esc(fmtShort(x.data))} · Anticipo ricevuto${x.descrizione ? ' (' + esc(x.descrizione) + ')' : ''} · − ${eur(x.importo)}`)).join('<br>')}</span></details></div>
-        <div class="pay-r"><b class="num">${eur(r.tot)}</b>
+        <div class="pay-r"><div class="pay-tot"><span>Da pagare</span><b class="num">${eur(r.tot)}</b></div><div class="pay-btns">
         ${r.a && r.a.iban ? `<button class="btn btn-ghost sm" data-iban="${esc(r.a.iban)}">Copia IBAN</button>` : ''}
-        ${r.tot ? `<button class="btn ${ok ? 'btn-ghost' : 'btn-primary'} sm" data-pay="${esc(r.uid)}" data-imp="${r.tot}" data-n="${r.gare.length}">${ok ? 'Annulla pagato' : 'Segna pagato'}</button>` : ''}</div></li>`; }).join('')}</ul>`
+        ${r.tot ? `<button class="btn ${ok ? 'btn-ghost' : 'btn-primary'} sm" data-pay="${esc(r.uid)}" data-imp="${r.tot}" data-n="${r.gare.length}">${ok ? 'Annulla pagato' : 'Segna pagato'}</button>` : ''}</div></div></li>`; }).join('')}</ul>`
       : '<p class="note" style="margin:0">Nessuna gara giocata in questo mese.</p>'}</section>`;
 
   box.querySelectorAll('[data-pm]').forEach(b => b.onclick = () => { const d = new Date(y, m - 1 + +b.dataset.pm, 1); PAY.mese = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; renderPay(); });
@@ -2359,7 +2407,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113095538';
+const APP_BUILD = '20261113101216';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
