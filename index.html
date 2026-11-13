@@ -474,9 +474,22 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 @media (max-width:400px){.seg.seg6 button{font-size:14px;padding-left:2px;padding-right:2px}}
 .pill.sost-pill{border-radius:10px}
 .sub-list .sost-prop{display:block;margin-top:6px}
-.fit1{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}
+.fit1{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%;padding-block:2px;flex-shrink:0}
 .acc-sum.due{grid-template-columns:repeat(2,1fr)}
-.acc-sum.due .warn b{color:#E8820C}
+.sheet > *{flex-shrink:0}
+.cron{background:var(--surface);border:1px solid var(--line);border-left:4px solid #E8820C;border-radius:var(--r);padding:14px 16px}
+.cron h3{margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.cron-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.cron-l > li{display:flex;flex-direction:column;gap:4px;padding:10px 0;border-top:1px solid var(--line)}
+.cron-l > li:first-child{border-top:0;padding-top:2px}
+.cron-t{font-size:13px;color:var(--muted)}.cron-t b{color:#E8820C}
+.cron-r{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.cron-r .mod-k{min-width:74px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cron-r .mod-v{flex:1;min-width:0;overflow-wrap:anywhere}
+.cron-r s{color:var(--muted)}
+.ds-chip.modc{color:#E8820C}.ds-chip.modc i{display:none}
+.acc-sum.due .warn b,.acc-sum .warn2 b{color:#E8820C}
+.acc-sum .ok b{color:var(--ok)}
 .acc-sum .bad b{color:var(--card-red)}
 .mod-info{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--card-yellow);background:color-mix(in srgb,var(--card-yellow) 10%,var(--surface));font-size:14px;line-height:1.4}
 .mod-info b{color:color-mix(in srgb,var(--card-yellow) 75%,var(--fg))}
@@ -857,11 +870,13 @@ function addrLink(g){
 }
 
 /* ---------- OGGI ---------- */
+// gara con designazione non (ancora) accettata, es. modificata dal designatore: non è la prossima finché non la riconfermo
+const daConfermareGara = g => { const d = desDi(g); return !!(d && (d.arbitriIds || []).includes(ACC.user.uid) && (rispOf(d, ACC.user.uid) || {}).stato !== 'accettata'); };
 function renderOggi(){
   const box = $('#nextBox');
   if(Store.mode === 'loading'){ box.innerHTML = `<div class="status"><span class="spin"></span>Apro il registro…</div>`; }
   else {
-    const n = Store.gare.filter(g => !isPast(g) && g.stato !== 'rinviata').sort((a,b)=>sortKey(a).localeCompare(sortKey(b)))[0];
+    const n = Store.gare.filter(g => !isPast(g) && g.stato !== 'rinviata' && !daConfermareGara(g)).sort((a,b)=>sortKey(a).localeCompare(sortKey(b)))[0];
     if(n){
       const d = parseD(n.data); const diff = d ? Math.round((d - parseD(todayIso()))/86400000) : null;
       const when = diff === 0 ? 'Oggi' : diff === 1 ? 'Domani' : diff != null ? `Tra ${diff} giorni` : '';
@@ -2644,16 +2659,17 @@ const TIPO_EX = {rifiuto: 'aveva rifiutato', sost: 'aveva chiesto la sostituzion
 const storicoRiga = (x, conA) => `<span class="sost-prop">🔁 ${conA ? (x.a ? `<b>${esc(exNome(x.a, x.aNome))}</b> al posto di ` : 'Tolto ') : 'Al posto di '}<b>${esc(exNome(x.da, x.daNome))}</b> · ${esc(TIPO_EX[x.tipo] || '')}${x.at ? ' · ' + esc(sostQuando(x.at)) : ''}</span>`;
 /* quante gare un arbitro ha rifiutato o lasciato (sostituito) */
 function contaArb(uid, gare){
-  let rif = 0, sost = 0;
+  let rif = 0, sost = 0, fatte = 0;
   gare.forEach(d => {
+    if((d.arbitriIds || []).includes(uid) && (rispOf(d, uid) || {}).stato !== 'rifiutata' && fatta(d)) fatte++;
     if((d.arbitriIds || []).includes(uid) && (rispOf(d, uid) || {}).stato === 'rifiutata') rif++;
     const st = (d.storico || []).filter(x => x.da === uid);
     st.forEach(x => { if(x.tipo === 'rifiuto') rif++; else sost++; });
     if(!st.length && (d.sostituiti || []).includes(uid)) sost++;
   });
-  return {rif, sost};
+  return {rif, sost, fatte};
 }
-const contaBox = c => `<div class="acc-sum due"><div class="${c.rif ? 'bad' : ''}"><b>${c.rif}</b><span>partite rifiutate</span></div><div class="${c.sost ? 'warn' : ''}"><b>${c.sost}</b><span>partite sostituite</span></div></div>`;
+const contaBox = c => `<div class="acc-sum"><div class="${c.fatte ? 'ok' : ''}"><b>${c.fatte}</b><span>partite fatte</span></div><div class="${c.rif ? 'bad' : ''}"><b>${c.rif}</b><span>partite rifiutate</span></div><div class="${c.sost ? 'warn2' : ''}"><b>${c.sost}</b><span>partite sostituite</span></div></div>`;
 /* partita modificata dal designatore: cosa è cambiato */
 const MOD_L = {data: 'giorno', ora: 'ora', casa: 'squadre', ospite: 'squadre', impianto: 'campo'};
 const modDi = d => { const m = d && d.modifiche; return m && (m.campi || []).length && ACC.user && !rispOf(d, ACC.user.uid) && (!m.per || m.per.includes(ACC.user.uid)) ? m : null; };   // solo a chi era già designato
@@ -2749,7 +2765,7 @@ function dsCard(d){
     <span class="info"><span class="teams">${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</span>
     <span class="sub">${esc(fmtShort(d.data))}${d.ora ? ' · ' + esc(d.ora) : ''}${d.impianto ? ' · ' + esc(d.impianto) : ''}</span>
     <span class="pills">${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}</span>
-    <span class="ds-chips">${d.annullata && !uff.length ? '<span class="ds-chip no"><i></i>🔄 Annullata · da riprogrammare</span>' : chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}</span></span></button></li>`;
+    <span class="ds-chips">${d.annullata && !uff.length ? '<span class="ds-chip no"><i></i>🔄 Annullata · da riprogrammare</span>' : chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}${!(d.annullata && !uff.length) && cronDi(d).length ? `<span class="ds-chip modc"><i></i>✏️ Modificata${cronDi(d).length > 1 ? ` ${cronDi(d).length} volte` : ''}</span>` : ''}</span></span></button></li>`;
 }
 const DSF_FILTRI = {tutte: ['Tutte', () => true], attesa: ['In attesa', d => (d.ufficiali || []).some(u => !rispOf(d, u.uid) || sostAperta(d, u.uid))], rifiuti: ['Rifiutate', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'rifiutata')],
   senza: ['Senza arbitro', d => !(d.ufficiali || []).length], sost: ['Sostituzioni', d => (d.ufficiali || []).some(u => sostAperta(d, u.uid))], referto: ['Referto non compilato', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'accettata' && !(d.referti && d.referti[u.uid] && !d.referti[u.uid].sbloccato))]};
@@ -2910,6 +2926,26 @@ function dsText(d, u){
 }
 
 const invQuando = t => { const x = new Date(t); return (x.toDateString() === new Date().toDateString() ? 'oggi' : 'il ' + x.toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit'})) + ' alle ' + x.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'}); };
+/* cronologia delle modifiche fatte dal designatore */
+const CRON_L = {data: 'Giorno', ora: 'Ora', squadre: 'Squadre', impianto: 'Campo', indirizzo: 'Indirizzo', citta: 'Città', categoria: 'Categoria', girone: 'Girone', numeroGara: 'N. gara', rimborso: 'Rimborso', note: 'Note', arbitri: 'Arbitri'};
+const cronVal = (k, v) => k === 'data' ? (v ? fmtShort(v) : '—') : k === 'rimborso' ? (toNum(v) ? eur(v) : '—') : (v === 0 ? '0' : v || '—');
+const uffNomi = l => (l || []).map(u => `${nomeArb(DS.arbitri.find(x => x.id === u.uid)) || u.nome || '?'}${u.ruolo && u.ruolo !== 'Arbitro' ? ` (${u.ruolo})` : ''}`).join(', ');
+function cronVoci(d, o, uff){
+  const v = [], ug = (a, b) => String(a == null ? '' : a) === String(b == null ? '' : b);
+  if(!ug(d.casa, o.casa) || !ug(d.ospite, o.ospite)) v.push({k: 'squadre', da: `${d.casa || '—'} – ${d.ospite || '—'}`, a: `${o.casa || '—'} – ${o.ospite || '—'}`});
+  Object.keys(o).filter(k => k !== 'casa' && k !== 'ospite').forEach(k => { const a = k === 'rimborso' ? toNum(d[k]) : d[k]; if(!ug(a, o[k]) && (a || o[k])) v.push({k, da: a == null ? '' : a, a: o[k]}); });
+  const pr = uffNomi(d.ufficiali), nu = uffNomi(uff); if(pr !== nu) v.push({k: 'arbitri', da: pr, a: nu});
+  return v;
+}
+const cronDi = d => { const l = [...(d.cronologia || [])];   // le vecchie modifiche (prima della cronologia) le ricostruisco da "modifiche"
+  if(!l.length && d.modifiche && d.modifiche.prima){ const p = d.modifiche.prima, m = d.modifiche, c = m.campi || [], v = [];
+    if(c.includes('data')) v.push({k: 'data', da: p.data, a: d.data}); if(c.includes('ora')) v.push({k: 'ora', da: p.ora, a: d.ora});
+    if(c.includes('casa') || c.includes('ospite')) v.push({k: 'squadre', da: `${p.casa || '—'} – ${p.ospite || '—'}`, a: `${d.casa || '—'} – ${d.ospite || '—'}`});
+    if(c.includes('impianto')) v.push({k: 'impianto', da: p.impianto, a: d.impianto});
+    if(v.length) l.push({at: m.at, voci: v}); }
+  return l.sort((a, b) => b.at - a.at); };
+const cronBox = d => { const l = cronDi(d); if(!l.length) return '';
+  return `<section class="cron"><h3>✏️ Modifiche <span class="cnt">${l.length}</span></h3><ol class="cron-l">${l.map((x, i) => `<li><span class="cron-t">${l.length > 1 ? `<b>${l.length - i}ª</b> · ` : ''}${esc(invQuando(x.at))}</span>${x.annullata ? `<span class="cron-r"><span class="mod-k">Annullata</span><span class="mod-v">da riprogrammare${x.motivo ? ` · “${esc(x.motivo)}”` : ''}</span></span>` : ''}${(x.voci || []).map(v => `<span class="cron-r"><span class="mod-k">${esc(CRON_L[v.k] || v.k)}</span><span class="mod-v"><s>${esc(cronVal(v.k, v.da))}</s><span class="mod-arr">→</span><b>${esc(cronVal(v.k, v.a))}</b></span></span>`).join('')}</li>`).join('')}</ol></section>`; };
 function openDs(id){
   const d = DS.gare.find(x => x.id === id); if(!d) return;
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
@@ -2922,6 +2958,7 @@ function openDs(id){
     <h2>${esc(d.casa || '—')} – ${esc(d.ospite || '—')}${desRis(d)}</h2>
     ${d.annullata ? `<div class="ann-info"><b>🔄 Partita annullata · da riprogrammare</b><span>Annullata il ${esc(sostQuando(d.annullata.at))}${d.annullata.motivo ? ` · “${esc(d.annullata.motivo)}”` : ''}. Tocca <b>Modifica</b>, metti la nuova data e scegli gli arbitri: la riceveranno come una designazione nuova.</span></div>` : ''}
     <dl class="kv">${[['Categoria', [d.categoria, d.girone && 'girone ' + d.girone].filter(Boolean).join(' · ')], ['N. gara', d.numeroGara], ['Campo', d.impianto], ['Indirizzo', [d.indirizzo, d.citta].filter(Boolean).join(', ')], ['Rimborso', d.rimborso ? eur(d.rimborso) : ''], ['Note', d.note]].filter(x => x[1]).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    ${cronBox(d)}
     <section class="ref-sec"><h3>Arbitri designati</h3>${rows ? `<ul class="list">${rows}</ul>` : '<p class="note" style="margin:0">Nessuno: tocca Modifica per aggiungerli.</p>'}<div id="dsRefBox"></div></section>
     <div class="row"><button class="btn btn-ghost" data-a="edit">Modifica</button><button class="btn btn-ghost" data-a="copy">Copia testo</button><button class="btn btn-danger" data-a="del">Elimina</button></div>
     ${fatta(d) ? '' : d.annullata && !uff.length ? '' : '<button class="btn btn-warn btn-block" data-a="annulla">🔄 Annulla partita · da riprogrammare</button>'}
@@ -2940,7 +2977,7 @@ function openDs(id){
     const nomi = uff.map(u => nomeArb(DS.arbitri.find(x => x.id === u.uid)) || u.nome).filter(Boolean);
     if(!confirm(`Annullare ${d.casa || ''} – ${d.ospite || ''}?\n\n${nomi.length ? `Vengono tolti ${nomi.join(', ')} e ricevono l’avviso che la partita è annullata.\n` : ''}La partita resta in elenco SENZA ARBITRI, da riprogrammare: con Modifica metti la nuova data e designi da capo.`)) return;
     const motivo = (prompt('Motivo (facoltativo), es. palestra non disponibile', '') || '').trim().slice(0, 140);
-    const upd = {ufficiali: [], arbitriIds: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], modifiche: null, annullata: {at: Date.now(), motivo, arbitri: nomi}, updatedAt: Date.now()};
+    const upd = {ufficiali: [], arbitriIds: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], modifiche: null, annullata: {at: Date.now(), motivo, arbitri: nomi}, cronologia: [...(d.cronologia || []), {at: Date.now(), annullata: true, motivo, voci: nomi.length ? [{k: 'arbitri', da: nomi.join(', '), a: ''}] : []}], updatedAt: Date.now()};
     try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); toast('Partita annullata: ora è da riprogrammare'); openDs(d.id); }
     catch(e){ toast(fbErr(e)); }
   };
@@ -3099,7 +3136,9 @@ function openDsForm(d){
     // cosa è cambiato: l'arbitro lo vede quando deve riconfermare
     const vecchia = !d.annullata && d.modifiche && !Object.values(d.risposte || {}).some(r => r && r.at > d.modifiche.at) ? d.modifiche : null;
     const modifiche = d.annullata ? null : cambiati.length ? {at: Date.now(), campi: [...new Set([...(vecchia ? vecchia.campi : []), ...cambiati])], prima: vecchia ? vecchia.prima : Object.fromEntries(CAMPI.map(k => [k, d[k] || ''])), per: ids.filter(x => prima.includes(x) && (!vecchia || !vecchia.per || vecchia.per.includes(x)))} : d.modifiche || null;
-    const doc = {...o, ufficiali, arbitriIds: ids, risposte, referti, avvisi, inviate, sostituzioni, subentri, sostituiti, storico, ...(modifiche ? {modifiche} : {}), updatedAt: Date.now()};
+    const cronologia = [...(d.cronologia || [])], voci = isNew ? [] : cronVoci(d, o, ufficiali);
+    if(voci.length) cronologia.push({at: Date.now(), voci});
+    const doc = {...o, ufficiali, arbitriIds: ids, cronologia, risposte, referti, avvisi, inviate, sostituzioni, subentri, sostituiti, storico, ...(modifiche ? {modifiche} : {}), updatedAt: Date.now()};
     if(isNew) doc.createdAt = Date.now();
     btn.disabled = true; msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
     try{
@@ -3115,7 +3154,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113220523';
+const APP_BUILD = '20261113235055';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
