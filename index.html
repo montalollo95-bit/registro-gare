@@ -415,6 +415,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 .seg.seg5{grid-template-columns:repeat(6,1fr)}
 .seg.seg5 button:nth-child(-n+3){grid-column:span 2}
 .seg.seg5 button:nth-child(n+4){grid-column:span 3}
+.sheet::-webkit-scrollbar{width:12px}
+.sheet::-webkit-scrollbar-track{background:transparent;margin:22px 0}
+.sheet::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:4px solid transparent;background-clip:padding-box}
+.sheet::-webkit-scrollbar-thumb:hover{background-color:var(--muted)}
+.sheet::-webkit-scrollbar-button{display:none;height:0}
+@supports not selector(::-webkit-scrollbar){.sheet{scrollbar-width:thin;scrollbar-color:var(--line) transparent}}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -2695,7 +2701,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113161435';
+const APP_BUILD = '20261113163008';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
