@@ -474,6 +474,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;bor
 @media (max-width:400px){.seg.seg6 button{font-size:14px;padding-left:2px;padding-right:2px}}
 .pill.sost-pill{border-radius:10px}
 .sub-list .sost-prop{display:block;margin-top:6px}
+.sost-banner.rosso{border-color:var(--card-red);background:color-mix(in srgb,var(--card-red) 12%,var(--surface))}
+.sost-banner.rosso b{color:var(--card-red)}
+.sost-banner.rosso span{background:var(--card-red)}
+.ds-sum .warn b{color:color-mix(in srgb,var(--card-yellow) 75%,var(--fg))}
+.mie-h{margin:14px 0 8px;font-size:17px;display:flex;align-items:center;gap:8px}
+.mie-h:first-of-type{margin-top:4px}
+.mie-acc{color:var(--ok)}.mie-att{color:color-mix(in srgb,var(--card-yellow) 75%,var(--fg))}.mie-sost{color:#E8820C}.mie-rif{color:var(--card-red)}
 .tabs a[data-v=designazioni] .tab-badge{right:calc(50% - 26px)}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
@@ -1893,10 +1900,10 @@ function renderTab(){
   a.setAttribute('aria-label', !p ? 'Login' : 'Account di ' + nomeArb(p));
   const note = $('#storeNote');
   if(note && fbReady() && ACC.ready){ const off = !ACC.user; note.hidden = !off; if(off) note.innerHTML = 'Non sei entrato: i dati restano solo su questo telefono. <a href="#account">Accedi</a> per salvarli online.'; }
-  const n = ACC.user ? ACC.mie.filter(d => ((!d.data || d.data >= todayIso()) && !rispOf(d, ACC.user.uid)) || sostNoDaVedere(d)).length : 0;
+  const n = ACC.user ? ACC.mie.filter(d => ((!d.data || d.data >= todayIso()) && !iniziata(d) && !rispOf(d, ACC.user.uid)) || sostNoDaVedere(d)).length : 0;   // solo da accettare o risposta del designatore da leggere
   a.querySelector('.tab-badge').hidden = !n; a.querySelector('.tab-badge').textContent = n;
   const db = document.querySelector('.tabs a[data-v=designazioni] .tab-badge');
-  if(db){ const m = ACC.user && ACC.isAdmin && DS.loaded ? sostRichieste().length + arbInAttesa().length : 0; db.hidden = !m; db.textContent = m; }
+  if(db){ const m = ACC.user && ACC.isAdmin && DS.loaded ? dsDaGuardare().length + arbInAttesa().length : 0; db.hidden = !m; db.textContent = m; }
 }
 /* solo i designatori inseriscono e modificano le gare: gli altri vedono, accettano e segnano km e benzina */
 function locked(){
@@ -2197,7 +2204,9 @@ function renderMie(){
   if(ACC.isAdmin && !up.length){ box.hidden = true; return; }
   box.hidden = false;
   if(!ACC.mieLoaded){ box.innerHTML = '<h3>Le mie designazioni</h3><div class="status"><span class="spin"></span>Carico…</div>'; return; }
-  box.innerHTML = `<h3>Le mie designazioni <span class="cnt">${up.length}</span></h3>${up.length ? `<ul class="list">${up.map(mieRow).join('')}</ul>` : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
+  const st = d => { const r = rispOf(d, uid); return sostMiaAperta(d) ? 'sost' : !r ? 'att' : r.stato === 'accettata' ? 'acc' : 'rif'; };
+  const grp = [['acc', '✓ Accettate'], ['att', '⏳ In attesa di risposta'], ['sost', '🔁 Richiesta sostituzione'], ['rif', '✕ Rifiutate']].map(([k, t]) => [k, t, up.filter(d => st(d) === k)]).filter(g => g[2].length);
+  box.innerHTML = `<h3>Le mie designazioni <span class="cnt">${up.length}</span></h3>${up.length ? grp.map(([k, t, l]) => `<h4 class="mie-h mie-${k}">${t} <span class="cnt">${l.length}</span></h4><ul class="list">${l.map(mieRow).join('')}</ul>`).join('') : '<p class="note" style="margin:0">Nessuna designazione in arrivo. Quando un designatore ti assegna una gara la trovi qui.</p>'}`;
   bindRows(box);
 }
 function mieRow(d){
@@ -2415,7 +2424,7 @@ function renderDesigna(){
   const box = $('#dsBody'); if(!box) return;
   if(!(ACC.user && ACC.isAdmin)){ box.innerHTML = ACC.ready ? '' : '<div class="status"><span class="spin"></span>Collego l’account…</div>'; return; }
   const tab = DS.tab;
-  box.innerHTML = `<div class="seg seg6" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare</button><button data-t="sost" aria-pressed="${tab === 'sost'}">Sostituzioni${DS.loaded && sostRichieste().length ? ` <b class="seg-n">${sostRichieste().length}</b>` : ''}</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri${arbInAttesa().length ? ` <b class="seg-n">${arbInAttesa().length}</b>` : ''}</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button><button data-t="ind" aria-pressed="${tab === 'ind'}">Indisponibili</button></div>
+  box.innerHTML = `<div class="seg seg6" role="group" aria-label="Sezione designazioni"><button data-t="gare" aria-pressed="${tab === 'gare'}">Gare${DS.loaded && dsDaGuardare().length ? ` <b class="seg-n">${dsDaGuardare().length}</b>` : ''}</button><button data-t="sost" aria-pressed="${tab === 'sost'}">Sostituzioni${DS.loaded && sostRichieste().length ? ` <b class="seg-n">${sostRichieste().length}</b>` : ''}</button><button data-t="arbitri" aria-pressed="${tab === 'arbitri'}">Arbitri${arbInAttesa().length ? ` <b class="seg-n">${arbInAttesa().length}</b>` : ''}</button><button data-t="squadre" aria-pressed="${tab === 'squadre'}">Squadre</button><button data-t="impianti" aria-pressed="${tab === 'impianti'}">Campi</button><button data-t="ind" aria-pressed="${tab === 'ind'}">Indisponibili</button></div>
     ${DS.err ? `<div class="status err">${esc(DS.err)}</div>` : ''}
     <div id="dsList" class="view"></div>`;
   box.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { DS.tab = b.dataset.t; renderDesigna(); });
@@ -2574,10 +2583,11 @@ const sostNoDaVedere = d => { const r = ACC.user && sostDi(d, ACC.user.uid); ret
 const sostNoGara = g => { const d = desDi(g); return !!(d && sostNoDaVedere(d)); };
 const sostMiaAperta = d => !!(ACC.user && d && sostAperta(d, ACC.user.uid) && !iniziata(d));   // ho chiesto la sostituzione: gara sospesa
 const sostAttesaGara = g => sostMiaAperta(desDi(g));
-const subDi = (d, uid) => { const s = d && (d.subentri || {})[uid]; return s && (d.arbitriIds || []).includes(uid) ? s : null; };   // gara passata a me da un collega
+const subDi = (d, uid) => { const s = d && (d.subentri || {})[uid]; return s && s.sost && (d.arbitriIds || []).includes(uid) ? s : null; };   // gara passata a me da un collega
 const subNome = s => { if(!s) return ''; const a = DS.arbitri.find(x => x.id === s.da); return (a && nomeArb(a)) || s.daNome || 'un collega'; };
 const subInfo = s => s ? `<div class="sub-info">🔁 <span>Prima questa designazione era di <b>${esc(subNome(s))}</b>${s.at ? ` · passata a te il ${esc(sostQuando(s.at))}` : ''}</span></div>` : '';
 const sostNonViste = () => DS.gare.filter(d => !iniziata(d) && (d.ufficiali || []).some(u => { const r = sostDi(d, u.uid); return r && r.esito === 'no' && !r.visto; })).sort(dsSort);
+const dsDaGuardare = () => DS.gare.filter(d => !fatta(d) && ['attesa', 'rifiuti', 'senza'].some(k => DSF_FILTRI[k][1](d)));   // gare non ancora a posto
 const sostFatte = () => DS.gare.filter(d => !fatta(d) && (d.ufficiali || []).some(u => subDi(d, u.uid))).sort(dsSort);
 const sostQuando = t => new Date(t).toLocaleString('it-IT', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}).replace(',', ' alle');
 /* lato arbitro: tasto nella scheda della partita */
@@ -2662,20 +2672,27 @@ function dsCard(d){
     <span class="pills">${d.categoria ? `<span class="pill">${esc(d.categoria)}</span>` : ''}</span>
     <span class="ds-chips">${chips || '<span class="ds-chip wait"><i></i>Nessun arbitro</span>'}</span></span></button></li>`;
 }
-const DSF_FILTRI = {tutte: ['Tutte', () => true], attesa: ['In attesa', d => (d.ufficiali || []).some(u => !rispOf(d, u.uid))], rifiuti: ['Rifiutate', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'rifiutata')],
+const DSF_FILTRI = {tutte: ['Tutte', () => true], attesa: ['In attesa', d => (d.ufficiali || []).some(u => !rispOf(d, u.uid) || sostAperta(d, u.uid))], rifiuti: ['Rifiutate', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'rifiutata')],
   senza: ['Senza arbitro', d => !(d.ufficiali || []).length], sost: ['Sostituzioni', d => (d.ufficiali || []).some(u => sostAperta(d, u.uid))], referto: ['Referto non compilato', d => (d.ufficiali || []).some(u => (rispOf(d, u.uid) || {}).stato === 'accettata' && !(d.referti && d.referti[u.uid] && !d.referti[u.uid].sbloccato))]};
+function dsBanner(base){
+  const n1 = base.filter(d => (d.ufficiali || []).some(u => !rispOf(d, u.uid))).length, n2 = base.filter(d => (d.ufficiali || []).some(u => sostAperta(d, u.uid))).length;
+  const n3 = base.filter(DSF_FILTRI.rifiuti[1]).length, n4 = base.filter(DSF_FILTRI.senza[1]).length, g = n => n === 1 ? '1 gara' : n + ' gare';
+  return [[n1, 'attesa', '', `⏳ ${g(n1)} in attesa di conferma`], [n2, 'sost', '', `🔁 ${n2 === 1 ? '1 sostituzione arbitro' : n2 + ' sostituzioni arbitro'} da approvare`],
+    [n3, 'rifiuti', ' rosso', `✕ ${n3 === 1 ? '1 gara rifiutata' : n3 + ' gare rifiutate'}: scegli un altro arbitro`], [n4, 'senza', ' rosso', `⚠️ ${g(n4)} senza arbitro`]]
+    .filter(x => x[0]).map(([, k, c, t]) => `<button class="sost-banner${c}" data-ban="${k}"><b>${t}</b><span>Apri</span></button>`).join('');
+}
 function renderDsGare(){
   const el = $('#dsList');
   if(!DS.loaded){ el.innerHTML = '<div class="status"><span class="spin"></span>Carico le designazioni…</div>'; return; }
   const past = !!DS.past, base = DS.gare.filter(d => past ? fatta(d) : !fatta(d));
-  const att = base.reduce((n, d) => n + (d.ufficiali || []).filter(u => !rispOf(d, u.uid)).length, 0);
+  const att = past ? 0 : base.reduce((n, d) => n + (d.ufficiali || []).filter(u => !rispOf(d, u.uid) || sostAperta(d, u.uid)).length, 0);
   const rif = base.filter(DSF_FILTRI.rifiuti[1]).length, senzaRef = base.filter(DSF_FILTRI.referto[1]).length, senza = base.filter(DSF_FILTRI.senza[1]).length;
   const filtri = past ? ['tutte', 'referto', 'senza'] : ['tutte', 'attesa', 'rifiuti', 'senza', ...(base.some(DSF_FILTRI.sost[1]) ? ['sost'] : [])];
   if(!filtri.includes(DS.f)) DS.f = 'tutte';
-  el.innerHTML = `<div class="seg" role="group" aria-label="Periodo"><button data-p="0" aria-pressed="${!past}">Prossime</button><button data-p="1" aria-pressed="${past}">Giocate</button></div>
+  el.innerHTML = `<div class="seg" role="group" aria-label="Periodo"><button data-p="0" aria-pressed="${!past}">Prossime${dsDaGuardare().length ? ` <b class="seg-n">${dsDaGuardare().length}</b>` : ''}</button><button data-p="1" aria-pressed="${past}">Giocate</button></div>
     <div class="ds-sum">${past ? `<div><b>${base.length}</b><span>giocate</span></div><div class="${senzaRef ? 'bad' : ''}"><b>${senzaRef}</b><span>referti non compilati</span></div><div class="${senza ? 'bad' : ''}"><b>${senza}</b><span>senza arbitro</span></div>`
-      : `<div><b>${base.length}</b><span>in programma</span></div><div><b>${att}</b><span>risposte in attesa</span></div><div class="${rif || senza ? 'bad' : ''}"><b>${rif + senza}</b><span>rifiuti / senza arbitro</span></div>`}</div>
-    ${!past && sostRichieste().length ? `<button class="sost-banner" id="goSost"><b>🔁 ${sostRichieste().length === 1 ? '1 sostituzione arbitro da approvare' : sostRichieste().length + ' sostituzioni arbitro da approvare'}</b><span>Apri</span></button>` : ''}
+      : `<div><b>${base.length}</b><span>in programma</span></div><div class="${att ? 'warn' : ''}"><b>${att}</b><span>risposte in attesa</span></div><div class="${rif || senza ? 'bad' : ''}"><b>${rif + senza}</b><span>rifiuti / senza arbitro</span></div>`}</div>
+    ${past ? '' : dsBanner(base)}
     ${past ? '' : '<button class="btn btn-primary btn-block" id="dsAdd">+ Nuova designazione</button>'}
     <div class="ds-filtri">${filtri.map(k => `<button class="chip-f" data-f="${k}" aria-pressed="${DS.f === k}">${DSF_FILTRI[k][0]}${k === 'tutte' ? '' : ` <b>${base.filter(DSF_FILTRI[k][1]).length}</b>`}</button>`).join('')}</div>
     <input class="ds-q" id="dsQ" type="search" placeholder="Cerca squadra, campo o arbitro" value="${esc(DS.q || '')}" aria-label="Cerca">
@@ -2683,7 +2700,7 @@ function renderDsGare(){
   el.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { DS.past = b.dataset.p === '1'; DS.f = 'tutte'; renderDsGare(); });
   el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { DS.f = b.dataset.f; renderDsGare(); });
   if($('#dsAdd')) $('#dsAdd').onclick = () => openDsForm({});
-  if($('#goSost')) $('#goSost').onclick = () => { DS.tab = 'sost'; renderDesigna(); };
+  el.querySelectorAll('[data-ban]').forEach(b => b.onclick = () => { if(b.dataset.ban === 'sost'){ DS.tab = 'sost'; renderDesigna(); return; } DS.f = b.dataset.ban; renderDsGare(); });
   $('#dsQ').oninput = e => { DS.q = e.target.value; renderDsGareList(base, past); };
   renderDsGareList(base, past);
 }
@@ -2861,7 +2878,7 @@ function openDs(id){
 async function sostituisci(d, old, nuovo, btn){
   const uff = d.ufficiali || [], na = DS.arbitri.find(x => x.id === nuovo), ufn = uff.map(x => x.uid === old ? {uid: nuovo, ruolo: x.ruolo || 'Arbitro', nome: nomeArb(na)} : x);
   const senza = m => { const o = {...(m || {})}; delete o[old]; return o; };
-  const upd = {ufficiali: ufn, arbitriIds: ufn.map(x => x.uid), risposte: senza(d.risposte), referti: senza(d.referti), avvisi: senza(d.avvisi), sostituzioni: senza(d.sostituzioni), sostituiti: [...new Set([...(d.sostituiti || []), old])], subentri: {...senza(d.subentri), [nuovo]: {da: old, daNome: nomeArb(DS.arbitri.find(x => x.id === old)) || (uff.find(x => x.uid === old) || {}).nome || '', at: Date.now()}}, updatedAt: Date.now()};
+  const upd = {ufficiali: ufn, arbitriIds: ufn.map(x => x.uid), risposte: senza(d.risposte), referti: senza(d.referti), avvisi: senza(d.avvisi), sostituzioni: senza(d.sostituzioni), sostituiti: [...new Set([...(d.sostituiti || []), old])], subentri: {...senza(d.subentri), ...(sostAperta(d, old) ? {[nuovo]: {da: old, daNome: nomeArb(DS.arbitri.find(x => x.id === old)) || (uff.find(x => x.uid === old) || {}).nome || '', at: Date.now(), sost: true}} : {})}, updatedAt: Date.now()};
   if(btn) btn.disabled = true;
   try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); toast(`Fatto: ${nomeArb(na)} riceve la designazione da accettare`); openDs(d.id); }
   catch(err){ if(btn) btn.disabled = false; toast(fbErr(err)); }
@@ -2973,7 +2990,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113193832';
+const APP_BUILD = '20261113204538';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;

@@ -91,7 +91,7 @@ async function main() {
 
     if (!zitto && !giocata) {
       const nuovi = uids.filter(u => !prima.includes(u) && risp(u).stato !== 'accettata');
-      const sub = u => (d.subentri || {})[u];
+      const sub = u => ((d.subentri || {})[u] || {}).sost ? d.subentri[u] : null;
       manda(nuovi.filter(u => !sub(u)), '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''}. Apri l’app per accettarla.`, 'des-' + id);
       for (const u of nuovi.filter(sub)) manda([u], '📋 Nuova designazione', `${squadre(d)} · ${quando(d)}${dove(d) ? ' · ' + dove(d) : ''} · al posto di ${nomi[sub(u).da] || sub(u).daNome || 'un collega'}. Apri l’app per accettarla.`, 'des-' + id);
       const tolti = prima.filter(u => !uids.includes(u)), chiesto = u => !!((s && s.sost || {})[u] || '').startsWith('aperta');
