@@ -393,6 +393,7 @@ body.gated .tabs,body.gated #scroller{visibility:hidden}
 .stat-btn{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
 .stat-alert b{color:var(--card-red)}
 .pill.ref-todo{background:var(--card-red)!important;color:#fff!important;border-color:var(--card-red)!important}
+.score-in{display:inline-block;margin-left:8px;padding:0 8px;border-radius:8px;background:var(--pitch);color:#fff;font-family:var(--display);font-weight:800;white-space:nowrap}
 /* tema azzurro */
 :root{--pitch:#1677D2;--pitch-deep:#0F5AA3;--ok:#1677D2;--bg:#F0F5FA;--surface-2:#E1EBF5;--line:#CEDBE8;--fg:#10202F;--muted:#566B80}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A121C;--surface:#121D2A;--surface-2:#1A2838;--line:#26384C;--fg:#E5EEF7;--muted:#8FA5BB;--pitch:#2088E8;--pitch-deep:#125FAD;--ok:#5AAEF5}}
@@ -764,9 +765,9 @@ function renderOggi(){
     <button class="stat stat-btn${daFare ? ' stat-alert' : ''}" id="stRef"><b class="num">${daFare}</b><span>Referti da inviare</span></button>`;
   $('#stArb').onclick = () => { filter = 'done'; seg($('#fUp'), $('#fDone'), false); location.hash = '#partite'; renderList(); };
   $('#stRef').onclick = () => openReferto(null);
-  const todo = refCandidates().filter(g => !g.referto).length;
+  const todo = refCandidates().length;
   $('#refHint').hidden = !todo;
-  $('#refHint').textContent = todo === 1 ? '1 gara giocata senza referto' : `${todo} gare giocate senza referto`;
+  $('#refHint').textContent = todo === 1 ? '1 referto da compilare' : `${todo} referti da compilare`;
 }
 $('#goReferto').onclick = () => openReferto(null);
 
@@ -781,13 +782,13 @@ function garaCard(g){
   const day = d ? `<b class="num">${d.getDate()}</b><span>${MESI[d.getMonth()].slice(0,3)}</span>` : `<b>?</b><span>data</span>`;
   const where = [g.ora, g.impianto || g.citta].filter(Boolean).map(esc).join(' · ');
   let st = '';
-  if(g.stato === 'disputata') st = `<span class="pill done">${g.risultato ? esc(g.risultato) : 'Disputata'}</span>`;
+  if(g.stato === 'disputata') st = g.risultato ? '' : `<span class="pill done">Disputata</span>`;
   else if(g.stato === 'rinviata') st = `<span class="pill rinv">Rinviata</span>`;
   else if(isPast(g) && !refDaFare(g)) st = `<span class="pill">Da completare</span>`;
   return `<li><button class="gara" data-id="${esc(g.id)}"><div class="day">${day}</div><div class="info">
-      <div class="teams">${esc(g.casa || '—')} – ${esc(g.ospite || '—')}</div>
+      <div class="teams">${esc(g.casa || '—')} – ${esc(g.ospite || '—')}${risOk(g)}</div>
       <div class="sub">${where || 'Orario e campo da definire'}</div>
-      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${g.referto ? '<span class="pill done">Referto ✓</span>' : refDaFare(g) ? '<span class="pill ref-todo">Referto da fare</span>' : ''}</div>
+      <div class="pills">${g.ruolo ? `<span class="pill ruolo">${esc(g.ruolo)}</span>` : ''}${g.categoria ? `<span class="pill">${esc(g.categoria)}</span>` : ''}${st}${refDaFare(g) ? '<span class="pill ref-todo">Referto da compilare</span>' : g.referto ? '<span class="pill done">Referto ✓</span>' : ''}</div>
     </div></button></li>`;
 }
 function bindCards(root){ root.querySelectorAll('.gara').forEach(b => b.onclick = () => openSheet(b.dataset.id)); }
@@ -1210,8 +1211,10 @@ const PROV = ['Ammonizione','Espulsione (allontanamento)'];
 let refId = null, draft = null;
 const oraNow = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
 const iniziata = g => !!g.data && (g.data < todayIso() || (g.data === todayIso() && (!g.ora || g.ora <= oraNow())));
-const refDaFare = g => iniziata(g) && !g.referto && g.stato !== 'rinviata' && !refNonMio(g) && !refInviato(g);
-const refCandidates = () => Store.gare.filter(g => iniziata(g) && g.stato !== 'rinviata' && !refNonMio(g)).sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+const refSbloccato = g => { const r = refInviato(g); return !!(r && r.sbloccato); };
+const refDaFare = g => iniziata(g) && g.stato !== 'rinviata' && !refNonMio(g) && (refSbloccato(g) || (!g.referto && !refInviato(g)));
+const refCandidates = () => Store.gare.filter(refDaFare).sort((a,b)=>sortKey(b).localeCompare(sortKey(a)));
+const risOk = g => g.risultato && !refDaFare(g) ? `<span class="score-in">${esc(g.risultato)}</span>` : '';
 function openReferto(id){ refId = id || null; draft = null; if(location.hash === '#referto') renderReferto(); else location.hash = '#referto'; }
 
 function renderReferto(){
@@ -1220,7 +1223,7 @@ function renderReferto(){
   const g = refId && Store.gare.find(x => x.id === refId);
   if(!g){
     const c = refCandidates();
-    if(!c.length){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessuna gara da refertare</h3><span>Il referto si compila dall’orario d’inizio della gara. Prima importa la designazione.</span><a class="btn btn-primary" href="#importa">+ Importa designazione</a></div>`; return; }
+    if(!c.length){ body.innerHTML = `<div class="empty-box"><span class="eic">${ICON_BALL}</span><h3>Nessun referto da compilare</h3><span>Qui trovi solo le gare iniziate che aspettano il referto. I referti già inviati li apri dalla scheda della gara in Partite.</span></div>`; return; }
     body.innerHTML = `<div class="eyebrow">Scegli la gara</div><ul class="list">${c.map(garaCard).join('')}</ul>`;
     body.querySelectorAll('.gara').forEach(b => b.onclick = () => openReferto(b.dataset.id));
     return;
@@ -1612,8 +1615,8 @@ function openSheet(id, edit=false){
   const spese = Store.spese.filter(s => s.garaId === id).reduce((a,s)=>a+toNum(s.importo),0);
   const body = edit ? formHTML(g, 'e', 'Modifica gara') : `
     <div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div>
-    <h2>${esc(g.casa || '—')} – ${esc(g.ospite || '—')}</h2>
-    <div class="pills">${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.stato==='disputata'?`<span class="pill done">${esc(g.risultato||'Disputata')}</span>`:g.stato==='rinviata'?'<span class="pill rinv">Rinviata</span>':''}</div>
+    <h2>${esc(g.casa || '—')} – ${esc(g.ospite || '—')}${risOk(g)}</h2>
+    <div class="pills">${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.stato==='disputata' && !g.risultato ? '<span class="pill done">Disputata</span>' : g.stato==='rinviata'?'<span class="pill rinv">Rinviata</span>':''}${refDaFare(g) ? '<span class="pill ref-todo">Referto da compilare</span>' : ''}</div>
     <dl class="kv">${row('Girone',g.girone)}${row('N. gara',g.numeroGara)}${row('Campo',g.impianto)}${row('Indirizzo',[g.indirizzo,g.citta].filter(Boolean).join(', '))}${row('Terna',g.colleghi)}${row('Osservatore',g.osservatore)}${row('Note',g.note)}
       ${g.stato==='disputata' ? row('Cartellini', `${toNum(g.gialli)} gialli · ${toNum(g.rossi)} rossi`) + row('Voto', g.voto) : ''}${spese ? row('Spese', eur(spese)) : ''}</dl>
     <div class="row">
@@ -1622,7 +1625,7 @@ function openSheet(id, edit=false){
     </div>
     <div class="row">
       <button class="btn btn-ghost" data-act="edit">${isPast(g) && g.stato !== 'disputata' ? 'Segna risultato e voto' : 'Modifica'}</button>
-      ${refNonMio(g) && !g.referto ? '' : iniziata(g) || g.referto ? `<button class="btn btn-ghost" data-act="ref">${refBloccato(g) || refNonMio(g) ? 'Vedi referto' : g.referto ? 'Apri referto' : 'Compila referto'}</button>` : g.data === todayIso() && g.ora ? `<span class="note" style="align-self:center">Referto dalle ${esc(g.ora)}</span>` : ''}
+      ${refNonMio(g) && !g.referto ? '' : iniziata(g) || g.referto ? `<button class="btn btn-ghost" data-act="ref">${refBloccato(g) || refNonMio(g) ? 'Vedi referto' : refSbloccato(g) ? 'Correggi referto' : g.referto ? 'Apri referto' : 'Compila referto'}</button>` : g.data === todayIso() && g.ora ? `<span class="note" style="align-self:center">Referto dalle ${esc(g.ora)}</span>` : ''}
       <button class="btn btn-ghost" data-act="spesa">Rimborso e km</button>
       <button class="btn btn-danger" data-act="del">Elimina</button>
     </div>
@@ -1740,7 +1743,7 @@ async function onUser(u){
   useRegistro(rid);
   // designazioni ricevute
   ACC.unsub.push(db.collection('anticipi').where('uid', '==', u.uid).onSnapshot(s => { ACC.anticipi = s.docs.map(d => ({id: d.id, ...d.data()})); renderAnticipi(); }, () => {}));
-  ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot({includeMetadataChanges: true}, s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; if(!s.metadata.fromCache) ACC.mieServer = true; syncAccettate(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
+  ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot({includeMetadataChanges: true}, s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; if(!s.metadata.fromCache) ACC.mieServer = true; syncAccettate(); render(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
   if(ACC.isAdmin){
     const fail = () => { DS.err = 'Non riesco a leggere le designazioni: controlla le regole di Firestore.'; renderAccount(); };
     const docs = s => s.docs.map(d => ({id: d.id, ...d.data()}));
@@ -2450,7 +2453,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113113110';
+const APP_BUILD = '20261113114654';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
