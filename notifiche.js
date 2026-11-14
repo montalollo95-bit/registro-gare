@@ -54,8 +54,18 @@ async function eliminazioni() {
   }
 }
 
+// tesserati delle squadre: i dati restano un anno dopo la scadenza del cartellino (30 giugno), poi si cancellano
+async function pulisciTesserati() {
+  const q = await db.collection('tesserati').where('cancellaDopo', '<', oraRoma().data).limit(400).get();
+  if (q.empty) return;
+  if (DRY) { console.log(`  [prova] cancellerei ${q.size} tesserati scaduti da più di un anno`); return; }
+  const b = db.batch(); q.forEach(d => b.delete(d.ref)); await b.commit();
+  console.log(`  ✕ cancellati ${q.size} tesserati scaduti da più di un anno`);
+}
+
 async function main() {
   await eliminazioni();
+  try { await pulisciTesserati(); } catch (e) { console.log('  ! pulizia tesserati non riuscita:', e.message); }
   const now = oraRoma(), adesso = minuti(now.data, now.ora);
   const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap, indSnap, elSnap] = await Promise.all([...['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi', 'indisponibilita'].map(c => db.collection(c).get()), db.collection('elenco').doc('arbitri').get()]);
   const stati = {}; statiSnap.forEach(s => { stati[s.id] = s.data(); });
