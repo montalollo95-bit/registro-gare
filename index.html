@@ -665,6 +665,17 @@ a[x-apple-data-detectors],a[href^="mailto:"].kv-plain{color:inherit!important;te
 :root[data-theme="light"] .warn-t{color:#A84E05}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .warn-t{color:#A84E05}}
 .imp-pos{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+
+/* transizioni accesso <-> app */
+@keyframes gateOut{from{opacity:1;transform:none;filter:none}to{opacity:0;transform:scale(1.06);filter:blur(6px)}}
+@keyframes gateIn{from{opacity:0}to{opacity:1}}
+@keyframes gateStep{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes appIn{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+#gate.gate-out{animation:gateOut .5s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none}
+#gate.gate-in-anim{animation:gateIn .45s ease-out both}
+#gate.gate-step .gate-in{animation:gateStep .38s cubic-bezier(.2,.8,.2,1) both}
+body.app-in .tabs,body.app-in #scroller{animation:appIn .6s cubic-bezier(.2,.8,.2,1) .12s both}
+@media (prefers-reduced-motion:reduce){#gate.gate-out,#gate.gate-in-anim,#gate.gate-step .gate-in,body.app-in .tabs,body.app-in #scroller{animation:none}}
 </style>
 </head><body>
 <div id="scroller">
@@ -2219,18 +2230,33 @@ function renderAccount(){
 }
 
 /* -- pagina di accesso: chi non è entrato vede solo questa -- */
+const NO_ANIM = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* la pagina di accesso sfuma via e l'app compare dolcemente */
+function gateEsci(g){
+  ACC.appVista = true;
+  if(NO_ANIM()){ g.remove(); return; }
+  if(g.classList.contains('gate-out')) return;
+  g.classList.remove('gate-in-anim', 'gate-step');
+  g.classList.add('gate-out');
+  document.body.classList.add('app-in');
+  g._t = setTimeout(() => { g.remove(); }, 520);
+  clearTimeout(gateEsci._t);
+  gateEsci._t = setTimeout(() => document.body.classList.remove('app-in'), 900);
+}
 function renderGate(){
   let g = $('#gate');
   if(!fbReady()){ if(g) g.remove(); return; }
   const fermo = !!(ACC.ready && ACC.user && !ACC.isAdmin && ACC.accesso && ACC.accesso !== 'attivo' && (ACC.profilo || ACC.accesso !== 'attesa'));
   const show = !ACC.ready || !ACC.user || !ACC.profilo || fermo;
   document.body.classList.toggle('gated', show);
-  if(!show){ if(g) g.remove(); return; }
-  if(!g){ g = document.createElement('div'); g.id = 'gate'; document.body.appendChild(g); }
+  if(!show){ if(g) gateEsci(g); return; }
+  if(g && g.classList.contains('gate-out')){ g.classList.remove('gate-out'); clearTimeout(g._t); }
+  if(!g){ g = document.createElement('div'); g.id = 'gate'; if(ACC.appVista) g.classList.add('gate-in-anim'); document.body.appendChild(g); }
   const intro = !ACC.user && !ACC.gateForm && !ACC.err;
   const was = g.dataset.st, st = !ACC.ready ? 'wait' : intro ? 'intro' : !ACC.user ? 'auth-' + ACC.mode + (ACC.err ? '-e' : '') : fermo ? 'acc-' + ACC.accesso : 'prof';
   if(was === st && st !== 'wait') return;
   g.dataset.st = st;
+  if(was && was !== 'wait' && !NO_ANIM()){ g.classList.remove('gate-step'); void g.offsetWidth; g.classList.add('gate-step'); }
   if(st === 'intro' || st === 'wait'){
     g.innerHTML = `<div class="gate-in gate-intro"><span class="gate-logo big logo-img" role="img" aria-label="Logo"></span>${st === 'wait' ? '<div class="status" style="align-self:center"><span class="spin"></span>Apro l’app…</div>' : '<button class="btn btn-primary gate-login" id="gLogin">LOGIN</button>'}</div>`;
     if(st === 'intro') $('#gLogin').onclick = () => { ACC.gateForm = true; renderGate(); };
@@ -3440,7 +3466,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114105128';
+const APP_BUILD = '20261114122820';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
