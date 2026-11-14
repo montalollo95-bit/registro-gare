@@ -547,6 +547,14 @@ body.lock .ro-flex{display:flex!important}
 .ds-sum b.num{font-size:22px}
 #dsBody .seg button{padding-left:4px;padding-right:4px}
 </style>
+<link rel="preload" as="image" href="sfondo-avvio.jpg">
+<style>
+#gate[data-st=wait],#gate[data-st=intro]{background:#081446 url(sfondo-avvio.jpg) center 30%/cover no-repeat}
+#gate[data-st=wait] .gate-logo,#gate[data-st=intro] .gate-logo{display:none}
+#gate[data-st=wait] .gate-in,#gate[data-st=intro] .gate-in{margin:auto auto 0;padding-bottom:5vh}
+#gate[data-st=wait] .status{background:rgba(6,12,40,.62);color:#fff;border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#gate[data-st=intro] .gate-login{align-self:center;width:auto;min-width:0;font-size:15px;letter-spacing:.14em;padding:10px 34px;border-radius:99px;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+</style>
 </head><body>
 <div id="scroller">
 
@@ -3154,7 +3162,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261113235055';
+const APP_BUILD = '20261114000911';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
