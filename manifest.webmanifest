@@ -1,1 +1,1 @@
-{"name": "AICS", "short_name": "AICS", "start_url": "./", "display": "standalone", "background_color": "#F0F5FA", "theme_color": "#1677D2", "icons": [{"src": "icon-aics.png", "sizes": "512x512", "type": "image/png"}]}
+{"name": "AICS", "short_name": "AICS", "start_url": "./", "display": "standalone", "background_color": "#081446", "theme_color": "#1677D2", "icons": [{"src": "icon-aics.png", "sizes": "512x512", "type": "image/png"}]}
