@@ -661,6 +661,10 @@ a[x-apple-data-detectors],a[href^="mailto:"].kv-plain{color:inherit!important;te
 .cnt.cnt-debt{background:#E8820C;color:#fff}
 :root[data-theme="light"] .debt-box b,:root[data-theme="light"] .debt-t,:root[data-theme="light"] .pay-row em.debt,:root[data-theme="light"] .pay-tot.debt b,:root[data-theme="light"] .pay-tot.debt span,:root[data-theme="light"] .debt-h{color:#A84E05!important}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .debt-box b,:root:not([data-theme="dark"]) .debt-t,:root:not([data-theme="dark"]) .pay-row em.debt,:root:not([data-theme="dark"]) .pay-tot.debt b,:root:not([data-theme="dark"]) .pay-tot.debt span,:root:not([data-theme="dark"]) .debt-h{color:#A84E05!important}}
+.warn-t{color:#E8820C;font-weight:600}
+:root[data-theme="light"] .warn-t{color:#A84E05}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .warn-t{color:#A84E05}}
+.imp-pos{display:flex;flex-direction:column;gap:10px;margin:12px 0}
 </style>
 </head><body>
 <div id="scroller">
@@ -849,7 +853,7 @@ $('#seasonHead').textContent = 'Questa stagione · ' + SEASON.label;
 function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent = msg; $('#toastRoot').replaceChildren(t); setTimeout(()=>t.remove(), 2600); }
 
 /* ---------- archivio: gare e spese nella stessa raccolta privata ---------- */
-const GF = ['desId','data','ora','categoria','girone','numeroGara','casa','ospite','impianto','indirizzo','citta','ruolo','colleghi','osservatore','note','stato','risultato','gialli','rossi','voto','referto','mapsUrl'];
+const GF = ['desId','lat','lng','data','ora','categoria','girone','numeroGara','casa','ospite','impianto','indirizzo','citta','ruolo','colleghi','osservatore','note','stato','risultato','gialli','rossi','voto','referto','mapsUrl'];
 const SF = ['data','tipo','importo','km','tariffa','consumo','prezzo','descrizione','garaId'];
 function clean(o, fields){ const r = {}; for(const f of fields){ let v = o[f]; if(v === undefined || v === null) v = ''; r[f] = typeof v === 'string' ? v.trim() : v; } r.createdAt = o.createdAt || Date.now(); return r; }
 
@@ -945,7 +949,7 @@ const Store = {
     await this.put('campi', {kind: 'campi', list, createdAt: Date.now()});
   },
   saveSpesa(s){ const d = clean(s, SF); d.importo = toNum(d.importo); d.km = toNum(d.km); d.tariffa = toNum(d.tariffa); d.consumo = toNum(d.consumo); d.prezzo = toNum(d.prezzo); d.kind = 'spesa'; return this.put(s.id || uid('s'), d); },
-  saveSettings(o){ return this.put('impostazioni', {partenza: o.partenza || '', auto: o.auto || '', carburante: o.carburante || '', consumo: toNum(o.consumo), prezzo: toNum(o.prezzo), tariffa: toNum(o.tariffa), kind: 'settings', createdAt: Date.now()}); },
+  saveSettings(o){ return this.put('impostazioni', {partenza: o.partenza || '', pLat: +o.pLat || 0, pLng: +o.pLng || 0, auto: o.auto || '', carburante: o.carburante || '', consumo: toNum(o.consumo), prezzo: toNum(o.prezzo), tariffa: toNum(o.tariffa), kind: 'settings', createdAt: Date.now()}); },
   async remove(id){
     if(this.mode === 'db'){ await this.col.doc(id).delete(); }
     else if(this.mode === 'fb'){ this.col.doc(id).delete().catch(() => toast('Eliminazione online non riuscita.')); }
@@ -1160,7 +1164,7 @@ $('#bkFile').addEventListener('change', async () => {
 $('#exportAll').onclick = () => saveIcs(Store.gare.filter(g => !isPast(g)), 'gare-in-programma.ics');
 
 /* ---------- SPESE ---------- */
-const TIPI = {carburante:'Carburante', rimborso:'Rimborso km', diaria:'Diaria', altro:'Altro'};
+const TIPI = {carburante:'Carburante', rimborso:'Rimborso', diaria:'Diaria', altro:'Altro'};
 let sMode = 'mese', sMonth = new Date(); sMonth.setDate(1); let sSeason = SEASON.y;
 let catSel = null;
 $('#sMese').onclick = () => { sMode='mese'; catSel = null; seg($('#sMese'),$('#sStag'),true); renderSpese(); };
@@ -1297,7 +1301,6 @@ function openSpesaForm(s){
   location.hash = '#spese';
   const isNew = !s.id, S = Store.settings;
   if(isNew){
-    if(s.tipo === 'rimborso' && !s.tariffa) s.tariffa = S.tariffa || lastTariffa();
     if(s.tipo === 'carburante') s.consumo = s.consumo || S.consumo || '';
     if(s.tipo === 'rimborso' || s.tipo === 'carburante') s.prezzo = s.prezzo || lastPrezzo() || '';
   }
@@ -1311,7 +1314,7 @@ function openSpesaForm(s){
     <div class="field full"><label for="sp-gara">Gara collegata</label><select id="sp-gara" data-f="garaId"><option value="">Nessuna</option>${gare.map(g=>`<option value="${esc(g.id)}" ${s.garaId===g.id?'selected':''}>${esc(fmtShort(g.data))} · ${esc(g.casa)} – ${esc(g.ospite)}</option>`).join('')}</select></div>
     <div class="field full trip"><div class="row"><button type="button" class="btn btn-primary sm" id="sp-calc">Calcola km dal campo</button><a class="btn btn-ghost sm" id="sp-maps" target="_blank" rel="noopener" hidden>Verifica su Maps</a></div><span class="note" id="sp-msg"></span></div>
     <div class="field full trip"><label for="sp-km">Km andata e ritorno</label><input id="sp-km" data-f="km" type="number" min="0" inputmode="decimal" value="${esc(s.km || '')}"></div>
-    <div class="field full rimb"><label for="sp-tariffa">Rimborso € al km</label><input id="sp-tariffa" data-f="tariffa" type="text" inputmode="decimal" placeholder="0,30" value="${esc(dec(s.tariffa))}"></div>
+    <input type="hidden" id="sp-tariffa" data-f="tariffa" value="">
     <div class="field carb"><label for="sp-consumo">Consumo km/l</label><input id="sp-consumo" data-f="consumo" type="text" inputmode="decimal" placeholder="15" value="${esc(dec(s.consumo))}"></div>
     <div class="field fuelp"><label for="sp-prezzo">Benzina €/l quel giorno</label><input id="sp-prezzo" data-f="prezzo" type="text" inputmode="decimal" placeholder="1,85" value="${esc(dec(s.prezzo))}"></div>
     <div class="field full"><label for="sp-importo">Importo €</label><input id="sp-importo" data-f="importo" type="text" inputmode="decimal" value="${esc(dec(s.importo))}"></div>
@@ -1348,7 +1351,7 @@ function openSpesaForm(s){
   };
   imp.addEventListener('input', showFuel);
   const dest = () => { const g = Store.gare.find(x => x.id === garaSel.value); return g ? [g.impianto, g.indirizzo, g.citta].filter(Boolean).join(', ') : ''; };
-  const updMaps = () => { const d = dest(); maps.hidden = !(d && Store.settings.partenza); if(!maps.hidden) maps.href = 'https://www.google.com/maps/dir/?' + new URLSearchParams({api:'1', origin: Store.settings.partenza, destination: d, travelmode:'driving'}); };
+  const updMaps = () => { const S = Store.settings, g = Store.gare.find(x => x.id === garaSel.value), d = g && toNum(g.lat) && toNum(g.lng) ? g.lat + ',' + g.lng : dest(), o = toNum(S.pLat) && toNum(S.pLng) ? S.pLat + ',' + S.pLng : casaArbitro(); maps.hidden = !(d && o); if(!maps.hidden) maps.href = 'https://www.google.com/maps/dir/?' + new URLSearchParams({api:'1', origin: o, destination: d, travelmode:'driving'}); };
   const sync = () => {
     const t = tipo.value;
     f.querySelectorAll('.trip').forEach(el => el.hidden = !(t === 'rimborso' || t === 'carburante'));
@@ -1357,7 +1360,6 @@ function openSpesaForm(s){
     f.querySelectorAll('.fuelp').forEach(el => el.hidden = !(t === 'rimborso' || t === 'carburante'));
     if(t === 'carburante' && !cons.value && Store.settings.consumo) cons.value = dec(Store.settings.consumo);
     if((t === 'rimborso' || t === 'carburante') && !prz.value && isNew){ const lp = lastPrezzo(); if(lp) prz.value = dec(lp); }
-    if(t === 'rimborso' && !tar.value){ const tt = Store.settings.tariffa || lastTariffa(); if(tt) tar.value = dec(tt); }
   };
   tipo.onchange = () => { sync(); calc(); }; [km, tar, cons, prz].forEach(el => el.oninput = calc); sync(); updMaps(); showFuel();
   garaSel.onchange = () => { const g = Store.gare.find(x => x.id === garaSel.value); if(g && g.data) q('sp-data').value = g.data; updMaps(); msg.textContent = ''; if(isNew) km.value = ''; autoKnown(); };
@@ -1367,20 +1369,15 @@ function openSpesaForm(s){
     const known = kmNoto(Store.gare.find(x => x.id === garaSel.value), s.id);
     if(known){ useKnown(known); return; }
     const S = Store.settings, d = dest();
-    if(!S.partenza){ msg.textContent = 'Prima imposta l’indirizzo di partenza nel riquadro “Viaggio” qui sopra.'; return; }
+    if(!haCasa()){ msg.textContent = 'Prima scrivi il tuo indirizzo di casa nel riquadro “Viaggio” qui sopra.'; return; }
     if(!garaSel.value){ msg.textContent = 'Scegli la gara collegata per sapere dov’è il campo.'; return; }
     if(!d){ msg.textContent = 'Questa gara non ha campo né città: aggiungili nella scheda della gara.'; return; }
-    if(!sample){ msg.innerHTML = `Apri il <a href="${esc('https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=' + encodeURIComponent(S.partenza) + '&destination=' + encodeURIComponent(d))}" target="_blank" rel="noopener">percorso su Google Maps</a> e scrivi i km di andata e ritorno.`; return; }
     calcBtn.disabled = true; msg.innerHTML = '<span class="spin" style="display:inline-block;vertical-align:-4px"></span> Calcolo il percorso…';
     try{
-      const r = await sample.json(`Stima la distanza stradale in auto in Italia (percorso più usato, non in linea d'aria) da: "${S.partenza}" a: "${d}". Se il nome del campo non basta, usa indirizzo e città. Rispondi SOLO con JSON: {"km": numero di km della sola andata arrotondato all'intero, "minuti": durata stimata in minuti}`, {modelTier: 'default'});
-      const one = Math.round(toNum(r && r.km));
-      if(!one) throw new Error('nokm');
-      km.value = one * 2; calc();
-      msg.textContent = `Stima: circa ${one} km a tratta${r.minuti ? `, ${Math.round(toNum(r.minuti))} minuti` : ''}. Andata e ritorno: ${one*2} km. Se conosci i km giusti scrivili tu: quando salvi, per questo campo userò i tuoi.`;
-    }catch(e){
-      msg.textContent = e && e.code === 'not_granted' ? 'Serve il tuo permesso per il calcolo: riprova e consenti la richiesta.' : e && e.code === 'rate_limited' ? 'Troppe richieste: riprova tra qualche minuto.' : 'Non sono riuscito a stimare la distanza. Inserisci i km a mano o controlla su Maps.';
-    }
+      const r = await kmGara(Store.gare.find(x => x.id === garaSel.value));
+      km.value = r.km * 2; calc();
+      msg.textContent = `Percorso stradale: ${r.km} km a tratta, circa ${r.min} minuti. Andata e ritorno: ${r.km * 2} km.${r.approx ? ' Il campo l’ho trovato solo dalla città: controlla i km.' : ''} Se conosci i km giusti scrivili tu: per questo campo userò i tuoi.`;
+    }catch(e){ msg.textContent = kmErr(e); }
     calcBtn.disabled = false;
   };
   f.querySelector('[data-x]').onclick = () => box.innerHTML = '';
@@ -1399,8 +1396,111 @@ function openSpesaForm(s){
   });
   box.scrollIntoView({behavior:'smooth', block:'start'});
   if(isNew) autoKnown();
-  if(isNew && s.autoCalc && !km.value && Store.settings.partenza && dest()) calcBtn.click();
+  if(!km.value && garaSel.value && (tipo.value === 'rimborso' || tipo.value === 'carburante') && haCasa() && dest()) calcBtn.click();
 }
+
+/* ===== percorso: posizioni e km stradali con OpenStreetMap (gratis, senza chiavi) ===== */
+const CONSUMO_TIPICO = {'Benzina': 15, 'Diesel': 18, 'GPL': 12, 'Metano': 20, 'Ibrida benzina': 20, 'Elettrica': 6.5};
+const unitaCarb = c => c === 'Metano' ? 'kg' : c === 'Elettrica' ? 'kWh' : 'l';
+const isLinkMaps = t => /^\s*https?:\/\//i.test(String(t || ''));
+const linkCorto = t => /goo\.gl|maps\.app/i.test(String(t || ''));
+function coordDaLink(t){
+  let s = String(t || ''); try{ s = decodeURIComponent(s); }catch(e){}
+  const ok = (a, b) => { const lat = +a, lng = +b; return isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && (lat || lng) ? {lat, lng} : null; };
+  const esatti = [...s.matchAll(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/g)];
+  if(esatti.length){ const m = esatti[esatti.length - 1]; const r = ok(m[1], m[2]); if(r) return r; }
+  const pats = [/[?&](?:q|ll|query|destination|daddr|center|sll)=(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/, /\/(?:place|search|dir\/[^/]*)\/(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/, /@(-?\d+\.\d+),(-?\d+\.\d+)/, /^\s*(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})\s*$/];
+  for(const p of pats){ const m = s.match(p); if(m){ const r = ok(m[1], m[2]); if(r) return r; } }
+  return null;
+}
+/* testo da cercare sulla mappa: l'indirizzo scritto, o quello dentro un link lungo di Google Maps */
+function testoDaLink(t){
+  const s = String(t || '').trim();
+  if(!isLinkMaps(s)) return s;
+  if(linkCorto(s)) return '';
+  try{
+    const u = new URL(s), q = u.searchParams.get('q') || u.searchParams.get('query') || u.searchParams.get('destination') || u.searchParams.get('daddr');
+    if(q && !coordDaLink(q)) return q;
+    const m = u.pathname.match(/\/place\/([^/]+)/); if(m) return decodeURIComponent(m[1]).replace(/\+/g, ' ');
+  }catch(e){}
+  return '';
+}
+const GEO_CACHE = new Map();
+async function geocodifica(q){
+  q = String(q || '').replace(/\s+/g, ' ').trim(); if(q.length < 3) return null;
+  const k = q.toLowerCase(); if(GEO_CACHE.has(k)) return GEO_CACHE.get(k);
+  let r = null;
+  try{
+    const j = await (await fetch('https://nominatim.openstreetmap.org/search?' + new URLSearchParams({q, format: 'jsonv2', limit: '1', countrycodes: 'it', 'accept-language': 'it', viewbox: '9.9,45.15,11.2,44.15'}))).json();
+    if(j && j[0]) r = {lat: +j[0].lat, lng: +j[0].lon};
+  }catch(e){}
+  if(!r) try{
+    const j = await (await fetch('https://photon.komoot.io/api/?' + new URLSearchParams({q, limit: '1', lat: '44.7', lon: '10.63'}))).json();
+    const f = j && j.features && j.features[0];
+    if(f && (!f.properties || !f.properties.countrycode || f.properties.countrycode === 'IT')) r = {lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0]};
+  }catch(e){}
+  if(r) GEO_CACHE.set(k, r);
+  return r;
+}
+async function indirizzoDa(p){
+  try{
+    const j = await (await fetch('https://nominatim.openstreetmap.org/reverse?' + new URLSearchParams({lat: p.lat, lon: p.lng, format: 'jsonv2', zoom: '18', 'accept-language': 'it'}))).json();
+    const a = (j && j.address) || {}, via = [a.road || a.pedestrian || a.square, a.house_number].filter(Boolean).join(' '), citta = a.city || a.town || a.village || a.hamlet || a.municipality || '';
+    return [via, citta].filter(Boolean).join(', ') || '';
+  }catch(e){ return ''; }
+}
+function miaPosizione(){
+  return new Promise((res, rej) => {
+    if(!navigator.geolocation){ rej(new Error('nogps')); return; }
+    navigator.geolocation.getCurrentPosition(p => res({lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6), acc: Math.round(p.coords.accuracy || 0)}), e => rej(new Error(e && e.code === 1 ? 'negato' : 'nogps')), {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+  });
+}
+const gpsErr = e => e && e.message === 'negato' ? 'Il telefono non dà il permesso per la posizione: attivalo nelle impostazioni (Privacy → Localizzazione → Safari/sito) e riprova.' : 'Non riesco a leggere la posizione GPS. Riprova all’aperto o scrivi l’indirizzo.';
+const PERC_CACHE = new Map();
+async function percorsoKm(a, b){
+  const k = [a.lat, a.lng, b.lat, b.lng].map(x => (+x).toFixed(5)).join(',');
+  if(PERC_CACHE.has(k)) return PERC_CACHE.get(k);
+  const j = await (await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`)).json();
+  if(!j || j.code !== 'Ok' || !j.routes || !j.routes[0]) throw new Error('rete');
+  const r = {km: Math.max(1, Math.round(j.routes[0].distance / 1000)), min: Math.max(1, Math.round(j.routes[0].duration / 60))};
+  PERC_CACHE.set(k, r); return r;
+}
+/* casa dell'arbitro: quella scritta in "Viaggio", altrimenti l'indirizzo del profilo */
+function casaProfilo(){
+  const pr = typeof ACC !== 'undefined' && ACC && ACC.profilo;
+  return pr && pr.indirizzo ? [pr.indirizzo, [pr.cap, pr.citta].filter(Boolean).join(' ')].filter(Boolean).join(', ') : '';
+}
+const casaArbitro = () => Store.settings.partenza || casaProfilo();
+const haCasa = () => !!(casaArbitro() || toNum(Store.settings.pLat));
+async function posPartenza(){
+  const S = Store.settings;
+  if(toNum(S.pLat) && toNum(S.pLng)) return {lat: +S.pLat, lng: +S.pLng};
+  const t = casaArbitro();
+  return coordDaLink(t) || await geocodifica(testoDaLink(t));
+}
+const desDiGara = g => g && g.desId && typeof ACC !== 'undefined' && ACC && ACC.mie ? ACC.mie.find(x => x.id === g.desId) : null;
+async function posCampo(g){
+  if(!g) return null;
+  if(toNum(g.lat) && toNum(g.lng)) return {lat: +g.lat, lng: +g.lng};
+  const d = desDiGara(g);
+  if(d && toNum(d.lat) && toNum(d.lng)) return {lat: +d.lat, lng: +d.lng};
+  const c = coordDaLink(g.mapsUrl) || (d && coordDaLink(d.mapsUrl)); if(c) return c;
+  if(g.indirizzo){ const p = await geocodifica([g.indirizzo, g.citta].filter(Boolean).join(', ')); if(p) return p; }
+  const t = testoDaLink(g.mapsUrl); if(t && isLinkMaps(g.mapsUrl)){ const p = await geocodifica(t); if(p) return p; }
+  if(g.impianto){ const p = await geocodifica([g.impianto, g.citta].filter(Boolean).join(', ')); if(p) return p; }
+  if(g.citta){ const p = await geocodifica(g.citta); if(p) return {...p, approx: true}; }
+  return null;
+}
+/* km della sola andata dalla partenza dell'arbitro al campo della gara */
+async function kmGara(g){
+  const a = await posPartenza(); if(!a) throw new Error('partenza');
+  const b = await posCampo(g); if(!b) throw new Error('campo');
+  const r = await percorsoKm(a, b);
+  return {...r, approx: !!b.approx};
+}
+const kmErr = e => e && e.message === 'partenza' ? 'Non trovo il tuo indirizzo di casa sulla mappa: correggilo nel riquadro “Viaggio” (o tocca 📍 quando sei a casa).'
+  : e && e.message === 'campo' ? 'Non trovo il campo sulla mappa: scrivi i km a mano (puoi controllarli con «Verifica su Maps»).'
+  : 'Calcolo non riuscito (serve internet): riprova o scrivi i km a mano.';
 
 /* impostazioni viaggio */
 let editingTravel = false;
@@ -1410,48 +1510,64 @@ function renderTravel(){
   box.hidden = sMode !== 'mese';
   if(editingTravel) return;
   if(Store.mode === 'loading'){ box.innerHTML = ''; return; }
-  const dec = v => v ? String(v).replace('.',',') : '—';
+  const dec = v => v ? String(v).replace('.',',') : '—', u = unitaCarb(S.carburante);
   if(!S.partenza && !S.consumo){
-    box.innerHTML = `<div class="ref-sec"><h3>Costo della benzina</h3><p class="note" style="margin:0;font-size:15px">Imposta da dove parti e che auto usi: calcolo il percorso fino ai campi nuovi e quanto spendi di benzina.</p><button class="btn btn-primary" id="tvEdit">Imposta partenza e auto</button></div>`;
+    box.innerHTML = `<div class="ref-sec"><h3>Costo della benzina</h3><p class="note" style="margin:0;font-size:15px">Scrivi una volta sola il tuo indirizzo di casa e l’alimentazione dell’auto: per ogni gara calcolo da solo i km fino al campo e quanto spendi di benzina.</p><button class="btn btn-primary" id="tvEdit">Imposta partenza e auto</button></div>`;
   } else {
+    const trovata = toNum(S.pLat) && toNum(S.pLng);
     box.innerHTML = `<div class="ref-sec"><header><h3>Viaggio</h3><button class="btn btn-ghost sm" id="tvEdit">Modifica</button></header>
-      <dl class="kv" style="border:0;padding:0;background:transparent">${S.partenza ? `<dt>Partenza</dt><dd>${esc(S.partenza)}</dd>` : ''}${S.auto ? `<dt>Auto</dt><dd>${esc(S.auto)}${S.carburante ? ' · ' + esc(S.carburante) : ''}</dd>` : ''}<dt>Consumo</dt><dd>${dec(S.consumo)} km/l</dd><dt>Carburante</dt><dd>${dec(S.prezzo)} €/l</dd>${S.tariffa ? `<dt>Rimborso</dt><dd>${dec(S.tariffa)} €/km</dd>` : ''}</dl></div>`;
+      <dl class="kv" style="border:0;padding:0;background:transparent">${casaArbitro() ? `<dt>Casa</dt><dd>${esc(isLinkMaps(casaArbitro()) ? 'Link di Google Maps' : casaArbitro())}${trovata || !S.partenza ? '' : '<br><span class="warn-t" style="font-size:14px">Non trovata sulla mappa: tocca Modifica</span>'}</dd>` : ''}${S.carburante ? `<dt>Auto</dt><dd>${esc(S.carburante)}</dd>` : ''}<dt>Consumo</dt><dd>${dec(S.consumo)} km/${u}</dd><dt>Carburante</dt><dd>${dec(S.prezzo)} €/${u}</dd></dl></div>`;
   }
   $('#tvEdit').onclick = editTravel;
 }
 function editTravel(){
   editingTravel = true;
   const S = Store.settings, box = $('#travelBox'), dec = v => v ? String(v).replace('.',',') : '';
+  const carb0 = S.carburante || 'Benzina', cons0 = S.consumo ? dec(S.consumo) : dec(CONSUMO_TIPICO[carb0]);
   box.innerHTML = `<form class="form" novalidate>
     <h3>Partenza e auto</h3>
-    <div class="field full"><label for="tv-partenza">Indirizzo di partenza</label><input id="tv-partenza" value="${esc(S.partenza)}" placeholder="Via, numero civico, città" autocomplete="street-address"></div>
-    <div class="field full"><label for="tv-auto">Auto (marca e modello)</label><input id="tv-auto" value="${esc(S.auto)}" placeholder="Es. Fiat Panda 1.2"></div>
-    <div class="field full"><label for="tv-carb">Alimentazione</label><select id="tv-carb">${CARB.map(c=>`<option ${c===S.carburante?'selected':''}>${c}</option>`).join('')}</select></div>
-    <div class="field"><label for="tv-consumo">Consumo km/l</label><input id="tv-consumo" inputmode="decimal" value="${esc(dec(S.consumo))}" placeholder="15"></div>
-    <div class="field"><label for="tv-prezzo">Prezzo €/l</label><input id="tv-prezzo" inputmode="decimal" value="${esc(dec(S.prezzo))}" placeholder="1,85"></div>
-    <div class="field full"><button type="button" class="btn btn-ghost sm" id="tv-stima">Stima il consumo dal modello</button><span class="note" id="tv-msg"></span></div>
-    <div class="field full"><label for="tv-tariffa">Rimborso € al km (se ti spetta)</label><input id="tv-tariffa" inputmode="decimal" value="${esc(dec(S.tariffa))}" placeholder="Facoltativo"></div>
-    <p class="note" style="grid-column:1/-1;margin:0">Il prezzo della benzina lo segni in ogni rimborso: per i nuovi parto da quello dell'ultimo inserito. Quello qui sopra serve solo per i rimborsi che non ce l'hanno. L'indirizzo resta salvato solo nel tuo registro.</p>
+    <div class="field full"><label for="tv-partenza">Indirizzo di casa</label><input id="tv-partenza" value="${esc(S.partenza || casaProfilo())}" placeholder="Via, civico, città, oppure link di Google Maps" autocomplete="street-address"></div>
+    <div class="field full"><button type="button" class="btn btn-ghost sm" id="tv-gps">📍 Sono a casa: usa la mia posizione</button><span class="note" id="tv-pos">${toNum(S.pLat) ? '✓ Casa trovata sulla mappa. ' : ''}Si imposta una volta sola: scrivi l’indirizzo, incolla il link di Google Maps di casa tua, oppure tocca 📍 quando sei a casa. Vale per tutte le gare.</span></div>
+    <div class="field full"><label for="tv-carb">Alimentazione dell’auto</label><select id="tv-carb">${CARB.map(c=>`<option ${c===carb0?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="field"><label for="tv-consumo" id="tv-cl">Consumo km/${unitaCarb(carb0)}</label><input id="tv-consumo" inputmode="decimal" value="${esc(cons0)}" placeholder="15"></div>
+    <div class="field"><label for="tv-prezzo" id="tv-pl">Prezzo €/${unitaCarb(carb0)}</label><input id="tv-prezzo" inputmode="decimal" value="${esc(dec(S.prezzo))}" placeholder="1,85"></div>
+    <p class="note" style="grid-column:1/-1;margin:0">Per ogni gara calcolo da solo i km da casa al campo sul percorso stradale. Il consumo è un valore medio per quell’alimentazione: correggilo se conosci quello della tua auto. Il prezzo della benzina lo segni in ogni rimborso; quello qui sopra serve solo per i rimborsi che non ce l’hanno. L’indirizzo resta salvato solo nel tuo registro.</p>
     <div class="actions row"><button type="submit" class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
   </form>`;
-  const f = box.querySelector('form'), v = id => f.querySelector('#'+id).value.trim();
+  const f = box.querySelector('form'), q = id => f.querySelector('#' + id), v = id => q(id).value.trim(), pos = q('tv-pos');
+  let gps = null, gpsTxt = null, carbPrima = carb0;
   f.querySelector('[data-x]').onclick = () => { editingTravel = false; renderTravel(); };
-  f.querySelector('#tv-stima').onclick = async () => {
-    const m = f.querySelector('#tv-msg'), auto = v('tv-auto');
-    if(!auto){ m.textContent = ' Scrivi prima il modello dell’auto.'; return; }
-    if(!sample){ m.textContent = ' Scrivi il consumo a mano (km con un litro).'; return; }
-    m.textContent = ' Cerco il consumo medio…';
+  q('tv-carb').onchange = () => {
+    const c = v('tv-carb'), u = unitaCarb(c), cons = q('tv-consumo');
+    if(!cons.value || toNum(cons.value) === CONSUMO_TIPICO[carbPrima]) cons.value = dec(CONSUMO_TIPICO[c]);
+    q('tv-cl').textContent = `Consumo km/${u}`; q('tv-pl').textContent = `Prezzo €/${u}`; carbPrima = c;
+  };
+  q('tv-gps').onclick = async () => {
+    const b = q('tv-gps'); b.disabled = true; pos.innerHTML = '<span class="spin" style="display:inline-block;vertical-align:-4px"></span> Leggo la posizione…';
     try{
-      const r = await sample.json(`Qual è il consumo medio reale nel ciclo misto dell'auto "${auto}" con alimentazione ${v('tv-carb')}? Rispondi SOLO con JSON: {"km_per_unita": numero con una cifra decimale (km per litro; km per kg se metano; km per kWh se elettrica)}`, {modelTier: 'default'});
-      const n = toNum(r && r.km_per_unita); if(!n) throw 0;
-      f.querySelector('#tv-consumo').value = String(n).replace('.',','); m.textContent = ' Stima inserita: correggila se conosci il consumo reale.';
-    }catch(e){ m.textContent = ' Non sono riuscito a stimarlo: inseriscilo a mano.'; }
+      const p = await miaPosizione(); gps = p;
+      const a = await indirizzoDa(p);
+      q('tv-partenza').value = gpsTxt = a || `Posizione GPS (${p.lat.toFixed(4)}, ${p.lng.toFixed(4)})`;
+      pos.textContent = `✓ Posizione presa${p.acc ? ` (precisione circa ${p.acc} m)` : ''}. Tocca Salva.`;
+    }catch(e){ pos.textContent = gpsErr(e); }
+    b.disabled = false;
   };
   f.addEventListener('submit', async ev => {
     ev.preventDefault();
-    try{ await Store.saveSettings({partenza: v('tv-partenza'), auto: v('tv-auto'), carburante: v('tv-carb'), consumo: v('tv-consumo'), prezzo: v('tv-prezzo'), tariffa: v('tv-tariffa')});
-      editingTravel = false; renderTravel(); toast('Impostazioni salvate'); }
-    catch(e){ toast('Salvataggio non riuscito. Riprova.'); }
+    const btn = f.querySelector('[type=submit]'), txt = v('tv-partenza');
+    let p = null, partenza = txt;
+    if(gps && txt === gpsTxt) p = gps;
+    else if(txt && txt === S.partenza && toNum(S.pLat) && toNum(S.pLng)) p = {lat: +S.pLat, lng: +S.pLng};
+    else if(txt){
+      btn.disabled = true; pos.innerHTML = '<span class="spin" style="display:inline-block;vertical-align:-4px"></span> Cerco l’indirizzo sulla mappa…';
+      p = coordDaLink(txt) || await geocodifica(testoDaLink(txt));
+      if(p && isLinkMaps(txt)){ const a = await indirizzoDa(p); if(a) partenza = a; }
+      btn.disabled = false;
+    }
+    try{ await Store.saveSettings({partenza, pLat: p ? p.lat : 0, pLng: p ? p.lng : 0, auto: '', carburante: v('tv-carb'), consumo: v('tv-consumo'), prezzo: v('tv-prezzo'), tariffa: 0});
+      editingTravel = false; renderTravel();
+      toast(!txt || p ? 'Impostazioni salvate' : linkCorto(txt) ? 'Salvato, ma il link corto di Google non dice dov’è: scrivi l’indirizzo o tocca 📍 quando sei a casa' : 'Salvato, ma non trovo l’indirizzo sulla mappa: controllalo o tocca 📍 quando sei a casa');
+    }catch(e){ toast('Salvataggio non riuscito. Riprova.'); }
   });
 }
 
@@ -2429,7 +2545,7 @@ async function rispondi(id, stato, motivo){
     else { const g = Store.gare.find(x => x.desId === id); if(g){ Store.remove(g.id); Store.spese.filter(s => s.garaId === g.id).forEach(s => Store.remove(s.id)); } toast('Gara rifiutata'); }
   }catch(e){ toast('Non sono riuscito a salvare la risposta. Riprova.'); }
 }
-const DES_F = ['data', 'ora', 'categoria', 'girone', 'numeroGara', 'casa', 'ospite', 'impianto', 'indirizzo', 'citta', 'mapsUrl'];
+const DES_F = ['data', 'ora', 'categoria', 'girone', 'numeroGara', 'casa', 'ospite', 'impianto', 'indirizzo', 'citta', 'mapsUrl', 'lat', 'lng'];
 function garaDaDes(d){
   const uid = ACC.user.uid, mine = (d.ufficiali || []).find(u => u.uid === uid) || {};
   const o = {}; DES_F.forEach(k => o[k] = d[k] || '');
@@ -2445,6 +2561,7 @@ function mettiInRegistro(d){
   if(!Store.spese.some(s => s.garaId === id)){
     const kn = kmNoto(g);
     Store.saveSpesa({id: 'sd-' + d.id, data: g.data, tipo: 'rimborso', importo: toNum(d.rimborso), km: kn ? kn.km : 0, garaId: id, prezzo: lastPrezzo(), descrizione: 'Rimborso designazione'});
+    if(!kn && haCasa()) kmGara(g).then(r => { const sp = Store.spese.find(x => x.id === 'sd-' + d.id); if(sp && !toNum(sp.km)) Store.saveSpesa({...sp, km: r.km * 2}); }).catch(() => {});
   }
 }
 /* referto delle gare designate: lo compila solo l'arbitro designato; inviato = bloccato finché un designatore non lo sblocca */
@@ -3017,11 +3134,40 @@ function renderDsSquadre(){
 }
 function renderDsImpianti(){
   const el = $('#dsList'), list = DS.impianti.slice().sort(byName);
+  const senzaPos = list.filter(c => !(toNum(c.lat) && toNum(c.lng)));
   el.innerHTML = `<button class="btn btn-primary btn-block" id="impAdd">+ Nuovo campo</button>
-    ${list.length ? `<ul class="list">${list.map(c => `<li class="ds-arb"><div><b>${esc(c.nome)}</b><span>${esc([c.indirizzo, c.citta].filter(Boolean).join(', '))}</span>${c.note ? `<span>${esc(c.note)}</span>` : ''}</div><button class="btn btn-ghost sm" data-imp="${esc(c.id)}">Modifica</button></li>`).join('')}</ul>`
+    ${senzaPos.length ? `<div class="ref-sec imp-pos"><span class="note" style="margin:0">📍 ${senzaPos.length === 1 ? '1 campo non ha' : senzaPos.length + ' campi non hanno'} ancora la posizione sulla mappa: serve agli arbitri per calcolare i km da soli.</span><button class="btn btn-ghost sm" id="impTrova">Trova le posizioni dagli indirizzi</button><span class="note" id="impTrovaMsg" style="margin:0"></span></div>` : ''}
+    ${list.length ? `<ul class="list">${list.map(c => `<li class="ds-arb"><div><b>${esc(c.nome)}</b><span>${esc([c.indirizzo, c.citta].filter(Boolean).join(', '))}</span>${c.note ? `<span>${esc(c.note)}</span>` : ''}${toNum(c.lat) && toNum(c.lng) ? '' : '<span class="warn-t">📍 posizione mancante</span>'}</div><button class="btn btn-ghost sm" data-imp="${esc(c.id)}">Modifica</button></li>`).join('')}</ul>`
       : '<div class="empty-box"><h3>Nessun campo</h3><span>Aggiungi i campi con indirizzo e link di Google Maps: quando designi li scegli dall’elenco e si compila tutto da solo.</span></div>'}`;
   $('#impAdd').onclick = () => openImp({});
+  if($('#impTrova')) $('#impTrova').onclick = async () => {
+    const b = $('#impTrova'), m = $('#impTrovaMsg'), col = firebase.firestore().collection('impianti'); b.disabled = true;
+    let ok = 0, no = [];
+    for(const [i, c] of senzaPos.entries()){
+      m.textContent = `Cerco ${i + 1} di ${senzaPos.length}: ${c.nome}…`;
+      const p = await posImpianto(c);
+      if(p){ try{ await col.doc(c.id).set({lat: p.lat, lng: p.lng}, {merge: true}); await posInDesignazioni(c, p); ok++; }catch(e){ no.push(c.nome); } } else no.push(c.nome);
+      await new Promise(r => setTimeout(r, 1100));
+    }
+    toast(`Posizioni trovate: ${ok} su ${senzaPos.length}`);
+    if($('#impTrovaMsg')) $('#impTrovaMsg').textContent = no.length ? `Non trovati: ${no.join(', ')}. Aprili e usa «📍 Sono al campo» quando sei lì, oppure correggi l’indirizzo.` : '';
+    if($('#impTrova')) $('#impTrova').disabled = false;
+  };
   el.querySelectorAll('[data-imp]').forEach(b => b.onclick = () => openImp(DS.impianti.find(x => x.id === b.dataset.imp) || {}));
+}
+/* posizione di un campo: dal link lungo di Maps, poi dall'indirizzo, poi dal nome */
+async function posImpianto(c){
+  return coordDaLink(c.mapsUrl)
+    || (c.indirizzo && await geocodifica([c.indirizzo, c.citta].filter(Boolean).join(', ')))
+    || (isLinkMaps(c.mapsUrl) && testoDaLink(c.mapsUrl) && await geocodifica(testoDaLink(c.mapsUrl)))
+    || (c.nome && await geocodifica([c.nome, c.citta].filter(Boolean).join(', ')))
+    || null;
+}
+/* le gare da giocare in quel campo prendono la posizione nuova */
+async function posInDesignazioni(c, p){
+  const oggi = new Date().toISOString().slice(0, 10), col = firebase.firestore().collection('designazioni');
+  const da = (DS.gare || []).filter(d => (d.impianto || '').toUpperCase() === (c.nome || '').toUpperCase() && (d.indirizzo || '') === (c.indirizzo || '') && (d.data || '') >= oggi && (+d.lat !== p.lat || +d.lng !== p.lng));
+  for(const d of da) await col.doc(d.id).update({lat: p.lat, lng: p.lng});
 }
 function openImp(c){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !c.id;
@@ -3030,14 +3176,30 @@ function openImp(c){
     <form class="form" id="impForm"><h3>${isNew ? 'Nuovo campo' : 'Modifica campo'}</h3>
     ${inp('nome', 'Nome del campo', 'text', true, 'required autocapitalize="characters"')}${inp('indirizzo', 'Indirizzo', 'text', false)}${inp('citta', 'Città', 'text', false)}
     ${inp('mapsUrl', 'Link Google Maps (facoltativo)', 'url')}
+    <div class="field full"><button type="button" class="btn btn-ghost sm" id="im-gps">📍 Sono al campo: usa la mia posizione</button><span class="note" id="im-pos">${toNum(c.lat) && toNum(c.lng) ? `✓ Posizione sulla mappa salvata · <a href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}" target="_blank" rel="noopener">controlla</a>` : 'Se l’indirizzo non basta a trovare il campo, usa questo tasto quando sei lì.'}</span></div>
     <div class="field full"><label for="im-note">Note (spogliatoi, parcheggio, superficie…)</label><textarea id="im-note" data-f="note">${esc(c.note || '')}</textarea></div>
     <div class="actions row"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button>${isNew ? '' : '<button type="button" class="btn btn-danger" data-del>Elimina</button>'}</div></form></div></div>`;
   const f = root.querySelector('form'), col = firebase.firestore().collection('impianti');
   root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
   f.querySelector('[data-x]').onclick = close;
   if(!isNew) f.querySelector('[data-del]').onclick = async () => { if(!confirm(`Eliminare ${c.nome}?`)) return; try{ await col.doc(c.id).delete(); close(); toast('Campo eliminato'); }catch(err){ toast(fbErr(err)); } };
+  let gps = null; const posEl = f.querySelector('#im-pos');
+  f.querySelector('#im-gps').onclick = async () => {
+    const b = f.querySelector('#im-gps'); b.disabled = true; posEl.innerHTML = '<span class="spin" style="display:inline-block;vertical-align:-4px"></span> Leggo la posizione…';
+    try{ gps = await miaPosizione(); posEl.textContent = `✓ Posizione presa${gps.acc ? ` (precisione circa ${gps.acc} m)` : ''}. Tocca Salva.`;
+      const ind = f.querySelector('#im-indirizzo'), cit = f.querySelector('#im-citta');
+      if(!ind.value.trim() || !cit.value.trim()){ const a = await indirizzoDa(gps); if(a){ const [via, ...rest] = a.split(', '); if(!ind.value.trim() && rest.length) ind.value = via; if(!cit.value.trim()) cit.value = rest.length ? rest.join(', ') : a; } } }
+    catch(err){ posEl.textContent = gpsErr(err); }
+    b.disabled = false;
+  };
   f.onsubmit = async e => { e.preventDefault(); const o = {}; f.querySelectorAll('[data-f]').forEach(el => o[el.dataset.f] = el.value.trim()); o.nome = o.nome.toUpperCase();
-    try{ if(isNew) await col.add({...o, createdAt: Date.now()}); else await col.doc(c.id).set(o, {merge: true}); close(); toast('Campo salvato'); }catch(err){ toast(fbErr(err)); } };
+    const btn = f.querySelector('.actions .btn-primary'); btn.disabled = true;
+    const uguale = ['indirizzo', 'citta', 'mapsUrl'].every(k => (c[k] || '') === (o[k] || ''));
+    let p = gps || (uguale && toNum(c.lat) && toNum(c.lng) ? {lat: +c.lat, lng: +c.lng} : null);
+    if(!p){ posEl.innerHTML = '<span class="spin" style="display:inline-block;vertical-align:-4px"></span> Cerco il campo sulla mappa…'; p = await posImpianto(o); }
+    o.lat = p ? p.lat : null; o.lng = p ? p.lng : null;
+    try{ if(isNew) await col.add({...o, createdAt: Date.now()}); else await col.doc(c.id).set(o, {merge: true}); if(p) posInDesignazioni(o, p).catch(() => {}); close();
+      toast(p ? 'Campo salvato' : 'Campo salvato, ma non l’ho trovato sulla mappa: usa 📍 quando sei lì'); }catch(err){ btn.disabled = false; toast(fbErr(err)); } };
 }
 const waUrl = (tel, text) => { let n = String(tel || '').replace(/[^\d+]/g, '').replace(/^\+/, '').replace(/^00/, ''); if(n && n.length <= 10) n = '39' + n; return `https://wa.me/${n}${text ? '?text=' + encodeURIComponent(text) : ''}`; };
 function dsText(d, u){
@@ -3055,7 +3217,7 @@ const uffNomi = l => (l || []).map(u => `${nomeArb(DS.arbitri.find(x => x.id ===
 function cronVoci(d, o, uff){
   const v = [], ug = (a, b) => String(a == null ? '' : a) === String(b == null ? '' : b);
   if(!ug(d.casa, o.casa) || !ug(d.ospite, o.ospite)) v.push({k: 'squadre', da: `${d.casa || '—'} – ${d.ospite || '—'}`, a: `${o.casa || '—'} – ${o.ospite || '—'}`});
-  Object.keys(o).filter(k => k !== 'casa' && k !== 'ospite').forEach(k => { const a = k === 'rimborso' ? toNum(d[k]) : d[k]; if(!ug(a, o[k]) && (a || o[k])) v.push({k, da: a == null ? '' : a, a: o[k]}); });
+  Object.keys(o).filter(k => !['casa', 'ospite', 'lat', 'lng'].includes(k)).forEach(k => { const a = k === 'rimborso' ? toNum(d[k]) : d[k]; if(!ug(a, o[k]) && (a || o[k])) v.push({k, da: a == null ? '' : a, a: o[k]}); });
   const pr = uffNomi(d.ufficiali), nu = uffNomi(uff); if(pr !== nu) v.push({k: 'arbitri', da: pr, a: nu});
   return v;
 }
@@ -3226,6 +3388,8 @@ function openDsForm(d){
     const msg = f.querySelector('#dsFormMsg'), btn = f.querySelector('[type=submit]');
     const o = {}; f.querySelectorAll('[data-f]').forEach(el => o[el.dataset.f] = el.value.trim());
     o.rimborso = toNum(o.rimborso);
+    { const ci = DS.impianti.find(c => (c.nome || '').toUpperCase() === (o.impianto || '').toUpperCase() && (c.indirizzo || '') === (o.indirizzo || '') && toNum(c.lat) && toNum(c.lng));
+      const p = ci ? {lat: +ci.lat, lng: +ci.lng} : coordDaLink(o.mapsUrl); o.lat = p ? p.lat : null; o.lng = p ? p.lng : null; }
     if(!o.casa || !o.ospite){ msg.innerHTML = '<span class="err-t">Scegli categoria e squadre.</span>'; return; }
     if(o.casa === o.ospite){ msg.innerHTML = '<span class="err-t">Casa e ospite sono la stessa squadra.</span>'; return; }
     const ufficiali = [...offs.querySelectorAll('.ds-offrow')].map(r => ({uid: r.querySelector('[data-o=uid]').value, ruolo: r.querySelector('[data-o=ruolo]').value})).filter(u => u.uid);
@@ -3276,7 +3440,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114074600';
+const APP_BUILD = '20261114105128';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
