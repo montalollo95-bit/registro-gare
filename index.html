@@ -573,6 +573,52 @@ body.lock .ro-flex{display:flex!important}
 #gate[data-st=wait] .status{background:rgba(6,12,40,.62);color:#fff;border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 #gate[data-st=intro] .gate-login{align-self:center;width:auto;min-width:0;font-size:15px;letter-spacing:.14em;padding:10px 34px;border-radius:99px;box-shadow:0 8px 28px rgba(0,0,0,.45)}
 </style>
+<style>
+/* sfondo fisso dell'app (stesso in tema chiaro e scuro) */
+body{background:
+  url(logo-sfondo.png?v=2) center 62%/min(92vw,520px) auto no-repeat,
+  radial-gradient(55% 32% at 0% 16%,rgba(96,180,248,.85),transparent 72%),
+  radial-gradient(60% 30% at 100% 14%,rgba(222,52,44,.85),transparent 72%),
+  radial-gradient(50% 26% at 62% 22%,rgba(110,48,120,.55),transparent 75%),
+  radial-gradient(65% 30% at 40% 100%,rgba(60,165,85,.85),transparent 72%),
+  radial-gradient(60% 34% at 100% 96%,rgba(62,136,234,.9),transparent 72%),
+  radial-gradient(70% 40% at 0% 60%,rgba(14,32,80,.9),transparent 75%),
+  linear-gradient(180deg,#183A85 0%,#1A3C8A 55%,#1D46A0 100%) !important}
+/* testi appoggiati direttamente sullo sfondo: sempre chiari */
+#scroller{--on-bg:#EEF4FB;--on-bg-2:#AFC2DA}
+#scroller .view > .sec-head h2,#scroller .view > .cal-head h2,#scroller .view > h2,#scroller .view > h3,#scroller .view > .ds-day b{color:var(--on-bg)}
+#scroller .view > .sec-head a{color:#7FC0FF}
+#scroller .view > .shortcuts .sc{color:var(--on-bg)}
+#scroller .view > .eyebrow,#scroller .view > .ds-day span,#scroller .view > .note:not(.ok-t),#scroller .list > li.note{color:var(--on-bg-2)}
+#scroller .view > .empty-box,#scroller .list > .empty-box{color:var(--on-bg-2);border-color:rgba(255,255,255,.18)}
+#scroller .view > .empty-box h3,#scroller .list > .empty-box h3{color:var(--on-bg)}
+#scroller .view > .empty-box span,#scroller .list > .empty-box span{color:var(--on-bg-2)}
+#scroller .view > .note.ok-t{color:#6FD39B}
+/* barra in alto: stadio + marchio AICS a sinistra al posto del vecchio logo */
+.band{background:linear-gradient(90deg,rgba(5,12,40,.35) 0%,rgba(5,12,40,.3) 55%,rgba(5,12,40,.2) 100%),url(sfondo-barra.jpg?v=2) 70% 40%/cover no-repeat,#0B1640 !important}
+.band::before,.band::after{display:none!important}
+.band h1,.band .date,.band .eyebrow{text-shadow:0 2px 10px rgba(0,0,0,.55)}
+.band.sub .spacer{display:none!important}
+.band.sub .round[hidden]{display:none!important}
+/* Home */
+.band-home{padding-left:128px!important}
+.band-home .band-logo{width:112px!important;height:128px!important;background:url(marchio-aics.png) center/contain no-repeat!important;border-radius:0!important;padding:0!important;box-shadow:none!important}
+.band-home .band-logo.logo-img{background-image:url(marchio-aics.png)!important}
+.band-home .band-logo > *{display:none}
+/* altre pagine: il marchio resta il tasto per tornare alla Home */
+.band.sub{background:linear-gradient(90deg,rgba(5,12,40,.5) 0%,rgba(5,12,40,.4) 60%,rgba(5,12,40,.3) 100%),url(sfondo-barra.jpg?v=2) 92% 42%/max(165%,640px) auto no-repeat,#0B1640 !important}
+.band.sub .band-in{padding-block:8px}
+.band.sub h1{text-align:left!important;font-size:24px;min-width:0}
+.band .logo-back{width:70px!important;height:82px!important;background:url(marchio-aics.png) center/contain no-repeat!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
+.band .logo-back .logo-img{display:none!important}
+/* scritte centrate, logo con lo stesso spazio sopra e sotto (10% dell'altezza della barra) */
+.band-home{display:grid!important;grid-template-columns:auto 1fr;column-gap:12px;row-gap:4px;align-content:center;padding:14px 0!important}
+.band-home .band-logo{position:static!important;transform:none!important;grid-column:1;grid-row:1 / 4;align-self:center;width:98px!important;height:112px!important}
+.band-home > :not(.band-logo){grid-column:2;justify-self:center;text-align:center}
+.band.sub .band-in{padding-block:9px!important}
+.band .logo-back{width:66px!important;height:76px!important}
+.band.sub h1{text-align:center!important}
+</style>
 </head><body>
 <div id="scroller">
 
@@ -3180,7 +3226,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114002238';
+const APP_BUILD = '20261114011531';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
