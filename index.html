@@ -650,6 +650,17 @@ a[x-apple-data-detectors],a[href^="mailto:"].kv-plain{color:inherit!important;te
 /* titoli appoggiati sullo sfondo: il numerino resta leggibile */
 #scroller .view > h2 .cnt,#scroller .view > h3 .cnt,#scroller .view > .sec-head .cnt{background:rgba(255,255,255,.2);color:#fff}
 .money .split{display:grid!important;grid-template-columns:repeat(3,1fr);gap:12px 10px!important}
+.pay-row em.ant-only{font-style:normal;font-weight:700;color:var(--muted)}
+/* arbitri a debito (anticipi più alti delle gare) */
+.debt-box{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;border:1px solid #E8820C;background:color-mix(in srgb,#E8820C 12%,var(--surface))}
+.debt-box b{color:#E8820C}.debt-box span{font-size:14px;color:var(--muted)}
+.debt-t{color:#E8820C;font-weight:700;font-size:14px}
+.pay-row em.debt{font-style:normal;font-weight:800;color:#E8820C}
+.pay-tot.debt b,.pay-tot.debt span{color:#E8820C!important}
+.debt-h{color:#E8820C}
+.cnt.cnt-debt{background:#E8820C;color:#fff}
+:root[data-theme="light"] .debt-box b,:root[data-theme="light"] .debt-t,:root[data-theme="light"] .pay-row em.debt,:root[data-theme="light"] .pay-tot.debt b,:root[data-theme="light"] .pay-tot.debt span,:root[data-theme="light"] .debt-h{color:#A84E05!important}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .debt-box b,:root:not([data-theme="dark"]) .debt-t,:root:not([data-theme="dark"]) .pay-row em.debt,:root:not([data-theme="dark"]) .pay-tot.debt b,:root:not([data-theme="dark"]) .pay-tot.debt span,:root:not([data-theme="dark"]) .debt-h{color:#A84E05!important}}
 </style>
 </head><body>
 <div id="scroller">
@@ -2236,28 +2247,32 @@ function renderPay(){
   }));
   DS.anticipi.filter(x => (x.data || '').startsWith(PAY.mese)).forEach(x => { const o = per.get(x.uid) || {uid: x.uid, nome: x.nome, gare: [], tot: 0, senza: []}; (o.ant = o.ant || []).push(x); per.set(x.uid, o); });
   per.forEach(o => { o.ant = o.ant || []; o.lordo = o.tot; o.antTot = o.ant.reduce((a, x) => a + toNum(x.importo), 0); o.tot = Math.max(0, o.lordo - o.antTot); });
-  const antMese = [...per.values()].reduce((a, o) => a + o.antTot, 0);
+  const antMese = [...per.values()].reduce((a, o) => a + o.antTot, 0), lordoMese = [...per.values()].reduce((a, o) => a + o.lordo, 0);
+  per.forEach(o => { o.extra = Math.max(0, o.antTot - o.lordo); });
+  const extraMese = [...per.values()].reduce((a, o) => a + o.extra, 0);
   PAY.cards = {};
   const rows = [...per.values()].map(o => ({...o, a: DS.arbitri.find(x => x.id === o.uid), p: DS.pag.find(x => x.id === `${o.uid}_${PAY.mese}`)})).sort((a, b) => nomeArb(a.a || {nome: a.nome}).localeCompare(nomeArb(b.a || {nome: b.nome})));
   const tot = rows.reduce((s, r) => s + r.tot, 0), pagato = rows.reduce((s, r) => s + Math.min(r.tot, r.p ? toNum(r.p.importo) : 0), 0);
   box.innerHTML = `<section class="ref-sec"><h3>Da pagare agli arbitri</h3>
     <div class="cal-head"><button class="icon-btn" data-pm="-1" aria-label="Mese precedente">‹</button><h2 style="font-size:22px">${lbl}</h2><button class="icon-btn" data-pm="1" aria-label="Mese successivo">›</button></div>
-    <div class="ds-sum"><div><b class="num">${eur(tot + antMese)}</b><span>spettanti per le gare</span></div><div><b class="num">− ${eur(antMese)}</b><span>già anticipati</span></div><div class="${tot - pagato > 0 ? 'bad' : ''}"><b class="num">${eur(tot - pagato)}</b><span>da pagare</span></div></div>
+    <div class="ds-sum"><div><b class="num">${eur(lordoMese)}</b><span>spettanti per le gare</span></div><div><b class="num">− ${eur(antMese)}</b><span>già anticipati</span></div><div class="${tot - pagato > 0 ? 'bad' : ''}"><b class="num">${eur(tot - pagato)}</b><span>da pagare</span></div></div>
     ${pagato ? `<p class="note" style="margin:0">Già pagati con bonifico: ${eur(pagato)}.</p>` : ''}
-    <p class="note" style="margin:0">Conto solo le gare con il referto compilato: 25 € calcio a 5, 30 € calcio a 7.</p>
+    <p class="note" style="margin:0">Le gare contano solo con il referto compilato: 25 € calcio a 5, 30 € calcio a 7. Gli anticipi non hanno bisogno del referto.</p>
     ${rows.length ? paySections(rows.map(r => {
       const n5 = r.gare.filter(d => tariffaDes(d) === 25).length, n7 = r.gare.filter(d => tariffaDes(d) === 30).length, pg = r.p ? toNum(r.p.importo) : 0, ok = r.p && pg >= r.tot;
       PAY.cards[r.uid] = `<div class="ds-arb pay${ok ? ' paid' : ''}"><div><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>
         <span>${r.gare.length} ${r.gare.length === 1 ? 'gara' : 'gare'}${n5 ? ` · ${n5} C5` : ''}${n7 ? ` · ${n7} C7` : ''}</span>
         <span class="pay-calc"><span>Spettante per le gare</span><b>${eur(r.lordo)}</b><span>Già anticipato</span><b>− ${eur(r.antTot)}</b></span>
+        ${r.extra ? `<span class="debt-t">⚠️ Da recuperare ${eur(r.extra)}: ha ricevuto ${eur(r.antTot)} di anticipi e per le gare di questo mese gli spettano ${eur(r.lordo)}.</span>` : ''}
         ${r.senza.length ? `<span class="err-t">${r.senza.length === 1 ? '1 gara' : r.senza.length + ' gare'} con referto non compilato: non conteggiate</span>` : ''}
         <span>${r.a && r.a.iban ? 'IBAN ' + esc(ibanFmt(r.a.iban)) : '<span class="err-t">IBAN non inserito</span>'}</span>
         ${r.p ? `<span class="ds-chip done"><i></i>Pagato ${eur(pg)} il ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</span>${pg < r.tot ? `<span class="err-t">Mancano ${eur(r.tot - pg)}</span>` : ''}` : ''}
         <details><summary class="note">Vedi dettagli</summary><span>${r.gare.sort(dsSort).map(d => `${esc(fmtShort(d.data))} · ${esc(d.casa)} – ${esc(d.ospite)} · ${eur(tariffaDes(d))}`).concat(r.ant.map(x => `${esc(fmtShort(x.data))} · Anticipo ricevuto${x.descrizione ? ' (' + esc(x.descrizione) + ')' : ''} · − ${eur(x.importo)}`)).join('<br>')}</span></details></div>
-        <div class="pay-r"><div class="pay-tot"><span>Da pagare</span><b class="num">${eur(r.tot)}</b></div><div class="pay-btns">
+        <div class="pay-r"><div class="pay-tot${r.extra ? ' debt' : ''}"><span>${r.extra ? 'Da recuperare' : 'Da pagare'}</span><b class="num">${r.extra ? '− ' + eur(r.extra) : eur(r.tot)}</b></div><div class="pay-btns">
         ${r.a && r.a.iban ? `<button class="btn btn-ghost sm" data-iban="${esc(r.a.iban)}">Copia IBAN</button>` : ''}
         ${r.tot ? `<button class="btn ${ok ? 'btn-ghost' : 'btn-primary'} sm" data-pay="${esc(r.uid)}" data-imp="${r.tot}" data-n="${r.gare.length}">${ok ? 'Annulla pagato' : 'Segna pagato'}</button>` : ''}</div></div></div>`;
-      return {ok: !!ok, li: `<li><button class="pay-row${ok ? ' done' : ''}" data-payopen="${esc(r.uid)}"><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>${ok ? `<em>✓ ${eur(pg)} · ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</em>` : r.tot ? `<em class="due">${eur(r.tot)}</em>` : '<em class="due wait">manca referto</em>'}<span aria-hidden="true">›</span></button></li>`}; }))
+      const niente = !r.tot && !r.senza.length && !r.extra, debito = !!r.extra;
+      return {ok: !!ok, niente, debito, li: `<li><button class="pay-row${ok ? ' done' : ''}" data-payopen="${esc(r.uid)}"><b>${esc(nomeArb(r.a || {nome: r.nome}))}</b>${ok ? `<em>✓ ${eur(pg)} · ${new Date(r.p.at).toLocaleDateString('it-IT', {day: 'numeric', month: 'short'})}</em>` : r.tot ? `<em class="due">${eur(r.tot)}</em>` : r.extra ? `<em class="debt">da recuperare ${eur(r.extra)}</em>` : r.senza.length ? '<em class="due wait">manca referto</em>' : '<em class="ant-only">coperto da anticipo</em>'}<span aria-hidden="true">›</span></button></li>`}; }))
       : '<p class="note" style="margin:0">Nessuna gara giocata in questo mese.</p>'}</section>`;
 
   box.querySelectorAll('[data-pm]').forEach(b => b.onclick = () => { const d = new Date(y, m - 1 + +b.dataset.pm, 1); PAY.mese = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; renderPay(); });
@@ -2265,9 +2280,11 @@ function renderPay(){
   if(PAY.open && $('#sheetRoot .pay-sheet')) openPay(PAY.open);
 }
 function paySections(items){
-  const da = items.filter(x => !x.ok), fatti = items.filter(x => x.ok);
+  const debito = items.filter(x => x.debito), da = items.filter(x => !x.ok && !x.niente && !x.debito), fatti = items.filter(x => x.ok && !x.debito), niente = items.filter(x => !x.ok && x.niente);
   return `<div class="pay-sec"><h4>Da pagare <span class="cnt${da.length ? ' cnt-red' : ''}">${da.length}</span></h4>${da.length ? `<ul class="list pay-list">${da.map(x => x.li).join('')}</ul>` : '<p class="note ok-t" style="margin:0">✓ Tutti pagati</p>'}</div>
-    <div class="pay-sec"><h4>Pagato <span class="cnt">${fatti.length}</span></h4>${fatti.length ? `<ul class="list pay-list">${fatti.map(x => x.li).join('')}</ul>` : '<p class="note" style="margin:0">Nessun pagamento segnato in questo mese.</p>'}</div>`;
+    ${debito.length ? `<div class="pay-sec"><h4 class="debt-h">Da recuperare <span class="cnt cnt-debt">${debito.length}</span></h4><ul class="list pay-list">${debito.map(x => x.li).join('')}</ul></div>` : ''}
+    <div class="pay-sec"><h4>Pagato <span class="cnt">${fatti.length}</span></h4>${fatti.length ? `<ul class="list pay-list">${fatti.map(x => x.li).join('')}</ul>` : '<p class="note" style="margin:0">Nessun pagamento segnato in questo mese.</p>'}</div>
+    ${niente.length ? `<div class="pay-sec"><h4>Coperti da anticipo · niente da pagare <span class="cnt">${niente.length}</span></h4><ul class="list pay-list">${niente.map(x => x.li).join('')}</ul></div>` : ''}`;
 }
 function openPay(uid){
   const html = PAY.cards[uid]; if(!html){ $('#sheetRoot').innerHTML = ''; PAY.open = null; return; }
@@ -3259,7 +3276,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114015233';
+const APP_BUILD = '20261114074600';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
