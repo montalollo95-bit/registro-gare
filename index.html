@@ -3307,7 +3307,7 @@ function openDs(id){
     if(!confirm(`Annullare ${d.casa || ''} – ${d.ospite || ''}?\n\n${nomi.length ? `Vengono tolti ${nomi.join(', ')} e ricevono l’avviso che la partita è annullata.\n` : ''}La partita resta in elenco SENZA ARBITRI, da riprogrammare: con Modifica metti la nuova data e designi da capo.`)) return;
     const motivo = (prompt('Motivo (facoltativo), es. palestra non disponibile', '') || '').trim().slice(0, 140);
     const upd = {ufficiali: [], arbitriIds: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], modifiche: null, annullata: {at: Date.now(), motivo, arbitri: nomi}, cronologia: [...(d.cronologia || []), {at: Date.now(), annullata: true, motivo, voci: nomi.length ? [{k: 'arbitri', da: nomi.join(', '), a: ''}] : []}], updatedAt: Date.now()};
-    try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); toast('Partita annullata: ora è da riprogrammare'); openDs(d.id); }
+    try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); await allineaPartita(d, {stato: 'rinviata', arbitro: ''}); toast('Partita annullata: ora è da riprogrammare'); openDs(d.id); }
     catch(e){ toast(fbErr(e)); }
   };
   root.querySelectorAll('[data-unl]').forEach(b => b.onclick = async () => {
@@ -3343,7 +3343,7 @@ function openDs(id){
     const cb = root.querySelector('#dsConfirm');
     cb.innerHTML = `<div class="confirm"><strong>Eliminare questa designazione?</strong><span class="note">Sparisce anche dalla pagina degli arbitri.</span><div class="row"><button class="btn btn-danger" data-yes>Sì, elimina</button><button class="btn btn-ghost" data-no>Annulla</button></div></div>`;
     cb.querySelector('[data-no]').onclick = () => cb.innerHTML = '';
-    cb.querySelector('[data-yes]').onclick = async () => { try{ await firebase.firestore().collection('designazioni').doc(id).delete(); close(); toast('Designazione eliminata'); }catch(e){ toast(fbErr(e)); } };
+    cb.querySelector('[data-yes]').onclick = async () => { try{ await firebase.firestore().collection('designazioni').doc(id).delete(); await allineaPartita(d, {desId: '', arbitro: ''}); close(); toast('Designazione eliminata'); }catch(e){ toast(fbErr(e)); } };
   };
 }
 
@@ -3360,6 +3360,8 @@ const propOk = (d, p, perche) => { const a = DS.arbitri.find(x => x.id === p);
   const no = !a || statoArb(a) !== 'attivo' ? 'non è più attivo' : (d.arbitriIds || []).includes(p) ? 'è già in questa gara' : sostEsclusi(d).has(p) ? 'ha già lasciato questa gara' : indDi(p, d.data).length ? 'è indisponibile quel giorno' : '';
   return perche ? no : !no; };
 const DSF = ['data', 'ora', 'categoria', 'girone', 'numeroGara', 'casa', 'ospite', 'impianto', 'indirizzo', 'citta', 'mapsUrl', 'rimborso', 'note'];
+/* le gare che vengono dal calendario dei campionati restano allineate con la partita pubblica */
+const allineaPartita = (d, upd) => { if(!d || !d.partitaId) return Promise.resolve(); return firebase.firestore().collection('partite').doc(d.partitaId).set({...upd, updatedAt: Date.now()}, {merge: true}).catch(e => console.warn('partita', e && e.code)); };
 function openDsForm(d){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '', isNew = !d.id;
   const cats = [...new Set([...DS.gare.map(x => x.categoria), ...Store.gare.map(x => x.categoria)].filter(Boolean))].sort();
@@ -3469,13 +3471,14 @@ function openDsForm(d){
     const modifiche = d.annullata ? null : cambiati.length ? {at: Date.now(), campi: [...new Set([...(vecchia ? vecchia.campi : []), ...cambiati])], prima: vecchia ? vecchia.prima : Object.fromEntries(CAMPI.map(k => [k, d[k] || ''])), per: ids.filter(x => prima.includes(x) && (!vecchia || !vecchia.per || vecchia.per.includes(x)))} : d.modifiche || null;
     const cronologia = [...(d.cronologia || [])], voci = isNew ? [] : cronVoci(d, o, ufficiali);
     if(voci.length) cronologia.push({at: Date.now(), voci});
-    const doc = {...o, ufficiali, arbitriIds: ids, cronologia, risposte, referti, avvisi, inviate, sostituzioni, subentri, sostituiti, storico, ...(modifiche ? {modifiche} : {}), updatedAt: Date.now()};
+    const doc = {...o, ufficiali, arbitriIds: ids, cronologia, risposte, referti, avvisi, inviate, sostituzioni, subentri, sostituiti, storico, ...(modifiche ? {modifiche} : {}), ...(d.partitaId ? {partitaId: d.partitaId, giornata: d.giornata || null} : {}), updatedAt: Date.now()};
     if(isNew) doc.createdAt = Date.now();
     btn.disabled = true; msg.innerHTML = '<span class="spin" style="display:inline-block"></span>';
     try{
       const col = firebase.firestore().collection('designazioni');
       const ref = isNew ? col.doc() : col.doc(d.id);
       await ref.set(doc);
+      await allineaPartita(doc, {data: o.data || '', ora: o.ora || '', casa: o.casa, ospite: o.ospite, casaId: (DS.squadre.find(q => q.nome === o.casa) || {}).id || '', ospiteId: (DS.squadre.find(q => q.nome === o.ospite) || {}).id || '', impianto: o.impianto || '', indirizzo: o.indirizzo || '', citta: o.citta || '', stato: '', desId: ref.id});
       toast(isNew ? 'Designazione creata' : 'Modifiche salvate');
       DS.gare = DS.gare.filter(x => x.id !== ref.id).concat([{id: ref.id, ...doc}]);
       openDs(ref.id);
@@ -3485,7 +3488,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114153438';
+const APP_BUILD = '20261114232933';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
