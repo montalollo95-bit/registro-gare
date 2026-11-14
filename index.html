@@ -689,6 +689,11 @@ a[x-apple-data-detectors],a[href^="mailto:"].kv-plain{color:inherit!important;te
 #gate.gate-step .gate-in{animation:gateStep .65s cubic-bezier(.2,.8,.2,1) both}
 body.app-in .tabs,body.app-in #scroller{animation:appIn 1.2s cubic-bezier(.2,.8,.2,1) .4s both}
 @media (prefers-reduced-motion:reduce){#gate.gate-out,#gate.gate-in-anim,#gate.gate-step .gate-in,body.app-in .tabs,body.app-in #scroller{animation:none}}
+/* avvio: "Apro l'app…" compare solo se il caricamento è lento; il LOGIN entra dolcemente */
+@keyframes gateLate{from{opacity:0}to{opacity:1}}
+#gate[data-st=wait] .status{animation:gateLate .5s ease 1.6s both}
+#gate[data-st=intro] .gate-login{animation:gateStep .7s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){#gate[data-st=wait] .status,#gate[data-st=intro] .gate-login{animation:none}}
 </style>
 </head><body class="gated">
 <div id="gate" data-st="wait"><div class="gate-in gate-intro"><span class="gate-logo big logo-img" role="img" aria-label="Logo"></span><div class="status" style="align-self:center"><span class="spin"></span>Apro l’app…</div></div></div>
@@ -3480,7 +3485,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114130408';
+const APP_BUILD = '20261114133644';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
