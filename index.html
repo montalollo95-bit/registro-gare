@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="it"><head>
 <meta charset="utf-8">
+<meta name="format-detection" content="telephone=no,email=no,address=no,date=no">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -618,6 +619,37 @@ body{background:
 .band.sub .band-in{padding-block:9px!important}
 .band .logo-back{width:66px!important;height:76px!important}
 .band.sub h1{text-align:center!important}
+/* contatori Home centrati */
+.stat.stat-btn{align-items:center;justify-content:center;text-align:center}
+.stat.stat-btn b,.stat.stat-btn span{text-align:center;align-self:center}
+/* schede del designatore: 6 sezioni divise da linee grigio chiaro, pallino dentro la sua sezione */
+.seg.seg6{gap:0;padding:0;overflow:hidden!important}
+.seg.seg6 button{border-radius:0;padding:18px 4px 12px;border-right:1px solid rgba(190,204,222,.38);border-bottom:1px solid rgba(190,204,222,.38);box-shadow:none}
+.seg.seg6 button:nth-child(3n){border-right:0}
+.seg.seg6 button:nth-child(n+4){border-bottom:0}
+.seg.seg6 .seg-n{top:4px!important;right:4px!important;min-width:17px;height:17px;font-size:10.5px}
+@media (max-width:400px){.seg.seg6 button{padding:22px 2px 10px!important}.seg.seg6 .seg-n{top:3px!important;right:3px!important}}
+/* scorciatoie: la scritta dentro il riquadro, sotto l'icona */
+.shortcuts{justify-items:center}
+#scroller .view > .shortcuts .sc,.sc{width:100%;max-width:108px;aspect-ratio:1;justify-content:center;gap:8px;padding:8px 4px;border-radius:22px;background:var(--surface);border:1px solid var(--line);color:var(--fg);font-size:12.5px;line-height:1.15;box-sizing:border-box}
+.sc .ic{width:auto!important;max-width:none!important;aspect-ratio:auto!important;background:none!important;border:0!important;border-radius:0!important}
+.sc .ic svg{width:32px;height:32px}
+.sc:active{transform:scale(.96)}
+.sc:active .ic{transform:none}
+/* finestre (pop-up): lo spazio per la barra dell'iPhone lo lascia già lo sfondo scuro, non serve ripeterlo dentro */
+.sheet{padding-top:16px!important;padding-bottom:16px!important}
+/* iPhone: link automatici su email/telefoni senza sottolineatura */
+a[x-apple-data-detectors],a[href^="mailto:"].kv-plain{color:inherit!important;text-decoration:none!important;font:inherit!important}
+
+/* tema chiaro: arancione più scuro per leggerlo bene sul bianco */
+:root[data-theme="light"] .btn-warn,:root[data-theme="light"] .sost-card b,:root[data-theme="light"] .sost-req,:root[data-theme="light"] .sost-card.da-vedere > b:first-child,:root[data-theme="light"] .sost-wait,:root[data-theme="light"] .sub-info b,:root[data-theme="light"] .sost-banner b,:root[data-theme="light"] .cron-t b,:root[data-theme="light"] .ds-chip.modc,:root[data-theme="light"] .acc-sum.due .warn b,:root[data-theme="light"] .acc-sum .warn2 b,:root[data-theme="light"] .mie-sost,:root[data-theme="light"] .sost-prop b.sost-wait{color:#A84E05!important}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .btn-warn,:root:not([data-theme="dark"]) .sost-card b,:root:not([data-theme="dark"]) .sost-req,:root:not([data-theme="dark"]) .sost-card.da-vedere > b:first-child,:root:not([data-theme="dark"]) .sost-wait,:root:not([data-theme="dark"]) .sub-info b,:root:not([data-theme="dark"]) .sost-banner b,:root:not([data-theme="dark"]) .cron-t b,:root:not([data-theme="dark"]) .ds-chip.modc,:root:not([data-theme="dark"]) .acc-sum.due .warn b,:root:not([data-theme="dark"]) .acc-sum .warn2 b,:root:not([data-theme="dark"]) .mie-sost,:root:not([data-theme="dark"]) .sost-prop b.sost-wait{color:#A84E05!important}}
+:root[data-theme="light"] .mie-att{color:#8A6400!important}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mie-att{color:#8A6400!important}}
+.mie-h .cnt{color:var(--fg)}
+/* titoli appoggiati sullo sfondo: il numerino resta leggibile */
+#scroller .view > h2 .cnt,#scroller .view > h3 .cnt,#scroller .view > .sec-head .cnt{background:rgba(255,255,255,.2);color:#fff}
+.money .split{display:grid!important;grid-template-columns:repeat(3,1fr);gap:12px 10px!important}
 </style>
 </head><body>
 <div id="scroller">
@@ -717,13 +749,13 @@ body{background:
   <div class="wrap view">
     <div id="payBox" hidden></div>
     <div id="refWait" hidden></div>
-    <div id="antBox" hidden></div>
     <div class="seg" role="group" aria-label="Periodo">
       <button id="sMese" aria-pressed="true">Mese</button>
       <button id="sStag" aria-pressed="false">Stagione</button>
     </div>
     <div class="cal-head" id="sNav"><button class="icon-btn" id="sPrev" aria-label="Periodo precedente">‹</button><h2 id="sLbl" style="font-size:22px"></h2><button class="icon-btn" id="sNext" aria-label="Periodo successivo">›</button></div>
     <div id="moneyBox"></div>
+    <div id="antBox" hidden></div>
     <div id="catBox"></div>
     <div id="travelBox"></div>
     <div class="eyebrow" id="movLbl"></div>
@@ -1209,11 +1241,12 @@ function renderSpese(){
   const entrate = sum('rimborso') + sum('diaria');
   const benzina = sum('carburante') + items.reduce((a,s)=>a+fuelOf(s, skip),0);
   const altro = sum('altro');
-  const netto = entrate - benzina - altro;
+  const ant = (fbReady() && ACC.user ? ACC.anticipi || [] : []).filter(x => x.data >= from && x.data <= to).reduce((a, x) => a + toNum(x.importo), 0);
+  const netto = entrate - ant - benzina - altro;
   const noSet = !toNum(Store.settings.consumo);
   $('#moneyBox').innerHTML = `<div class="money"><span class="eyebrow">Ti restano · ${esc(lbl)}</span><div class="tot num">${eur(netto)}</div>
-    <div class="split num"><div><b>${eur(entrate)}</b><span>rimborsi</span></div><div><b>− ${eur(benzina)}</b><span>benzina${noSet ? '' : ' stimata'}</span></div><div><b>− ${eur(altro)}</b><span>altre spese</span></div><div><b>${km.toLocaleString('it-IT')}</b><span>km</span></div></div>
-    ${noSet ? '<span style="font-size:14px;opacity:.85">Imposta consumo e prezzo nel riquadro Viaggio per calcolare la benzina.</span>' : ''}</div>`;
+    <div class="split num"><div><b>${eur(entrate)}</b><span>rimborsi</span></div>${ant ? `<div><b>− ${eur(ant)}</b><span>anticipi</span></div>` : ''}<div><b>− ${eur(benzina)}</b><span>benzina${noSet ? '' : ' stimata'}</span></div><div><b>− ${eur(altro)}</b><span>altre spese</span></div><div><b>${km.toLocaleString('it-IT')}</b><span>km</span></div></div>
+    ${!Store.settings.partenza && !toNum(Store.settings.consumo) ? '<span style="font-size:14px;opacity:.85">Tocca «Imposta partenza e auto» qui sotto per calcolare la benzina.</span>' : ''}</div>`;
   $('#movLbl').textContent = 'Movimenti · ' + lbl;
   renderCat(items);
   items = items.concat(wait).sort((a,b) => (b.data||'').localeCompare(a.data||''));
@@ -1984,7 +2017,7 @@ async function onUser(u){
   indAscolta(db, u);
   ACC.elenco = [];
   ACC.unsub.push(db.collection('elenco').doc('arbitri').onSnapshot(s => { ACC.elenco = s.exists ? s.data().list || [] : []; ACC.elencoJson = s.exists ? JSON.stringify(s.data().list || []) : ''; if(ACC.isAdmin) elencoSync(); }, () => {}));
-  ACC.unsub.push(db.collection('anticipi').where('uid', '==', u.uid).onSnapshot(s => { ACC.anticipi = s.docs.map(d => ({id: d.id, ...d.data()})); renderAnticipi(); }, () => {}));
+  ACC.unsub.push(db.collection('anticipi').where('uid', '==', u.uid).onSnapshot(s => { ACC.anticipi = s.docs.map(d => ({id: d.id, ...d.data()})); try{ renderSpese(); }catch(_){ renderAnticipi(); } }, () => {}));
   ACC.ex = [];
   ACC.unsub.push(db.collection('designazioni').where('sostituiti', 'array-contains', u.uid).onSnapshot(s => { ACC.ex = s.docs.map(d => ({id: d.id, ...d.data()})); renderAccount(); }, () => {}));
   ACC.unsub.push(db.collection('designazioni').where('arbitriIds', 'array-contains', u.uid).onSnapshot({includeMetadataChanges: true}, s => { ACC.mie = s.docs.map(d => ({id: d.id, ...d.data()})); ACC.mieLoaded = true; if(!s.metadata.fromCache) ACC.mieServer = true; syncAccettate(); render(); renderAccount(); renderOggiDes(); }, () => { ACC.mieLoaded = true; renderAccount(); }));
@@ -2518,7 +2551,7 @@ function fitSquadre(){
     if(!el.classList.contains('fit1')){ el.classList.add('fit1'); FIT_RO.observe(el); }   // si riadatta quando diventa visibile o cambia larghezza
     el.style.fontSize = '';
     const w = el.clientWidth; if(!w || el.scrollWidth <= w) return;
-    const base = parseFloat(getComputedStyle(el).fontSize), min = Math.max(10, base * 0.45); let fs = base;
+    const base = parseFloat(getComputedStyle(el).fontSize), min = Math.max(9, base * 0.42); let fs = base;
     while(el.scrollWidth > w && fs > min){ fs -= 0.5; el.style.fontSize = fs + 'px'; }
     if(fs > min){ fs -= 0.5; el.style.fontSize = fs + 'px'; }   // mezzo punto di margine contro gli arrotondamenti
   });
@@ -2923,8 +2956,8 @@ const accChip = a => { const st = statoArb(a); return ADMINS().includes(String(a
 const accInfo = a => { if(ADMINS().includes(String(a.email || '').toLowerCase())) return 'Designatore: entra sempre.';
   const x = (DS.acc || {})[a.id] || {}, quando = x.at ? new Date(x.at).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
   const reg = a.createdAt ? ` Registrato il ${new Date(a.createdAt).toLocaleDateString('it-IT', {day: '2-digit', month: '2-digit', year: 'numeric'})}.` : '';
-  return (x.stato === 'attivo' ? (x.da === 'avvio' ? `Già iscritto e designato prima dell’approvazione degli arbitri: abilitato il ${quando}.` : `Approvato${x.da ? ' da ' + x.da : ''} il ${quando}.`)
-    : x.stato === 'bloccato' ? `Accesso tolto${x.da ? ' da ' + x.da : ''} il ${quando}.` : 'In attesa della tua approvazione.') + reg; };
+  return (x.stato === 'attivo' ? (x.da === 'avvio' ? `Già iscritto e designato prima dell’approvazione degli arbitri: abilitato il ${quando}.` : `Approvato${x.da ? ' da ' + x.da : ''}${quando ? ' il ' + quando : ''}.`)
+    : x.stato === 'bloccato' ? `Accesso tolto${x.da ? ' da ' + x.da : ''}${quando ? ' il ' + quando : ''}.` : 'In attesa della tua approvazione.') + reg; };
 function openArb(id){
   const a = DS.arbitri.find(x => x.id === id); if(!a) return;
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
@@ -3226,7 +3259,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114011531';
+const APP_BUILD = '20261114015233';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;
