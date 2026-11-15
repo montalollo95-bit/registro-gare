@@ -306,6 +306,43 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .mkb .ckr select{min-height:38px;border:1px solid var(--line);border-radius:10px;padding:4px 8px;background:var(--card);color:var(--fg);font-size:14px;width:100%;min-width:0}
 .ckr .x{height:38px}
 .nw{white-space:nowrap}.sl{display:block}
+.stemma.img{background:transparent !important;box-shadow:none;overflow:hidden}.stemma.img img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.tap{cursor:pointer}.tab-cl td.sq.tap:active,.tm.tap:active,.gr.tap:active,.pr.tap:active{opacity:.6}
+.maglie{display:flex;gap:12px;margin-top:6px}.maglie span{display:flex;flex-direction:column;align-items:center;gap:2px}.maglie small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.maglia.vuota{color:var(--muted);opacity:.6}
+.maglie small{white-space:nowrap}
+.stemma.img.ol-l img{filter:drop-shadow(1px 0 0 #1b1f2a) drop-shadow(-1px 0 0 #1b1f2a) drop-shadow(0 1px 0 #1b1f2a) drop-shadow(0 -1px 0 #1b1f2a)}
+@media (prefers-color-scheme:dark){.stemma.img.ol-l img{filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}.stemma.img.ol-d img{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff)}}
+.stm-duo{display:flex;gap:6px;flex:none}.stm-duo .stm-prev{width:78px;height:78px;border-style:solid}
+.stm-prev.chiaro{background:#EEF3FB}.stm-prev.scuro{background:#0D183A}.stm-prev.scuro .vuoto{color:#9fb0d0}
+.stm-prev.chiaro.ol img{filter:drop-shadow(1px 0 0 #1b1f2a) drop-shadow(-1px 0 0 #1b1f2a) drop-shadow(0 1px 0 #1b1f2a) drop-shadow(0 -1px 0 #1b1f2a)}
+.stm-prev.scuro.ol img{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--fg)}.chk input{width:20px;height:20px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;padding:6px 10px;font-size:12.5px;font-weight:700;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--royal);border-color:var(--royal);color:#fff}
+.sw.cust{position:relative;overflow:hidden;background:conic-gradient(#f33,#fd3,#3d5,#3cf,#36f,#c3f,#f33);display:inline-block}
+.sw.cust input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+.sheet-bg.sopra{z-index:60}
+.btn.scelta{display:flex;flex-direction:column;align-items:center;gap:2px;height:auto;min-height:52px;padding:10px 14px;white-space:normal;text-align:center}.btn.scelta small{font-weight:500;font-size:12.5px;opacity:.85}
+.warn-campo{background:rgba(232,163,60,.14);border:1px solid rgba(232,163,60,.45);border-radius:12px;padding:8px 10px;color:var(--fg)}
+.mg-row{align-items:flex-start}
+@media (prefers-color-scheme:dark){.maglia path:last-child{stroke:rgba(255,255,255,.6)}}
+.stm-row,.mg-row{display:flex;gap:14px;align-items:center}
+.stm-prev{width:96px;height:96px;border-radius:18px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden;background:var(--chip)}
+.stm-prev img{width:100%;height:100%;object-fit:contain}.stm-prev .vuoto{font-size:12px;color:var(--muted);text-align:center;padding:6px}
+.mg-prev{flex:none;width:64px;display:flex;justify-content:center}.mini{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.pal{display:flex;flex-wrap:wrap;gap:6px}.sw{width:28px;height:28px;border-radius:50%;border:2px solid rgba(0,0,0,.18);cursor:pointer;padding:0}.sw.on{outline:3px solid var(--royal);outline-offset:2px;border-color:#fff}
+.sqbox{display:flex;align-items:center;gap:12px;padding:12px}.sqbox .sqst .stemma{width:56px;height:56px;font-size:20px;border-radius:14px;margin:0}.sqbox .sqtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.sqbox .maglie{margin-top:0}
+.indietro-sq{align-self:flex-start;border:0;background:var(--card);color:var(--fg);font-weight:700;border-radius:99px;padding:8px 14px;cursor:pointer;box-shadow:var(--card-sh)}
+.sqhead{display:flex;gap:14px;align-items:center;padding:16px}.sqhead .stemma{width:76px;height:76px;font-size:28px;border-radius:18px;margin:0}
+.sqhead h2{margin:0;font-family:var(--display);font-size:26px;line-height:1.05;text-transform:uppercase;color:var(--fg)}.sqhead p{margin:2px 0 0;color:var(--muted);font-size:13px}.sqhead .sqtx{min-width:0}
+.sqnum{display:flex;align-items:center;gap:12px;padding:12px 14px}.sqnum .big{display:flex;flex-direction:column;align-items:center;min-width:64px}.sqnum .big b{font-size:30px;font-weight:800;line-height:1;color:var(--fg)}.sqnum .big small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sqnum .nn{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 8px;flex:1}.sqnum .nn span{display:flex;flex-direction:column;align-items:center}.sqnum .nn b{font-size:17px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}.sqnum .nn small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.sqcampo{display:flex;align-items:center;gap:12px;padding:12px 14px}.sqcampo .ic{font-size:22px}.sqcampo div{flex:1;min-width:0;display:flex;flex-direction:column}.sqcampo small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.sqcampo b{color:var(--fg)}.sqcampo span{font-size:13px;color:var(--muted)}
+.sqpar{padding:4px 0}.pr{display:grid;grid-template-columns:30px 30px 1fr auto;gap:8px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}.pr:first-child{border-top:0}
+.pr .g{color:var(--muted);font-weight:700;text-align:center}.pr .stemma{width:28px;height:28px;font-size:11px;margin:0}.pr .vs{min-width:0;display:flex;flex-direction:column}.pr .vs b{font-size:13.5px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg)}.pr .vs small{font-size:11px;color:var(--muted)}
+.pr .rs{font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;padding:3px 9px;border-radius:9px;background:var(--chip);color:var(--fg);white-space:nowrap}.pr .rs.v{background:rgba(51,178,106,.22)}.pr .rs.p{background:rgba(229,51,58,.18)}.pr .rs.n{background:rgba(160,170,190,.25)}
+.sqlist{padding:4px 0}.sqlist > div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line);font-size:14px;color:var(--fg)}.sqlist > div:first-child{border-top:0}.sqlist b{font-weight:800}.sqlist small{color:var(--muted)}.sqlist .no span{color:#E5333A;font-weight:700}
 .drow{display:grid;grid-template-columns:24px 1fr 52px 40px;gap:6px;align-items:center}.drow.dir{grid-template-columns:1fr 40px}
 .drow .dn{text-align:center;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
 .pick{display:flex;align-items:center;gap:6px;min-height:44px;width:100%;min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);padding:6px 10px;font-size:15px;font-weight:600;text-align:left;cursor:pointer}
@@ -460,7 +497,7 @@ function loadFB(){
 const db = () => firebase.firestore();
 
 /* ---------- stato ---------- */
-const S = {ready: false, user: null, admin: false, resp: null, respOk: false, squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, pubPar: [], pgPub: {}, camp: {}};
+const S = {ready: false, user: null, admin: false, resp: null, respOk: false, squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
 const VIEW = () => ({'#futsal': 'futsal', '#liga': 'liga', '#area': 'area'})[location.hash] || 'home';
 const CAMP = {futsal: {cat: 'C5 AICS', nome: 'Futsal League', sub: 'Calcio a 5 · AICS Reggio Emilia', logo: 'logo-futsal.png', cls: 'camp-f'}, liga: {cat: 'C7 AICS', nome: 'R.E. Liga', sub: 'Calcio a 7 · AICS Reggio Emilia', logo: 'logo-liga.png', cls: 'camp-l'}};
 const sqById = id => S.squadre.find(q => q.id === id) || {};
@@ -500,6 +537,7 @@ async function onUser(u){
 
 /* ---------- disegno ---------- */
 function render(){
+  STEMMI = null;
   const app = $('#app'), v = VIEW();
   if(!CAMP[v]) app.className = '';
   if(v === 'home') return renderHome(app);
@@ -539,6 +577,7 @@ function pubStart(){
   loadFB().then(() => db().collection('squadre').onSnapshot(s => { S.pubSq = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubLoaded = true; S.pubErr = ''; if(CAMP[VIEW()]) render(); },
     e => { S.pubErr = fbErr(e); S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); })
     && db().collection('campionati').onSnapshot(s => { s.docs.forEach(d => { S.camp[d.id] = d.data(); }); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
+    && db().collection('squadreInfo').onSnapshot(s => { S.info = {}; s.docs.forEach(d => { S.info[d.id] = d.data(); }); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
     && db().collection('squalifiche').onSnapshot(s => { S.pubSqu = s.docs.map(d => ({id: d.id, ...d.data()})); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
     && db().collection('partite').onSnapshot(s => { S.pubPar = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubParOk = true; if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => { S.pubParOk = true; })).catch(() => { S.pubErr = 'Serve internet per vedere classifiche e risultati.'; S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); });
 }
@@ -549,7 +588,13 @@ const ICO = {
   dis: '<rect x="3" y="4" width="10" height="14" rx="2"/><path d="M15 6.5l4.2.7a2 2 0 0 1 1.6 2.3l-1.7 10a2 2 0 0 1-2.3 1.6l-6-1"/>'};
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`;
 const COL = ['#2F6FD6', '#C0392B', '#1E8A4F', '#7B3FBF', '#E08A1E', '#16303F', '#B8336A', '#0E8C9C', '#5D6D7E', '#A04000'];
-const stemma = n => { const t = String(n || ''); let h = 0; for(const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; const ini = t.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(); return `<span class="stemma" style="background:${COL[h % COL.length]}">${esc(ini)}</span>`; };
+/* schede squadre (squadreInfo/{id}): stemma, maglie [{c1, c2}], campo di casa. Separate da squadre/ che appartiene all'app arbitri */
+let STEMMI = null;
+const okImg = d => typeof d === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(d) ? d : '';
+const okCol = c => typeof c === 'string' && /^#[0-9A-Fa-f]{6}$/.test(c) ? c : '';
+const olCls = b => (String(b || '').includes('l') ? ' ol-l' : '') + (String(b || '').includes('d') ? ' ol-d' : '');
+const stemmaImg = n => { if(!STEMMI){ STEMMI = new Map(); [...(S.pubSq || []), ...(S.squadre || [])].forEach(q => { const i = S.info[q.id]; if(i && okImg(i.stemma)) STEMMI.set(q.nome, {img: i.stemma, b: i.stemmaBordo || ''}); }); } return STEMMI.get(n); };
+const stemma = n => { const im = stemmaImg(n); if(im) return `<span class="stemma img${olCls(im.b)}"><img src="${im.img}" alt=""></span>`; const t = String(n || ''); let h = 0; for(const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; const ini = t.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(); return `<span class="stemma" style="background:${COL[h % COL.length]}">${esc(ini)}</span>`; };
 const testa = (l, t) => `<p class="lbl">${l}</p><h2 class="ttl">${t}</h2>`;
 const vuoto = (t, x) => `<div class="empty"><h3>${t}</h3><span>${x}</span></div>`;
 const segSub = (k, l) => `<div class="seg" role="tablist">${l.map(([id, t]) => `<button data-sub="${k}:${id}" aria-pressed="${(S.sub[k] || l[0][0]) === id}">${t}</button>`).join('')}</div>`;
@@ -567,7 +612,7 @@ function classGioc(cat, k){
 function tabGioc(l, k){
   let pos = 0;
   return `<div class="gioc"><div class="gh"><span>Giocatore</span><span>${k === 'mar' ? 'Gol' : 'Volte'}</span></div>${l.map((r, i) => { if(!i || r.v !== l[i - 1].v) pos = i + 1;
-    return `<div class="gr${pos === 1 ? ' p1' : ''}"><span class="pos">${pos}</span>${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gv">${r.v}</span></div>`; }).join('')}</div>`;
+    return `<div class="gr${pos === 1 ? ' p1' : ''}" data-sqp="${esc(r.sqId || '')}"><span class="pos">${pos}</span>${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gv">${r.v}</span></div>`; }).join('')}</div>`;
 }
 /* marcatori e premi sotto il risultato */
 function marcHtml(p){
@@ -615,15 +660,15 @@ function squalificati(cat){
 }
 const vsDi = (p, sqId) => p ? `${p.giornata}ª giornata contro <span class="nw">${esc(p.casaId === sqId ? p.ospite : p.casa)}</span>` : '';
 function tabSqu(l){
-  return `<div class="gioc dis"><div class="gh"><span>Squalificato</span><span>Giornate</span></div>${l.map(r => `<div class="gr">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span>
+  return `<div class="gioc dis"><div class="gh"><span>Squalificato</span><span>Giornate</span></div>${l.map(r => `<div class="gr" data-sqp="${esc(r.sqId || '')}">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span>
     <span class="gg${r.att && !r.rest ? ' att' : ''}"><b>${r.rest || (r.att ? '?' : 0)}</b><small>${r.rest ? (r.att ? '+ da decidere' : r.rest === 1 ? 'giornata' : 'giornate') : 'da decidere'}</small></span>
     <span class="gx">${esc(r.motivi.join(' · '))}${r.prossima ? `<span class="sl">Salta la <b>${vsDi(r.prossima, r.sqId)}</b></span>` : ''}</span></div>`).join('')}</div>`;
 }
 function tabDif(l){
-  return `<div class="gioc dis"><div class="gh"><span>Diffidato</span><span>Ammonizioni</span></div>${l.map(r => `<div class="gr">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gg"><b>${r.g}</b><small><span class="cy"></span></small></span></div>`).join('')}</div>`;
+  return `<div class="gioc dis"><div class="gh"><span>Diffidato</span><span>Ammonizioni</span></div>${l.map(r => `<div class="gr" data-sqp="${esc(r.sqId || '')}">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gg"><b>${r.g}</b><small><span class="cy"></span></small></span></div>`).join('')}</div>`;
 }
 function tabCar(l){
-  return `<div class="gioc car"><div class="gh"><span>Giocatore</span><span><span class="cy" title="Ammonizioni"></span></span><span><span class="cr" title="Espulsioni"></span></span></div>${l.map(r => `<div class="gr">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gc${r.g ? '' : ' z'}">${r.g}</span><span class="gc${r.r ? '' : ' z'}">${r.r}</span></div>`).join('')}</div>`;
+  return `<div class="gioc car"><div class="gh"><span>Giocatore</span><span><span class="cy" title="Ammonizioni"></span></span><span><span class="cr" title="Espulsioni"></span></span></div>${l.map(r => `<div class="gr" data-sqp="${esc(r.sqId || '')}">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gc${r.g ? '' : ' z'}">${r.g}</span><span class="gc${r.r ? '' : ' z'}">${r.r}</span></div>`).join('')}</div>`;
 }
 /* ===================== DISTINTE ===================== */
 /* distinte/{partita_squadra}: giocatori [{id, nome, cog, numero, ruolo}], capitano, vice, dirigenti [{id, nome, ruolo}], rinvii.
@@ -745,6 +790,165 @@ function openDistinta(p, sqId){
     root.querySelector('#spOk').onclick = () => { close(); apri(); };
   } else apri();
 }
+/* ===================== SQUADRE ===================== */
+const MCOL = [['Bianco', '#FFFFFF'], ['Nero', '#16181D'], ['Grigio', '#9AA3AF'], ['Rosso', '#D62828'], ['Granata', '#7B1E2B'], ['Arancione', '#F28C28'], ['Giallo', '#F5C518'],
+  ['Verde', '#1E9E4A'], ['Verde scuro', '#0F5A32'], ['Azzurro', '#4FB3F6'], ['Blu', '#1F4FD1'], ['Blu scuro', '#15214A'], ['Viola', '#7B3FBF'], ['Rosa', '#F06AA8']];
+const MG = 'M26 7Q32 13 38 7L44 10L56 16L51 28L44 25L44 58L20 58L20 25L13 28L8 16L20 10Z';
+const TIPI_M = [['unita', 'Tinta unita'], ['maniche', 'Maniche diverse'], ['strisce', 'Strisce verticali'], ['righe', 'Righe orizzontali'], ['meta', 'Metà e metà']];
+const LAB_M = {unita: ['Colore', ''], maniche: ['Corpo', 'Maniche e collo'], strisce: ['Colore di fondo', 'Strisce'], righe: ['Colore di fondo', 'Righe'], meta: ['Metà sinistra', 'Metà destra']};
+let MGN = 0;
+const tipoM = m => m && TIPI_M.some(([k]) => k === m.t) ? m.t : (okCol(m && m.c2) && m.c2 !== m.c1 ? 'maniche' : 'unita');
+const magliaSvg = (m, w = 44) => { const c1 = okCol(m && m.c1);
+  if(!c1) return `<svg class="maglia vuota" viewBox="0 0 64 64" width="${w}" height="${w}" aria-hidden="true"><path d="${MG}" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/></svg>`;
+  const t = tipoM(m), c2 = okCol(m.c2) || c1, id = 'mgc' + (++MGN);
+  let corpo;
+  if(t === 'unita') corpo = `<path d="${MG}" fill="${c1}"/><path d="M26 7Q32 13 38 7" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="2"/>`;
+  else if(t === 'maniche') corpo = `<path d="M20 10L26 7Q32 13 38 7L44 10L44 58L20 58Z" fill="${c1}"/><path d="M20 10L8 16L13 28L20 25Z" fill="${c2}"/><path d="M44 10L56 16L51 28L44 25Z" fill="${c2}"/><path d="M26 7Q32 13 38 7" fill="none" stroke="${c2}" stroke-width="3"/>`;
+  else { const r = t === 'strisce' ? [0, 1, 2, 3].map(k => `<rect x="${14 + k * 10}" y="0" width="5" height="64" fill="${c2}"/>`).join('')
+      : t === 'righe' ? [0, 1, 2, 3, 4].map(k => `<rect x="0" y="${14 + k * 9}" width="64" height="4.5" fill="${c2}"/>`).join('') : `<rect x="32" y="0" width="32" height="64" fill="${c2}"/>`;
+    corpo = `<defs><clipPath id="${id}"><path d="${MG}"/></clipPath></defs><g clip-path="url(#${id})"><rect width="64" height="64" fill="${c1}"/>${r}</g>`; }
+  return `<svg class="maglia" viewBox="0 0 64 64" width="${w}" height="${w}" aria-hidden="true">${corpo}<path d="${MG}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="1.6" stroke-linejoin="round"/></svg>`; };
+const maglieHtml = (inf, w = 40) => { const m = (inf && inf.maglie) || []; return m.some(x => okCol(x && x.c1)) ? `<div class="maglie">${[0, 1].filter(i => okCol((m[i] || {}).c1)).map(i => `<span>${magliaSvg(m[i], w)}<small>${i ? '2ª maglia' : '1ª maglia'}</small></span>`).join('')}</div>` : ''; };
+
+/* --- stemma: toglie lo sfondo uniforme, ritaglia, e capisce se serve un contorno nel tema chiaro (l) o scuro (d) --- */
+const caricaImg = file => new Promise((res, rej) => { const img = new Image(), u = URL.createObjectURL(file); img.onload = () => { URL.revokeObjectURL(u); res(img); }; img.onerror = () => { URL.revokeObjectURL(u); rej(new Error('img')); }; img.src = u; });
+function togliSfondo(c){
+  const x = c.getContext('2d'), W = c.width, H = c.height, d = x.getImageData(0, 0, W, H), p = d.data, bord = [];
+  for(let i = 0; i < W; i++) bord.push(i, (H - 1) * W + i);
+  for(let j = 1; j < H - 1; j++) bord.push(j * W, j * W + W - 1);
+  if(bord.filter(k => p[k * 4 + 3] < 200).length > bord.length * .3) return false;     /* è già trasparente */
+  const q = k => (p[k * 4] >> 4) + ',' + (p[k * 4 + 1] >> 4) + ',' + (p[k * 4 + 2] >> 4), cnt = new Map();
+  bord.forEach(k => cnt.set(q(k), (cnt.get(q(k)) || 0) + 1));
+  const top = [...cnt.entries()].sort((a, b) => b[1] - a[1])[0];
+  if(top[1] < bord.length * .3) return false;                                          /* sfondo non uniforme: lo lascio */
+  let r = 0, g = 0, b = 0, n = 0; bord.forEach(k => { if(q(k) === top[0]){ r += p[k * 4]; g += p[k * 4 + 1]; b += p[k * 4 + 2]; n++; } }); r /= n; g /= n; b /= n;
+  const dist = k => Math.hypot(p[k * 4] - r, p[k * 4 + 1] - g, p[k * 4 + 2] - b), T = 46, seen = new Uint8Array(W * H);
+  const st = bord.filter(k => dist(k) < T); st.forEach(k => { seen[k] = 1; });
+  while(st.length){ const k = st.pop(), xx = k % W, yy = (k - xx) / W; p[k * 4 + 3] = 0;
+    for(const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const nx = xx + dx, ny = yy + dy; if(nx < 0 || ny < 0 || nx >= W || ny >= H) continue; const nk = ny * W + nx; if(seen[nk]) continue; seen[nk] = 1;
+      const dd = dist(nk); if(dd < T) st.push(nk); else if(dd < T * 1.8) p[nk * 4 + 3] = Math.min(p[nk * 4 + 3], Math.round(255 * (dd - T) / (T * .8))); } }
+  x.putImageData(d, 0, 0); return true;
+}
+function preparaStemma(img, togli){
+  const c = document.createElement('canvas'), k = Math.min(1, 360 / Math.max(img.width, img.height)); c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0, c.width, c.height); const tolto = togli ? togliSfondo(c) : false;
+  const W = c.width, H = c.height, p = x.getImageData(0, 0, W, H).data, A = i => p[i * 4 + 3];
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for(let yy = 0; yy < H; yy++) for(let xx = 0; xx < W; xx++) if(A(yy * W + xx) > 16){ if(xx < x0) x0 = xx; if(xx > x1) x1 = xx; if(yy < y0) y0 = yy; if(yy > y1) y1 = yy; }
+  if(x1 < 0){ x0 = 0; y0 = 0; x1 = W - 1; y1 = H - 1; }
+  /* luminosità del bordo esterno dello stemma */
+  let L = 0, n = 0; const lum = i => (.2126 * p[i * 4] + .7152 * p[i * 4 + 1] + .0722 * p[i * 4 + 2]) / 255;
+  /* pixel pieni entro 3 pixel dal bordo esterno (salta la sfumatura con lo sfondo tolto) */
+  const vuoto = (xx, yy) => xx < 0 || yy < 0 || xx >= W || yy >= H || A(yy * W + xx) < 128;
+  for(let yy = y0; yy <= y1; yy++) for(let xx = x0; xx <= x1; xx++){ const i = yy * W + xx; if(A(i) < 250) continue;
+    let fuori = false; for(const [dx, dy] of [[3, 0], [-3, 0], [0, 3], [0, -3], [2, 2], [-2, 2], [2, -2], [-2, -2]]) if(vuoto(xx + dx, yy + dy)){ fuori = true; break; }
+    if(fuori){ L += lum(i); n++; } }
+  L = n ? L / n : .5;
+  const bordo = (L > .78 ? 'l' : '') + (L < .25 ? 'd' : '');
+  const w = x1 - x0 + 1, h = y1 - y0 + 1;
+  const enc = (S2, jpg) => { const o = document.createElement('canvas'); o.width = o.height = S2; const ox = o.getContext('2d'); if(jpg){ ox.fillStyle = '#fff'; ox.fillRect(0, 0, S2, S2); }
+    const sc = S2 * .96 / Math.max(w, h); ox.drawImage(c, x0, y0, w, h, (S2 - w * sc) / 2, (S2 - h * sc) / 2, w * sc, h * sc); return o.toDataURL(jpg ? 'image/jpeg' : 'image/png', .85); };
+  let out = enc(200); if(out.length > 140000) out = enc(140); if(out.length > 140000) out = enc(160, true);
+  return {img: out, bordo, tolto};
+}
+/* scheda della squadra: stemma e maglie (anche il responsabile), campo di casa (solo amministratore) */
+function openSchedaSq(q){
+  const inf = S.info[q.id] || {}, adm = S.admin, mg = inf.maglie || [];
+  const M = {stemma: okImg(inf.stemma), bordo: inf.stemmaBordo || '', orig: null, togli: true,
+    maglie: [0, 1].map(i => { const m = mg[i] || {}; return okCol(m.c1) ? {t: tipoM(m), c1: okCol(m.c1), c2: okCol(m.c2)} : {t: i ? '' : 'unita', c1: '', c2: ''}; })};
+  const imp = (S.impianti || []).slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
+  const {root, close} = sheet(`<h3>${esc(q.nome)}</h3><p class="note">Stemma e maglie si vedono nell’app pubblica e nelle partite.</p>
+    <div class="eyebrow">Stemma</div>
+    <div class="stm-row"><div class="stm-duo"><div class="stm-prev chiaro" id="stP1"></div><div class="stm-prev scuro" id="stP2"></div></div>
+      <div class="stack" style="gap:8px;flex:1;min-width:0"><label class="btn btn-primary sm" for="stFile" id="stLbl"></label><input type="file" id="stFile" accept="image/*" hidden><button type="button" class="btn btn-ghost sm" id="stDel">Togli stemma</button></div></div>
+    <label class="chk" id="stTogliW" hidden><input type="checkbox" id="stTogli" checked> Togli lo sfondo</label>
+    <p class="note" id="stNota">Lo sfondo si toglie da solo. Se serve, l’app aggiunge un contorno perché lo stemma si veda sia col tema chiaro sia con quello scuro.</p>
+    <div id="mgb0"></div><div id="mgb1"></div>
+    ${adm ? `<div class="field"><label for="sc-campo">Campo di casa</label><select id="sc-campo"><option value="">Nessuno</option>${imp.map(x => `<option value="${esc(x.id)}" ${x.id === inf.campoId ? 'selected' : ''}>${esc(x.nome)}${x.citta ? ' · ' + esc(x.citta) : ''}</option>`).join('')}</select></div><p class="note">Vale per tutte le partite in casa. Se lo cambi, si aggiorna anche nelle partite in casa ancora da giocare e nelle loro designazioni.</p>`
+      : inf.campo ? `<p class="note">Campo di casa: <b>${esc(inf.campo)}</b>. Lo imposta l’amministratore del torneo.</p>` : ''}
+    <div class="err" id="scErr"></div>
+    <div class="actions"><button class="btn btn-primary" id="scGo">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>`, 'Scheda squadra');
+  const $r = x => root.querySelector(x);
+  const showSt = () => { [['#stP1', 'l'], ['#stP2', 'd']].forEach(([id, k]) => { const el = $r(id); el.classList.toggle('ol', M.bordo.includes(k)); el.innerHTML = M.stemma ? `<img src="${M.stemma}" alt="">` : '<span class="vuoto">Nessuno stemma</span>'; });
+    $r('#stLbl').textContent = M.stemma ? 'Cambia stemma' : 'Carica stemma'; $r('#stDel').hidden = !M.stemma; $r('#stTogliW').hidden = !M.orig; };
+  const elabora = () => { const r = preparaStemma(M.orig, M.togli); M.stemma = r.img; M.bordo = r.bordo;
+    $r('#stNota').textContent = M.togli && !r.tolto ? 'Lo sfondo non è uniforme (o è già trasparente): l’ho lasciato com’è.' : 'Sopra come si vede col tema chiaro e con quello scuro. Il contorno compare solo se serve.'; showSt(); };
+  showSt();
+  $r('#stFile').onchange = async e => { const fl = e.target.files[0]; e.target.value = ''; if(!fl) return; try{ M.orig = await caricaImg(fl); elabora(); }catch(err){ toast('Immagine non valida'); } };
+  $r('#stTogli').onchange = e => { M.togli = e.target.checked; if(M.orig) elabora(); };
+  $r('#stDel').onclick = () => { M.stemma = ''; M.bordo = ''; M.orig = null; showSt(); };
+  const pal = (i, k) => { const cur = M.maglie[i][k], fuori = cur && !MCOL.some(([, h]) => h === cur);
+    return `<div class="pal">${MCOL.map(([n, h]) => `<button type="button" class="sw${cur === h ? ' on' : ''}" data-sw="${i}:${k}:${h}" style="background:${h}" aria-label="${n}" title="${n}"></button>`).join('')}
+      <label class="sw cust${fuori ? ' on' : ''}" title="Altro colore" style="${fuori ? 'background:' + cur : ''}"><input type="color" data-cc="${i}:${k}" value="${cur || '#3A6BEA'}" aria-label="Altro colore"></label></div>`; };
+  const drawMg = i => { const m = M.maglie[i], el = $r('#mgb' + i), t = m.t, [l1, l2] = LAB_M[t] || ['', ''];
+    el.innerHTML = `<div class="eyebrow">${i ? 'Seconda maglia <span class="min">facoltativa</span>' : 'Prima maglia'}</div>
+      <div class="mg-row"><div class="mg-prev">${magliaSvg(t ? m : null, 64)}</div><div class="stack" style="gap:8px;flex:1;min-width:0">
+        <div class="chips">${(i ? [['', 'Nessuna']] : []).concat(TIPI_M).map(([k, n]) => `<button type="button" data-mt="${i}:${k}" aria-pressed="${t === k}">${n}</button>`).join('')}</div>
+        ${t ? `<span class="mini">${l1}</span>${pal(i, 'c1')}${l2 ? `<span class="mini">${l2}</span>${pal(i, 'c2')}` : ''}` : ''}</div></div>`;
+    el.querySelectorAll('[data-mt]').forEach(b => b.onclick = () => { m.t = b.dataset.mt.split(':')[1]; if(!m.t){ m.c1 = ''; m.c2 = ''; } drawMg(i); });
+    el.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => { const [, k, h] = b.dataset.sw.split(':'); m[k] = m[k] === h ? '' : h; drawMg(i); });
+    el.querySelectorAll('[data-cc]').forEach(x => x.onchange = () => { m[x.dataset.cc.split(':')[1]] = okCol(x.value.toUpperCase()); drawMg(i); }); };
+  drawMg(0); drawMg(1);
+  $r('#scGo').onclick = async () => { const b = $r('#scGo'), er = $r('#scErr'); er.textContent = '';
+    if(M.maglie.some(m => m.t && m.t !== 'unita' && m.c1 && !m.c2)){ er.textContent = 'Scegli anche il secondo colore della maglia (o metti “Tinta unita”).'; return; }
+    b.disabled = true;
+    const o = {stemma: M.stemma, stemmaBordo: M.stemma ? M.bordo : '', maglie: M.maglie.map(m => m.t && m.c1 ? {t: m.t, c1: m.c1, c2: m.t === 'unita' ? '' : m.c2 || ''} : {t: '', c1: '', c2: ''}), updatedAt: Date.now(), by: S.user.uid};
+    let im = null;
+    if(adm){ im = imp.find(x => x.id === $r('#sc-campo').value) || null; Object.assign(o, {campoId: im ? im.id : '', campo: im ? im.nome || '' : '', indirizzo: im ? im.indirizzo || '' : '', citta: im ? im.citta || '' : '', mapsUrl: im ? im.mapsUrl || '' : ''}); }
+    try{
+      await db().collection('squadreInfo').doc(q.id).set(o, {merge: true});
+      /* campo di casa cambiato: lo porta nelle partite in casa ancora da giocare (non quelle con un campo messo a mano) e nelle designazioni */
+      if(adm && im && im.id !== (inf.campoId || '')){
+        const lp = nCampoProssime(q.id, q.categoria, im, inf.campoId || '');
+        const conDes = lp.filter(p => desDi(p) && (desDi(p).ufficiali || []).length).length;
+        if(lp.length && confirm(`Mettere ${im.nome} in ${lp.length === 1 ? 'una partita in casa' : 'tutte le ' + lp.length + ' partite in casa'} ancora da giocare?${conDes ? `\n\n${conDes === 1 ? 'Una ha' : conDes + ' hanno'} già l’arbitro: la designazione si aggiorna e l’arbitro deve riconfermare.` : ''}`)){
+          await campoAlleProssime(q.id, q.categoria, im, inf.campoId || '');
+          toast(`Campo aggiornato in ${lp.length} ${lp.length === 1 ? 'partita' : 'partite'}`);
+        } else toast('Scheda salvata');
+      } else toast('Scheda salvata');
+      close();
+    }catch(err){ b.disabled = false; er.textContent = fbErr(err); } };
+}
+/* domanda con più scelte, sopra la finestra già aperta; restituisce la chiave scelta (o '' se annulla) */
+const chiedi = (titolo, testo, scelte) => new Promise(res => {
+  const el = document.createElement('div'); el.className = 'sheet-bg sopra';
+  el.innerHTML = `<div class="sheet stack" role="alertdialog" aria-modal="true" aria-label="${esc(titolo)}"><h3>${titolo}</h3>${testo}
+    <div class="stack" style="gap:8px">${scelte.map(([k, t, sub, cls]) => `<button type="button" class="btn ${cls || 'btn-ghost'} btn-block scelta" data-k="${k}"><b>${t}</b>${sub ? `<small>${sub}</small>` : ''}</button>`).join('')}
+    <button type="button" class="btn btn-ghost btn-block" data-k="">Annulla</button></div></div>`;
+  const fine = k => { el.remove(); res(k); };
+  el.onclick = e => { if(e.target === el) fine(''); };
+  el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => fine(b.dataset.k));
+  document.body.appendChild(el);
+});
+/* porta un campo nelle partite in casa ancora da giocare di una squadra (e nelle designazioni). Le eccezioni (altro campo messo a mano) restano */
+async function campoAlleProssime(sqId, cat, im, vecchio, salta){
+  const lp = parDi(S.partite, cat).filter(p => p.casaId === sqId && p.id !== salta && !esito(p) && !refFatto(desDi(p)) && p.impiantoId !== im.id && (!p.impiantoId || p.impiantoId === vecchio));
+  for(const p of lp) await salvaPartita({...p, impianto: im.nome || '', impiantoId: im.id, indirizzo: im.indirizzo || '', citta: im.citta || '', updatedAt: Date.now()}, p, im);
+  return lp.length;
+}
+const nCampoProssime = (sqId, cat, im, vecchio, salta) => parDi(S.partite, cat).filter(p => p.casaId === sqId && p.id !== salta && !esito(p) && !refFatto(desDi(p)) && p.impiantoId !== im.id && (!p.impiantoId || p.impiantoId === vecchio));
+/* pagina pubblica di una squadra */
+function paginaSquadra(C, l){
+  const q = l.find(x => x.id === S.sqp); if(!q) return '';
+  const inf = S.info[q.id] || {}, cat = C.cat, {righe} = classifica(cat, l, S.pubPar), pos = righe.findIndex(r => r.id === q.id), r = righe[pos] || {};
+  const lp = parDi(S.pubPar, cat).filter(p => p.casaId === q.id || p.ospiteId === q.id).sort(ordCr);
+  const mar = classGioc(cat, 'mar').filter(x => x.sqId === q.id).slice(0, 10);
+  const dd = disciplina(cat), squ = squalificati(cat).filter(x => x.sqId === q.id), dg = dd.gioc.filter(x => x.sqId === q.id), dif = dg.filter(x => x.g % 4 === 3);
+  const amm = dg.reduce((a, x) => a + x.g, 0), esp = dg.reduce((a, x) => a + x.r, 0);
+  const riga = p => { const e = esito(p), noi = p.casaId === q.id, avv = noi ? p.ospite : p.casa, gf = e && (noi ? e.gc : e.go), gs = e && (noi ? e.go : e.gc), k = e ? (gf > gs ? 'v' : gf < gs ? 'p' : 'n') : '';
+    return `<div class="pr" data-sqp="${esc(noi ? p.ospiteId : p.casaId)}"><span class="g">${esc(p.giornata)}ª</span>${stemma(avv)}<span class="vs"><b>${esc(avv)}</b><small>${noi ? 'in casa' : 'fuori casa'}</small></span>
+      <span class="rs ${k}">${e ? `${gf}–${gs}` : p.stato === 'rinviata' ? 'Rinviata' : p.data ? esc(giornoCorto(p.data)) : 'Da definire'}</span></div>`; };
+  const n = x => `<span><b>${x}</b>`;
+  return `<button class="indietro-sq" data-sqback>‹ Indietro</button>
+    <div class="card sqhead"><div class="sqst">${stemma(q.nome)}</div><div class="sqtx"><h2>${esc(q.nome)}</h2><p>${esc(C.nome)}</p>${maglieHtml(inf, 38)}</div></div>
+    ${pos >= 0 ? `<div class="card sqnum"><div class="big"><b>${r.rit ? '–' : pos + 1 + 'º'}</b><small>${r.rit ? 'ritirata' : 'in classifica'}</small></div><div class="nn">${n(r.Pt)}<small>punti</small></span>${n(r.G)}<small>giocate</small></span>${n(r.V)}<small>vinte</small></span>${n(r.N)}<small>pari</small></span>${n(r.P)}<small>perse</small></span>${n(r.GF + '–' + r.GS)}<small>gol</small></span></div></div>` : ''}
+    ${inf.campo ? `<div class="card sqcampo"><span class="ic" aria-hidden="true">📍</span><div><small>Campo di casa</small><b>${esc(inf.campo)}</b><span>${esc([inf.indirizzo, inf.citta].filter(Boolean).join(', '))}</span></div>${inf.mapsUrl && /^https:\/\//.test(inf.mapsUrl) ? `<a class="btn btn-ghost sm" href="${esc(inf.mapsUrl)}" target="_blank" rel="noopener">Mappa</a>` : ''}</div>` : ''}
+    <p class="lbl">Partite</p>${lp.length ? `<div class="card sqpar">${lp.map(riga).join('')}</div>` : '<p class="note">Calendario in arrivo.</p>'}
+    ${mar.length ? `<p class="lbl">Marcatori</p><div class="card sqlist">${mar.map(x => `<div><span>${esc(x.nome)}</span><b>${x.v}</b></div>`).join('')}</div>` : ''}
+    <p class="lbl">Disciplina</p><div class="card sqlist"><div><span><span class="cy"></span> Ammonizioni</span><b>${amm}</b></div><div><span><span class="cr"></span> Espulsioni</span><b>${esp}</b></div>
+      ${squ.map(x => `<div class="no"><span>⛔ ${esc(x.nome)}</span><small>${x.rest ? x.rest + (x.rest === 1 ? ' giornata' : ' giornate') : 'da decidere'}</small></div>`).join('')}
+      ${dif.map(x => `<div><span>⚠️ ${esc(x.nome)}</span><small>diffidato</small></div>`).join('')}</div>`;
+}
 /* card di una partita nella pagina pubblica */
 function cardPar(p){
   const e = esito(p), fin = !!e;
@@ -753,7 +957,7 @@ function cardPar(p){
     : p.data ? `<span class="st prox">${GIORNI[dataObj(p.data).getDay()]}</span><span class="ora">${esc(p.ora || '--:--')}</span>`
     : '<span class="st">Da definire</span><span class="ora">– : –</span>';
   const piede = [p.impianto, p.data ? giornoCorto(p.data) : 'Data da definire'].filter(Boolean).join(' · ');
-  return `<div class="m"><div class="tm">${stemma(p.casa)}<span>${esc(p.casa)}</span></div><div class="sc">${mid}</div><div class="tm">${stemma(p.ospite)}<span>${esc(p.ospite)}</span></div>
+  return `<div class="m"><div class="tm" data-sqp="${esc(p.casaId || '')}">${stemma(p.casa)}<span>${esc(p.casa)}</span></div><div class="sc">${mid}</div><div class="tm" data-sqp="${esc(p.ospiteId || '')}">${stemma(p.ospite)}<span>${esc(p.ospite)}</span></div>
     <div class="ft">${esc(piede)}</div>${p.arbitro && !fin ? `<div class="arb">Arbitro: <b>${esc(p.arbitro)}</b></div>` : ''}${fin && !e.tav ? marcHtml(p) : ''}</div>`;
 }
 function renderCamp(app, v){
@@ -801,13 +1005,16 @@ function renderCamp(app, v){
       car: vuoto('Nessun cartellino', 'Qui ammonizioni ed espulsioni di ogni giocatore.')}[k])
       + (k === 'squ' ? `<ul class="regole"><li>Doppia ammonizione nella stessa partita: 1 giornata di squalifica (i due gialli non contano per le 4 ammonizioni).</li><li>Ogni 4 ammonizioni: 1 giornata di squalifica.</li><li>Espulsione diretta: le giornate le decide l’amministratore del torneo.</li><li>Le giornate si scontano con le partite successive della squadra giocate o decise a tavolino.</li></ul>` : '');
   }
+  if(S.sqp && l.some(q => q.id === S.sqp)) body = paginaSquadra(C, l);
   app.dataset.v = 'camp-' + v;
   app.className = 'con-tabs ' + C.cls + '-app';
   app.innerHTML = `<header class="band ${C.cls}"><div class="band-in"><button class="casa" data-home aria-label="Torna alla pagina iniziale">‹</button><img class="clogo" src="${C.logo}" alt=""><div><h1>${C.nome}</h1><div class="sub">${C.sub}</div></div><button class="infob" data-info aria-label="Regolamento e informazioni"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.4" fill="currentColor"/></svg></button></div></header>
     <main class="wrap stack">${body}</main>
     <div class="tabbar"><nav aria-label="Sezioni">${tabs.map(([k, n]) => `<button data-pt="${k}"${t === k ? ' aria-current="page"' : ''}>${svg(k)}${n}</button>`).join('')}</nav></div>`;
   bindHome(app);
-  app.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { S.ptab = b.dataset.pt; render(); window.scrollTo(0, 0); });
+  app.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { S.ptab = b.dataset.pt; S.sqp = ''; render(); window.scrollTo(0, 0); });
+  app.querySelectorAll('[data-sqp]').forEach(b => { if(!b.dataset.sqp || !l.some(q => q.id === b.dataset.sqp)) return; b.classList.add('tap'); b.onclick = () => { S.sqp = b.dataset.sqp; render(); window.scrollTo(0, 0); }; });
+  const bk = app.querySelector('[data-sqback]'); if(bk) bk.onclick = () => { S.sqp = ''; render(); window.scrollTo(0, 0); };
   app.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => { const [k, id] = b.dataset.sub.split(':'); S.sub[k] = id; render(); });
   app.querySelectorAll('[data-gp]').forEach(b => b.onclick = () => { S.pgPub[v] = +b.dataset.gp; render(); });
   const gf = app.querySelector('#gFil'); if(gf) gf.onchange = () => { S.gsq = {...(S.gsq || {}), [v]: gf.value}; render(); };
@@ -878,7 +1085,16 @@ function renderResp(app){
   const gr = {attesa: [], rifiutato: [], approvato: [], sospeso: [], scaduto: []};
   l.forEach(t => (gr[statoT(t)] || gr.attesa).push(t));
   app.dataset.v = 'resp'; pubStart();
-  const rt = S.rtab || 'dist', segR = `<div class="seg" role="tablist">${[['dist', 'Partite e distinte'], ['tess', 'Tesserati']].map(([k, t]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${t}</button>`).join('')}</div>`;
+  const rt = S.rtab || 'dist', segR = `<div class="seg" role="tablist">${[['dist', 'Partite e distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra']].map(([k, t]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${t}</button>`).join('')}</div>`;
+  if(rt === 'sq'){
+    const qq = {id: r.squadraId, nome: q.nome || r.squadra, categoria: q.categoria || r.categoria};
+    app.innerHTML = band(qq.nome, `${qq.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">${segR}${schedaBox(qq)}
+      <p class="note">Carica lo stemma e scegli i colori delle maglie: si vedono nell’app pubblica, nelle partite e in classifica. Il campo di casa lo imposta l’amministratore del torneo.</p></main>`;
+    bindOut();
+    app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
+    app.querySelector('[data-scheda]').onclick = () => openSchedaSq(qq);
+    return;
+  }
   if(rt === 'dist'){
     const cat = q.categoria || r.categoria, lp = parDi(S.pubPar, cat).filter(p => p.casaId === r.squadraId || p.ospiteId === r.squadraId).sort(ordCr);
     const prox = lp.filter(p => !esito(p)), fatte = lp.filter(p => esito(p)).reverse();
@@ -1029,7 +1245,7 @@ function renderAdmin(app){
     const l = S.squadre.filter(q => q.categoria === S.cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
     body = `<div class="seg" role="group" aria-label="Categoria">${CATS.map(c => `<button data-c="${c}" aria-pressed="${c === S.cat}">${c} <span class="cnt">${S.squadre.filter(q => q.categoria === c).length}</span></button>`).join('')}</div>
       ${l.length ? `<ul class="list">${l.map(q => { const ts = S.tess.filter(t => t.squadraId === q.id), ok = ts.filter(t => statoT(t) === 'approvato').length, at = ts.filter(t => t.stato === 'attesa').length, rs = S.resps.filter(r => r.squadraId === q.id && r.stato === 'attivo');
-        return `<li><button class="item" data-q="${esc(q.id)}"><span class="ph">⚽</span><span class="tx"><b>${esc(q.nome)}</b><span>${ok} tesserati validi${at ? ` · ${at} da approvare` : ''} · ${rs.length ? 'Resp. ' + rs.map(r => esc(r.nome + ' ' + r.cognome)).join(', ') : 'nessun responsabile'}</span></span></button></li>`; }).join('')}</ul>`
+        return `<li><button class="item" data-q="${esc(q.id)}">${stemma(q.nome)}<span class="tx"><b>${esc(q.nome)}</b><span>${ok} tesserati validi${at ? ` · ${at} da approvare` : ''} · ${rs.length ? 'Resp. ' + rs.map(r => esc(r.nome + ' ' + r.cognome)).join(', ') : 'nessun responsabile'}</span></span></button></li>`; }).join('')}</ul>`
         : `<div class="empty"><h3>Nessuna squadra ${S.cat}</h3><span>Le squadre sono le stesse dell’archivio del designatore nell’app arbitri.</span></div>`}`;
   } else {
     const f = S.filtro, l = S.tess.filter(t => f === 'tutti' || statoT(t) === f).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
@@ -1056,12 +1272,15 @@ function renderAdmin(app){
   if(fi && S.cerca) fi.oninput();
   bindItems(app);
 }
+const schedaBox = q => { const inf = S.info[q.id] || {};
+  return `<div class="card sqbox"><div class="sqst">${stemma(q.nome)}</div><div class="sqtx">${maglieHtml(inf, 34) || '<span class="note">Maglie non indicate</span>'}<span class="note">${inf.campo ? 'Campo di casa: <b>' + esc(inf.campo) + '</b>' : 'Campo di casa non indicato'}</span></div><button type="button" class="btn btn-ghost sm" data-scheda>Modifica</button></div>`; };
 function openSquadra(q){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   const draw = () => {
     const ts = S.tess.filter(t => t.squadraId === q.id).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')), rs = S.resps.filter(r => r.squadraId === q.id && r.stato === 'attivo');
     root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="${esc(q.nome)}"><div class="grab"></div>
       <h3>${esc(q.nome)}</h3><div class="note">${esc(q.categoria || '')}</div>
+      ${schedaBox(q)}
       <section class="stack" style="gap:8px"><div class="eyebrow">Responsabili</div>${rs.length ? rs.map(r => `<div class="item" style="cursor:default"><span class="tx"><b>${esc(r.nome)} ${esc(r.cognome)}</b><span>${esc(r.email)} · ${esc(r.telefono || '')}</span></span><button class="btn btn-danger sm" data-rv="${esc(r.id)}">Togli</button></div>`).join('') : '<p class="note">Nessun responsabile abilitato.</p>'}</section>
       <section class="stack" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="eyebrow">Tesserati <span class="cnt">${ts.length}</span></div><button class="btn btn-primary sm" id="sqAddT">+ Tesserato</button></div>
       <ul class="list">${ts.map(itemT).join('') || '<p class="note">Nessun tesserato.</p>'}</ul></section>
@@ -1069,6 +1288,7 @@ function openSquadra(q){
     root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
     root.querySelector('[data-x]').onclick = close;
     $('#sqAddT').onclick = () => openTess({squadraId: q.id, squadra: q.nome, categoria: q.categoria});
+    root.querySelector('[data-scheda]').onclick = () => openSchedaSq(q);
     root.querySelectorAll('[data-rv]').forEach(b => b.onclick = async () => { if(!confirm('Togliere a questa persona l’accesso alla squadra?')) return; try{ await db().collection('responsabili').doc(b.dataset.rv).update({stato: 'revocato', motivo: ''}); toast('Accesso tolto'); draw(); }catch(err){ toast(fbErr(err)); } });
     bindItems(root);
   };
@@ -1217,7 +1437,7 @@ function openCalMenu(){
 /* scritture a blocchi da 400 */
 async function scriviTutto(ops){ for(let i = 0; i < ops.length; i += 400){ const b = db().batch(); ops.slice(i, i + 400).forEach(f => f(b)); await b.commit(); } }
 const squadreCat = cat => S.squadre.filter(q => q.categoria === cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
-const nuovaPar = (cat, g, c, o) => ({camp: cat, stagione: STAG, fase: 'Campionato', giornata: g, casa: c.nome, casaId: c.id, ospite: o.nome, ospiteId: o.id, data: '', ora: '', impianto: '', impiantoId: '', indirizzo: '', citta: '', stato: '', desId: '', createdAt: Date.now()});
+const nuovaPar = (cat, g, c, o) => { const i = S.info[c.id] || {}; return {camp: cat, stagione: STAG, fase: 'Campionato', giornata: g, casa: c.nome, casaId: c.id, ospite: o.nome, ospiteId: o.id, data: '', ora: '', impianto: i.campo || '', impiantoId: i.campoId || '', indirizzo: i.indirizzo || '', citta: i.citta || '', stato: '', desId: '', createdAt: Date.now()}; };
 function anteprima(rows){ const gs = [...new Set(rows.map(r => r.giornata))]; return `<div class="ante">${gs.slice(0, 40).map(g => `<div><b>${g}ª giornata</b>${rows.filter(r => r.giornata === g).map(r => `<span>${esc(r.casa)} – ${esc(r.ospite)}</span>`).join('')}</div>`).join('')}</div>`; }
 
 /* --- generatore all'italiana (metodo del cerchio) --- */
@@ -1314,6 +1534,7 @@ function openPartita(p){
     <div class="field"><label for="p-d">Data</label><input id="p-d" type="date" value="${esc(p.data || '')}"></div>
     <div class="field"><label for="p-h">Ora</label><input id="p-h" type="time" value="${esc(p.ora || '')}"></div>
     <div class="field full"><label for="p-i">Campo</label><select id="p-i"><option value="">Scegli il campo…</option>${opt(imp, p.impiantoId)}</select></div>
+    <p class="note warn-campo" id="pCampoN" style="grid-column:1/-1" hidden></p>
     ${imp.length ? '' : '<p class="note" style="grid-column:1/-1">L’archivio campi è vuoto: aggiungili nell’app arbitri (Designazioni → Campi).</p>'}
     <div class="eyebrow" style="grid-column:1/-1">Risultato</div>
     <div class="field full"><label for="p-es">Esito</label><select id="p-es"><option value="">Non ancora giocata</option><option value="g" ${p.giocata && !p.tavolino ? 'selected' : ''}>Giocata: scrivi il risultato</option><option value="casa" ${p.tavolino === 'casa' ? 'selected' : ''}>Vittoria a tavolino della squadra di casa</option><option value="ospite" ${p.tavolino === 'ospite' ? 'selected' : ''}>Vittoria a tavolino della squadra ospite</option></select></div>
@@ -1371,6 +1592,10 @@ function openPartita(p){
     mk.querySelectorAll('[data-am]').forEach(b => b.onclick = () => { M.aut[b.dataset.am]--; drawMk(); });
     mk.querySelectorAll('[data-add]').forEach(x => x.onchange = () => { const s = x.dataset.add; if(x.value === '__aut') M.aut[s] = 1; else { const t = rosa(s).find(y => y.id === x.value); if(t) M.mar.push({...ogg(t, s), n: 1}); } drawMk(); });
   };
+  const campoN = () => { const i = S.info[sel('p-c').value] || {}, n = sel('pCampoN'), v2 = sel('p-i').value;
+    n.hidden = !(i.campoId && v2 && v2 !== i.campoId); if(!n.hidden) n.innerHTML = `Campo diverso da quello di casa (<b>${esc(i.campo || '')}</b>). Quando salvi ti chiedo se vale solo per questa partita o anche per le prossime in casa${desDi(p) ? '; la designazione si aggiorna' : ''}.`; };
+  sel('p-c').addEventListener('change', () => { const i = S.info[sel('p-c').value]; if(i && i.campoId && !sel('p-i').value && !sel('p-i').disabled) sel('p-i').value = i.campoId; campoN(); });
+  sel('p-i').addEventListener('change', campoN); campoN();
   drawMk(); ['p-c', 'p-o'].forEach(id => sel(id).addEventListener('change', drawMk)); ['p-gc', 'p-go'].forEach(id => sel(id).addEventListener('input', drawMk));
   f.onsubmit = async e => {
     e.preventDefault(); const er = root.querySelector('#pErr'), btn = root.querySelector('#pGo'); er.textContent = '';
@@ -1392,8 +1617,24 @@ function openPartita(p){
         amm: M.car.filter(x => x.t === 'g').map(cc), esp: M.car.filter(x => x.t !== 'g').map(x => ({...cc(x), tipo: x.t === 'd' ? 'doppia' : 'diretta'}))});
       n.cart = {casa: cartDi(n, 'casa'), ospite: cartDi(n, 'ospite')};
     } else Object.assign(n, {mar: [], aut: null, mvp: null, por: null, amm: [], esp: [], cart: null});
+    const ic = S.info[c.id] || {}, prima = isNew || p.casaId !== c.id ? '' : p.impiantoId || '';
+    let tutte = false;
+    if(im && im.id !== prima && im.id !== (ic.campoId || '')){
+      const altre = nCampoProssime(c.id, cat, im, ic.campoId || '', p.id), conArb = altre.filter(x => desDi(x) && (desDi(x).ufficiali || []).length).length;
+      const k = await chiedi('Cambio di campo', `<p class="note"><b>${esc(c.nome)}</b> gioca in casa a <b>${esc(ic.campo || 'nessun campo indicato')}</b>. Hai scelto <b>${esc(im.nome)}</b>.</p>`,
+        [['una', 'Solo per questa partita', 'Le altre partite in casa restano dove sono', 'btn-primary'],
+         ['tutte', `Questa e tutte le prossime in casa${altre.length ? ' (' + (altre.length + 1) + ')' : ''}`, `Diventa il nuovo campo di casa${conArb ? `. ${conArb === 1 ? 'Una designazione' : conArb + ' designazioni'} con l’arbitro si aggiornano: l’arbitro deve riconfermare` : ''}`]]);
+      if(!k) return;
+      tutte = k === 'tutte';
+    }
     btn.disabled = true;
-    try{ await salvaPartita(isNew ? {...nuovaPar(cat, n.giornata, c, o), ...n} : {...p, ...n}, p, im); S.pgio[cat] = n.giornata; toast(isNew ? 'Partita aggiunta' : 'Partita salvata'); close(); }
+    try{ await salvaPartita(isNew ? {...nuovaPar(cat, n.giornata, c, o), ...n} : {...p, ...n}, p, im); S.pgio[cat] = n.giornata;
+      if(tutte){ const vecchio = ic.campoId || '';
+        await db().collection('squadreInfo').doc(c.id).set({campoId: im.id, campo: im.nome || '', indirizzo: im.indirizzo || '', citta: im.citta || '', mapsUrl: im.mapsUrl || '', updatedAt: Date.now(), by: S.user.uid}, {merge: true});
+        const k2 = await campoAlleProssime(c.id, cat, im, vecchio, p.id);
+        toast(`Nuovo campo di casa: ${im.nome}${k2 ? ` (anche in altre ${k2} ${k2 === 1 ? 'partita' : 'partite'})` : ''}`);
+      } else toast(isNew ? 'Partita aggiunta' : 'Partita salvata');
+      close(); }
     catch(err){ btn.disabled = false; er.textContent = err.msg || fbErr(err); }
   };
   root.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => openDistinta(p, b.dataset.dd));
@@ -1487,7 +1728,7 @@ function tabClassifica(cat, squadre){
   const {righe, giocate, imp} = classifica(cat, squadre, S.pubPar), sg = n => n > 0 ? '+' + n : String(n);
   const zone = (imp.zone || []).filter(z => z.nome);
   return `<div class="tab-wrap"><table class="tab-cl"><thead><tr><th class="pos"></th><th class="sq">Squadre</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th></tr></thead><tbody>
-    ${righe.map((r, i) => { const z = !r.rit && zonaDi(imp, i + 1); return `<tr class="${r.rit ? 'rit' : ''}"><td class="pos">${r.rit ? '–' : i + 1}</td><td class="sq">${stemma(r.nome)}${esc(r.nome)}${r.rit ? ' <small>ritirata</small>' : ''}</td><td class="pt" style="border-left-color:${z ? ZCOL[z.col] || ZCOL.blu : 'transparent'}">${r.Pt}</td><td>${r.G}</td><td>${r.V}</td><td>${r.N}</td><td>${r.P}</td><td>${r.GF}</td><td>${r.GS}</td><td>${sg(r.GF - r.GS)}</td></tr>`; }).join('')}</tbody></table></div>
+    ${righe.map((r, i) => { const z = !r.rit && zonaDi(imp, i + 1); return `<tr class="${r.rit ? 'rit' : ''}"><td class="pos">${r.rit ? '–' : i + 1}</td><td class="sq" data-sqp="${esc(r.id)}">${stemma(r.nome)}${esc(r.nome)}${r.rit ? ' <small>ritirata</small>' : ''}</td><td class="pt" style="border-left-color:${z ? ZCOL[z.col] || ZCOL.blu : 'transparent'}">${r.Pt}</td><td>${r.G}</td><td>${r.V}</td><td>${r.N}</td><td>${r.P}</td><td>${r.GF}</td><td>${r.GS}</td><td>${sg(r.GF - r.GS)}</td></tr>`; }).join('')}</tbody></table></div>
     ${zone.length ? `<div class="legenda">${zone.map(z => `<span><i style="background:${ZCOL[z.col] || ZCOL.blu}"></i>${z.da === z.a ? z.da + 'ª' : `${z.da}ª–${z.a}ª`} ${esc(z.nome)}</span>`).join('')}</div>` : ''}`;
 }
 /* --- impostazioni della classifica (amministratore) --- */
