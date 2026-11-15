@@ -3307,7 +3307,7 @@ function openDs(id){
     if(!confirm(`Annullare ${d.casa || ''} – ${d.ospite || ''}?\n\n${nomi.length ? `Vengono tolti ${nomi.join(', ')} e ricevono l’avviso che la partita è annullata.\n` : ''}La partita resta in elenco SENZA ARBITRI, da riprogrammare: con Modifica metti la nuova data e designi da capo.`)) return;
     const motivo = (prompt('Motivo (facoltativo), es. palestra non disponibile', '') || '').trim().slice(0, 140);
     const upd = {ufficiali: [], arbitriIds: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], modifiche: null, annullata: {at: Date.now(), motivo, arbitri: nomi}, cronologia: [...(d.cronologia || []), {at: Date.now(), annullata: true, motivo, voci: nomi.length ? [{k: 'arbitri', da: nomi.join(', '), a: ''}] : []}], updatedAt: Date.now()};
-    try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); await allineaPartita(d, {stato: 'rinviata', arbitro: ''}); toast('Partita annullata: ora è da riprogrammare'); openDs(d.id); }
+    try{ await firebase.firestore().collection('designazioni').doc(d.id).update(upd); Object.assign(d, upd); await allineaPartita(d, {stato: 'rinviata', arbitro: '', rinvii: firebase.firestore.FieldValue.increment(1)}); toast('Partita annullata: ora è da riprogrammare'); openDs(d.id); }
     catch(e){ toast(fbErr(e)); }
   };
   root.querySelectorAll('[data-unl]').forEach(b => b.onclick = async () => {
@@ -3488,7 +3488,7 @@ function openDsForm(d){
 $('#dsHeadBtn').onclick = () => openDsForm({});
 
 /* aggiornamento automatico */
-const APP_BUILD = '20261114232933';
+const APP_BUILD = '20261115012213';
 let updChecking = false;
 async function checkUpdate(){
   if(updChecking || !navigator.onLine) return; updChecking = true;

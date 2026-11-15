@@ -210,7 +210,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
   radial-gradient(70% 40% at 0% 60%,rgba(14,32,80,.9),transparent 75%),
   linear-gradient(180deg,#183A85 0%,#1A3C8A 55%,#1D46A0 100%)}}
 /* riquadri */
-.card,.item,.empty,.tab-cl,.regole,.lista{background:var(--card);border:1px solid var(--card-bd);box-shadow:var(--card-sh);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.card,.item,.empty,.tab-cl,.regole,.lista,.gioc{background:var(--card);border:1px solid var(--card-bd);box-shadow:var(--card-sh);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .card,.empty,.regole,.lista{border-radius:20px}
 .item{border-radius:16px}
 .empty{color:var(--muted);border-style:solid}
@@ -259,6 +259,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 
 /* partite (amministratore) */
 .pst{display:inline-block;margin-top:4px;font-size:12px;font-weight:800;padding:2px 9px;border-radius:99px;align-self:flex-start;background:var(--chip);color:var(--muted)}
+.pst.multi{border-radius:12px;padding:6px 10px;line-height:1.35;align-self:stretch;font-weight:700}
 .pst.ok{background:rgba(30,138,79,.16);color:var(--ok)}.pst.wait{background:rgba(232,163,60,.18);color:var(--warn)}.pst.no{background:rgba(210,58,46,.14);color:var(--red)}
 .item .stemma{width:40px;height:40px;border-radius:11px;font-size:15px;margin:0}
 .sheet.stack > *{flex-shrink:0}
@@ -279,6 +280,68 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .ora{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;color:var(--ora);white-space:nowrap}
 .ft{grid-column:1/-1;margin-top:10px;font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
 .arb{grid-column:1/-1;margin-top:4px;font-size:13.5px;color:var(--fg)}
+.mrc{grid-column:1/-1;display:grid;grid-template-columns:1fr 22px 1fr;gap:6px;margin-top:10px;font-size:13px;color:var(--fg);align-items:start}
+.mrc > div{display:flex;flex-direction:column;gap:2px}.mrc > div:first-child{text-align:right}.mrc > div:last-child{text-align:left}
+.mrc i{font-style:normal;font-weight:800;color:var(--muted)}.mrc .pal{font-size:13px;opacity:.75;text-align:center}
+.prm{grid-column:1/-1;margin-top:8px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:center;gap:2px 12px}.prm b{color:var(--fg);font-weight:700}
+.gioc{border-radius:20px;overflow:hidden}
+.gioc .gh,.gioc .gr{display:grid;grid-template-columns:30px 36px 1fr 52px;align-items:center;gap:8px;padding:10px 12px 10px 8px}
+.gioc .gh{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--fg);padding-top:12px;padding-bottom:8px}.gioc .gh span:first-child{grid-column:1/4;padding-left:4px}
+.gioc .gr{border-top:1px solid var(--line)}
+.gioc .pos{text-align:center;font-size:16px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gioc .gr .stemma{width:34px;height:34px;border-radius:10px;font-size:13px;margin:0}
+.gioc .gn{min-width:0;display:flex;flex-direction:column}
+.gioc .gn b{font-weight:800;letter-spacing:.02em;text-transform:uppercase;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gioc .gn span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.04em}
+.gioc .gv,.gioc .gh span:last-child{text-align:center}.gioc .gv{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.gioc .gr.p1 .pos{color:#D49A00;font-weight:800}
+.gioc.dis .gr{grid-template-columns:36px 1fr auto}.gioc.dis .gh{grid-template-columns:1fr auto}.gioc.dis .gh span:first-child{grid-column:auto}
+.gioc.car .gr,.gioc.car .gh{grid-template-columns:36px 1fr 38px 38px}.gioc.car .gh span:first-child{grid-column:1/3}
+.gioc .gx{grid-column:2/-1;font-size:12.5px;color:var(--muted);margin-top:-4px}.gioc .gx b{color:var(--fg);font-weight:700}
+.gioc .gg{text-align:center;min-width:64px}.gioc .gg b{display:block;font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}.gioc .gg small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.gioc .gg.att b{color:#E8A33C}
+.cy,.cr{display:inline-block;width:11px;height:15px;border-radius:2.5px;vertical-align:-2px;box-shadow:0 1px 2px rgba(0,0,0,.25)}.cy{background:#F5C518}.cr{background:#E5333A}
+.gioc .gc{text-align:center;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}.gioc .gc.z{color:var(--muted);opacity:.5;font-weight:600}
+.ckr{display:grid;grid-template-columns:1fr 40px;align-items:center;gap:4px 6px;font-size:14px}.ckr + .ckr{border-top:1px solid var(--line);padding-top:8px}.ckr > span{grid-column:1/-1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.mkb .ckr select{min-height:38px;border:1px solid var(--line);border-radius:10px;padding:4px 8px;background:var(--card);color:var(--fg);font-size:14px;width:100%;min-width:0}
+.ckr .x{height:38px}
+.nw{white-space:nowrap}.sl{display:block}
+.drow{display:grid;grid-template-columns:24px 1fr 52px 40px;gap:6px;align-items:center}.drow.dir{grid-template-columns:1fr 40px}
+.drow .dn{text-align:center;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.pick{display:flex;align-items:center;gap:6px;min-height:44px;width:100%;min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);padding:6px 10px;font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+.pick span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pick.vuoto{color:var(--muted);font-weight:500;border-style:dashed}.pick b{font-size:12px;color:var(--muted)}
+.pick[aria-expanded=true]{border-color:var(--royal);box-shadow:0 0 0 2px rgba(58,107,234,.25)}
+.dnum{min-height:44px;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);text-align:center;font-size:16px;font-weight:700;padding:4px}
+.drow .x{height:44px}
+.tend{border:1px solid var(--line);border-radius:12px;background:var(--card);max-height:260px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;margin:-4px 0 0 30px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.drow.dir + .tend{margin-left:0}
+.tend button{border:0;border-top:1px solid var(--line);background:none;color:var(--fg);text-align:left;padding:11px 12px;font-size:15px;cursor:pointer;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.tend button:first-child{border-top:0}.tend button[aria-selected=true]{background:rgba(58,107,234,.14);font-weight:700}
+.tend em{font-style:normal;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.tend i{font-style:normal;font-size:13px;color:var(--muted);margin-left:auto}
+.tend button.usato{opacity:.45;cursor:default}
+.tend button.sq{cursor:not-allowed;color:#E5333A}.tend button.sq span{font-weight:700}.tend button.sq em{color:#E5333A;font-weight:800}
+.tend .svuota{color:var(--muted);font-size:14px}
+.dcap{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.eyebrow .min{font-size:11px;letter-spacing:.04em;text-transform:none;font-weight:600;margin-left:4px}
+.squ-box{border-color:rgba(229,51,58,.5);background:rgba(229,51,58,.12)}
+.squ-pop{display:flex;flex-direction:column;gap:10px;text-align:center}.squ-pop .ico{font-size:40px;line-height:1}.squ-pop h3{margin:0;color:#E5333A}
+.squ-pop ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;text-align:left}
+.squ-pop li{border:1px solid rgba(229,51,58,.45);background:rgba(229,51,58,.10);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column}
+.squ-pop li b{color:#E5333A;text-transform:uppercase;letter-spacing:.02em}.squ-pop li span{font-size:13px;color:var(--muted)}
+@media (prefers-color-scheme:dark){.tend button.sq,.tend button.sq em,.squ-pop h3,.squ-pop li b{color:#FF6B70}}
+.dlist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}.dlist li{display:flex;align-items:center;gap:10px;padding:9px 4px;border-top:1px solid var(--line)}.dlist li:first-child{border-top:0}
+.dlist li span{width:28px;text-align:center;font-weight:800;color:var(--muted)}.dlist li b{flex:1;min-width:0}.dlist li em{font-style:normal;font-weight:800;font-size:12px;background:var(--royal);color:#fff;border-radius:99px;padding:1px 7px}.dlist li i{font-style:normal;font-size:12px;color:var(--muted)}
+.gfil{display:flex}.gfil select{flex:1;min-height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:8px 12px;font-size:14px}
+.mk{display:flex;flex-direction:column;gap:12px}
+.mkb{border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.mkh{display:flex;align-items:center;gap:6px;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.03em}.mkh .stemma{width:26px;height:26px;font-size:11px;margin:0}
+.mkh em{margin-left:auto;font-style:normal;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--chip);color:var(--fg);text-transform:none;letter-spacing:0;white-space:nowrap}
+.mkh em.ko{background:rgba(232,163,60,.25)}.mkh em.ok{background:rgba(51,178,106,.22)}
+.mkr{display:grid;grid-template-columns:1fr 40px 30px 40px;align-items:center;gap:4px;font-size:14px}
+.mkr > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mkr.aut > span{color:var(--muted);font-style:italic}
+.mkr b{text-align:center;font-size:16px;font-variant-numeric:tabular-nums}
+.mkr button{height:36px;border:0;border-radius:10px;background:var(--chip);color:var(--fg);font-size:18px;font-weight:800;cursor:pointer}
+.mkb select{min-height:42px;border:1px dashed var(--line);border-radius:10px;padding:6px 10px;background:transparent;color:var(--fg);width:100%}
 @media (prefers-color-scheme:dark){.ora{text-shadow:0 1px 10px rgba(91,139,255,.35)}.st.prox{background:rgba(169,204,255,.16);color:#CFE2FF}}
 
 /* classifica */
@@ -415,6 +478,7 @@ async function onUser(u){
     live(db().collection('partite'), 'partite', l => { S.partite = l; });
     live(db().collection('impianti'), 'impianti', l => { S.impianti = l; });
     live(db().collection('designazioni'), 'des', l => { S.des = l; });
+    live(db().collection('distinte'), 'dist', l => { S.dist = l; });
     pubStart();
     S.ready = true; render(); return;
   }
@@ -426,6 +490,9 @@ async function onUser(u){
       const i = S.unsub.findIndex(f => f.tess); if(i >= 0){ S.unsub[i](); S.unsub.splice(i, 1); }
       const f = db().collection('tesserati').where('squadraId', '==', S.resp.squadraId).onSnapshot(s => { S.tess = s.docs.map(x => ({id: x.id, ...x.data()})); S.loaded.tess = true; render(); }, e => { S.err = fbErr(e); S.loaded.tess = true; render(); });
       f.tess = true; S.unsub.push(f);
+      const j = S.unsub.findIndex(x => x.dist); if(j >= 0){ S.unsub[j](); S.unsub.splice(j, 1); }
+      const g = db().collection('distinte').where('squadraId', '==', S.resp.squadraId).onSnapshot(s => { S.dist = s.docs.map(x => ({id: x.id, ...x.data()})); S.loaded.dist = true; render(); }, e => { console.warn('dist', e.code); S.loaded.dist = true; render(); });
+      g.dist = true; S.unsub.push(g);
     }
     S.ready = true; render();
   }, e => { S.err = fbErr(e); S.ready = true; render(); }));
@@ -472,7 +539,8 @@ function pubStart(){
   loadFB().then(() => db().collection('squadre').onSnapshot(s => { S.pubSq = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubLoaded = true; S.pubErr = ''; if(CAMP[VIEW()]) render(); },
     e => { S.pubErr = fbErr(e); S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); })
     && db().collection('campionati').onSnapshot(s => { s.docs.forEach(d => { S.camp[d.id] = d.data(); }); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
-    && db().collection('partite').onSnapshot(s => { S.pubPar = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubParOk = true; if(CAMP[VIEW()]) render(); }, () => { S.pubParOk = true; })).catch(() => { S.pubErr = 'Serve internet per vedere classifiche e risultati.'; S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); });
+    && db().collection('squalifiche').onSnapshot(s => { S.pubSqu = s.docs.map(d => ({id: d.id, ...d.data()})); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
+    && db().collection('partite').onSnapshot(s => { S.pubPar = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubParOk = true; if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => { S.pubParOk = true; })).catch(() => { S.pubErr = 'Serve internet per vedere classifiche e risultati.'; S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); });
 }
 const ICO = {
   par: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
@@ -485,6 +553,198 @@ const stemma = n => { const t = String(n || ''); let h = 0; for(const c of t) h 
 const testa = (l, t) => `<p class="lbl">${l}</p><h2 class="ttl">${t}</h2>`;
 const vuoto = (t, x) => `<div class="empty"><h3>${t}</h3><span>${x}</span></div>`;
 const segSub = (k, l) => `<div class="seg" role="tablist">${l.map(([id, t]) => `<button data-sub="${k}:${id}" aria-pressed="${(S.sub[k] || l[0][0]) === id}">${t}</button>`).join('')}</div>`;
+/* ===================== GIOCATORI ===================== */
+/* nelle partite: mar [{id, nome, cog, sq:'casa'|'ospite', n}], aut {casa, ospite} (autogol a favore), mvp e por {id, nome, cog, sq} */
+const brv = m => { const r = (m.nome || '').slice((m.cog || '').length).trim(); return m.cog ? m.cog + (r ? ' ' + r[0] + '.' : '') : m.nome || ''; };
+const valida = p => p.giocata && !p.tavolino;
+function classGioc(cat, k){
+  const m = new Map();
+  const add = (x, p, n) => { if(!x || !x.id || !n) return; const r = m.get(x.id) || {id: x.id, v: 0}; r.v += n; r.nome = x.nome; r.sq = p[x.sq]; r.sqId = p[x.sq + 'Id']; m.set(x.id, r); };
+  parDi(S.pubPar, cat).filter(valida).sort((a, b) => (a.data || '').localeCompare(b.data || '')).forEach(p => {
+    if(k === 'mar') (p.mar || []).forEach(x => add(x, p, +x.n || 0)); else add(p[k], p, 1); });
+  return [...m.values()].sort((a, b) => b.v - a.v || (a.nome || '').localeCompare(b.nome || '', 'it'));
+}
+function tabGioc(l, k){
+  let pos = 0;
+  return `<div class="gioc"><div class="gh"><span>Giocatore</span><span>${k === 'mar' ? 'Gol' : 'Volte'}</span></div>${l.map((r, i) => { if(!i || r.v !== l[i - 1].v) pos = i + 1;
+    return `<div class="gr${pos === 1 ? ' p1' : ''}"><span class="pos">${pos}</span>${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gv">${r.v}</span></div>`; }).join('')}</div>`;
+}
+/* marcatori e premi sotto il risultato */
+function marcHtml(p){
+  const x2 = n => n > 1 ? ` <i>×${n}</i>` : '';
+  const lato = s => [...(p.mar || []).filter(x => x.sq === s && x.n > 0).map(x => esc(brv(x)) + x2(x.n)), ...(p.aut && p.aut[s] ? ['Autogol' + x2(p.aut[s])] : [])];
+  const c = lato('casa'), o = lato('ospite'), pr = [p.mvp && `Migliore in campo: <b>${esc(p.mvp.nome)}</b>`, p.por && `Miglior portiere: <b>${esc(p.por.nome)}</b>`].filter(Boolean);
+  return (c.length || o.length ? `<div class="mrc"><div>${c.map(x => `<span>${x}</span>`).join('')}</div><span class="pal">⚽</span><div>${o.map(x => `<span>${x}</span>`).join('')}</div></div>` : '')
+    + (pr.length ? `<div class="prm">${pr.map(x => `<span>${x}</span>`).join('')}</div>` : '');
+}
+/* ===================== DISCIPLINA ===================== */
+/* nelle partite: amm [{id, nome, cog, sq, ruolo}] = ammoniti, esp [{…, tipo:'doppia'|'diretta'}] = espulsi.
+   collezione squalifiche: decisione sui rossi diretti (id = partita_tesserato) e squalifiche a mano (manuale: true) */
+const ordCr = (a, b) => (a.data || '9999').localeCompare(b.data || '9999') || (+a.giornata || 0) - (+b.giornata || 0) || (a.ora || '').localeCompare(b.ora || '');
+const cartDi = (p, s) => (p.amm || p.esp) ? (p.amm || []).filter(x => x.sq === s).length + (p.esp || []).filter(x => x.sq === s).reduce((a, x) => a + (x.tipo === 'doppia' ? 2 : 1), 0) : +((p.cart || {})[s]) || 0;
+function disciplina(cat){
+  const imp = impDi(cat), par = parDi(S.pubPar, cat).sort(ordCr), fatta = p => !!esito(p, imp), qs = S.pubSqu || [];
+  const gioc = new Map(), sanz = [];
+  const G = (x, p) => { const r = gioc.get(x.id) || {id: x.id, g: 0, r: 0}; Object.assign(r, {nome: x.nome, ruolo: x.ruolo || '', sq: p[x.sq], sqId: p[x.sq + 'Id']}); gioc.set(x.id, r); return r; };
+  const chi = r => ({id: r.id, nome: r.nome, sq: r.sq, sqId: r.sqId});
+  par.filter(p => fatta(p) && valida(p)).forEach(p => {
+    (p.amm || []).forEach(x => { const r = G(x, p); r.g++; if(r.g % 4 === 0) sanz.push({...chi(r), gg: 1, motivo: r.g + ' ammonizioni', dopo: p}); });
+    (p.esp || []).forEach(x => { const r = G(x, p); r.r++;
+      if(x.tipo === 'doppia') sanz.push({...chi(r), gg: 1, motivo: 'Doppia ammonizione', dopo: p});
+      else { const d = qs.find(q => q.id === p.id + '_' + x.id); sanz.push({...chi(r), gg: d ? +d.gg : null, motivo: (d && d.motivo) || 'Espulsione diretta', dopo: p, docId: p.id + '_' + x.id, dir: true, x}); } });
+  });
+  qs.filter(q => q.manuale && q.camp === cat && (q.stagione || STAG) === STAG).forEach(q => sanz.push({id: q.tid, nome: q.nome, sq: q.sq, sqId: q.sqId, gg: +q.gg, motivo: q.motivo || 'Decisione del giudice', dal: q.dal || '', docId: q.id, man: true, doc: q}));
+  /* le giornate si scontano con le partite successive della squadra che hanno un risultato; più squalifiche si scontano una dopo l'altra */
+  const perG = new Map();
+  sanz.forEach(z => { z.tm = par.filter(p => p.casaId === z.sqId || p.ospiteId === z.sqId); z.ini = z.dopo ? z.tm.indexOf(z.dopo) + 1 : z.tm.findIndex(p => (p.data || '9999') >= z.dal); if(z.ini < 0) z.ini = z.tm.length; if(!perG.has(z.id)) perG.set(z.id, []); perG.get(z.id).push(z); });
+  perG.forEach(l => { l.sort((a, b) => a.ini - b.ini); let lib = 0;
+    l.forEach(z => { z.scontate = 0; z.prossime = []; const tm = z.tm, da = Math.max(z.ini, lib);
+      /* rosso diretto non ancora deciso: intanto salta la prossima partita */
+      if(z.gg == null){ z.rest = null; const m = tm.slice(da).find(x => !fatta(x) && x.stato !== 'rinviata'); if(m) z.prossime.push(m); return; }
+      let ult = da - 1;
+      for(let i = da; i < tm.length && z.scontate + z.prossime.length < z.gg; i++){ const m = tm[i]; if(fatta(m)){ z.scontate++; ult = i; } else if(m.stato !== 'rinviata'){ z.prossime.push(m); ult = i; } }
+      z.rest = z.gg - z.scontate; lib = ult + 1; }); });
+  return {gioc: [...gioc.values()], sanz};
+}
+/* chi è squalificato adesso (anche in attesa di decisione), raggruppato per tesserato */
+function squalificati(cat){
+  const m = new Map();
+  disciplina(cat).sanz.filter(z => z.rest == null || z.rest > 0).forEach(z => { const r = m.get(z.id) || {id: z.id, nome: z.nome, sq: z.sq, sqId: z.sqId, rest: 0, att: false, motivi: [], prossima: null}; m.set(z.id, r);
+    if(z.rest == null) r.att = true; else { r.rest += z.rest; if(!r.prossima && z.prossime[0]) r.prossima = z.prossime[0]; } r.motivi.push(z.motivo); });
+  return [...m.values()].sort((a, b) => (a.sq || '').localeCompare(b.sq || '', 'it') || (a.nome || '').localeCompare(b.nome || '', 'it'));
+}
+const vsDi = (p, sqId) => p ? `${p.giornata}ª giornata contro <span class="nw">${esc(p.casaId === sqId ? p.ospite : p.casa)}</span>` : '';
+function tabSqu(l){
+  return `<div class="gioc dis"><div class="gh"><span>Squalificato</span><span>Giornate</span></div>${l.map(r => `<div class="gr">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span>
+    <span class="gg${r.att && !r.rest ? ' att' : ''}"><b>${r.rest || (r.att ? '?' : 0)}</b><small>${r.rest ? (r.att ? '+ da decidere' : r.rest === 1 ? 'giornata' : 'giornate') : 'da decidere'}</small></span>
+    <span class="gx">${esc(r.motivi.join(' · '))}${r.prossima ? `<span class="sl">Salta la <b>${vsDi(r.prossima, r.sqId)}</b></span>` : ''}</span></div>`).join('')}</div>`;
+}
+function tabDif(l){
+  return `<div class="gioc dis"><div class="gh"><span>Diffidato</span><span>Ammonizioni</span></div>${l.map(r => `<div class="gr">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gg"><b>${r.g}</b><small><span class="cy"></span></small></span></div>`).join('')}</div>`;
+}
+function tabCar(l){
+  return `<div class="gioc car"><div class="gh"><span>Giocatore</span><span><span class="cy" title="Ammonizioni"></span></span><span><span class="cr" title="Espulsioni"></span></span></div>${l.map(r => `<div class="gr">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span><span class="gc${r.g ? '' : ' z'}">${r.g}</span><span class="gc${r.r ? '' : ' z'}">${r.r}</span></div>`).join('')}</div>`;
+}
+/* ===================== DISTINTE ===================== */
+/* distinte/{partita_squadra}: giocatori [{id, nome, cog, numero, ruolo}], capitano, vice, dirigenti [{id, nome, ruolo}], rinvii.
+   Se la partita viene annullata (rinvii cresce) la distinta va ricompilata. */
+const LIM = {'C5 AICS': [3, 12], 'C7 AICS': [5, 15]}, MAXDIR = 4;
+const inizioMs = p => p.data ? new Date(`${p.data}T${p.ora || '00:00'}:00`).getTime() : null;
+const distDi = (p, sqId) => (S.dist || []).find(d => d.id === p.id + '_' + sqId);
+const distOk = (d, p) => !!d && (+d.rinvii || 0) === (+p.rinvii || 0);
+function statoDist(p, sqId){
+  const d = distDi(p, sqId), ini = inizioMs(p), chiusa = ini && Date.now() >= ini;
+  if(esito(p)) return distOk(d, p) ? ['ok', 'Giocata · distinta inviata'] : ['', 'Giocata'];
+  if(p.stato === 'rinviata') return ['no', 'Rinviata: la distinta si rifà con la nuova data'];
+  if(!p.data || !p.ora) return ['', 'Distinta: si compila quando c’è la data'];
+  if(distOk(d, p)){ const sid = new Set(squPer(p, sqId).map(x => x.id)), bad = [...d.giocatori, ...(d.dirigenti || [])].filter(x => sid.has(x.id));
+    if(bad.length && !chiusa) return ['no', `In distinta c’è uno squalificato (${bad.map(x => x.nome).join(', ')}): correggila`];
+    return ['ok', chiusa ? 'Distinta inviata · chiusa' : 'Distinta inviata ✓']; }
+  if(chiusa) return ['no', 'Distinta non inviata'];
+  if(d) return ['wait', 'Partita riprogrammata: ricompila la distinta'];
+  return ['wait', 'Distinta da compilare'];
+}
+/* tesserati di una squadra squalificati per quella partita */
+function squPer(p, sqId){
+  const out = new Map();
+  disciplina(p.camp).sanz.forEach(z => { if(z.sqId !== sqId || !z.prossime.some(m => m.id === p.id)) return;
+    const r = out.get(z.id) || {id: z.id, nome: z.nome, motivi: []}; r.motivi.push(z.gg == null ? 'espulsione diretta, giornate da decidere' : z.motivo.toLowerCase()); out.set(z.id, r); });
+  return [...out.values()];
+}
+function openDistinta(p, sqId){
+  if(!p) return;
+  const lim = LIM[p.camp] || [3, 12], casa = p.casaId === sqId, sq = casa ? p.casa : p.ospite, vs = casa ? p.ospite : p.casa;
+  const squ = squPer(p, sqId), sid = new Set(squ.map(x => x.id)), old = distDi(p, sqId), ini = inizioMs(p);
+  const ro = !S.admin && (!!esito(p) || (ini && Date.now() >= ini));
+  const rosa = S.tess.filter(t => t.squadraId === sqId && statoT(t) === 'approvato').sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
+  const gioc = rosa.filter(t => ['Giocatore', 'Portiere', ''].includes(t.ruolo || '')), dirL = rosa.filter(t => ['Allenatore', 'Dirigente'].includes(t.ruolo));
+  const testa = `<h3>Distinta · ${esc(p.giornata)}ª giornata</h3><p class="note"><b>${esc(sq)}</b> contro ${esc(vs)}${p.data ? ' · ' + esc(giornoCorto(p.data)) + (p.ora ? ' ore ' + esc(p.ora) : '') : ''}${p.impianto ? ' · ' + esc(p.impianto) : ''}</p>`;
+  /* sola lettura: partita iniziata o giocata */
+  if(ro){
+    if(!old){ toast('Per questa partita la distinta non è stata inviata'); return; }
+    sheet(`${testa}${distOk(old, p) ? '' : '<div class="warn-box">Questa distinta era per la data precedente alla riprogrammazione.</div>'}
+      <ol class="dlist">${old.giocatori.map(x => `<li><span>${esc(x.numero || '–')}</span><b>${esc(x.nome)}</b>${x.id === old.capitano ? '<em>C</em>' : x.id === old.vice ? '<em>VC</em>' : ''}${x.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}</li>`).join('')}</ol>
+      ${(old.dirigenti || []).length ? `<div class="eyebrow">Dirigenti</div><ul class="dlist dir">${old.dirigenti.map(x => `<li><b>${esc(x.nome)}</b><i>${esc((x.ruolo || '').toLowerCase())}</i></li>`).join('')}</ul>` : ''}
+      <p class="note">La distinta si chiude all’orario d’inizio: ora la può cambiare solo l’amministratore.</p><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Distinta');
+    return;
+  }
+  const valido = id => rosa.some(t => t.id === id) && !sid.has(id);
+  const D = {g: [], dir: [], cap: '', vice: ''};
+  if(old){ D.g = old.giocatori.filter(x => valido(x.id)).map(x => ({id: x.id, num: x.numero || ''})); D.dir = (old.dirigenti || []).filter(x => valido(x.id)).map(x => ({id: x.id}));
+    D.cap = valido(old.capitano) ? old.capitano : ''; D.vice = valido(old.vice) ? old.vice : ''; }
+  while(D.g.length < lim[0]) D.g.push({id: '', num: ''});
+  if(!D.dir.length) D.dir.push({id: ''});
+  const tolti = old ? old.giocatori.filter(x => sid.has(x.id)).map(x => x.nome) : [];
+  let aperta = '';
+  const nm = id => { const t = rosa.find(x => x.id === id); return t ? nomeT(t) : ''; };
+  const apri = () => {
+    const {root, close} = sheet(`${testa}
+      ${old && !distOk(old, p) ? '<div class="warn-box">La partita è stata annullata e riprogrammata: controlla la distinta e inviala di nuovo.</div>' : ''}
+      ${squ.length ? `<div class="warn-box squ-box">⛔ <b>Squalificati:</b> ${squ.map(x => esc(x.nome)).join(', ')}${tolti.length ? '<br>Li ho tolti dalla distinta che avevi già compilato.' : ''}</div>` : ''}
+      <div id="dBody" class="stack" style="gap:10px"></div>
+      <div class="err" id="dErr"></div>
+      <div class="actions"><button class="btn btn-primary" id="dGo">${old ? 'Invia di nuovo' : 'Invia distinta'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+      <p class="note">Puoi cambiarla fino all’orario d’inizio della partita.</p>`, 'Distinta');
+    const body = root.querySelector('#dBody');
+    const tend = (k, i, lista, cur, usati) => `<div class="tend" role="listbox">${cur ? `<button type="button" data-pk="${k}:${i}:" class="svuota">Svuota la riga</button>` : ''}${lista.map(t => sid.has(t.id)
+        ? `<button type="button" class="sq" disabled aria-disabled="true"><span>${esc(nomeT(t))}</span><em>squalificato</em></button>`
+        : `<button type="button" data-pk="${k}:${i}:${esc(t.id)}"${usati.has(t.id) && t.id !== cur ? ' disabled class="usato"' : ''}${t.id === cur ? ' aria-selected="true"' : ''}>${esc(nomeT(t))}${t.ruolo === 'Portiere' ? ' <em>portiere</em>' : ''}${t.ruolo === 'Allenatore' ? ' <em>allenatore</em>' : ''}${t.numero && k === 'g' ? ` <i>n. ${esc(t.numero)}</i>` : ''}${usati.has(t.id) && t.id !== cur ? ' <em>già scelto</em>' : ''}</button>`).join('')
+        || '<p class="note">Nessun tesserato approvato.</p>'}</div>`;
+    const draw = () => {
+      const ug = new Set(D.g.map(x => x.id).filter(Boolean)), ud = new Set(D.dir.map(x => x.id).filter(Boolean)), sc = D.g.filter(x => x.id);
+      const de = root.querySelector('#dErr'); if(de) de.textContent = '';
+      if(!ug.has(D.cap)) D.cap = ''; if(!ug.has(D.vice) || D.vice === D.cap) D.vice = '';
+      body.innerHTML = `<div class="eyebrow">Giocatori <span class="cnt">${ug.size} di ${lim[1]}</span> <span class="min">minimo ${lim[0]}</span></div>
+        ${D.g.map((x, i) => `<div class="drow"><span class="dn">${i + 1}</span><button type="button" class="pick${x.id ? '' : ' vuoto'}" data-op="g:${i}" aria-expanded="${aperta === 'g:' + i}"><span>${x.id ? esc(nm(x.id)) : 'Scegli giocatore…'}</span><b>▾</b></button>
+          <input class="dnum" data-num="${i}" type="text" inputmode="numeric" maxlength="2" placeholder="n." value="${esc(x.num)}" aria-label="Numero di maglia riga ${i + 1}">${i >= lim[0] ? `<button type="button" class="x" data-rg="${i}" aria-label="Togli la riga">✕</button>` : '<span></span>'}</div>
+          ${aperta === 'g:' + i ? tend('g', i, gioc, x.id, ug) : ''}`).join('')}
+        ${D.g.length < lim[1] ? '<button type="button" class="btn btn-ghost btn-block sm" id="dAddG">+ Aggiungi giocatore</button>' : ''}
+        <div class="dcap"><div class="field"><label for="d-cap">Capitano</label><select id="d-cap"><option value="">Scegli…</option>${sc.map(x => `<option value="${esc(x.id)}" ${x.id === D.cap ? 'selected' : ''}>${esc(nm(x.id))}</option>`).join('')}</select></div>
+        <div class="field"><label for="d-vice">Vice capitano</label><select id="d-vice"><option value="">Nessuno</option>${sc.filter(x => x.id !== D.cap).map(x => `<option value="${esc(x.id)}" ${x.id === D.vice ? 'selected' : ''}>${esc(nm(x.id))}</option>`).join('')}</select></div></div>
+        <div class="eyebrow">Dirigenti <span class="min">facoltativo · massimo ${MAXDIR}</span></div>
+        ${D.dir.map((x, i) => `<div class="drow dir"><button type="button" class="pick${x.id ? '' : ' vuoto'}" data-op="d:${i}" aria-expanded="${aperta === 'd:' + i}"><span>${x.id ? esc(nm(x.id)) : 'Scegli dirigente…'}</span><b>▾</b></button>${i ? `<button type="button" class="x" data-rd="${i}" aria-label="Togli la riga">✕</button>` : '<span></span>'}</div>
+          ${aperta === 'd:' + i ? tend('d', i, dirL, x.id, ud) : ''}`).join('')}
+        ${D.dir.length < MAXDIR ? '<button type="button" class="btn btn-ghost btn-block sm" id="dAddD">+ Aggiungi dirigente</button>' : ''}`;
+      body.querySelectorAll('[data-op]').forEach(b => b.onclick = () => { aperta = aperta === b.dataset.op ? '' : b.dataset.op; draw();
+        const t = body.querySelector('.tend'); if(t) t.scrollIntoView({block: 'nearest'}); });
+      body.querySelectorAll('[data-pk]').forEach(b => b.onclick = () => { const [k, i, id] = b.dataset.pk.split(':'), r = (k === 'g' ? D.g : D.dir)[+i];
+        if(k === 'g' && r.id !== id){ const t = rosa.find(y => y.id === id); r.num = t && t.numero ? String(t.numero) : ''; }
+        r.id = id; aperta = ''; draw(); });
+      body.querySelectorAll('[data-num]').forEach(n => n.oninput = () => { n.value = n.value.replace(/\D/g, '').slice(0, 2); D.g[+n.dataset.num].num = n.value; });
+      body.querySelectorAll('[data-rg]').forEach(b => b.onclick = () => { D.g.splice(+b.dataset.rg, 1); aperta = ''; draw(); });
+      body.querySelectorAll('[data-rd]').forEach(b => b.onclick = () => { D.dir.splice(+b.dataset.rd, 1); aperta = ''; draw(); });
+      const ag = body.querySelector('#dAddG'); if(ag) ag.onclick = () => { D.g.push({id: '', num: ''}); aperta = 'g:' + (D.g.length - 1); draw(); };
+      const ad = body.querySelector('#dAddD'); if(ad) ad.onclick = () => { D.dir.push({id: ''}); aperta = 'd:' + (D.dir.length - 1); draw(); };
+      body.querySelector('#d-cap').onchange = e => { D.cap = e.target.value; draw(); };
+      body.querySelector('#d-vice').onchange = e => { D.vice = e.target.value; };
+    };
+    draw();
+    root.querySelector('#dGo').onclick = async () => {
+      const er = root.querySelector('#dErr'); er.textContent = '';
+      const g = D.g.filter(x => x.id), nums = g.map(x => x.num.trim()).filter(Boolean), dup = nums.find((n, i) => nums.indexOf(n) !== i);
+      if(g.length < lim[0]){ er.textContent = `Servono almeno ${lim[0]} giocatori.`; return; }
+      if(g.length > lim[1]){ er.textContent = `Al massimo ${lim[1]} giocatori.`; return; }
+      if(g.some(x => sid.has(x.id))){ er.textContent = 'In distinta c’è un giocatore squalificato.'; return; }
+      if(dup){ er.textContent = `Il numero ${dup} è ripetuto: ogni giocatore deve avere un numero diverso.`; return; }
+      if(!D.cap){ er.textContent = 'Scegli il capitano.'; return; }
+      const doc = {partitaId: p.id, squadraId: sqId, squadra: sq, camp: p.camp, stagione: p.stagione || STAG, giornata: +p.giornata || 0, rinvii: +p.rinvii || 0,
+        giocatori: g.map(x => { const t = rosa.find(y => y.id === x.id); return {id: t.id, nome: nomeT(t), cog: t.cognome || '', numero: x.num.trim(), ruolo: t.ruolo || 'Giocatore'}; }),
+        capitano: D.cap, vice: D.vice || '', dirigenti: D.dir.filter(x => x.id).map(x => { const t = rosa.find(y => y.id === x.id); return {id: t.id, nome: nomeT(t), ruolo: t.ruolo}; }),
+        by: S.user.uid, updatedAt: Date.now()};
+      const b = root.querySelector('#dGo'); b.disabled = true;
+      try{ await db().collection('distinte').doc(p.id + '_' + sqId).set(doc); toast('Distinta inviata'); close(); }catch(err){ b.disabled = false; er.textContent = fbErr(err); }
+    };
+  };
+  /* prima di tutto: promemoria degli squalificati */
+  if(squ.length){
+    const {root, close} = sheet(`<div class="squ-pop"><div class="ico" aria-hidden="true">⛔</div><h3>${squ.length === 1 ? 'Un tesserato è squalificato' : squ.length + ' tesserati sono squalificati'}</h3>
+      <p>Non possono essere in distinta per la <b>${esc(p.giornata)}ª giornata</b> contro <b class="nw">${esc(vs)}</b>:</p>
+      <ul>${squ.map(x => `<li><b>${esc(x.nome)}</b><span>${esc(x.motivi.join(' · '))}</span></li>`).join('')}</ul>
+      <p class="note">Nel menu dei giocatori li trovi in rosso.</p>
+      <button class="btn btn-primary btn-block" id="spOk">Ho capito</button></div>`, 'Squalificati');
+    root.querySelector('#spOk').onclick = () => { close(); apri(); };
+  } else apri();
+}
 /* card di una partita nella pagina pubblica */
 function cardPar(p){
   const e = esito(p), fin = !!e;
@@ -494,7 +754,7 @@ function cardPar(p){
     : '<span class="st">Da definire</span><span class="ora">– : –</span>';
   const piede = [p.impianto, p.data ? giornoCorto(p.data) : 'Data da definire'].filter(Boolean).join(' · ');
   return `<div class="m"><div class="tm">${stemma(p.casa)}<span>${esc(p.casa)}</span></div><div class="sc">${mid}</div><div class="tm">${stemma(p.ospite)}<span>${esc(p.ospite)}</span></div>
-    <div class="ft">${esc(piede)}</div>${p.arbitro && !fin ? `<div class="arb">Arbitro: <b>${esc(p.arbitro)}</b></div>` : ''}</div>`;
+    <div class="ft">${esc(piede)}</div>${p.arbitro && !fin ? `<div class="arb">Arbitro: <b>${esc(p.arbitro)}</b></div>` : ''}${fin && !e.tav ? marcHtml(p) : ''}</div>`;
 }
 function renderCamp(app, v){
   const C = CAMP[v]; pubStart();
@@ -519,17 +779,27 @@ function renderCamp(app, v){
   else if(t === 'cl') body = testa('Classifica', 'Campionato') + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : l.length ? tabClassifica(C.cat, l) : vuoto('Squadre in arrivo', 'Le squadre del campionato non sono ancora state inserite.'));
   else if(t === 'gio'){
     const k = sb('gio') || 'mar';
-    body = segSub('gio', [['mar', 'Marcatori'], ['mvp', 'Migliore in campo'], ['por', 'Miglior portiere']]) + ({
-      mar: vuoto('Ancora nessun gol', 'La classifica marcatori si riempie con i gol scritti nei referti degli arbitri.'),
+    const lg = S.pubParOk ? classGioc(C.cat, k) : [], fq = (S.gsq || {})[v] || '', sqs = [...new Map(lg.map(r => [r.sqId || r.sq, r.sq])).entries()].sort((a, b) => (a[1] || '').localeCompare(b[1] || '', 'it'));
+    const lf = fq ? lg.filter(r => (r.sqId || r.sq) === fq) : lg;
+    body = segSub('gio', [['mar', 'Marcatori'], ['mvp', 'Migliore in campo'], ['por', 'Miglior portiere']]) + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lg.length
+      ? (sqs.length > 1 ? `<div class="gfil"><select id="gFil" aria-label="Squadra"><option value="">Tutte le squadre</option>${sqs.map(([id, n]) => `<option value="${esc(id)}" ${id === fq ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : '') + tabGioc(lf, k)
+      : {mar: vuoto('Ancora nessun gol', 'La classifica marcatori si riempie con i gol scritti nei referti degli arbitri.'),
       mvp: vuoto('Ancora nessuna partita', 'A fine partita l’arbitro sceglie il migliore in campo: qui la classifica di chi è stato scelto più volte.'),
       por: vuoto('Ancora nessuna partita', 'A fine partita l’arbitro sceglie il miglior portiere: qui la classifica di chi è stato scelto più volte.')}[k]);
   } else {
-    const k = sb('dis') || 'squ';
-    body = segSub('dis', [['squ', 'Squalificati'], ['dif', 'Diffidati'], ['car', 'Cartellini']]) + ({
-      squ: vuoto('Nessuno squalificato', 'Qui i giocatori che devono saltare la prossima partita e per quante giornate.'),
+    const k = sb('dis') || 'squ', fq = (S.gsq || {})[v] || '';
+    let lt = [];
+    if(S.pubParOk){ const dd = disciplina(C.cat);
+      lt = k === 'squ' ? squalificati(C.cat) : k === 'dif' ? dd.gioc.filter(r => r.g % 4 === 3).sort((a, b) => b.g - a.g || (a.nome || '').localeCompare(b.nome || '', 'it'))
+        : dd.gioc.filter(r => r.g || r.r).sort((a, b) => b.r - a.r || b.g - a.g || (a.nome || '').localeCompare(b.nome || '', 'it')); }
+    const sqs = [...new Map(lt.map(r => [r.sqId || r.sq, r.sq])).entries()].sort((a, b) => (a[1] || '').localeCompare(b[1] || '', 'it')), lf = fq ? lt.filter(r => (r.sqId || r.sq) === fq) : lt;
+    body = segSub('dis', [['squ', 'Squalificati'], ['dif', 'Diffidati'], ['car', 'Cartellini']]) + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lt.length
+      ? (sqs.length > 1 ? `<div class="gfil"><select id="gFil" aria-label="Squadra"><option value="">Tutte le squadre</option>${sqs.map(([id, n]) => `<option value="${esc(id)}" ${id === fq ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : '')
+        + (lf.length ? {squ: tabSqu, dif: tabDif, car: tabCar}[k](lf) : vuoto('Nessuno in questa squadra', ''))
+      : {squ: vuoto('Nessuno squalificato', 'Qui i tesserati che devono saltare le prossime partite e per quante giornate.'),
       dif: vuoto('Nessun diffidato', 'Qui i giocatori con 3 ammonizioni: alla prossima ammonizione scatta la squalifica.'),
-      car: vuoto('Nessun cartellino', 'Qui ammonizioni ed espulsioni di ogni giocatore e il totale per squadra.')}[k])
-      + `<ul class="regole"><li>Doppia ammonizione nella stessa partita: 1 giornata di squalifica.</li><li>Ogni 4 ammonizioni: 1 giornata di squalifica.</li><li>Espulsione diretta: le giornate le decide l’amministratore del torneo.</li></ul>`;
+      car: vuoto('Nessun cartellino', 'Qui ammonizioni ed espulsioni di ogni giocatore.')}[k])
+      + (k === 'squ' ? `<ul class="regole"><li>Doppia ammonizione nella stessa partita: 1 giornata di squalifica (i due gialli non contano per le 4 ammonizioni).</li><li>Ogni 4 ammonizioni: 1 giornata di squalifica.</li><li>Espulsione diretta: le giornate le decide l’amministratore del torneo.</li><li>Le giornate si scontano con le partite successive della squadra giocate o decise a tavolino.</li></ul>` : '');
   }
   app.dataset.v = 'camp-' + v;
   app.className = 'con-tabs ' + C.cls + '-app';
@@ -540,6 +810,7 @@ function renderCamp(app, v){
   app.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { S.ptab = b.dataset.pt; render(); window.scrollTo(0, 0); });
   app.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => { const [k, id] = b.dataset.sub.split(':'); S.sub[k] = id; render(); });
   app.querySelectorAll('[data-gp]').forEach(b => b.onclick = () => { S.pgPub[v] = +b.dataset.gp; render(); });
+  const gf = app.querySelector('#gFil'); if(gf) gf.onchange = () => { S.gsq = {...(S.gsq || {}), [v]: gf.value}; render(); };
   app.querySelector('[data-info]').onclick = () => openInfo(C.cat);
   const gs = app.querySelector('.gior [aria-pressed=true]'); if(gs) gs.scrollIntoView({block: 'nearest', inline: 'center'});
 }
@@ -606,14 +877,35 @@ function renderResp(app){
   const r = S.resp, q = sqById(r.squadraId), l = S.tess.slice().sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
   const gr = {attesa: [], rifiutato: [], approvato: [], sospeso: [], scaduto: []};
   l.forEach(t => (gr[statoT(t)] || gr.attesa).push(t));
-  app.dataset.v = 'resp';
+  app.dataset.v = 'resp'; pubStart();
+  const rt = S.rtab || 'dist', segR = `<div class="seg" role="tablist">${[['dist', 'Partite e distinte'], ['tess', 'Tesserati']].map(([k, t]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${t}</button>`).join('')}</div>`;
+  if(rt === 'dist'){
+    const cat = q.categoria || r.categoria, lp = parDi(S.pubPar, cat).filter(p => p.casaId === r.squadraId || p.ospiteId === r.squadraId).sort(ordCr);
+    const prox = lp.filter(p => !esito(p)), fatte = lp.filter(p => esito(p)).reverse();
+    const item = p => { const [k, t] = statoDist(p, r.squadraId), vs = p.casaId === r.squadraId ? p.ospite : p.casa, sq = !esito(p) && p.data && p.stato !== 'rinviata' ? squPer(p, r.squadraId) : [];
+      return `<li><button class="item" data-dp="${esc(p.id)}">${stemma(vs)}<span class="tx"><b>${esc(p.giornata)}ª · ${esc(p.casa)} – ${esc(p.ospite)}</b><span>${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>
+        <span class="pst ${k}">${esc(t)}</span>${sq.length ? `<span class="pst no">⛔ ${sq.length === 1 ? '1 squalificato' : sq.length + ' squalificati'}</span>` : ''}</span></button></li>`; };
+    app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">${segR}
+      ${!S.pubParOk || !S.loaded.dist ? '<div class="status"><span class="spin"></span>Carico le partite…</div>' : !lp.length ? '<div class="empty"><h3>Calendario in arrivo</h3><span>Qui troverai le partite della tua squadra: per ognuna si compila la distinta.</span></div>'
+        : `${prox.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Da giocare</div><ul class="list">${prox.map(item).join('')}</ul></section>` : ''}
+        ${fatte.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Giocate</div><ul class="list">${fatte.map(item).join('')}</ul></section>` : ''}`}
+      <p class="note">Distinta: da ${(LIM[cat] || [3, 12])[0]} a ${(LIM[cat] || [3, 12])[1]} giocatori, capitano obbligatorio, fino a ${MAXDIR} dirigenti. Si compila quando la partita ha data e ora e si può cambiare fino all’inizio. Se la partita viene annullata, la distinta va rifatta.</p></main>`;
+    bindOut(); bindHome(app);
+    app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
+    app.querySelectorAll('[data-dp]').forEach(b => b.onclick = () => { const p = lp.find(x => x.id === b.dataset.dp); if(!p) return;
+      if(!esito(p) && p.stato === 'rinviata'){ toast('Partita rinviata: la distinta si compila quando c’è la nuova data'); return; }
+      if(!esito(p) && (!p.data || !p.ora)){ toast('La distinta si compila quando la partita ha data e ora'); return; }
+      openDistinta(p, r.squadraId); });
+    return;
+  }
   const blocco = (k, tit) => gr[k].length ? `<section class="stack" style="gap:8px"><div class="eyebrow">${tit} <span class="cnt">${gr[k].length}</span></div><ul class="list">${gr[k].map(itemT).join('')}</ul></section>` : '';
-  app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">
+  app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">${segR}
     <button class="btn btn-primary btn-block" id="tNew">+ Nuovo tesserato</button>
     ${!S.loaded.tess ? '<div class="status"><span class="spin"></span>Carico i tesserati…</div>' : !l.length ? `<div class="empty"><h3>Nessun tesserato</h3><span>Aggiungi i giocatori e lo staff: l’amministratore del torneo li controlla e approva. Solo i tesserati approvati potranno andare in distinta.</span></div>` : ''}
     ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('scaduto', 'Scaduti (stagioni passate)')}
     <p class="note">I cartellini valgono fino al 30 giugno. Dopo la scadenza restano in archivio per un anno, poi i dati si cancellano da soli.</p></main>`;
   bindOut();
+  app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
   $('#tNew').onclick = () => openTess({squadraId: r.squadraId, squadra: q.nome || r.squadra, categoria: q.categoria || r.categoria || ''});
   bindItems(app);
 }
@@ -723,7 +1015,8 @@ function openCard(t){
 /* -- amministratore del torneo -- */
 function renderAdmin(app){
   const attT = S.tess.filter(t => t.stato === 'attesa'), attR = S.resps.filter(r => r.stato === 'attesa');
-  const tabs = [['appr', 'Da approvare', attT.length + attR.length], ['partite', 'Partite', 0], ['squadre', 'Squadre', 0], ['tess', 'Tesserati', 0]];
+  const daDec = S.pubParOk ? CATS.reduce((a, c) => a + disciplina(c).sanz.filter(z => z.gg == null).length, 0) : 0;
+  const tabs = [['appr', 'Da approvare', attT.length + attR.length], ['partite', 'Partite', 0], ['squ', 'Squalifiche', daDec], ['squadre', 'Squadre', 0], ['tess', 'Tesserati', 0]];
   app.dataset.v = 'admin';
   let body = '';
   if(!S.loaded.tess || !S.loaded.resps || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
@@ -731,6 +1024,7 @@ function renderAdmin(app){
       + (attT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Tesserati <span class="cnt hot">${attT.length}</span></div><ul class="list">${attT.sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '') || nomeT(a).localeCompare(nomeT(b))).map(itemT).join('')}</ul><p class="note">Tocca un tesserato per vedere il cartellino e approvarlo.</p></section>` : '')
       + (!attT.length && !attR.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
   else if(S.tab === 'partite') body = adminPartite();
+  else if(S.tab === 'squ') body = adminSqu();
   else if(S.tab === 'squadre'){
     const l = S.squadre.filter(q => q.categoria === S.cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
     body = `<div class="seg" role="group" aria-label="Categoria">${CATS.map(c => `<button data-c="${c}" aria-pressed="${c === S.cat}">${c} <span class="cnt">${S.squadre.filter(q => q.categoria === c).length}</span></button>`).join('')}</div>
@@ -752,6 +1046,7 @@ function renderAdmin(app){
   app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { S.filtro = b.dataset.f; render(); });
   app.querySelectorAll('[data-q]').forEach(b => b.onclick = () => openSquadra(sqById(b.dataset.q)));
   if(S.tab === 'partite') bindPartite(app);
+  if(S.tab === 'squ') bindSqu(app);
   const rref = id => db().collection('responsabili').doc(id);
   app.querySelectorAll('[data-ra]').forEach(b => b.onclick = async () => { try{ await rref(b.dataset.ra).update({stato: 'attivo', motivo: '', abilitatoAt: Date.now()}); toast('Responsabile abilitato'); }catch(err){ toast(fbErr(err)); } });
   app.querySelectorAll('[data-rn]').forEach(b => b.onclick = async () => { const m = prompt('Motivo (lo legge chi ha fatto la richiesta)', ''); if(m === null) return; try{ await rref(b.dataset.rn).update({stato: 'rifiutato', motivo: m.trim()}); toast('Richiesta rifiutata'); }catch(err){ toast(fbErr(err)); } });
@@ -840,6 +1135,64 @@ function bindPartite(app){
 const sheet = (html, label) => { const root = $('#sheetRoot'); root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="${esc(label)}"><div class="grab"></div>${html}</div></div>`;
   const close = () => root.innerHTML = ''; root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
   root.querySelectorAll('[data-x]').forEach(b => b.onclick = close); return {root, close}; };
+
+/* --- squalifiche (amministratore) --- */
+function adminSqu(){
+  const cat = S.pcat, seg = `<div class="seg" role="group" aria-label="Campionato">${CATS.map(c => `<button data-sc="${c}" aria-pressed="${c === cat}">${NOMECAMP[c]}</button>`).join('')}</div>`;
+  if(!S.pubParOk) return seg + '<div class="status"><span class="spin"></span>Carico…</div>';
+  const {sanz} = disciplina(cat); S.sanz = sanz;
+  const dec = sanz.filter(z => z.gg == null), inc = sanz.filter(z => z.rest > 0), fin = sanz.filter(z => z.gg != null && z.rest <= 0).reverse();
+  const nw = t => `<span class="nw">${esc(t)}</span>`, da = z => z.dopo ? `${z.dopo.giornata}ª giornata${z.dopo.data ? ' del ' + fmt(z.dopo.data) : ''}:<br>${nw(z.dopo.casa)} – ${nw(z.dopo.ospite)}` : z.dal ? 'dal ' + fmt(z.dal) : '';
+  const it = (z, i, k) => `<li><button class="item" data-sz="${i}"${z.dir || z.man ? '' : ' data-auto="1"'}>${stemma(z.sq)}<span class="tx"><b>${esc(z.nome)}</b><span>${esc(z.sq)} · ${esc(z.motivo)}</span><span>${da(z)}</span>
+    ${k === 'dec' ? '<span class="pst wait">Decidi le giornate</span>' : k === 'inc' ? `<span class="pst ok multi">${z.scontate} di ${z.gg} ${z.gg === 1 ? 'giornata scontata' : 'giornate scontate'}${z.prossime[0] ? '<span class="sl">Salta la ' + vsDi(z.prossime[0], z.sqId) + '</span>' : ''}</span>` : `<span class="pst">Scontata (${z.gg} ${z.gg === 1 ? 'giornata' : 'giornate'})</span>`}</span></button></li>`;
+  const idx = z => sanz.indexOf(z);
+  return seg + `<div class="row"><button class="btn btn-primary sm" id="sqNew">+ Squalifica a mano</button></div>
+    ${dec.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Espulsioni dirette da decidere <span class="cnt hot">${dec.length}</span></div><ul class="list">${dec.map(z => it(z, idx(z), 'dec')).join('')}</ul></section>` : ''}
+    <section class="stack" style="gap:8px"><div class="eyebrow">In corso <span class="cnt">${inc.length}</span></div>${inc.length ? `<ul class="list">${inc.map(z => it(z, idx(z), 'inc')).join('')}</ul>` : '<p class="note">Nessuna squalifica da scontare.</p>'}</section>
+    ${fin.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Già scontate <span class="cnt">${fin.length}</span></div><ul class="list">${fin.map(z => it(z, idx(z), 'fin')).join('')}</ul></section>` : ''}
+    <p class="note">Doppia ammonizione e 4ª ammonizione danno 1 giornata in automatico dai cartellini delle partite. Le espulsioni dirette aspettano la tua decisione.</p>`;
+}
+function bindSqu(app){
+  app.querySelectorAll('[data-sc]').forEach(b => b.onclick = () => { S.pcat = b.dataset.sc; render(); });
+  const nb = app.querySelector('#sqNew'); if(nb) nb.onclick = () => openSqualifica(null);
+  app.querySelectorAll('[data-sz]').forEach(b => b.onclick = () => { const z = S.sanz[+b.dataset.sz]; if(!z) return; if(b.dataset.auto) toast('Squalifica automatica: per toglierla correggi i cartellini nella scheda della partita'); else openSqualifica(z); });
+}
+function openSqualifica(z){
+  const cat = S.pcat, nuovo = !z, teams = squadreCat(cat);
+  const rosa = q => S.tess.filter(t => t.squadraId === q && t.stato === 'approvato').sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
+  const {root, close} = sheet(`<form class="form" id="sqForm" novalidate><h3>${nuovo ? 'Squalifica a mano' : esc(z.nome)}</h3>
+    <p class="note" style="grid-column:1/-1">${esc(NOMECAMP[cat])}${z ? ' · ' + esc(z.sq) : ''}${z && z.dir ? ` · espulso in ${esc(z.dopo.casa)} – ${esc(z.dopo.ospite)} (${z.dopo.giornata}ª giornata)` : ''}</p>
+    ${nuovo ? `<div class="field full"><label for="sq-q">Squadra</label><select id="sq-q"><option value="">Scegli…</option>${teams.map(q => `<option value="${esc(q.id)}">${esc(q.nome)}</option>`).join('')}</select></div>
+    <div class="field full"><label for="sq-t">Tesserato</label><select id="sq-t" disabled><option value="">Prima scegli la squadra</option></select></div>` : ''}
+    <div class="field"><label for="sq-g">Giornate</label><input id="sq-g" type="number" min="1" max="99" inputmode="numeric" value="${esc(z && z.gg != null ? z.gg : '')}"></div>
+    ${nuovo || z.man ? `<div class="field"><label for="sq-d">A partire dal</label><input id="sq-d" type="date" value="${esc(z ? z.dal : oggi())}"></div>` : '<div></div>'}
+    <div class="field full"><label for="sq-m">Motivo</label><input id="sq-m" value="${esc(z ? z.motivo : '')}" placeholder="${z && z.dir ? 'Espulsione diretta' : 'Es. comportamento a fine gara'}"></div>
+    ${z && z.dir ? '' : '<p class="note" style="grid-column:1/-1">Si scontano le partite della squadra giocate (o decise a tavolino) da quella data in poi.</p>'}
+    <div class="err" id="sqErr" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="sqGo">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+    ${z && (z.man || z.gg != null) ? `<button type="button" class="btn btn-danger btn-block" id="sqDel" style="grid-column:1/-1">${z.man ? 'Elimina squalifica' : 'Togli la decisione'}</button>` : ''}</form>`, 'Squalifica');
+  const v = id => root.querySelector('#' + id).value.trim();
+  if(nuovo) root.querySelector('#sq-q').onchange = e => { const r = rosa(e.target.value), t = root.querySelector('#sq-t'); t.disabled = !r.length;
+    t.innerHTML = r.length ? '<option value="">Scegli…</option>' + r.map(x => `<option value="${esc(x.id)}">${esc(nomeT(x))}${x.ruolo && x.ruolo !== 'Giocatore' ? ' · ' + esc(x.ruolo.toLowerCase()) : ''}</option>`).join('') : '<option value="">Nessun tesserato approvato</option>'; };
+  root.querySelector('#sqForm').onsubmit = async e => {
+    e.preventDefault(); const er = root.querySelector('#sqErr'), gg = parseInt(v('sq-g'), 10); er.textContent = '';
+    if(!(gg >= 1)) { er.textContent = 'Scrivi quante giornate (almeno 1).'; return; }
+    let id, o;
+    if(z && z.dir){ id = z.docId; o = {camp: cat, stagione: STAG, tid: z.id, nome: z.nome, sq: z.sq, sqId: z.sqId, gg, motivo: v('sq-m') || 'Espulsione diretta', partitaId: z.dopo.id, manuale: false, updatedAt: Date.now()}; }
+    else {
+      let t = null, q = null;
+      if(nuovo){ q = teams.find(x => x.id === v('sq-q')); t = q && rosa(q.id).find(x => x.id === v('sq-t')); if(!t){ er.textContent = 'Scegli squadra e tesserato.'; return; } }
+      if(!v('sq-d')){ er.textContent = 'Scegli da quando vale.'; return; }
+      id = nuovo ? db().collection('squalifiche').doc().id : z.docId;
+      o = {camp: cat, stagione: STAG, gg, motivo: v('sq-m') || 'Decisione del giudice', dal: v('sq-d'), manuale: true, updatedAt: Date.now(), ...(nuovo ? {tid: t.id, nome: nomeT(t), sq: q.nome, sqId: q.id, createdAt: Date.now()} : {})};
+    }
+    const b = root.querySelector('#sqGo'); b.disabled = true;
+    try{ await db().collection('squalifiche').doc(id).set(o, {merge: true}); toast('Squalifica salvata'); close(); }catch(err){ b.disabled = false; er.textContent = fbErr(err); }
+  };
+  const del = root.querySelector('#sqDel');
+  if(del) del.onclick = async () => { if(!confirm(z.man ? `Eliminare la squalifica di ${z.nome}?` : `Togliere la decisione? L’espulsione di ${z.nome} torna da decidere.`)) return;
+    try{ await db().collection('squalifiche').doc(z.docId).delete(); toast('Fatto'); close(); }catch(err){ toast(fbErr(err)); } };
+}
 
 /* --- menu calendario --- */
 function openCalMenu(){
@@ -966,14 +1319,59 @@ function openPartita(p){
     <div class="field full"><label for="p-es">Esito</label><select id="p-es"><option value="">Non ancora giocata</option><option value="g" ${p.giocata && !p.tavolino ? 'selected' : ''}>Giocata: scrivi il risultato</option><option value="casa" ${p.tavolino === 'casa' ? 'selected' : ''}>Vittoria a tavolino della squadra di casa</option><option value="ospite" ${p.tavolino === 'ospite' ? 'selected' : ''}>Vittoria a tavolino della squadra ospite</option></select></div>
     <div class="field" data-ris><label for="p-gc">Gol casa</label><input id="p-gc" type="number" min="0" inputmode="numeric" value="${esc(p.gc ?? '')}"></div>
     <div class="field" data-ris><label for="p-go">Gol ospite</label><input id="p-go" type="number" min="0" inputmode="numeric" value="${esc(p.go ?? '')}"></div>
+    <div class="mk" data-ris style="grid-column:1/-1" id="pMk"></div>
     <p class="note" style="grid-column:1/-1">Il risultato arriverà da solo dal referto dell’arbitro: scrivilo qui solo per correggerlo o se il referto manca. A tavolino: ${esc(impDi(cat).tav.join('-'))} come da impostazioni.</p>
     <p class="note" style="grid-column:1/-1">Con data, ora e campo la partita passa da sola nell’app arbitri tra le gare da designare. Se poi li cambi, la modifica arriva anche lì e l’arbitro deve riconfermare.</p>
+    ${isNew ? '' : `<div class="eyebrow" style="grid-column:1/-1">Distinte</div>${[['casaId', 'casa'], ['ospiteId', 'ospite']].map(([k, n]) => { const [c, t] = statoDist(p, p[k]); return `<button type="button" class="item dbtn" data-dd="${esc(p[k])}" style="grid-column:1/-1"><span class="tx"><b>${esc(p[n])}</b><span class="pst ${c}">${esc(t)}</span></span></button>`; }).join('')}`}
     <div class="err" id="pErr" style="grid-column:1/-1"></div>
     <div class="actions"><button class="btn btn-primary" id="pGo">${isNew ? 'Aggiungi' : 'Salva'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
     ${isNew ? '' : '<button type="button" class="btn btn-danger btn-block" id="pDel" style="grid-column:1/-1">Elimina partita</button>'}</form>`, 'Partita');
   const f = root.querySelector('#pForm'), v = id => root.querySelector('#' + id).value.trim();
   if(fatto) ['p-c', 'p-o', 'p-d', 'p-h', 'p-i', 'p-st'].forEach(id => root.querySelector('#' + id).disabled = true);
   const es = root.querySelector('#p-es'), risVis = () => root.querySelectorAll('[data-ris]').forEach(x => x.hidden = es.value !== 'g'); es.onchange = risVis; risVis();
+  /* marcatori, migliore in campo, miglior portiere */
+  const M = {mar: (p.mar || []).map(x => ({...x})), aut: {casa: +((p.aut || {}).casa) || 0, ospite: +((p.aut || {}).ospite) || 0}, mvp: p.mvp || null, por: p.por || null, ids: {casa: p.casaId, ospite: p.ospiteId},
+    car: [...(p.amm || []).map(x => ({...x, t: 'g'})), ...(p.esp || []).map(x => ({...x, t: x.tipo === 'doppia' ? 'd' : 'r'}))]};
+  const mk = root.querySelector('#pMk'), sel = id => root.querySelector('#' + id);
+  const rosa = s => { const q = sel(s === 'casa' ? 'p-c' : 'p-o').value; return S.tess.filter(t => t.squadraId === q && t.stato === 'approvato' && ['Giocatore', 'Portiere', ''].includes(t.ruolo || '')).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')); };
+  const ogg = (t, s) => ({id: t.id, nome: nomeT(t), cog: t.cognome || '', sq: s});
+  const tutti = s => { const q = sel(s === 'casa' ? 'p-c' : 'p-o').value; return S.tess.filter(t => t.squadraId === q && t.stato === 'approvato').sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')); };
+  const gol = s => +(sel(s === 'casa' ? 'p-gc' : 'p-go').value || 0);
+  const drawMk = () => {
+    ['casa', 'ospite'].forEach(s => { const q = sel(s === 'casa' ? 'p-c' : 'p-o').value; if(q !== M.ids[s]){ M.ids[s] = q; M.mar = M.mar.filter(x => x.sq !== s); M.aut[s] = 0; if(M.mvp && M.mvp.sq === s) M.mvp = null; if(M.por && M.por.sq === s) M.por = null; M.car = M.car.filter(x => x.sq !== s); } });
+    const nomeSq = s => { const q = teams.find(x => x.id === M.ids[s]); return q ? q.nome : (s === 'casa' ? 'Casa' : 'Ospite'); };
+    const blocco = s => { const r = rosa(s), lm = M.mar.map((x, i) => [x, i]).filter(([x]) => x.sq === s), ass = lm.reduce((a, [x]) => a + (+x.n || 0), 0) + M.aut[s], g = gol(s);
+      const pres = new Set(lm.map(([x]) => x.id));
+      return `<div class="mkb"><div class="mkh">${stemma(nomeSq(s))}<span>${esc(nomeSq(s))}</span><em class="${ass === g ? 'ok' : 'ko'}">${ass} di ${g} gol</em></div>
+        ${lm.map(([x, i]) => `<div class="mkr"><span>${esc(x.nome)}</span><button type="button" data-mm="${i}" aria-label="Un gol in meno">−</button><b>${x.n}</b><button type="button" data-mp="${i}" aria-label="Un gol in più">+</button></div>`).join('')}
+        ${M.aut[s] ? `<div class="mkr aut"><span>Autogol degli avversari</span><button type="button" data-am="${s}" aria-label="Un autogol in meno">−</button><b>${M.aut[s]}</b><button type="button" data-ap="${s}" aria-label="Un autogol in più">+</button></div>` : ''}
+        <select data-add="${s}" aria-label="Aggiungi marcatore ${esc(nomeSq(s))}"><option value="">+ Aggiungi chi ha segnato…</option>${r.filter(t => !pres.has(t.id)).map(t => `<option value="${esc(t.id)}">${esc(nomeT(t))}${t.numero ? ' · n. ' + esc(t.numero) : ''}</option>`).join('')}${M.aut[s] ? '' : '<option value="__aut">Autogol degli avversari</option>'}</select>
+        ${!r.length && M.ids[s] ? '<p class="note">Questa squadra non ha ancora tesserati approvati.</p>' : ''}</div>`; };
+    const opz = (cur, pref) => ['casa', 'ospite'].map(s => { let r = rosa(s); if(pref) r = [...r.filter(t => t.ruolo === 'Portiere'), ...r.filter(t => t.ruolo !== 'Portiere')];
+      const extra = cur && cur.sq === s && !r.some(t => t.id === cur.id) ? `<option value="${esc(cur.id)}" selected>${esc(cur.nome)}</option>` : '';
+      return `<optgroup label="${esc(nomeSq(s))}">${extra}${r.map(t => `<option value="${esc(t.id)}" ${cur && cur.id === t.id ? 'selected' : ''}>${esc(nomeT(t))}${pref && t.ruolo === 'Portiere' ? ' (portiere)' : ''}</option>`).join('')}</optgroup>`; }).join('');
+    const TIPI = [['g', 'Ammonito'], ['d', 'Espulso: doppia ammonizione'], ['r', 'Espulso: rosso diretto']];
+    const cartB = s => { const lc = M.car.map((x, i) => [x, i]).filter(([x]) => x.sq === s), pres = new Set(lc.map(([x]) => x.id));
+      return `<div class="mkb"><div class="mkh">${stemma(nomeSq(s))}<span>${esc(nomeSq(s))}</span>${lc.length ? `<em>${lc.length} ${lc.length === 1 ? 'tesserato' : 'tesserati'}</em>` : ''}</div>
+        ${lc.map(([x, i]) => `<div class="ckr"><span><span class="${x.t === 'g' ? 'cy' : 'cr'}"></span> ${esc(x.nome)}${x.ruolo && x.ruolo !== 'Giocatore' ? ` <small class="note">(${esc(x.ruolo.toLowerCase())})</small>` : ''}</span><select data-ct="${i}" aria-label="Tipo di cartellino">${TIPI.map(([k, n]) => `<option value="${k}" ${x.t === k ? 'selected' : ''}>${n}</option>`).join('')}</select><button type="button" class="x" data-cx="${i}" aria-label="Togli">✕</button></div>`).join('')}
+        <select data-cadd="${s}" aria-label="Aggiungi cartellino ${esc(nomeSq(s))}"><option value="">+ Aggiungi cartellino…</option>${tutti(s).filter(t => !pres.has(t.id)).map(t => `<option value="${esc(t.id)}">${esc(nomeT(t))}${t.ruolo && t.ruolo !== 'Giocatore' ? ' · ' + esc(t.ruolo.toLowerCase()) : ''}</option>`).join('')}</select></div>`; };
+    mk.innerHTML = `<div class="eyebrow">Chi ha segnato</div>${blocco('casa')}${blocco('ospite')}
+      <div class="field full"><label for="p-mvp">Migliore in campo</label><select id="p-mvp"><option value="">Nessuno</option>${opz(M.mvp)}</select></div>
+      <div class="field full"><label for="p-por">Miglior portiere</label><select id="p-por"><option value="">Nessuno</option>${opz(M.por, true)}</select></div>
+      <div class="eyebrow">Cartellini</div>${cartB('casa')}${cartB('ospite')}`;
+    mk.querySelectorAll('[data-cadd]').forEach(x => x.onchange = () => { const s = x.dataset.cadd, t = tutti(s).find(y => y.id === x.value); if(t) M.car.push({...ogg(t, s), ruolo: t.ruolo || 'Giocatore', t: 'g'}); drawMk(); });
+    mk.querySelectorAll('[data-ct]').forEach(x => x.onchange = () => { M.car[+x.dataset.ct].t = x.value; drawMk(); });
+    mk.querySelectorAll('[data-cx]').forEach(b => b.onclick = () => { M.car.splice(+b.dataset.cx, 1); drawMk(); });
+    const trova = (id, cur) => { for(const s of ['casa', 'ospite']){ const t = rosa(s).find(x => x.id === id); if(t) return ogg(t, s); } return cur && cur.id === id ? cur : null; };
+    mk.querySelector('#p-mvp').onchange = e => { M.mvp = trova(e.target.value, M.mvp); };
+    mk.querySelector('#p-por').onchange = e => { M.por = trova(e.target.value, M.por); };
+    mk.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => { M.mar[+b.dataset.mp].n++; drawMk(); });
+    mk.querySelectorAll('[data-mm]').forEach(b => b.onclick = () => { const x = M.mar[+b.dataset.mm]; if(--x.n <= 0) M.mar.splice(+b.dataset.mm, 1); drawMk(); });
+    mk.querySelectorAll('[data-ap]').forEach(b => b.onclick = () => { M.aut[b.dataset.ap]++; drawMk(); });
+    mk.querySelectorAll('[data-am]').forEach(b => b.onclick = () => { M.aut[b.dataset.am]--; drawMk(); });
+    mk.querySelectorAll('[data-add]').forEach(x => x.onchange = () => { const s = x.dataset.add; if(x.value === '__aut') M.aut[s] = 1; else { const t = rosa(s).find(y => y.id === x.value); if(t) M.mar.push({...ogg(t, s), n: 1}); } drawMk(); });
+  };
+  drawMk(); ['p-c', 'p-o'].forEach(id => sel(id).addEventListener('change', drawMk)); ['p-gc', 'p-go'].forEach(id => sel(id).addEventListener('input', drawMk));
   f.onsubmit = async e => {
     e.preventDefault(); const er = root.querySelector('#pErr'), btn = root.querySelector('#pGo'); er.textContent = '';
     const c = teams.find(q => q.id === v('p-c')), o = teams.find(q => q.id === v('p-o')), im = S.impianti.find(x => x.id === v('p-i'));
@@ -984,10 +1382,21 @@ function openPartita(p){
     const ev = es.value, gc = v('p-gc'), go = v('p-go');
     if(ev === 'g' && (gc === '' || go === '')){ er.textContent = 'Scrivi i gol delle due squadre.'; return; }
     Object.assign(n, ev === 'g' ? {giocata: true, tavolino: '', gc: +gc, go: +go} : ev ? {giocata: true, tavolino: ev, gc: null, go: null} : {giocata: false, tavolino: '', gc: null, go: null});
+    if(ev === 'g'){
+      const ass = s => M.mar.filter(x => x.sq === s).reduce((a, x) => a + x.n, 0) + M.aut[s], piu = ['casa', 'ospite'].filter(s => ass(s) > (s === 'casa' ? +gc : +go));
+      if(piu.length){ er.textContent = 'Hai assegnato più gol di quelli del risultato: controlla i marcatori.'; return; }
+      const manca = (+gc - ass('casa')) + (+go - ass('ospite'));
+      if(manca && (M.mar.length || M.aut.casa || M.aut.ospite) && !confirm(`${manca === 1 ? "Manca 1 gol" : "Mancano " + manca + " gol"} da assegnare a chi ha segnato. Salvare lo stesso?`)) return;
+      const cc = ({id, nome, cog, sq, ruolo}) => ({id, nome, cog, sq, ruolo: ruolo || 'Giocatore'});
+      Object.assign(n, {mar: M.mar.filter(x => x.n > 0).map(({id, nome, cog, sq, n: k}) => ({id, nome, cog, sq, n: k})), aut: {...M.aut}, mvp: M.mvp, por: M.por,
+        amm: M.car.filter(x => x.t === 'g').map(cc), esp: M.car.filter(x => x.t !== 'g').map(x => ({...cc(x), tipo: x.t === 'd' ? 'doppia' : 'diretta'}))});
+      n.cart = {casa: cartDi(n, 'casa'), ospite: cartDi(n, 'ospite')};
+    } else Object.assign(n, {mar: [], aut: null, mvp: null, por: null, amm: [], esp: [], cart: null});
     btn.disabled = true;
     try{ await salvaPartita(isNew ? {...nuovaPar(cat, n.giornata, c, o), ...n} : {...p, ...n}, p, im); S.pgio[cat] = n.giornata; toast(isNew ? 'Partita aggiunta' : 'Partita salvata'); close(); }
     catch(err){ btn.disabled = false; er.textContent = err.msg || fbErr(err); }
   };
+  root.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => openDistinta(p, b.dataset.dd));
   const del = root.querySelector('#pDel');
   if(del) del.onclick = async () => {
     if(d && ((d.ufficiali || []).length || fatto)){ toast('C’è già un arbitro: prima annulla la gara nell’app arbitri'); return; }
@@ -1024,6 +1433,7 @@ async function salvaPartita(n, old, im){
     }
   }
   if(n.stato !== 'rinviata' && old && old.stato === 'rinviata' && !n.data){ const e = new Error('data'); e.msg = 'Per togliere “rinviata” metti la nuova data.'; throw e; }
+  if(n.stato === 'rinviata' && !(old && old.stato === 'rinviata')) dati.rinvii = (+((old || {}).rinvii) || 0) + 1;
   ops.unshift(b => b.set(ref, dati, {merge: true}));
   await scriviTutto(ops);
 }
@@ -1058,7 +1468,7 @@ function classifica(cat, squadre, partite){
   parDi(partite, cat).forEach(p => { const e = esito(p, imp); if(!e) return; const c = riga(p.casaId || p.casa, p.casa), o = riga(p.ospiteId || p.ospite, p.ospite);
     giocate.push({c: c.id, o: o.id, gc: e.gc, go: e.go});
     [[c, e.gc, e.go], [o, e.go, e.gc]].forEach(([r, f, a]) => { r.G++; r.GF += f; r.GS += a; if(f > a){ r.V++; r.Pt += 3; } else if(f === a){ r.N++; r.Pt += 1; } else r.P++; });
-    const k = p.cart || {}; c.cart += +k.casa || 0; o.cart += +k.ospite || 0; });
+    c.cart += cartDi(p, 'casa'); o.cart += cartDi(p, 'ospite'); });
   const l = [...rows.values()], dr = r => r.GF - r.GS;
   const base = (a, b) => dr(b) - dr(a) || b.GF - a.GF || a.cart - b.cart || (a.nome || '').localeCompare(b.nome || '', 'it');
   // a pari punti: prima gli scontri diretti tra le squadre appaiate
