@@ -323,6 +323,12 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sw.cust{position:relative;overflow:hidden;background:conic-gradient(#f33,#fd3,#3d5,#3cf,#36f,#c3f,#f33);display:inline-block}
 .sw.cust input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
 .sheet-bg.sopra{z-index:60}
+.rhead{display:flex;align-items:center;gap:10px;min-width:0}.rhead>b{flex:1;min-width:0}.rhead .stemma{width:36px;height:36px;border-radius:10px;margin:0}
+.rp{display:flex;align-items:center;gap:8px}.rp .rtx{flex:1}.rtx{display:flex;flex-direction:column;min-width:0;gap:1px}.rtx span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.rper{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid var(--line, rgba(127,127,127,.2))}.rcard .rper:first-of-type{border-top:0;padding-top:0}
+.ctt{gap:6px;flex-wrap:nowrap}.ctt .btn{flex:1 1 0;justify-content:center;text-decoration:none;white-space:nowrap;padding-left:8px;padding-right:8px}.ctt .btn.em{flex:0 0 46px}
+.btn-wa{background:#1FA855;color:#fff;border:0}
+.sqsw button{display:inline-flex;align-items:center;gap:6px}.sqsw .stemma{width:22px;height:22px;border-radius:6px;font-size:10px;margin:0}
 .btn.scelta{display:flex;flex-direction:column;align-items:center;gap:2px;height:auto;min-height:52px;padding:10px 14px;white-space:normal;text-align:center}.btn.scelta small{font-weight:500;font-size:12.5px;opacity:.85}
 .warn-campo{background:rgba(232,163,60,.14);border:1px solid rgba(232,163,60,.45);border-radius:12px;padding:8px 10px;color:var(--fg)}
 .mg-row{align-items:flex-start}
@@ -497,7 +503,7 @@ function loadFB(){
 const db = () => firebase.firestore();
 
 /* ---------- stato ---------- */
-const S = {ready: false, user: null, admin: false, resp: null, respOk: false, squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
+const S = {ready: false, user: null, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
 const VIEW = () => ({'#futsal': 'futsal', '#liga': 'liga', '#area': 'area'})[location.hash] || 'home';
 const CAMP = {futsal: {cat: 'C5 AICS', nome: 'Futsal League', sub: 'Calcio a 5 · AICS Reggio Emilia', logo: 'logo-futsal.png', cls: 'camp-f'}, liga: {cat: 'C7 AICS', nome: 'R.E. Liga', sub: 'Calcio a 7 · AICS Reggio Emilia', logo: 'logo-liga.png', cls: 'camp-l'}};
 const sqById = id => S.squadre.find(q => q.id === id) || {};
@@ -505,13 +511,15 @@ const live = (q, k, fn) => S.unsub.push(q.onSnapshot(s => { fn(s.docs.map(d => (
 
 async function onUser(u){
   S.unsub.forEach(f => f()); S.unsub = [];
-  Object.assign(S, {user: u, admin: false, resp: null, respOk: false, tess: [], resps: [], loaded: {}, err: ''});
+  Object.assign(S, {user: u, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], tess: [], resps: [], loaded: {}, err: '', accInv: false});
   if(!u){ S.ready = true; render(); return; }
   S.admin = ADMINS().includes(String(u.email || '').toLowerCase());
   live(db().collection('squadre'), 'squadre', l => { S.squadre = l; });
   if(S.admin){
     live(db().collection('tesserati'), 'tess', l => { S.tess = l; });
-    live(db().collection('responsabili'), 'resps', l => { S.resps = l; });
+    live(db().collection('responsabili'), 'resps', l => { S.resps = l; setTimeout(migraResp); });
+    live(db().collection('abilitazioni'), 'abil', l => { S.abil = l; setTimeout(migraResp); });
+    live(db().collection('inviti'), 'inviti', l => { S.inviti = l; });
     live(db().collection('partite'), 'partite', l => { S.partite = l; });
     live(db().collection('impianti'), 'impianti', l => { S.impianti = l; });
     live(db().collection('designazioni'), 'des', l => { S.des = l; });
@@ -519,20 +527,87 @@ async function onUser(u){
     pubStart();
     S.ready = true; render(); return;
   }
-  S.unsub.push(db().collection('responsabili').doc(u.uid).onSnapshot(d => {
-    const was = S.respOk && S.resp && S.resp.squadraId;
-    S.resp = d.exists ? {id: d.id, ...d.data()} : null; S.loaded.resp = true;
-    S.respOk = !!(S.resp && S.resp.stato === 'attivo');
-    if(S.respOk && was !== S.resp.squadraId){
-      const i = S.unsub.findIndex(f => f.tess); if(i >= 0){ S.unsub[i](); S.unsub.splice(i, 1); }
-      const f = db().collection('tesserati').where('squadraId', '==', S.resp.squadraId).onSnapshot(s => { S.tess = s.docs.map(x => ({id: x.id, ...x.data()})); S.loaded.tess = true; render(); }, e => { S.err = fbErr(e); S.loaded.tess = true; render(); });
-      f.tess = true; S.unsub.push(f);
-      const j = S.unsub.findIndex(x => x.dist); if(j >= 0){ S.unsub[j](); S.unsub.splice(j, 1); }
-      const g = db().collection('distinte').where('squadraId', '==', S.resp.squadraId).onSnapshot(s => { S.dist = s.docs.map(x => ({id: x.id, ...x.data()})); S.loaded.dist = true; render(); }, e => { console.warn('dist', e.code); S.loaded.dist = true; render(); });
-      g.dist = true; S.unsub.push(g);
-    }
-    S.ready = true; render();
-  }, e => { S.err = fbErr(e); S.ready = true; render(); }));
+  /* responsabile: i suoi dati, le squadre che gestisce (o ha chiesto) e gli inviti dell'amministratore per la sua email */
+  const me = u.uid, mail = String(u.email || '').toLowerCase(), got = new Set();
+  const fatto = k => { got.add(k); if(got.size < 3) return; S.loaded.resp = true; aggiornaResp(); S.ready = true; render(); };
+  const err = e => { console.warn('resp', e.code); S.err = fbErr(e); S.loaded.resp = true; S.ready = true; render(); };
+  S.unsub.push(db().collection('responsabili').doc(me).onSnapshot(d => { S.prof = d.exists ? {id: d.id, ...d.data()} : null; fatto('p'); }, err));
+  S.unsub.push(db().collection('abilitazioni').where('uid', '==', me).onSnapshot(x => { S.abil = x.docs.map(d => ({id: d.id, ...d.data()})); fatto('a'); }, err));
+  S.unsub.push(db().collection('inviti').where('email', '==', mail).onSnapshot(x => { S.inviti = x.docs.map(d => ({id: d.id, ...d.data()})); fatto('i'); }, err));
+}
+const leggiRsq = () => { try{ return localStorage.getItem('aics-rsq') || ''; }catch(e){ return ''; } };
+const scriviRsq = v => { try{ localStorage.setItem('aics-rsq', v); }catch(e){} };
+/* squadra su cui lavora il responsabile (se ne gestisce più di una sceglie lui) */
+function aggiornaResp(){
+  const att = S.abil.filter(a => a.stato === 'attivo').sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it'));
+  const cur = att.find(a => a.squadraId === S.rsq) || att.find(a => a.squadraId === leggiRsq()) || att[0];
+  const was = S.respOk && S.resp && S.resp.squadraId;
+  S.respOk = !!cur;
+  S.resp = cur ? {...(S.prof || {}), id: S.user.uid, squadraId: cur.squadraId, squadra: cur.squadra, categoria: cur.categoria, stato: 'attivo'} : null;
+  if(cur){ S.rsq = cur.squadraId; if(was !== cur.squadraId) subSq(cur.squadraId); }
+  if(S.inviti.length) accettaInviti();
+}
+function subSq(id){
+  S.unsub = S.unsub.filter(f => { if(f.sq){ f(); return false; } return true; });
+  S.tess = []; S.dist = []; S.loaded.tess = false; S.loaded.dist = false;
+  const f = db().collection('tesserati').where('squadraId', '==', id).onSnapshot(x => { S.tess = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.tess = true; render(); }, e => { S.err = fbErr(e); S.loaded.tess = true; render(); });
+  const g = db().collection('distinte').where('squadraId', '==', id).onSnapshot(x => { S.dist = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.dist = true; render(); }, e => { console.warn('dist', e.code); S.loaded.dist = true; render(); });
+  f.sq = g.sq = true; S.unsub.push(f, g);
+}
+/* invito dell'amministratore: con l'email confermata si entra subito nella squadra */
+async function accettaInviti(){
+  if(S.accInv || !S.user.emailVerified || !S.inviti.length) return;
+  S.accInv = true;
+  const me = S.user.uid, b = db().batch(), i0 = S.inviti[0];
+  if(!S.prof) b.set(db().collection('responsabili').doc(me), {nome: i0.nome || '', cognome: i0.cognome || '', telefono: i0.telefono || '', email: S.user.email, createdAt: Date.now()});
+  S.inviti.forEach(i => {
+    if(!S.abil.some(a => a.squadraId === i.squadraId && a.stato === 'attivo'))
+      b.set(db().collection('abilitazioni').doc(me + '_' + i.squadraId), {uid: me, squadraId: i.squadraId, squadra: i.squadra || '', categoria: i.categoria || '', stato: 'attivo', motivo: '', createdAt: Date.now(), via: 'invito'});
+    b.delete(db().collection('inviti').doc(i.id));
+  });
+  try{ await b.commit(); toast(`Benvenuto! Ora gestisci ${S.inviti.map(i => i.squadra).join(' e ')}`); }
+  catch(e){ console.warn('inviti', e.code); S.err = fbErr(e); S.accInv = false; render(); }
+}
+async function inviaVerifica(manuale){
+  S.verSent = true;
+  try{ firebase.auth().languageCode = 'it'; await S.user.sendEmailVerification(); if(manuale) toast('Email mandata di nuovo'); }
+  catch(e){ if(manuale) toast(e.code === 'auth/too-many-requests' ? 'Aspetta qualche minuto prima di chiederla di nuovo' : fbErr(e)); }
+}
+async function controllaVerifica(){
+  const u = firebase.auth().currentUser; if(!u) return;
+  try{ await u.reload(); if(u.emailVerified){ await u.getIdToken(true); S.user = u; S.accInv = false; accettaInviti(); render(); return true; } }catch(e){}
+  return false;
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && S.user && !S.admin && S.inviti.length && !S.user.emailVerified) controllaVerifica(); });
+/* richiesta di gestire una squadra (la approva l'amministratore) */
+async function chiediSquadra(q, d){
+  const me = S.user.uid, b = db().batch(), pr = db().collection('responsabili').doc(me);
+  if(S.prof) b.update(pr, {nome: d.nome, cognome: d.cognome, telefono: d.telefono, updatedAt: Date.now()});
+  else b.set(pr, {nome: d.nome, cognome: d.cognome, telefono: d.telefono, email: S.user.email, createdAt: Date.now()});
+  b.set(db().collection('abilitazioni').doc(me + '_' + q.id), {uid: me, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || '', stato: 'attesa', motivo: '', createdAt: Date.now(), via: 'richiesta'});
+  await b.commit();
+}
+/* responsabili: al massimo 2 per squadra (abilitati + invitati) */
+const MAXRESP = 2;
+const profDi = uid => S.resps.find(p => p.id === uid) || {};
+const respSq = sqId => S.abil.filter(a => a.squadraId === sqId && a.stato === 'attivo').map(a => ({...profDi(a.uid), ...a})).sort((a, b) => (a.abilitatoAt || a.createdAt || 0) - (b.abilitatoAt || b.createdAt || 0));
+const invSq = sqId => S.inviti.filter(i => i.squadraId === sqId);
+const postiSq = sqId => respSq(sqId).length + invSq(sqId).length;
+const nomeR = r => `${r.nome || ''} ${r.cognome || ''}`.trim() || r.email || 'Senza nome';
+/* numero per WhatsApp: cellulari italiani anche senza +39 */
+const telN = t => { let d = String(t || '').replace(/[^\d+]/g, ''); if(d.startsWith('+')) d = d.slice(1); else if(d.startsWith('00')) d = d.slice(2); else if(/^3\d{8,9}$/.test(d)) d = '39' + d; return d.replace(/\D/g, ''); };
+const waOk = n => /^393\d{8,9}$/.test(n) || (n.length >= 8 && !/^39/.test(n) && !/^0/.test(n));
+const contatti = (r, msg) => { const n = telN(r.telefono), tel = String(r.telefono || '').replace(/[^\d+]/g, '');
+  return `<div class="row ctt">${tel ? `<a class="btn btn-ghost sm" href="tel:${esc(tel)}">📞 Chiama</a>` : ''}${waOk(n) ? `<a class="btn btn-wa sm" href="https://wa.me/${n}${msg ? '?text=' + encodeURIComponent(msg) : ''}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${r.email ? `<a class="btn btn-ghost sm em" href="mailto:${esc(r.email)}" aria-label="Scrivi un’email" title="Email">✉️</a>` : ''}</div>`; };
+/* dati vecchi (un solo documento per responsabile) -> abilitazioni per squadra. Lo fa l'amministratore, una volta */
+async function migraResp(){
+  if(S.migrato || !S.loaded.resps || !S.loaded.abil) return;
+  const old = S.resps.filter(r => r.squadraId); S.migrato = true; if(!old.length) return;
+  const b = db().batch(), del = firebase.firestore.FieldValue.delete();
+  old.forEach(r => { const id = r.id + '_' + r.squadraId;
+    if(!S.abil.some(a => a.id === id)){ const o = {uid: r.id, squadraId: r.squadraId, squadra: r.squadra || '', categoria: r.categoria || '', stato: r.stato || 'attesa', motivo: r.motivo || '', createdAt: r.createdAt || Date.now(), via: 'richiesta'}; if(r.abilitatoAt) o.abilitatoAt = r.abilitatoAt; b.set(db().collection('abilitazioni').doc(id), o); }
+    b.update(db().collection('responsabili').doc(r.id), {squadraId: del, squadra: del, categoria: del, stato: del, motivo: del, abilitatoAt: del}); });
+  try{ await b.commit(); }catch(e){ console.warn('migra', e.code); S.migrato = false; }
 }
 
 /* ---------- disegno ---------- */
@@ -566,7 +641,7 @@ function renderHome(app){
     lay();
   }
   app.dataset.v = 'home';
-  const u = S.user, n = u ? (S.resp ? S.resp.nome : (u.email || '')) : '';
+  const u = S.user, n = u ? (S.prof && S.prof.nome ? S.prof.nome : (u.email || '')) : '';
   $('#accTx').textContent = u ? (S.admin ? 'Sei entrato come amministratore' : 'Sei entrato come ' + n) : 'Sei responsabile di una squadra?';
   $('#accBtn').textContent = u ? 'Area squadre ›' : 'Area squadre · Accedi';
 }
@@ -1053,45 +1128,82 @@ function renderGate(app){
     try{ await firebase.auth().sendPasswordResetEmail(em); toast('Ti ho mandato una email per cambiare la password'); }catch(err){ toast(fbErr(err)); } };
 }
 
-/* -- account senza squadra: chiede l'abilitazione -- */
-function renderRichiesta(app){
-  const r = S.resp, n = S.nuovo || {};
-  app.dataset.v = 'rich';
-  const attesa = r && r.stato === 'attesa';
-  const no = r && (r.stato === 'rifiutato' || r.stato === 'revocato');
-  const opt = CATS.map(c => `<optgroup label="${c}">${S.squadre.filter(q => q.categoria === c).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it')).map(q => `<option value="${esc(q.id)}" ${r && r.squadraId === q.id ? 'selected' : ''}>${esc(q.nome)}</option>`).join('')}</optgroup>`).join('');
-  app.innerHTML = band('AICS Squadre', S.user.email) + `<main class="wrap stack">
-    ${attesa ? `<div class="card"><h3>⏳ In attesa di abilitazione</h3><p class="note">Hai chiesto di gestire <b>${esc(r.squadra)}</b>. Appena l’amministratore del torneo ti abilita, qui trovi la tua squadra: non serve fare altro.</p></div>` : ''}
-    ${no ? `<div class="card"><h3>⛔ Richiesta non accettata</h3><p class="note">${r.stato === 'revocato' ? 'L’amministratore ti ha tolto l’accesso alla squadra.' : 'L’amministratore non ha accettato la richiesta.'}${r.motivo ? ' Motivo: ' + esc(r.motivo) : ''} Puoi inviarne una nuova qui sotto.</p></div>` : ''}
-    ${attesa ? '' : `<form class="card form" id="rForm"><h3 style="grid-column:1/-1">Di quale squadra sei responsabile?</h3>
-      <div class="field"><label for="r-nome">Nome</label><input id="r-nome" required value="${esc((r && r.nome) || n.nome || '')}"></div>
-      <div class="field"><label for="r-cog">Cognome</label><input id="r-cog" required value="${esc((r && r.cognome) || n.cognome || '')}"></div>
-      <div class="field full"><label for="r-tel">Telefono</label><input id="r-tel" type="tel" required inputmode="tel" value="${esc((r && r.telefono) || '')}"></div>
-      <div class="field full"><label for="r-sq">Squadra</label><select id="r-sq" required><option value="">Scegli la squadra…</option>${opt}</select></div>
+/* -- account senza squadra abilitata: invito da confermare o richiesta all'amministratore -- */
+const optSq = (escl, sel) => CATS.map(c => `<optgroup label="${c}">${S.squadre.filter(q => q.categoria === c && !escl.includes(q.id)).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it')).map(q => `<option value="${esc(q.id)}" ${q.id === sel ? 'selected' : ''}>${esc(q.nome)}</option>`).join('')}</optgroup>`).join('');
+const formChiedi = (p, escl, tit) => `<form class="card form" id="rForm"><h3 style="grid-column:1/-1">${tit}</h3>
+      <div class="field"><label for="r-nome">Nome</label><input id="r-nome" required value="${esc(p.nome || '')}" autocomplete="given-name"></div>
+      <div class="field"><label for="r-cog">Cognome</label><input id="r-cog" required value="${esc(p.cognome || '')}" autocomplete="family-name"></div>
+      <div class="field full"><label for="r-tel">Telefono (cellulare)</label><input id="r-tel" type="tel" required inputmode="tel" value="${esc(p.telefono || '')}" autocomplete="tel"></div>
+      <div class="field full"><label for="r-sq">Squadra</label><select id="r-sq" required><option value="">Scegli la squadra…</option>${optSq(escl)}</select></div>
       <label class="check"><input type="checkbox" id="r-ok" required><span>Dichiaro di essere autorizzato dalla società a gestire i tesserati di questa squadra.</span></label>
-      <div class="actions"><button class="btn btn-primary">Invia richiesta</button></div></form>`}
+      <div class="actions"><button class="btn btn-primary" id="rGo">Invia richiesta</button></div></form>`;
+const bindChiedi = (root, dopo) => { const fm = root.querySelector('#rForm'); if(!fm) return;
+  fm.onsubmit = async e => { e.preventDefault(); const q = sqById(fm.querySelector('#r-sq').value); if(!q.id) return; const bt = fm.querySelector('#rGo'); bt.disabled = true;
+    try{ await chiediSquadra(q, {nome: fm.querySelector('#r-nome').value.trim(), cognome: fm.querySelector('#r-cog').value.trim(), telefono: fm.querySelector('#r-tel').value.trim()}); toast('Richiesta inviata all’amministratore'); if(dopo) dopo(); }
+    catch(err){ bt.disabled = false; toast(fbErr(err)); } }; };
+const bindAnnullaRich = root => root.querySelectorAll('[data-ann]').forEach(b => b.onclick = async () => { if(!confirm('Annullare la richiesta?')) return; try{ await db().collection('abilitazioni').doc(b.dataset.ann).delete(); toast('Richiesta annullata'); }catch(err){ toast(fbErr(err)); } });
+const richHtml = () => { const pend = S.abil.filter(a => a.stato === 'attesa'), no = S.abil.filter(a => a.stato === 'rifiutato' || a.stato === 'revocato');
+  return (pend.length ? `<div class="card stack" style="gap:8px"><h3>⏳ In attesa di abilitazione</h3>${pend.map(a => `<div class="rp"><div class="rtx"><b>${esc(a.squadra)}</b><span>${esc(a.categoria || '')}</span></div><button type="button" class="btn btn-ghost sm" data-ann="${esc(a.id)}">Annulla</button></div>`).join('')}<p class="note">Appena l’amministratore del torneo ti abilita, qui trovi la squadra: non serve fare altro.</p></div>` : '')
+    + (no.length ? `<div class="card stack" style="gap:8px"><h3>⛔ Non accettata</h3>${no.map(a => `<p class="note"><b>${esc(a.squadra)}</b>: ${a.stato === 'revocato' ? 'l’amministratore ti ha tolto l’accesso' : 'l’amministratore non ha accettato la richiesta'}${a.motivo ? '. Motivo: ' + esc(a.motivo) : ''}.</p>`).join('')}<p class="note">Puoi chiederla di nuovo.</p></div>` : ''); };
+function renderRichiesta(app){
+  const p = S.prof || S.nuovo || {}, inv = S.inviti, pend = S.abil.filter(a => a.stato === 'attesa');
+  const nonVer = inv.length && !S.user.emailVerified;
+  if(nonVer && !S.verSent) inviaVerifica();
+  app.dataset.v = 'rich';
+  app.innerHTML = band('AICS League', S.user.email) + `<main class="wrap stack">
+    ${nonVer ? `<div class="card stack" style="gap:10px"><h3>📩 Conferma la tua email</h3><p class="note">L’amministratore del torneo ti ha indicato come responsabile di <b>${inv.map(i => esc(i.squadra)).join('</b> e <b>')}</b>. Per entrare ti ho mandato un’email a <b>${esc(S.user.email)}</b>: apri il link che c’è dentro e poi torna qui.</p>
+      <button class="btn btn-primary btn-block" id="vOk">Ho confermato l’email</button><button class="btn btn-ghost btn-block" id="vRe">Mandala di nuovo</button><p class="note">Non la trovi? Guarda nella posta indesiderata (spam).</p></div>`
+      : inv.length ? '<div class="status"><span class="spin"></span>Entro nella tua squadra…</div>' : ''}
+    ${richHtml()}
+    ${inv.length ? '' : pend.length && !S.altra ? '<button class="btn btn-ghost btn-block" id="rAltra">+ Chiedi anche un’altra squadra</button>' : formChiedi(p, pend.map(a => a.squadraId), pend.length ? 'Chiedi un’altra squadra' : 'Di quale squadra sei responsabile?')}
     ${S.err ? `<p class="err">${esc(S.err)}</p>` : ''}</main>`;
-  bindOut();
-  if($('#rForm')) $('#rForm').onsubmit = async e => {
-    e.preventDefault(); const q = sqById($('#r-sq').value); if(!q.id) return;
-    const o = {nome: $('#r-nome').value.trim(), cognome: $('#r-cog').value.trim(), telefono: $('#r-tel').value.trim(), email: S.user.email, squadraId: q.id, squadra: q.nome, categoria: q.categoria || '', stato: 'attesa', createdAt: Date.now()};
-    try{ await db().collection('responsabili').doc(S.user.uid).set(o); toast('Richiesta inviata all’amministratore'); }catch(err){ toast(fbErr(err)); }
-  };
+  bindOut(); bindChiedi(app, () => { S.altra = false; }); bindAnnullaRich(app);
+  if($('#rAltra')) $('#rAltra').onclick = () => { S.altra = true; render(); };
+  if($('#vOk')) $('#vOk').onclick = async () => { const b = $('#vOk'); b.disabled = true; if(!(await controllaVerifica())){ b.disabled = false; toast('Non risulta ancora confermata: apri il link nell’email'); } };
+  if($('#vRe')) $('#vRe').onclick = () => inviaVerifica(true);
+}
+/* responsabile: le sue squadre, altre richieste e i suoi dati */
+function openChiedi(){
+  const escl = S.abil.filter(a => a.stato === 'attivo' || a.stato === 'attesa').map(a => a.squadraId);
+  const {root, close} = sheet(formChiedi(S.prof || {}, escl, 'Chiedi un’altra squadra') + '<button type="button" class="btn btn-ghost btn-block" data-x>Annulla</button>', 'Chiedi un’altra squadra');
+  bindChiedi(root, close);
+}
+function openDati(){
+  const p = S.prof || {};
+  const {root, close} = sheet(`<form class="form" id="dForm"><h3 style="grid-column:1/-1">I tuoi dati</h3>
+    <div class="field"><label for="d-nome">Nome</label><input id="d-nome" required value="${esc(p.nome || '')}"></div>
+    <div class="field"><label for="d-cog">Cognome</label><input id="d-cog" required value="${esc(p.cognome || '')}"></div>
+    <div class="field full"><label for="d-tel">Telefono (cellulare)</label><input id="d-tel" type="tel" required inputmode="tel" value="${esc(p.telefono || '')}"></div>
+    <p class="note full" style="grid-column:1/-1">Li vede solo l’amministratore del torneo, per contattarti.</p>
+    <div class="actions"><button class="btn btn-primary" id="dGo">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'I tuoi dati');
+  root.querySelector('#dForm').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim();
+    const o = {nome: v('d-nome'), cognome: v('d-cog'), telefono: v('d-tel')};
+    try{ const r = db().collection('responsabili').doc(S.user.uid); if(S.prof) await r.update({...o, updatedAt: Date.now()}); else await r.set({...o, email: S.user.email, createdAt: Date.now()}); toast('Dati salvati'); close(); }catch(err){ toast(fbErr(err)); } };
 }
 
 /* -- responsabile della squadra -- */
+const bindRT = app => { app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
+  app.querySelectorAll('[data-rsq]').forEach(b => b.onclick = () => { S.rsq = b.dataset.rsq; scriviRsq(S.rsq); aggiornaResp(); render(); window.scrollTo(0, 0); }); };
 function renderResp(app){
-  const r = S.resp, q = sqById(r.squadraId), l = S.tess.slice().sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
+  const r = S.resp, q = sqById(r.squadraId) || {}, l = S.tess.slice().sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
   const gr = {attesa: [], rifiutato: [], approvato: [], sospeso: [], scaduto: []};
   l.forEach(t => (gr[statoT(t)] || gr.attesa).push(t));
   app.dataset.v = 'resp'; pubStart();
-  const rt = S.rtab || 'dist', segR = `<div class="seg" role="tablist">${[['dist', 'Partite e distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra']].map(([k, t]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${t}</button>`).join('')}</div>`;
+  const att = S.abil.filter(a => a.stato === 'attivo').sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it'));
+  const sw = att.length > 1 ? `<div class="seg sqsw" role="group" aria-label="Squadra">${att.map(a => `<button data-rsq="${esc(a.squadraId)}" aria-pressed="${a.squadraId === r.squadraId}">${stemma(a.squadra)}${esc(a.squadra)}</button>`).join('')}</div>` : '';
+  const rt = S.rtab || 'dist', segR = sw + `<div class="seg" role="tablist">${[['dist', 'Partite e distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra']].map(([k, t]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${t}</button>`).join('')}</div>`;
   if(rt === 'sq'){
     const qq = {id: r.squadraId, nome: q.nome || r.squadra, categoria: q.categoria || r.categoria};
-    app.innerHTML = band(qq.nome, `${qq.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">${segR}${schedaBox(qq)}
-      <p class="note">Carica lo stemma e scegli i colori delle maglie: si vedono nell’app pubblica, nelle partite e in classifica. Il campo di casa lo imposta l’amministratore del torneo.</p></main>`;
-    bindOut();
-    app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
+    app.innerHTML = band(qq.nome, `${qq.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}${schedaBox(qq)}
+      <p class="note">Carica lo stemma e scegli i colori delle maglie: si vedono nell’app pubblica, nelle partite e in classifica. Il campo di casa lo imposta l’amministratore del torneo.</p>
+      <section class="stack" style="gap:8px"><div class="eyebrow">${att.length > 1 ? 'Le tue squadre' : 'La tua squadra'}</div>
+        <div class="card stack" style="gap:8px">${att.map(a => `<div class="rp"><div class="rhead">${stemma(a.squadra)}<div class="rtx"><b>${esc(a.squadra)}</b><span>${esc(a.categoria || '')}</span></div></div></div>`).join('')}</div>
+        ${richHtml()}<button class="btn btn-ghost btn-block" id="rAltra">+ Chiedi un’altra squadra</button>
+        <p class="note">Ogni squadra ha al massimo ${MAXRESP} responsabili. Se gestisci più squadre, in alto scegli su quale lavorare.</p></section>
+      <section class="stack" style="gap:8px"><div class="eyebrow">I tuoi dati</div>
+        <div class="card rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || 'Telefono non indicato')} · ${esc(S.user.email)}</span></div><button class="btn btn-ghost sm" id="rDati">Modifica</button></div></section></main>`;
+    bindOut(); bindAnnullaRich(app); $('#rAltra').onclick = openChiedi; $('#rDati').onclick = openDati;
+    bindRT(app);
     app.querySelector('[data-scheda]').onclick = () => openSchedaSq(qq);
     return;
   }
@@ -1101,13 +1213,13 @@ function renderResp(app){
     const item = p => { const [k, t] = statoDist(p, r.squadraId), vs = p.casaId === r.squadraId ? p.ospite : p.casa, sq = !esito(p) && p.data && p.stato !== 'rinviata' ? squPer(p, r.squadraId) : [];
       return `<li><button class="item" data-dp="${esc(p.id)}">${stemma(vs)}<span class="tx"><b>${esc(p.giornata)}ª · ${esc(p.casa)} – ${esc(p.ospite)}</b><span>${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>
         <span class="pst ${k}">${esc(t)}</span>${sq.length ? `<span class="pst no">⛔ ${sq.length === 1 ? '1 squalificato' : sq.length + ' squalificati'}</span>` : ''}</span></button></li>`; };
-    app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">${segR}
+    app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}
       ${!S.pubParOk || !S.loaded.dist ? '<div class="status"><span class="spin"></span>Carico le partite…</div>' : !lp.length ? '<div class="empty"><h3>Calendario in arrivo</h3><span>Qui troverai le partite della tua squadra: per ognuna si compila la distinta.</span></div>'
         : `${prox.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Da giocare</div><ul class="list">${prox.map(item).join('')}</ul></section>` : ''}
         ${fatte.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Giocate</div><ul class="list">${fatte.map(item).join('')}</ul></section>` : ''}`}
       <p class="note">Distinta: da ${(LIM[cat] || [3, 12])[0]} a ${(LIM[cat] || [3, 12])[1]} giocatori, capitano obbligatorio, fino a ${MAXDIR} dirigenti. Si compila quando la partita ha data e ora e si può cambiare fino all’inizio. Se la partita viene annullata, la distinta va rifatta.</p></main>`;
     bindOut(); bindHome(app);
-    app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
+    bindRT(app);
     app.querySelectorAll('[data-dp]').forEach(b => b.onclick = () => { const p = lp.find(x => x.id === b.dataset.dp); if(!p) return;
       if(!esito(p) && p.stato === 'rinviata'){ toast('Partita rinviata: la distinta si compila quando c’è la nuova data'); return; }
       if(!esito(p) && (!p.data || !p.ora)){ toast('La distinta si compila quando la partita ha data e ora'); return; }
@@ -1115,13 +1227,13 @@ function renderResp(app){
     return;
   }
   const blocco = (k, tit) => gr[k].length ? `<section class="stack" style="gap:8px"><div class="eyebrow">${tit} <span class="cnt">${gr[k].length}</span></div><ul class="list">${gr[k].map(itemT).join('')}</ul></section>` : '';
-  app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${r.nome} ${r.cognome}`) + `<main class="wrap stack">${segR}
+  app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}
     <button class="btn btn-primary btn-block" id="tNew">+ Nuovo tesserato</button>
     ${!S.loaded.tess ? '<div class="status"><span class="spin"></span>Carico i tesserati…</div>' : !l.length ? `<div class="empty"><h3>Nessun tesserato</h3><span>Aggiungi i giocatori e lo staff: l’amministratore del torneo li controlla e approva. Solo i tesserati approvati potranno andare in distinta.</span></div>` : ''}
     ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('scaduto', 'Scaduti (stagioni passate)')}
     <p class="note">I cartellini valgono fino al 30 giugno. Dopo la scadenza restano in archivio per un anno, poi i dati si cancellano da soli.</p></main>`;
   bindOut();
-  app.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { S.rtab = b.dataset.rt; render(); });
+  bindRT(app);
   $('#tNew').onclick = () => openTess({squadraId: r.squadraId, squadra: q.nome || r.squadra, categoria: q.categoria || r.categoria || ''});
   bindItems(app);
 }
@@ -1230,22 +1342,23 @@ function openCard(t){
 
 /* -- amministratore del torneo -- */
 function renderAdmin(app){
-  const attT = S.tess.filter(t => t.stato === 'attesa'), attR = S.resps.filter(r => r.stato === 'attesa');
+  const attT = S.tess.filter(t => t.stato === 'attesa'), attR = S.abil.filter(a => a.stato === 'attesa').map(a => ({...profDi(a.uid), ...a}));
   const daDec = S.pubParOk ? CATS.reduce((a, c) => a + disciplina(c).sanz.filter(z => z.gg == null).length, 0) : 0;
-  const tabs = [['appr', 'Da approvare', attT.length + attR.length], ['partite', 'Partite', 0], ['squ', 'Squalifiche', daDec], ['squadre', 'Squadre', 0], ['tess', 'Tesserati', 0]];
+  const tabs = [['appr', 'Da approvare', attT.length + attR.length], ['partite', 'Partite', 0], ['squ', 'Squalifiche', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0]];
   app.dataset.v = 'admin';
   let body = '';
-  if(!S.loaded.tess || !S.loaded.resps || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
-  else if(S.tab === 'appr') body = (attR.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Responsabili di squadra <span class="cnt hot">${attR.length}</span></div><ul class="list">${attR.map(r => `<li class="card stack" style="gap:8px"><div><b>${esc(r.nome)} ${esc(r.cognome)}</b> chiede di gestire <b>${esc(r.squadra)}</b><div class="note">${esc(r.email)} · ${esc(r.telefono || '')}</div></div><div class="row"><button class="btn btn-ok sm" data-ra="${esc(r.id)}">✓ Abilita</button><button class="btn btn-danger sm" data-rn="${esc(r.id)}">Rifiuta</button></div></li>`).join('')}</ul></section>` : '')
+  if(!S.loaded.tess || !S.loaded.resps || !S.loaded.abil || !S.loaded.inviti || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
+  else if(S.tab === 'appr') body = (attR.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Responsabili di squadra <span class="cnt hot">${attR.length}</span></div><ul class="list">${attR.map(richAdm).join('')}</ul></section>` : '')
       + (attT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Tesserati <span class="cnt hot">${attT.length}</span></div><ul class="list">${attT.sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '') || nomeT(a).localeCompare(nomeT(b))).map(itemT).join('')}</ul><p class="note">Tocca un tesserato per vedere il cartellino e approvarlo.</p></section>` : '')
       + (!attT.length && !attR.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
   else if(S.tab === 'partite') body = adminPartite();
+  else if(S.tab === 'resp') body = adminResp();
   else if(S.tab === 'squ') body = adminSqu();
   else if(S.tab === 'squadre'){
     const l = S.squadre.filter(q => q.categoria === S.cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
     body = `<div class="seg" role="group" aria-label="Categoria">${CATS.map(c => `<button data-c="${c}" aria-pressed="${c === S.cat}">${c} <span class="cnt">${S.squadre.filter(q => q.categoria === c).length}</span></button>`).join('')}</div>
-      ${l.length ? `<ul class="list">${l.map(q => { const ts = S.tess.filter(t => t.squadraId === q.id), ok = ts.filter(t => statoT(t) === 'approvato').length, at = ts.filter(t => t.stato === 'attesa').length, rs = S.resps.filter(r => r.squadraId === q.id && r.stato === 'attivo');
-        return `<li><button class="item" data-q="${esc(q.id)}">${stemma(q.nome)}<span class="tx"><b>${esc(q.nome)}</b><span>${ok} tesserati validi${at ? ` · ${at} da approvare` : ''} · ${rs.length ? 'Resp. ' + rs.map(r => esc(r.nome + ' ' + r.cognome)).join(', ') : 'nessun responsabile'}</span></span></button></li>`; }).join('')}</ul>`
+      ${l.length ? `<ul class="list">${l.map(q => { const ts = S.tess.filter(t => t.squadraId === q.id), ok = ts.filter(t => statoT(t) === 'approvato').length, at = ts.filter(t => t.stato === 'attesa').length, rs = respSq(q.id);
+        return `<li><button class="item" data-q="${esc(q.id)}">${stemma(q.nome)}<span class="tx"><b>${esc(q.nome)}</b><span>${ok} tesserati validi${at ? ` · ${at} da approvare` : ''} · ${rs.length ? 'Resp. ' + rs.map(r => esc(nomeR(r))).join(', ') : 'nessun responsabile'}</span></span></button></li>`; }).join('')}</ul>`
         : `<div class="empty"><h3>Nessuna squadra ${S.cat}</h3><span>Le squadre sono le stesse dell’archivio del designatore nell’app arbitri.</span></div>`}`;
   } else {
     const f = S.filtro, l = S.tess.filter(t => f === 'tutti' || statoT(t) === f).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
@@ -1263,25 +1376,145 @@ function renderAdmin(app){
   app.querySelectorAll('[data-q]').forEach(b => b.onclick = () => openSquadra(sqById(b.dataset.q)));
   if(S.tab === 'partite') bindPartite(app);
   if(S.tab === 'squ') bindSqu(app);
-  const rref = id => db().collection('responsabili').doc(id);
-  app.querySelectorAll('[data-ra]').forEach(b => b.onclick = async () => { try{ await rref(b.dataset.ra).update({stato: 'attivo', motivo: '', abilitatoAt: Date.now()}); toast('Responsabile abilitato'); }catch(err){ toast(fbErr(err)); } });
-  app.querySelectorAll('[data-rn]').forEach(b => b.onclick = async () => { const m = prompt('Motivo (lo legge chi ha fatto la richiesta)', ''); if(m === null) return; try{ await rref(b.dataset.rn).update({stato: 'rifiutato', motivo: m.trim()}); toast('Richiesta rifiutata'); }catch(err){ toast(fbErr(err)); } });
+  bindRichAdm(app);
+  if(S.tab === 'resp') bindResp(app);
   const fi = $('#aFind');
   if(fi) fi.oninput = () => { S.cerca = fi.value; const k = fi.value.trim().toLowerCase();
     $('#aList').querySelectorAll('li').forEach(li => { const t = S.tess.find(x => x.id === li.querySelector('[data-t]').dataset.t); li.hidden = !!k && !`${nomeT(t)} ${t.nome} ${t.cognome} ${t.squadra}`.toLowerCase().includes(k); }); };
   if(fi && S.cerca) fi.oninput();
   bindItems(app);
 }
+/* --- responsabili (amministratore) --- */
+const richAdm = r => { const pieno = postiSq(r.squadraId) >= MAXRESP, altre = S.abil.filter(a => a.uid === r.uid && a.stato === 'attivo').map(a => a.squadra);
+  return `<li class="card stack" style="gap:8px"><div><b>${esc(nomeR(r))}</b> chiede di gestire <b>${esc(r.squadra)}</b><div class="note">${esc(r.email || '')}${r.telefono ? ' · ' + esc(r.telefono) : ''}${altre.length ? '<br>Gestisce già: ' + altre.map(esc).join(', ') : ''}</div></div>
+    ${pieno ? `<div class="warn-box">${esc(r.squadra)} ha già ${MAXRESP} responsabili: per abilitarlo togline prima uno.</div>` : ''}
+    <div class="row">${pieno ? '' : `<button class="btn btn-ok sm" data-ra="${esc(r.id)}">✓ Abilita</button>`}<button class="btn btn-danger sm" data-rn="${esc(r.id)}">Rifiuta</button></div></li>`; };
+const bindRichAdm = root => {
+  const ref = id => db().collection('abilitazioni').doc(id);
+  root.querySelectorAll('[data-ra]').forEach(b => b.onclick = async () => { const a = S.abil.find(x => x.id === b.dataset.ra); if(!a) return;
+    if(postiSq(a.squadraId) >= MAXRESP){ alert(`${a.squadra} ha già ${MAXRESP} responsabili: per abilitarne un altro togline prima uno.`); return; }
+    try{ await ref(a.id).update({stato: 'attivo', motivo: '', abilitatoAt: Date.now()}); toast('Responsabile abilitato'); }catch(err){ toast(fbErr(err)); } });
+  root.querySelectorAll('[data-rn]').forEach(b => b.onclick = async () => { const m = prompt('Motivo (lo legge chi ha fatto la richiesta)', ''); if(m === null) return; try{ await ref(b.dataset.rn).update({stato: 'rifiutato', motivo: m.trim()}); toast('Richiesta rifiutata'); }catch(err){ toast(fbErr(err)); } });
+};
+function adminResp(){
+  const sub = S.rsub || 'rub', cat = S.pcat;
+  const seg2 = `<div class="seg" role="group" aria-label="Responsabili">${[['rub', 'Rubrica'], ['dist', 'Distinte mancanti']].map(([k, t]) => `<button data-rs="${k}" aria-pressed="${sub === k}">${t}</button>`).join('')}</div>`;
+  const segC = `<div class="seg" role="group" aria-label="Campionato">${CATS.map(c => `<button data-rc="${c}" aria-pressed="${c === cat}">${NOMECAMP[c]}</button>`).join('')}</div>`;
+  if(sub === 'dist') return seg2 + segC + distMancanti(cat);
+  const l = S.squadre.filter(q => q.categoria === cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
+  if(!l.length) return seg2 + segC + `<div class="empty"><h3>Nessuna squadra</h3><span>Le squadre sono quelle dell’archivio del designatore nell’app arbitri.</span></div>`;
+  const senza = l.filter(q => !respSq(q.id).length).length;
+  const card = q => { const rs = respSq(q.id), iv = invSq(q.id), at = S.abil.filter(a => a.squadraId === q.id && a.stato === 'attesa').map(a => ({...profDi(a.uid), ...a})), n = rs.length + iv.length;
+    const cerca = norm([q.nome, ...rs.map(nomeR), ...iv.map(nomeR), ...rs.map(r => r.telefono || '')].join(' '));
+    return `<li class="card stack rcard" style="gap:10px" data-cerca="${esc(cerca)}"><div class="rhead">${stemma(q.nome)}<b>${esc(q.nome)}</b><span class="cnt${n ? '' : ' hot'}">${n}/${MAXRESP}</span></div>
+      ${rs.map(r => `<div class="rper"><div class="rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || 'telefono non indicato')}${r.email ? ' · ' + esc(r.email) : ''}</span></div><button class="btn btn-ghost sm" data-re="${esc(r.id)}">Modifica</button></div>${contatti(r)}</div>`).join('')}
+      ${iv.map(i => `<div class="rp"><div class="rtx"><b>${esc(nomeR(i))}</b><span>Invitato · entra quando si registra con ${esc(i.email)}</span></div><button class="btn btn-ghost sm" data-ri="${esc(i.id)}">Annulla</button></div>`).join('')}
+      ${at.map(a => `<div class="rp"><div class="rtx"><b>${esc(nomeR(a))}</b><span>Chiede di gestirla${a.telefono ? ' · ' + esc(a.telefono) : ''}</span></div>${n < MAXRESP ? `<button class="btn btn-ok sm" data-ra="${esc(a.id)}">✓ Abilita</button>` : ''}<button class="btn btn-danger sm" data-rn="${esc(a.id)}">Rifiuta</button></div>`).join('')}
+      ${n ? '' : '<p class="note">Nessun responsabile.</p>'}${n < MAXRESP ? `<button class="btn btn-ghost sm" data-radd="${esc(q.id)}">+ Aggiungi responsabile</button>` : ''}</li>`; };
+  return seg2 + segC + `<div class="field"><label for="rFind">Cerca</label><input id="rFind" type="search" placeholder="Squadra, nome o telefono" value="${esc(S.rcerca || '')}"></div>
+    <p class="note">${l.length} squadre${senza ? ` · <b>${senza} senza responsabile</b>` : ' · tutte con almeno un responsabile'}. Massimo ${MAXRESP} responsabili per squadra.</p>
+    <ul class="list" id="rList">${l.map(card).join('')}</ul>`;
+}
+/* distinte non ancora inviate nella giornata, con i contatti dei responsabili */
+function distMancanti(cat){
+  if(!S.loaded.partite || !S.loaded.dist || !S.pubParOk) return '<div class="status"><span class="spin"></span>Carico…</div>';
+  const l = parDi(S.partite, cat), giorn = giornateDi(l);
+  if(!l.length) return `<div class="empty"><h3>Nessun calendario ${esc(NOMECAMP[cat])}</h3><span>Le distinte si compilano per le partite del calendario.</span></div>`;
+  S.dgio = S.dgio || {}; let g = S.dgio[cat]; if(!giorn.includes(g)) g = S.dgio[cat] = gioDefault(l, giorn);
+  const lg = l.filter(p => +p.giornata === g).sort(ordPar), pronte = lg.filter(p => !esito(p) && p.stato !== 'rinviata' && p.data && p.ora);
+  const righe = []; let ok = 0;
+  pronte.forEach(p => [[p.casaId, p.casa], [p.ospiteId, p.ospite]].forEach(([id, nome]) => { const [k, t] = statoDist(p, id); if(k === 'ok') ok++; else righe.push({p, id, nome, k, t}); }));
+  const giocate = lg.filter(p => esito(p)).length, senza = lg.length - pronte.length - giocate;
+  const link = location.origin + location.pathname + '#area';
+  const it = ({p, id, nome, k, t}) => { const rs = respSq(id), quando = `${giornoCorto(p.data)} ore ${p.ora}`;
+    return `<li class="card stack" style="gap:8px"><div class="rhead">${stemma(nome)}<div class="rtx"><b>${esc(nome)}</b><span><span class="nw">${esc(p.casa)}</span> – <span class="nw">${esc(p.ospite)}</span></span><span>${esc(quando + (p.impianto ? ' · ' + p.impianto : ''))}</span></div></div><span class="pst ${k}">${esc(t)}</span>
+      ${rs.length ? rs.map(r => `<div class="rper"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || 'telefono non indicato')}</span></div>${contatti(r, `Ciao ${r.nome || ''}, ricordati di compilare la distinta di ${nome} per ${p.casa} – ${p.ospite} (${quando}). La trovi nell’app AICS League, area squadre: ${link}`)}</div>`).join('')
+        : `<p class="note">Nessun responsabile per questa squadra.</p><button class="btn btn-ghost sm" data-radd="${esc(id)}">+ Aggiungi responsabile</button>`}</li>`; };
+  return `<div class="seg gior" role="tablist" aria-label="Giornate">${giorn.map(n => `<button data-dg="${n}" aria-pressed="${n === g}">${n}ª giornata</button>`).join('')}</div>
+    <p class="note">${pronte.length ? `Distinte inviate: <b>${ok} su ${pronte.length * 2}</b>.` : 'Nessuna partita di questa giornata ha ancora data e ora.'}${senza ? ` ${senza === 1 ? '1 partita' : senza + ' partite'} senza data, ora o rinviate: la distinta si compila quando c’è la data.` : ''}${giocate ? ` ${giocate === 1 ? '1 partita già giocata' : giocate + ' partite già giocate'}.` : ''}</p>
+    ${righe.length ? `<ul class="list">${righe.map(it).join('')}</ul>` : pronte.length ? '<div class="empty"><h3>Tutte arrivate ✓</h3><span>Tutte le squadre di questa giornata hanno inviato la distinta.</span></div>' : ''}`;
+}
+function bindResp(app){
+  app.querySelectorAll('[data-rs]').forEach(b => b.onclick = () => { S.rsub = b.dataset.rs; render(); });
+  app.querySelectorAll('[data-rc]').forEach(b => b.onclick = () => { S.pcat = b.dataset.rc; render(); });
+  app.querySelectorAll('[data-dg]').forEach(b => b.onclick = () => { S.dgio[S.pcat] = +b.dataset.dg; render(); });
+  app.querySelectorAll('[data-re]').forEach(b => b.onclick = () => openRespEdit(b.dataset.re));
+  app.querySelectorAll('[data-radd]').forEach(b => b.onclick = () => openInvito(sqById(b.dataset.radd)));
+  app.querySelectorAll('[data-ri]').forEach(b => b.onclick = async () => { const i = S.inviti.find(x => x.id === b.dataset.ri); if(!i || !confirm(`Annullare l’invito per ${i.email}?`)) return; try{ await db().collection('inviti').doc(i.id).delete(); toast('Invito annullato'); }catch(err){ toast(fbErr(err)); } });
+  const fi = $('#rFind');
+  if(fi){ fi.oninput = () => { S.rcerca = fi.value; const k = norm(fi.value); $('#rList').querySelectorAll('.rcard').forEach(li => { li.hidden = !!k && !li.dataset.cerca.includes(k); }); }; if(S.rcerca) fi.oninput(); }
+  const sel = app.querySelector('.gior [aria-pressed=true]'); if(sel) sel.scrollIntoView({block: 'nearest', inline: 'center'});
+}
+/* nuovo responsabile: se ha già un account è abilitato subito, altrimenti entra quando si registra con quell'email */
+function openInvito(q){
+  if(!q || !q.id) return;
+  if(postiSq(q.id) >= MAXRESP){ alert(`${q.nome} ha già ${MAXRESP} responsabili.`); return; }
+  const {root, close} = sheet(`<form class="form" id="iForm"><h3 style="grid-column:1/-1">Nuovo responsabile</h3><p class="note" style="grid-column:1/-1">${stemma(q.nome)}<b>${esc(q.nome)}</b></p>
+    <div class="field full"><label for="i-em">Email</label><input id="i-em" type="email" required autocomplete="off" placeholder="L’email con cui entrerà nell’app"></div>
+    <div class="field"><label for="i-nome">Nome</label><input id="i-nome" required></div><div class="field"><label for="i-cog">Cognome</label><input id="i-cog" required></div>
+    <div class="field full"><label for="i-tel">Telefono (cellulare)</label><input id="i-tel" type="tel" inputmode="tel"></div>
+    <p class="note" style="grid-column:1/-1">Se ha già un account nell’area squadre viene abilitato subito. Altrimenti, quando si registra con questa email (e la conferma), entra direttamente nella squadra senza chiedere niente.</p>
+    <div class="err" id="iErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="iGo">Aggiungi</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Nuovo responsabile');
+  root.querySelector('#iForm').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim(), er = root.querySelector('#iErr'), bt = root.querySelector('#iGo');
+    const em = v('i-em').toLowerCase(), d = {nome: v('i-nome'), cognome: v('i-cog'), telefono: v('i-tel')};
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ er.textContent = 'Controlla l’email'; return; }
+    if(postiSq(q.id) >= MAXRESP){ er.textContent = `${q.nome} ha già ${MAXRESP} responsabili`; return; }
+    const p = S.resps.find(x => String(x.email || '').toLowerCase() === em);
+    bt.disabled = true;
+    try{
+      if(p){
+        if(S.abil.some(a => a.uid === p.id && a.squadraId === q.id && a.stato === 'attivo')){ er.textContent = 'È già responsabile di questa squadra'; bt.disabled = false; return; }
+        const b = db().batch();
+        b.set(db().collection('abilitazioni').doc(p.id + '_' + q.id), {uid: p.id, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || '', stato: 'attivo', motivo: '', createdAt: Date.now(), abilitatoAt: Date.now(), via: 'admin'});
+        const manca = {}; ['nome', 'cognome', 'telefono'].forEach(k => { if(!p[k] && d[k]) manca[k] = d[k]; }); if(Object.keys(manca).length) b.update(db().collection('responsabili').doc(p.id), manca);
+        await b.commit(); toast(`${nomeR(p)} ha già un account: l’ho abilitato subito`);
+      } else {
+        if(S.inviti.some(i => i.id === em + '_' + q.id)){ er.textContent = 'Questa email è già invitata per la squadra'; bt.disabled = false; return; }
+        await db().collection('inviti').doc(em + '_' + q.id).set({email: em, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || '', ...d, createdAt: Date.now(), by: S.user.uid});
+        toast('Fatto: quando si registra con questa email entra direttamente nella squadra');
+      }
+      close();
+    }catch(err){ bt.disabled = false; er.textContent = fbErr(err); }
+  };
+}
+/* modifica di un responsabile: dati, spostamento in un'altra squadra, accesso tolto */
+function openRespEdit(aid){
+  const a = S.abil.find(x => x.id === aid); if(!a) return; const r = {...profDi(a.uid), ...a};
+  const altre = S.abil.filter(x => x.uid === a.uid && x.id !== a.id && x.stato === 'attivo').map(x => x.squadra);
+  const {root, close} = sheet(`<form class="form" id="eForm"><h3 style="grid-column:1/-1">${esc(nomeR(r))}</h3>
+    <p class="note" style="grid-column:1/-1">Responsabile di <b>${esc(a.squadra)}</b>${altre.length ? ' · gestisce anche ' + altre.map(esc).join(', ') : ''}<br>Entra con ${esc(r.email || '—')}</p>
+    <div style="grid-column:1/-1">${contatti(r)}</div>
+    <div class="field"><label for="e-nome">Nome</label><input id="e-nome" required value="${esc(r.nome || '')}"></div><div class="field"><label for="e-cog">Cognome</label><input id="e-cog" required value="${esc(r.cognome || '')}"></div>
+    <div class="field full"><label for="e-tel">Telefono (cellulare)</label><input id="e-tel" type="tel" inputmode="tel" value="${esc(r.telefono || '')}"></div>
+    <div class="field full"><label for="e-sq">Squadra</label><select id="e-sq">${optSq(S.abil.filter(x => x.uid === a.uid && x.id !== a.id && x.stato === 'attivo').map(x => x.squadraId), a.squadraId)}</select><span class="note">Cambiala per spostarlo in un’altra squadra: non deve rifare la richiesta.</span></div>
+    <div class="err" id="eErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="eGo">Salva</button><button type="button" class="btn btn-danger" id="eOff">Togli accesso</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Responsabile');
+  root.querySelector('#eOff').onclick = async () => { if(!confirm(`Togliere a ${nomeR(r)} l’accesso a ${a.squadra}?`)) return;
+    try{ await db().collection('abilitazioni').doc(a.id).update({stato: 'revocato', motivo: ''}); toast('Accesso tolto'); close(); }catch(err){ toast(fbErr(err)); } };
+  root.querySelector('#eForm').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim(), er = root.querySelector('#eErr'), bt = root.querySelector('#eGo');
+    const q = sqById(v('e-sq')), sposta = q.id && q.id !== a.squadraId;
+    if(sposta && postiSq(q.id) >= MAXRESP){ er.textContent = `${q.nome} ha già ${MAXRESP} responsabili`; return; }
+    if(sposta && !confirm(`Spostare ${nomeR(r)} da ${a.squadra} a ${q.nome}?`)) return;
+    bt.disabled = true;
+    try{
+      const b = db().batch();
+      b.set(db().collection('responsabili').doc(a.uid), {nome: v('e-nome'), cognome: v('e-cog'), telefono: v('e-tel'), updatedAt: Date.now()}, {merge: true});
+      if(sposta){ b.set(db().collection('abilitazioni').doc(a.uid + '_' + q.id), {uid: a.uid, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || '', stato: 'attivo', motivo: '', createdAt: a.createdAt || Date.now(), abilitatoAt: Date.now(), via: 'spostato'}); b.delete(db().collection('abilitazioni').doc(a.id)); }
+      await b.commit(); toast(sposta ? `Spostato in ${q.nome}` : 'Dati salvati'); close();
+    }catch(err){ bt.disabled = false; er.textContent = fbErr(err); }
+  };
+}
 const schedaBox = q => { const inf = S.info[q.id] || {};
   return `<div class="card sqbox"><div class="sqst">${stemma(q.nome)}</div><div class="sqtx">${maglieHtml(inf, 34) || '<span class="note">Maglie non indicate</span>'}<span class="note">${inf.campo ? 'Campo di casa: <b>' + esc(inf.campo) + '</b>' : 'Campo di casa non indicato'}</span></div><button type="button" class="btn btn-ghost sm" data-scheda>Modifica</button></div>`; };
 function openSquadra(q){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   const draw = () => {
-    const ts = S.tess.filter(t => t.squadraId === q.id).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')), rs = S.resps.filter(r => r.squadraId === q.id && r.stato === 'attivo');
+    const ts = S.tess.filter(t => t.squadraId === q.id).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')), rs = respSq(q.id), iv = invSq(q.id);
     root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="${esc(q.nome)}"><div class="grab"></div>
       <h3>${esc(q.nome)}</h3><div class="note">${esc(q.categoria || '')}</div>
       ${schedaBox(q)}
-      <section class="stack" style="gap:8px"><div class="eyebrow">Responsabili</div>${rs.length ? rs.map(r => `<div class="item" style="cursor:default"><span class="tx"><b>${esc(r.nome)} ${esc(r.cognome)}</b><span>${esc(r.email)} · ${esc(r.telefono || '')}</span></span><button class="btn btn-danger sm" data-rv="${esc(r.id)}">Togli</button></div>`).join('') : '<p class="note">Nessun responsabile abilitato.</p>'}</section>
+      <section class="stack" style="gap:8px"><div class="eyebrow">Responsabili <span class="cnt">${rs.length + iv.length}/${MAXRESP}</span></div>${rs.map(r => `<div class="rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || '')}${r.telefono && r.email ? ' · ' : ''}${esc(r.email || '')}</span></div><button class="btn btn-ghost sm" data-re="${esc(r.id)}">Modifica</button></div>`).join('')}${iv.map(i => `<div class="rp"><div class="rtx"><b>${esc(nomeR(i))}</b><span>Invitato: entra quando si registra con ${esc(i.email)}</span></div></div>`).join('')}${rs.length + iv.length ? '' : '<p class="note">Nessun responsabile.</p>'}${rs.length + iv.length < MAXRESP ? `<button class="btn btn-ghost sm" data-radd="${esc(q.id)}">+ Aggiungi responsabile</button>` : ''}</section>
       <section class="stack" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="eyebrow">Tesserati <span class="cnt">${ts.length}</span></div><button class="btn btn-primary sm" id="sqAddT">+ Tesserato</button></div>
       <ul class="list">${ts.map(itemT).join('') || '<p class="note">Nessun tesserato.</p>'}</ul></section>
       <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
@@ -1289,7 +1522,8 @@ function openSquadra(q){
     root.querySelector('[data-x]').onclick = close;
     $('#sqAddT').onclick = () => openTess({squadraId: q.id, squadra: q.nome, categoria: q.categoria});
     root.querySelector('[data-scheda]').onclick = () => openSchedaSq(q);
-    root.querySelectorAll('[data-rv]').forEach(b => b.onclick = async () => { if(!confirm('Togliere a questa persona l’accesso alla squadra?')) return; try{ await db().collection('responsabili').doc(b.dataset.rv).update({stato: 'revocato', motivo: ''}); toast('Accesso tolto'); draw(); }catch(err){ toast(fbErr(err)); } });
+    root.querySelectorAll('[data-re]').forEach(b => b.onclick = () => openRespEdit(b.dataset.re));
+    root.querySelectorAll('[data-radd]').forEach(b => b.onclick = () => openInvito(q));
     bindItems(root);
   };
   draw();
