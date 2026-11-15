@@ -323,6 +323,9 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sw.cust{position:relative;overflow:hidden;background:conic-gradient(#f33,#fd3,#3d5,#3cf,#36f,#c3f,#f33);display:inline-block}
 .sw.cust input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
 .sheet-bg.sopra{z-index:60}
+.avv{color:#B5650B !important;font-weight:700}
+.tstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tstat div{background:var(--chip,var(--surface-2));border-radius:12px;padding:8px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.tstat b{font-family:var(--display);font-size:22px;line-height:1}.tstat span{font-size:11.5px;color:var(--muted);line-height:1.15}
+.imp-l{display:flex;flex-direction:column;gap:6px}.imp-r{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip,var(--surface-2));cursor:pointer}.imp-r input{margin-top:3px;width:20px;height:20px;flex:none}.imp-r .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.imp-r .tx>span{font-size:13px;color:var(--muted)}.imp-r .pst{align-self:flex-start}.imp-r.dis{opacity:.55}
 .rhead{display:flex;align-items:center;gap:10px;min-width:0}.rhead>b{flex:1;min-width:0}.rhead .stemma{width:36px;height:36px;border-radius:10px;margin:0}
 .rp{display:flex;align-items:center;gap:8px}.rp .rtx{flex:1}.rtx{display:flex;flex-direction:column;min-width:0;gap:1px}.rtx span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
 .rper{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid var(--line, rgba(127,127,127,.2))}.rcard .rper:first-of-type{border-top:0;padding-top:0}
@@ -653,6 +656,7 @@ function pubStart(){
     e => { S.pubErr = fbErr(e); S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); })
     && db().collection('campionati').onSnapshot(s => { s.docs.forEach(d => { S.camp[d.id] = d.data(); }); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
     && db().collection('squadreInfo').onSnapshot(s => { S.info = {}; s.docs.forEach(d => { S.info[d.id] = d.data(); }); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
+    && db().collection('trasferimenti').onSnapshot(s => { S.pubTrasf = s.docs.map(d => ({id: d.id, ...d.data()})); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
     && db().collection('squalifiche').onSnapshot(s => { S.pubSqu = s.docs.map(d => ({id: d.id, ...d.data()})); if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => {})
     && db().collection('partite').onSnapshot(s => { S.pubPar = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubParOk = true; if(CAMP[VIEW()] || VIEW() === 'area') render(); }, () => { S.pubParOk = true; })).catch(() => { S.pubErr = 'Serve internet per vedere classifiche e risultati.'; S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); });
 }
@@ -715,8 +719,13 @@ function disciplina(cat){
   });
   qs.filter(q => q.manuale && q.camp === cat && (q.stagione || STAG) === STAG).forEach(q => sanz.push({id: q.tid, nome: q.nome, sq: q.sq, sqId: q.sqId, gg: +q.gg, motivo: q.motivo || 'Decisione del giudice', dal: q.dal || '', docId: q.id, man: true, doc: q}));
   /* le giornate si scontano con le partite successive della squadra che hanno un risultato; più squalifiche si scontano una dopo l'altra */
-  const perG = new Map();
-  sanz.forEach(z => { z.tm = par.filter(p => p.casaId === z.sqId || p.ospiteId === z.sqId); z.ini = z.dopo ? z.tm.indexOf(z.dopo) + 1 : z.tm.findIndex(p => (p.data || '9999') >= z.dal); if(z.ini < 0) z.ini = z.tm.length; if(!perG.has(z.id)) perG.set(z.id, []); perG.get(z.id).push(z); });
+  const perG = new Map(), trs = (S.pubTrasf || []).filter(t => (t.stagione || STAG) === STAG).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.at || 0) - (b.at || 0));
+  /* periodi in cui il tesserato è stato in ogni squadra, a partire da quella con cui ha preso la squalifica */
+  const periodi = z => { const ini = z.dopo ? z.dopo.data || '' : z.dal || ''; let cur = {id: z.sqId, nome: z.sq, da: '', a: '~'}; const l = [cur];
+    trs.forEach(t => { if(t.tid === z.id && t.daId === cur.id && (t.data || '') >= ini){ cur.a = t.data; cur = {id: t.aId, nome: t.a, da: t.data, a: '~'}; l.push(cur); } }); return l; };
+  sanz.forEach(z => { const pe = periodi(z);
+    z.tm = par.filter(p => pe.some(x => (p.casaId === x.id || p.ospiteId === x.id) && (p.data || '9999') >= x.da && (p.data || '9999') < x.a));
+    if(pe.length > 1){ const u = pe[pe.length - 1]; z.sqId = u.id; z.sq = u.nome; } z.ini = z.dopo ? z.tm.indexOf(z.dopo) + 1 : z.tm.findIndex(p => (p.data || '9999') >= z.dal); if(z.ini < 0) z.ini = z.tm.length; if(!perG.has(z.id)) perG.set(z.id, []); perG.get(z.id).push(z); });
   perG.forEach(l => { l.sort((a, b) => a.ini - b.ini); let lib = 0;
     l.forEach(z => { z.scontate = 0; z.prossime = []; const tm = z.tm, da = Math.max(z.ini, lib);
       /* rosso diretto non ancora deciso: intanto salta la prossima partita */
@@ -1231,14 +1240,15 @@ function renderResp(app){
     <button class="btn btn-primary btn-block" id="tNew">+ Nuovo tesserato</button>
     ${!S.loaded.tess ? '<div class="status"><span class="spin"></span>Carico i tesserati…</div>' : !l.length ? `<div class="empty"><h3>Nessun tesserato</h3><span>Aggiungi i giocatori e lo staff: l’amministratore del torneo li controlla e approva. Solo i tesserati approvati potranno andare in distinta.</span></div>` : ''}
     ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('scaduto', 'Scaduti (stagioni passate)')}
+    ${(() => { const cat = q.categoria || r.categoria, L = limDi(cat); return `<p class="note">${L.max ? `Tesserati: <b>${contaTess(r.squadraId, cat)} su ${L.max}</b>${L.soloGioc ? ' (contano solo giocatori e portieri)' : ''}. ` : ''}${L.etaMin ? `Età minima: ${L.etaMin} anni compiuti entro il 30 giugno ${fineStagione().slice(0, 4)}.` : ''}</p>`; })()}
     <p class="note">I cartellini valgono fino al 30 giugno. Dopo la scadenza restano in archivio per un anno, poi i dati si cancellano da soli.</p></main>`;
   bindOut();
   bindRT(app);
-  $('#tNew').onclick = () => openTess({squadraId: r.squadraId, squadra: q.nome || r.squadra, categoria: q.categoria || r.categoria || ''});
+  $('#tNew').onclick = () => { const cat = q.categoria || r.categoria, L = limDi(cat); if(L.max && !L.soloGioc && contaTess(r.squadraId, cat) >= L.max){ alert(`Hai già ${L.max} tesserati: è il massimo. Per aggiungerne un altro chiedi all’amministratore.`); return; } openTess({squadraId: r.squadraId, squadra: q.nome || r.squadra, categoria: q.categoria || r.categoria || ''}); };
   bindItems(app);
 }
 const itemT = t => { const s = statoT(t); return `<li><button class="item" data-t="${esc(t.id)}">${t.foto ? `<img class="ph" src="${esc(t.foto)}" alt="">` : `<span class="ph">${esc(iniz(t))}</span>`}
-  <span class="tx"><b>${esc(nomeT(t))}</b><span>${esc([t.ruolo, t.numero ? 'n. ' + t.numero : '', S.admin ? t.squadra : '', t.dataNascita ? 'nato il ' + fmt(t.dataNascita) : ''].filter(Boolean).join(' · '))}</span></span>${badge(s)}</button></li>`; };
+  <span class="tx"><b>${esc(nomeT(t))}</b><span>${esc([t.ruolo, t.numero ? 'n. ' + t.numero : '', S.admin ? t.squadra : '', t.dataNascita ? 'nato il ' + fmt(t.dataNascita) : ''].filter(Boolean).join(' · '))}</span>${avvT(t).length ? `<span class="avv">⚠️ ${esc(avvT(t).join(' · '))}</span>` : ''}</span>${badge(s)}</button></li>`; };
 const bindItems = root => root.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const t = S.tess.find(x => x.id === b.dataset.t); if(!t) return;
   const s = statoT(t); if(S.admin || s === 'approvato' || s === 'sospeso' || s === 'scaduto') openCard(t); else openTess(t); });
 
@@ -1265,6 +1275,8 @@ function openTess(t){
     <div class="field"><label for="t-ruolo">Ruolo</label><select id="t-ruolo">${RUOLI.map(x => `<option ${x === (t.ruolo || 'Giocatore') ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
     ${inp('numero', 'Numero di maglia', 'number', false, 'min="0" max="99" inputmode="numeric"')}
     ${inp('documento', 'Documento (tipo e numero)', 'text', true, 'placeholder="Es. Carta d’identità CA12345AB"')}
+    ${inp('tesseraAics', 'Numero tessera AICS (facoltativo)', 'text', true, 'autocomplete="off"')}
+    ${!S.admin && (isNew || t.stato === 'rifiutato') ? `<div class="field full"><label for="t-da">Arriva da un’altra squadra del torneo?</label><select id="t-da"><option value="">No</option>${optSq([t.squadraId], t.daSquadraId)}</select><span class="note">Se quest’anno era già tesserato con un’altra squadra, sceglila: l’amministratore fa il trasferimento.</span></div>` : ''}
     ${isNew || !S.admin ? `<label class="check"><input type="checkbox" id="t-ok" required ${t.consenso && !isNew ? 'checked' : ''}><span>Il tesserato (o un genitore, se minorenne) ha dato il consenso all’uso dei suoi dati per il torneo AICS.</span></label>` : ''}
     <div class="actions"><button class="btn btn-primary" id="tSave">${S.admin ? (isNew ? 'Aggiungi e approva' : 'Salva') : isNew ? 'Invia all’amministratore' : 'Invia di nuovo'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button>
     ${!isNew && (S.admin || t.stato !== 'approvato') ? '<button type="button" class="btn btn-danger" data-del>Elimina</button>' : ''}</div></form></div></div>`;
@@ -1277,18 +1289,25 @@ function openTess(t){
     e.preventDefault(); const v = id => $('#t-' + id).value.trim();
     const q = S.admin ? sqById($('#t-sq').value) : {id: t.squadraId, nome: t.squadra, categoria: t.categoria};
     const o = {cognome: v('cognome'), nome: v('nome'), dataNascita: v('dataNascita'), luogoNascita: v('luogoNascita'), ruolo: v('ruolo'), numero: v('numero'), documento: v('documento'),
-      foto, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || ''};
+      tesseraAics: v('tesseraAics'), foto, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || ''};
     if(o.dataNascita > oggi()){ toast('Controlla la data di nascita'); return; }
-    const dup = S.tess.find(x => x.id !== t.id && x.cognome.toLowerCase() === o.cognome.toLowerCase() && x.nome.toLowerCase() === o.nome.toLowerCase() && x.dataNascita === o.dataNascita && statoT(x) !== 'scaduto');
+    const cat = o.categoria;
+    if(troppoGiovane(o, cat)){ if(!S.admin){ alert(msgEta(cat)); return; } if(!confirm(msgEta(cat) + ' Salvare lo stesso?')) return; }
+    if((isNew || q.id !== t.squadraId || o.ruolo !== t.ruolo || statoT(t) === 'scaduto' || t.stato === 'rifiutato') && pienoTess(q.id, cat, {...o, id: t.id})){ const m = `${q.nome} ha già ${limDi(cat).max} tesserati${limDi(cat).soloGioc ? ' (giocatori)' : ''}: è il massimo.`;
+      if(!S.admin){ alert(m + ' Per aggiungerne un altro chiedi all’amministratore.'); return; } if(!confirm(m + ' Salvare lo stesso?')) return; }
+    const trasf = S.admin && !isNew && t.squadraId && q.id !== t.squadraId;
+    if(trasf && !confirm(`Trasferire ${nomeT(o)} da ${t.squadra} a ${q.nome}? Statistiche e squalifiche da scontare lo seguono nella nuova squadra.`)) return;
+    const dup = !trasf && S.tess.find(x => x.id !== t.id && x.cognome.toLowerCase() === o.cognome.toLowerCase() && x.nome.toLowerCase() === o.nome.toLowerCase() && x.dataNascita === o.dataNascita && statoT(x) !== 'scaduto');
     if(dup && !confirm(`${nomeT(o)} risulta già tesserato${dup.squadraId !== o.squadraId ? ' con ' + dup.squadra : ''}. Salvare lo stesso?`)) return;
     const col = db().collection('tesserati'), b = $('#tSave'); b.disabled = true;
     try{
       if(S.admin){
         if(isNew) await col.add({...o, ...approva(o), consenso: true, creatoDa: S.user.uid, createdAt: Date.now()});
+        else if(trasf){ const {squadraId, squadra, categoria, ...resto} = o; await trasferisci(t, q, resto); }
         else await col.doc(t.id).update(o);
-        toast(isNew ? 'Tesserato aggiunto e approvato' : 'Modifiche salvate');
+        toast(isNew ? 'Tesserato aggiunto e approvato' : trasf ? `Trasferito in ${q.nome}` : 'Modifiche salvate');
       } else {
-        const x = {...o, stato: 'attesa', consenso: true, motivo: ''};
+        const da = $('#t-da') ? sqById($('#t-da').value) : {}, x = {...o, stato: 'attesa', consenso: true, motivo: '', ...($('#t-da') ? {daSquadraId: da.id || '', daSquadra: da.nome || ''} : {})};
         if(isNew) await col.add({...x, creatoDa: S.user.uid, createdAt: Date.now()}); else await col.doc(t.id).update(x);
         toast('Inviato: l’amministratore lo controlla e lo approva');
       }
@@ -1303,14 +1322,235 @@ function approva(t){
     codice: t.codice || `${/7/.test(t.categoria || '') ? 'C7' : 'C5'}-${sc.slice(2, 4)}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`};
 }
 
+/* ---------- limiti dei tesserati (impostazioni dell'amministratore per campionato) ---------- */
+const TESS_DEF = {etaMin: 16, max: 0, soloGioc: false};
+const limDi = cat => ({...TESS_DEF, ...((S.camp[cat] || {}).tess || {})});
+/* età: anni compiuti entro il 30 giugno di fine stagione */
+const nataEntro = cat => `${+fineStagione().slice(0, 4) - limDi(cat).etaMin}-06-30`;
+const troppoGiovane = (t, cat) => limDi(cat).etaMin > 0 && !!t.dataNascita && t.dataNascita > nataEntro(cat);
+const contaGioc = (t, L) => !L.soloGioc || /Giocatore|Portiere/.test(t.ruolo || 'Giocatore');
+const contaTess = (sqId, cat, escl) => { const L = limDi(cat); return S.tess.filter(t => t.squadraId === sqId && t.id !== escl && ['attesa', 'approvato', 'sospeso'].includes(statoT(t)) && contaGioc(t, L)).length; };
+const pienoTess = (sqId, cat, t) => { const L = limDi(cat); return !!L.max && contaGioc(t, L) && contaTess(sqId, cat, t.id) >= L.max; };
+const msgEta = cat => `Per il ${NOMECAMP[cat] || cat} servono ${limDi(cat).etaMin} anni compiuti entro il 30 giugno ${fineStagione().slice(0, 4)} (nati entro il ${fmt(nataEntro(cat))}).`;
+const lc = x => String(x || '').trim().toLowerCase();
+const stessa = (x, t) => lc(x.cognome) === lc(t.cognome) && lc(x.nome) === lc(t.nome) && (!x.dataNascita || !t.dataNascita || x.dataNascita === t.dataNascita);
+const doppioDi = t => S.tess.find(x => x.id !== t.id && stessa(x, t) && statoT(x) !== 'scaduto');
+const avvT = t => S.admin && t.stato === 'attesa' ? [t.daSquadraId ? 'trasferimento da ' + t.daSquadra : '', troppoGiovane(t, t.categoria) ? 'troppo giovane' : '', !t.daSquadraId && doppioDi(t) ? 'già tesserato con ' + doppioDi(t).squadra : ''].filter(Boolean) : [];
+/* trasferimento: lo stesso tesserato (stesso id: statistiche e squalifiche lo seguono) passa a un'altra squadra */
+async function trasferisci(x, q, extra = {}, delId = '', registra = true){
+  const b = db().batch(), mov = {da: x.squadra || '', daId: x.squadraId || '', a: q.nome || '', aId: q.id, data: oggi()};
+  b.update(db().collection('tesserati').doc(x.id), {...extra, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || x.categoria || '', ...(registra ? {trasferimenti: firebase.firestore.FieldValue.arrayUnion(mov)} : {})});
+  if(registra) b.set(db().collection('trasferimenti').doc(), {tid: x.id, nome: nomeT(x), ...mov, camp: q.categoria || x.categoria || '', stagione: STAG, at: Date.now(), by: S.user.uid});
+  if(delId) b.delete(db().collection('tesserati').doc(delId));
+  await b.commit();
+}
+/* statistiche della stagione del tesserato */
+function statTess(t){
+  const id = t.id, par = (S.pubPar || []).filter(p => (p.stagione || STAG) === STAG && valida(p)), n = {pres: 0, gol: 0, mvp: 0, por: 0, amm: 0, esp: 0};
+  par.forEach(p => { (p.mar || []).forEach(x => { if(x.id === id) n.gol += +x.n || 0; }); if(p.mvp && p.mvp.id === id) n.mvp++; if(p.por && p.por.id === id) n.por++;
+    (p.amm || []).forEach(x => { if(x.id === id) n.amm++; }); (p.esp || []).forEach(x => { if(x.id === id) n.esp++; }); });
+  const pm = new Map(par.map(p => [p.id, p]));
+  n.pres = (S.dist || []).filter(d => pm.has(d.partitaId) && distOk(d, pm.get(d.partitaId)) && (d.giocatori || []).some(g => g.id === id)).length;
+  return n;
+}
+function statHtml(t){
+  const n = statTess(t), cat = t.categoria, sq = cat ? squalificati(cat).find(r => r.id === t.id) : null, gi = cat ? disciplina(cat).gioc.find(r => r.id === t.id) : null;
+  const dif = !sq && gi && gi.g % 4 === 3;
+  const box = [['Presenze', n.pres], ['Gol', n.gol], ['MVP', n.mvp], ...(n.por || /Portiere/.test(t.ruolo || '') ? [['Miglior portiere', n.por]] : []), ['Ammonizioni', n.amm], ['Espulsioni', n.esp]];
+  return `<section class="stack" style="gap:8px"><div class="eyebrow">Stagione ${STAG}</div><div class="tstat">${box.map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join('')}</div>
+    ${sq ? `<div class="warn-box">⛔ <b>Squalificato</b>${sq.rest ? `: ${sq.rest} ${sq.rest === 1 ? 'giornata' : 'giornate'}` : ''}${sq.att ? ' (espulsione diretta, giornate da decidere)' : ''}${sq.prossima ? `. Salta la ${vsDi(sq.prossima, sq.sqId)}` : ''}</div>` : dif ? `<div class="warn-box">⚠️ <b>Diffidato</b>: ${gi.g} ammonizioni, alla prossima salta una giornata</div>` : ''}
+    ${(t.trasferimenti || []).map(m => `<p class="note">🔁 Trasferito da <b>${esc(m.da)}</b> a <b>${esc(m.a)}</b> il ${fmt(m.data)}</p>`).join('')}
+    <p class="note">Presenze: partite giocate in cui era in distinta.</p></section>`;
+}
+/* ---------- importa tesserati da Excel, CSV, TXT o PDF ---------- */
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+let pdfP = null;
+const caricaPdf = () => pdfP || (pdfP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = PDFJS + 'pdf.min.js'; sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js'; res(window.pdfjsLib); }; sc.onerror = () => { pdfP = null; rej(new Error('net')); }; document.head.appendChild(sc); }));
+async function righeDaFile(file){
+  const n = file.name.toLowerCase();
+  if(/\.pdf$/.test(n) || file.type === 'application/pdf'){
+    const lib = await caricaPdf(), doc = await lib.getDocument({data: await file.arrayBuffer()}).promise, out = [];
+    for(let i = 1; i <= doc.numPages; i++){
+      const tc = await (await doc.getPage(i)).getTextContent();
+      const its = tc.items.filter(x => x.str && x.str.trim()).map(x => ({s: x.str, x: x.transform[4], y: x.transform[5], w: x.width, h: Math.abs(x.transform[3]) || 10}));
+      const lines = [];
+      its.sort((a, b) => b.y - a.y || a.x - b.x).forEach(it => { const l = lines.find(L => Math.abs(L.y - it.y) < it.h * .5); if(l) l.it.push(it); else lines.push({y: it.y, it: [it]}); });
+      lines.sort((a, b) => b.y - a.y).forEach(L => { L.it.sort((a, b) => a.x - b.x); const cells = []; let pr = null;
+        L.it.forEach(it => { const gap = pr ? it.x - (pr.x + pr.w) : 99; if(pr && gap < it.h * .9) cells[cells.length - 1] += (gap > it.h * .12 ? ' ' : '') + it.s; else cells.push(it.s); pr = it; });
+        /* con la posizione: serve a rimettere ogni casella sotto la sua colonna anche se ce n'è una vuota */
+        const xs = []; pr = null; L.it.forEach(it => { const gap = pr ? it.x - (pr.x + pr.w) : 99; if(!(pr && gap < it.h * .9)) xs.push(it.x); pr = it; });
+        out.push(cells.map((c, j) => ({v: c.trim(), x: xs[j]})).filter(c => c.v)); });
+    }
+    return out;
+  }
+  if(/\.txt$/.test(n) || file.type === 'text/plain'){
+    return (await file.text()).split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => (/\t/.test(l) ? l.split('\t') : /;/.test(l) ? l.split(';') : /,/.test(l) ? l.split(',') : l.split(/\s{2,}/)).map(c => c.trim()));
+  }
+  const X = await caricaXlsx(), wb = X.read(await file.arrayBuffer(), {cellDates: true}), out = [];
+  wb.SheetNames.forEach(sn => X.utils.sheet_to_json(wb.Sheets[sn], {header: 1, raw: true, defval: ''}).forEach(r => out.push(r)));
+  return out;
+}
+const NRM = v => String(v == null ? '' : v).trim();
+const isoDi = (v, seriale) => {
+  if(v instanceof Date){ if(isNaN(v)) return ''; const d = new Date(v.getTime() + 12 * 36e5); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+  const t = NRM(v); let m = t.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);
+  if(m){ let y = +m[3]; if(y < 100) y = 2000 + y <= +oggi().slice(0, 4) - 5 ? 2000 + y : 1900 + y; const M = +m[2], D = +m[1]; if(M < 1 || M > 12 || D < 1 || D > 31) return ''; return `${y}-${pad(M)}-${pad(D)}`; }
+  m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if(m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  if(seriale && /^\d{5}$/.test(t) && +t > 7000 && +t < 50000) return new Date(Math.round((+t - 25569) * 864e5)).toISOString().slice(0, 10);
+  return '';
+};
+const ruoloDi = t => /port/i.test(t) ? 'Portiere' : /allen|mister|tecnic/i.test(t) ? 'Allenatore' : /dirig|accomp|massag|medic|prepar|team/i.test(t) ? 'Dirigente' : 'Giocatore';
+const IMPK = [['luogo', /luogo|comune|citt[aà]/], ['tessera', /tessera|^tess\b|n\.?\s*tess/], ['documento', /documento|^doc\b/], ['nominativo', /nominativo|cognome\s*(e|\/|-)\s*nome|^atleta|^tesserato/], ['cognome', /cognome/], ['nome', /^nome\b|\bnome$/], ['data', /nascita|^nato|^data\b|^d\.?\s*n\.?$/], ['ruolo', /ruolo|qualifica|mansione/], ['numero', /maglia/]];
+function leggiTess(rows){
+  const hx = rows.map(r => (r || []).map(c => c && typeof c === 'object' && 'x' in c ? c.x : null));
+  rows = rows.map(r => (r || []).map(c => c instanceof Date ? c : NRM(c && typeof c === 'object' && 'v' in c ? c.v : c)));
+  let map = null, hi = -1;
+  for(let i = 0; i < Math.min(rows.length, 25) && !map; i++){ const m = {};
+    rows[i].forEach((c, j) => { const t = String(c).toLowerCase(); if(!t || t.length > 40) return; const k = IMPK.find(([k, re]) => !(k in m) && re.test(t)); if(k) m[k[0]] = j; });
+    if(('cognome' in m || 'nominativo' in m) && Object.keys(m).length >= 2){ map = m; hi = i; } }
+  const nomi = (o, full) => { const w = NRM(full).split(/\s+/).filter(Boolean); if(w.length < 2){ o.cognome = w[0] || ''; o.nome = ''; } else { o.nome = w.pop(); o.cognome = w.join(' '); } };
+  const out = [];
+  /* PDF: ogni casella va nella colonna dell'intestazione più vicina */
+  if(map && hx[hi].every(x => x != null)){ const H = hx[hi];
+    rows = rows.map((r, i) => { if(i <= hi || !hx[i].length || hx[i].some(x => x == null)) return r; const a = new Array(H.length).fill('');
+      r.forEach((c, j) => { let k = 0; H.forEach((x, n) => { if(Math.abs(x - hx[i][j]) < Math.abs(H[k] - hx[i][j])) k = n; }); a[k] = a[k] ? a[k] + ' ' + c : c; }); return a; }); }
+  rows.slice(hi + 1).forEach(r => {
+    const piene = r.filter(c => c instanceof Date || NRM(c)); if(!piene.length) return;
+    const o = {cognome: '', nome: '', dataNascita: '', luogoNascita: '', ruolo: 'Giocatore', numero: '', tesseraAics: '', documento: ''};
+    if(map){ const g = k => k in map ? r[map[k]] : '';
+      if('cognome' in map){ o.cognome = NRM(g('cognome')); o.nome = NRM(g('nome')); if(!('nome' in map)) nomi(o, o.cognome); } else nomi(o, g('nominativo'));
+      o.dataNascita = isoDi(g('data'), true); o.luogoNascita = NRM(g('luogo')); o.ruolo = ruoloDi(NRM(g('ruolo')));
+      const nu = NRM(g('numero')); o.numero = /^\d{1,2}$/.test(nu) ? nu : ''; o.tesseraAics = NRM(g('tessera')); o.documento = NRM(g('documento'));
+    } else {
+      let cells = piene; const strutt = cells.length > 2;
+      if(!strutt) cells = cells.flatMap(c => c instanceof Date ? [c] : NRM(c).split(/\s+/));
+      const di = cells.findIndex(c => isoDi(c)); if(di < 1) return;
+      o.dataNascita = isoDi(cells[di]);
+      const pre = cells.slice(0, di).map(NRM).filter(c => !/^\d+[.)°]?$/.test(c)); if(!pre.length) return;
+      if(strutt && pre.length === 2){ o.cognome = pre[0]; o.nome = pre[1]; } else nomi(o, pre.join(' '));
+      const post = cells.slice(di + 1).map(NRM), ru = post.find(c => /port|allen|mister|dirig|accomp|giocat|massag/i.test(c));
+      if(ru) o.ruolo = ruoloDi(ru); const nu = post.find(c => /^\d{1,2}$/.test(c)); if(nu) o.numero = nu;
+      if(strutt){ const lu = post.find(c => c !== ru && /^[A-Za-zÀ-ÿ' .()-]{2,}$/.test(c)); if(lu) o.luogoNascita = lu; }
+    }
+    if(!/[A-Za-zÀ-ÿ]/.test(o.cognome) || /^(totale|pagina|squadra|elenco)\b/i.test(o.cognome)) return;
+    out.push(o);
+  });
+  return out;
+}
+function openImportaTess(sqId){
+  caricaXlsx().catch(() => {});
+  const {root, close} = sheet(`<form class="form" id="imF"><h3 style="grid-column:1/-1">Importa tesserati</h3>
+    <div class="field full"><label for="im-sq">Squadra</label><select id="im-sq" required><option value="">Scegli la squadra…</option>${optSq([], sqId)}</select></div>
+    <div class="field full"><label for="im-f">File</label><input id="im-f" type="file" required accept=".xlsx,.xls,.ods,.csv,.txt,.pdf,application/pdf,text/plain,text/csv"></div>
+    <p class="note" style="grid-column:1/-1">Excel, CSV, TXT o PDF con un tesserato per riga: cognome, nome e data di nascita. Se ci sono prendo anche luogo di nascita, ruolo, numero di maglia, tessera AICS e documento. Prima di importare ti faccio vedere cosa ho letto.</p>
+    <div class="err" id="imErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="imGo">Leggi il file</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Importa tesserati');
+  root.querySelector('#imF').onsubmit = async e => { e.preventDefault(); const q = sqById(root.querySelector('#im-sq').value), file = root.querySelector('#im-f').files[0], er = root.querySelector('#imErr'), bt = root.querySelector('#imGo');
+    if(!q.id || !file) return; bt.disabled = true; er.textContent = ''; bt.textContent = 'Leggo…';
+    try{ const l = leggiTess(await righeDaFile(file));
+      if(!l.length){ er.textContent = 'Non ho trovato tesserati nel file: su ogni riga servono almeno cognome, nome e data di nascita.'; bt.disabled = false; bt.textContent = 'Leggi il file'; return; }
+      anteprimaImport(q, l, file.name); }
+    catch(err){ console.warn(err); er.textContent = err.message === 'net' ? 'Serve internet per leggere questo tipo di file.' : 'Non riesco a leggere questo file. Prova a salvarlo come Excel o CSV.'; bt.disabled = false; bt.textContent = 'Leggi il file'; }
+  };
+}
+function anteprimaImport(q, l, nomeFile){
+  const cat = q.categoria, L = limDi(cat), visti = new Set();
+  l.forEach(o => { const k = lc(o.cognome) + '|' + lc(o.nome) + '|' + o.dataNascita; o.ok = true; o.dis = false; o.pb = '';
+    const qui = S.tess.find(x => x.squadraId === q.id && stessa(x, o) && statoT(x) !== 'scaduto'), alt = S.tess.find(x => x.squadraId !== q.id && stessa(x, o) && statoT(x) !== 'scaduto');
+    if(visti.has(k)){ o.dis = true; o.pb = 'Doppione nel file'; } else if(qui){ o.dis = true; o.pb = 'Già in questa squadra'; }
+    else if(alt){ o.ok = false; o.pb = 'Già tesserato con ' + alt.squadra; } else if(!o.dataNascita){ o.ok = false; o.pb = 'Manca la data di nascita'; }
+    else if(troppoGiovane(o, cat)){ o.ok = false; o.pb = 'Troppo giovane'; }
+    if(o.dis) o.ok = false; visti.add(k); });
+  const {root, close} = sheet(`<h3>Importa in ${esc(q.nome)}</h3><p class="note">Ho letto <b>${l.length}</b> ${l.length === 1 ? 'tesserato' : 'tesserati'} da ${esc(nomeFile)}. Togli la spunta a chi non vuoi importare: dopo potrai correggere e aggiungere la foto dalla scheda di ognuno.</p>
+    <div class="imp-l">${l.map((o, i) => `<label class="imp-r${o.dis ? ' dis' : ''}"><input type="checkbox" data-ii="${i}" ${o.ok ? 'checked' : ''} ${o.dis ? 'disabled' : ''}><span class="tx"><b>${esc(nomeT(o))}</b><span>${[o.dataNascita ? 'nato il ' + fmt(o.dataNascita) : '', o.luogoNascita, o.ruolo, o.numero ? 'n. ' + o.numero : '', o.tesseraAics ? 'tessera ' + o.tesseraAics : ''].filter(Boolean).map(esc).join(' · ')}</span>${o.pb ? `<span class="pst ${o.dis ? '' : 'no'}">${esc(o.pb)}</span>` : ''}</span></label>`).join('')}</div>
+    <p class="note" id="imCnt"></p>
+    <label class="check"><input type="checkbox" id="im-ok"><span>La società ha raccolto il consenso dei tesserati (o dei genitori, se minorenni) all’uso dei dati per il torneo AICS.</span></label>
+    <div class="err" id="imErr" role="alert"></div>
+    <button class="btn btn-primary btn-block" id="imGo">Importa e approva</button><button type="button" class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Importa tesserati');
+  const scelti = () => [...root.querySelectorAll('[data-ii]:checked')].map(x => l[+x.dataset.ii]);
+  const cnt = () => { const sc = scelti(), dopo = contaTess(q.id, cat) + sc.filter(o => contaGioc(o, L)).length, over = L.max && dopo > L.max;
+    root.querySelector('#imCnt').innerHTML = `Da importare: <b>${sc.length}</b>.${L.max ? ` In squadra diventano <b${over ? ' style="color:var(--danger,#D0342C)"' : ''}>${dopo} su ${L.max}</b>${L.soloGioc ? ' (solo giocatori)' : ''}${over ? ': oltre il massimo' : ''}.` : ''}`;
+    root.querySelector('#imGo').textContent = sc.length ? `Importa e approva (${sc.length})` : 'Importa e approva'; return {sc, over, dopo}; };
+  root.querySelectorAll('[data-ii]').forEach(x => x.onchange = cnt); cnt();
+  root.querySelector('#imGo').onclick = async () => { const {sc, over, dopo} = cnt(), er = root.querySelector('#imErr');
+    if(!sc.length){ er.textContent = 'Non hai scelto nessun tesserato'; return; }
+    if(!root.querySelector('#im-ok').checked){ er.textContent = 'Conferma il consenso al trattamento dei dati'; return; }
+    if(over && !confirm(`${q.nome} arriva a ${dopo} tesserati: il massimo è ${L.max}. Importare lo stesso?`)) return;
+    const bt = root.querySelector('#imGo'); bt.disabled = true; bt.textContent = 'Importo…';
+    try{ for(let i = 0; i < sc.length; i += 400){ const b = db().batch();
+        sc.slice(i, i + 400).forEach(o => { const {ok, dis, pb, ...d} = o, t = {...d, foto: '', squadraId: q.id, squadra: q.nome || '', categoria: cat || ''};
+          b.set(db().collection('tesserati').doc(), {...t, ...approva(t), consenso: true, importato: true, creatoDa: S.user.uid, createdAt: Date.now()}); });
+        await b.commit(); }
+      toast(`Importati ${sc.length} tesserati in ${q.nome}`); close(); }
+    catch(err){ bt.disabled = false; cnt(); er.textContent = fbErr(err); }
+  };
+}
+/* ---------- esporta l'elenco in Excel ---------- */
+async function salvaFile(blob, nome){
+  const f = new File([blob], nome, {type: blob.type});
+  if(/iPhone|iPad|Android/i.test(navigator.userAgent) && navigator.canShare && navigator.canShare({files: [f]})){ try{ await navigator.share({files: [f], title: nome}); return; }catch(e){ if(e.name === 'AbortError') return; } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function openEsporta(sqId){
+  caricaXlsx().catch(() => {});
+  const {root, close} = sheet(`<form class="form" id="exF"><h3 style="grid-column:1/-1">Esporta tesserati</h3>
+    <div class="field full"><label for="ex-sq">Squadra</label><select id="ex-sq"><option value="">Tutte le squadre</option>${optSq([], sqId)}</select></div>
+    <label class="check"><input type="checkbox" id="ex-at" checked><span>Anche quelli in attesa di approvazione</span></label>
+    <label class="check"><input type="checkbox" id="ex-sc"><span>Anche gli scaduti delle stagioni passate</span></label>
+    <div class="err" id="exErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="exGo">⬇️ Scarica Excel</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Esporta tesserati');
+  root.querySelector('#exF').onsubmit = async e => { e.preventDefault(); const id = root.querySelector('#ex-sq').value, at = root.querySelector('#ex-at').checked, scd = root.querySelector('#ex-sc').checked, er = root.querySelector('#exErr');
+    const l = S.tess.filter(t => (!id || t.squadraId === id) && t.stato !== 'rifiutato' && (at || t.stato !== 'attesa') && (scd || statoT(t) !== 'scaduto'))
+      .sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it') || nomeT(a).localeCompare(nomeT(b), 'it'));
+    if(!l.length){ er.textContent = 'Nessun tesserato da esportare'; return; }
+    try{ const X = await caricaXlsx();
+      const ws = X.utils.json_to_sheet(l.map(t => ({Squadra: t.squadra || '', Campionato: NOMECAMP[t.categoria] || t.categoria || '', Cognome: t.cognome || '', Nome: t.nome || '', 'Data di nascita': fmt(t.dataNascita), 'Luogo di nascita': t.luogoNascita || '', Ruolo: t.ruolo || 'Giocatore', Maglia: t.numero || '', 'Tessera AICS': t.tesseraAics || '', Documento: t.documento || '', Stato: ST_L[statoT(t)] || '', 'Valido fino al': t.scadenza ? fmt(t.scadenza) : '', Cartellino: t.codice || ''})));
+      ws['!cols'] = [22, 14, 18, 16, 14, 18, 12, 8, 14, 26, 11, 14, 14].map(w => ({wch: w}));
+      const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Tesserati');
+      const nome = `tesserati-${(id ? sqById(id).nome : 'tutte-le-squadre').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${oggi()}.xlsx`;
+      await salvaFile(new Blob([X.write(wb, {bookType: 'xlsx', type: 'array'})], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), nome);
+      toast(`Esportati ${l.length} tesserati`); close(); }
+    catch(err){ console.warn(err); er.textContent = 'Serve internet per creare il file Excel.'; }
+  };
+}
+/* ---------- limiti: età minima e massimo per squadra ---------- */
+function openLimiti(){
+  const {root, close} = sheet(`<form class="form" id="limF"><h3 style="grid-column:1/-1">Limiti tesserati</h3>
+    ${CATS.map(c => { const L = limDi(c), k = c.replace(/\W/g, ''); return `<div class="eyebrow" style="grid-column:1/-1">${NOMECAMP[c]}</div>
+      <div class="field" style="align-self:end"><label for="l-eta-${k}">Età minima</label><input id="l-eta-${k}" type="number" min="0" max="99" inputmode="numeric" value="${L.etaMin || ''}" placeholder="Nessuna"></div>
+      <div class="field" style="align-self:end"><label for="l-max-${k}">Massimo</label><input id="l-max-${k}" type="number" min="1" max="99" inputmode="numeric" value="${L.max || ''}" placeholder="Nessun limite"></div>
+      <label class="check" style="grid-column:1/-1"><input type="checkbox" id="l-sg-${k}" ${L.soloGioc ? 'checked' : ''}><span>Nel massimo contano solo giocatori e portieri (lo staff è libero)</span></label>`; }).join('')}
+    <p class="note" style="grid-column:1/-1">Età minima: anni compiuti entro il 30 giugno di fine stagione (stagione ${STAG}). Nel massimo contano i tesserati validi, sospesi e in attesa, non gli scaduti. Lascia vuoto per nessun limite. I responsabili non possono superarli; tu sì, dopo una conferma.</p>
+    <div class="actions"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Limiti tesserati');
+  root.querySelector('#limF').onsubmit = async e => { e.preventDefault();
+    try{ for(const c of CATS){ const k = c.replace(/\W/g, ''), n = id => Math.max(0, parseInt(root.querySelector('#' + id).value, 10) || 0);
+        await db().collection('campionati').doc(c).set({tess: {etaMin: n('l-eta-' + k), max: n('l-max-' + k), soloGioc: root.querySelector('#l-sg-' + k).checked}, updatedAt: Date.now()}, {merge: true}); }
+      toast('Limiti salvati'); close(); }
+    catch(err){ toast(fbErr(err)); } };
+}
+/* --- da approvare: per squadra, con "Approva tutti" --- */
+const pulito = t => !t.daSquadraId && !troppoGiovane(t, t.categoria) && !doppioDi(t);
+function gruppiAtt(l){
+  const g = new Map(); l.forEach(t => { const k = t.squadraId || ''; if(!g.has(k)) g.set(k, []); g.get(k).push(t); });
+  return [...g.entries()].sort((a, b) => (a[1][0].squadra || '').localeCompare(b[1][0].squadra || '', 'it')).map(([k, ts]) => { const ok = ts.filter(pulito);
+    return `<div class="stack" style="gap:6px"><div class="rhead">${stemma(ts[0].squadra)}<b>${esc(ts[0].squadra)} <span class="cnt hot">${ts.length}</span></b>${ok.length ? `<button class="btn btn-ok sm" data-aall="${esc(k)}">✓ Approva tutti${ok.length < ts.length ? ` (${ok.length})` : ''}</button>` : ''}</div>
+      <ul class="list">${ts.sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')).map(itemT).join('')}</ul></div>`; }).join('');
+}
+const bindAttT = root => root.querySelectorAll('[data-aall]').forEach(b => b.onclick = async () => {
+  const ts = S.tess.filter(t => t.stato === 'attesa' && (t.squadraId || '') === b.dataset.aall), ok = ts.filter(pulito), resto = ts.length - ok.length;
+  if(!confirm(`Approvare ${ok.length} ${ok.length === 1 ? 'tesserato' : 'tesserati'} di ${ts[0].squadra}?${resto ? ` ${resto === 1 ? 'Uno resta' : resto + ' restano'} da controllare uno per uno (trasferimento, età o già tesserato).` : ''}`)) return;
+  b.disabled = true;
+  try{ const bt = db().batch(); ok.forEach(t => bt.update(db().collection('tesserati').doc(t.id), approva(t))); await bt.commit(); toast(`Approvati ${ok.length} tesserati`); }
+  catch(err){ b.disabled = false; toast(fbErr(err)); } });
+
 /* -- cartellino digitale -- */
 const tesseraHTML = t => { const s = statoT(t); return `<div class="tessera ${s}"><div class="top"><img src="../icon-aics.png" alt=""><div><b>AICS Reggio Emilia</b><span>${esc(t.categoria || '')} · Stagione ${t.scadenza ? `${+t.scadenza.slice(0, 4) - 1}/${t.scadenza.slice(2, 4)}` : ''}</span></div><span class="stato">${s === 'approvato' ? 'VALIDO' : esc((ST_L[s] || s).toUpperCase())}</span></div>
   ${t.foto ? `<img class="foto" src="${esc(t.foto)}" alt="Foto di ${esc(nomeT(t))}">` : `<span class="foto">${esc(iniz(t))}</span>`}
   <div class="dati"><span class="nome">${esc(t.cognome || '')}<br>${esc(t.nome || '')}</span>
     <span class="k">Squadra</span><span class="v">${esc(t.squadra || '')}</span>
     <span class="k">Nato il</span><span class="v">${esc(fmt(t.dataNascita))}${t.luogoNascita ? ' · ' + esc(t.luogoNascita) : ''}</span>
-    <span class="k">Ruolo</span><span class="v">${esc(t.ruolo || 'Giocatore')}${t.numero ? ' · maglia n. ' + esc(t.numero) : ''}</span></div>
-  <div class="piede"><span>Tessera<br><b>${esc(t.codice || '—')}</b></span><span style="text-align:right">Valida fino al<br><b>${esc(fmt(t.scadenza))}</b></span></div></div>`; };
+    <span class="k">Ruolo</span><span class="v">${esc(t.ruolo || 'Giocatore')}${t.numero ? ' · maglia n. ' + esc(t.numero) : ''}</span>${t.tesseraAics ? `<span class="k">Tessera AICS</span><span class="v">${esc(t.tesseraAics)}</span>` : ''}</div>
+  <div class="piede"><span>Cartellino<br><b>${esc(t.codice || '—')}</b></span><span style="text-align:right">Valida fino al<br><b>${esc(fmt(t.scadenza))}</b></span></div></div>`; };
 function openCard(t){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '', s = statoT(t);
   const azioni = S.admin ? `<div class="row">
@@ -1318,11 +1558,16 @@ function openCard(t){
       ${s === 'approvato' ? '<button class="btn btn-danger" data-a="sosp">Sospendi</button>' : ''}${s === 'sospeso' ? '<button class="btn btn-ok" data-a="riatt">Riattiva</button>' : ''}
       ${s === 'scaduto' ? '<button class="btn btn-ok" data-a="ok">Rinnova per questa stagione</button>' : ''}
       <button class="btn btn-ghost" data-a="mod">Modifica</button></div>` : s === 'scaduto' ? '<button class="btn btn-primary btn-block" data-a="rinnova">Rinnova per la nuova stagione</button>' : '';
+  const cand = S.admin && (s === 'attesa' || s === 'rifiutato') ? S.tess.filter(x => x.id !== t.id && x.squadraId !== t.squadraId && x.stato !== 'attesa' && x.stato !== 'rifiutato' && (stessa(x, t) || (x.squadraId === t.daSquadraId && lc(x.cognome) === lc(t.cognome) && lc(x.nome) === lc(t.nome)))) : [];
   const dup = S.admin && S.tess.filter(x => x.id !== t.id && x.dataNascita === t.dataNascita && (x.cognome || '').toLowerCase() === (t.cognome || '').toLowerCase() && (x.nome || '').toLowerCase() === (t.nome || '').toLowerCase() && statoT(x) !== 'scaduto');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="Cartellino"><div class="grab"></div>
     ${tesseraHTML(t)}
     ${s === 'attesa' ? '<p class="note" style="text-align:center">Cartellino in attesa: diventa valido quando l’amministratore lo approva.</p>' : ''}
     ${dup && dup.length ? `<div class="warn-box">⚠️ Risulta già tesserato con: ${dup.map(x => `<b>${esc(x.squadra)}</b> (${ST_L[statoT(x)]})`).join(', ')}</div>` : ''}
+    ${S.admin && t.daSquadraId ? `<div class="warn-box">🔁 Chiede il trasferimento da <b>${esc(t.daSquadra)}</b>${cand.some(x => x.squadraId === t.daSquadraId) ? '' : '. Non trovo un tesserato con questo nome in quella squadra: controlla, oppure approvalo come nuovo.'}</div>` : ''}
+    ${cand.length ? `<div class="stack" style="gap:8px">${cand.map(x => `<button class="btn btn-ok btn-block" data-tr="${esc(x.id)}">${statoT(x) === 'scaduto' ? `♻️ Rinnova (la scorsa stagione era con ${esc(x.squadra)})` : `🔁 Trasferisci da ${esc(x.squadra)}`}</button>`).join('')}<p class="note">${statoT(cand[0]) === 'scaduto' ? 'Rinnovando tiene il suo cartellino e i dati nuovi della richiesta.' : 'Con il trasferimento resta lo stesso tesserato: statistiche e squalifiche da scontare lo seguono.'}</p></div>` : ''}
+    ${S.admin && (s === 'attesa' || s === 'rifiutato') && troppoGiovane(t, t.categoria) ? `<div class="warn-box">⚠️ ${esc(msgEta(t.categoria))}</div>` : ''}
+    ${s !== 'attesa' && s !== 'rifiutato' ? statHtml(t) : ''}
     ${S.admin && t.documento ? `<p class="note">Documento: ${esc(t.documento)}</p>` : ''}
     ${S.admin && t.approvatoDa ? `<p class="note">Approvato da ${esc(t.approvatoDa)} il ${new Date(t.approvatoAt).toLocaleDateString('it-IT')} · dati conservati fino al ${fmt(t.cancellaDopo)}</p>` : ''}
     ${azioni}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
@@ -1330,6 +1575,11 @@ function openCard(t){
   root.querySelector('[data-x]').onclick = close;
   const ref = db().collection('tesserati').doc(t.id);
   const go = async (o, msg) => { try{ await ref.update(o); toast(msg); close(); }catch(err){ toast(fbErr(err)); } };
+  root.querySelectorAll('[data-tr]').forEach(b => b.onclick = async () => { const x = S.tess.find(y => y.id === b.dataset.tr); if(!x) return; const scad = statoT(x) === 'scaduto', q = {...sqById(t.squadraId)}; if(!q.id) Object.assign(q, {id: t.squadraId, nome: t.squadra, categoria: t.categoria});
+    if(!confirm(scad ? `Rinnovare ${nomeT(x)} con ${q.nome}?` : `Trasferire ${nomeT(x)} da ${x.squadra} a ${q.nome}?`)) return;
+    const extra = {}; ['foto', 'numero', 'ruolo', 'documento', 'luogoNascita', 'tesseraAics', 'dataNascita'].forEach(k => { if(t[k]) extra[k] = t[k]; });
+    if(scad) Object.assign(extra, approva({...x, categoria: q.categoria}));
+    b.disabled = true; try{ await trasferisci(x, q, extra, t.id, !scad); toast(scad ? 'Rinnovato' : `Trasferito in ${q.nome}`); close(); }catch(err){ b.disabled = false; toast(fbErr(err)); } });
   root.querySelectorAll('[data-a]').forEach(b => b.onclick = () => ({
     ok: () => go(approva(t), `${nomeT(t)} approvato: cartellino valido fino al ${fmt(fineStagione())}`),
     no: () => { const m = prompt('Perché lo rifiuti? (lo legge il responsabile della squadra)', ''); if(m === null) return; go({stato: 'rifiutato', motivo: m.trim()}, 'Tesserato rifiutato'); },
@@ -1349,7 +1599,7 @@ function renderAdmin(app){
   let body = '';
   if(!S.loaded.tess || !S.loaded.resps || !S.loaded.abil || !S.loaded.inviti || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
   else if(S.tab === 'appr') body = (attR.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Responsabili di squadra <span class="cnt hot">${attR.length}</span></div><ul class="list">${attR.map(richAdm).join('')}</ul></section>` : '')
-      + (attT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Tesserati <span class="cnt hot">${attT.length}</span></div><ul class="list">${attT.sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '') || nomeT(a).localeCompare(nomeT(b))).map(itemT).join('')}</ul><p class="note">Tocca un tesserato per vedere il cartellino e approvarlo.</p></section>` : '')
+      + (attT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Tesserati <span class="cnt hot">${attT.length}</span></div>${gruppiAtt(attT)}<p class="note">Tocca un tesserato per vedere il cartellino e approvarlo. «Approva tutti» salta chi chiede un trasferimento, chi è troppo giovane e chi risulta già tesserato: quelli vanno guardati uno per uno.</p></section>` : '')
       + (!attT.length && !attR.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
   else if(S.tab === 'partite') body = adminPartite();
   else if(S.tab === 'resp') body = adminResp();
@@ -1362,7 +1612,8 @@ function renderAdmin(app){
         : `<div class="empty"><h3>Nessuna squadra ${S.cat}</h3><span>Le squadre sono le stesse dell’archivio del designatore nell’app arbitri.</span></div>`}`;
   } else {
     const f = S.filtro, l = S.tess.filter(t => f === 'tutti' || statoT(t) === f).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
-    body = `<div class="field"><label for="aFind">Cerca</label><input id="aFind" type="search" placeholder="Cognome, nome o squadra" value="${esc(S.cerca || '')}"></div>
+    body = `<div class="row"><button class="btn btn-primary sm" id="tImp">📥 Importa</button><button class="btn btn-ghost sm" id="tExp">⬇️ Esporta</button><button class="btn btn-ghost sm" id="tLim">⚙️ Limiti</button></div>
+      <div class="field"><label for="aFind">Cerca</label><input id="aFind" type="search" placeholder="Cognome, nome o squadra" value="${esc(S.cerca || '')}"></div>
       <div class="seg" role="group" aria-label="Filtro">${[['tutti', 'Tutti'], ['approvato', 'Validi'], ['sospeso', 'Sospesi'], ['scaduto', 'Scaduti']].map(([k, t]) => `<button data-f="${k}" aria-pressed="${k === f}">${t}</button>`).join('')}</div>
       <ul class="list" id="aList">${l.map(itemT).join('') || '<div class="empty"><h3>Nessun tesserato</h3></div>'}</ul>`;
   }
@@ -1376,7 +1627,8 @@ function renderAdmin(app){
   app.querySelectorAll('[data-q]').forEach(b => b.onclick = () => openSquadra(sqById(b.dataset.q)));
   if(S.tab === 'partite') bindPartite(app);
   if(S.tab === 'squ') bindSqu(app);
-  bindRichAdm(app);
+  bindRichAdm(app); bindAttT(app);
+  if($('#tImp')){ $('#tImp').onclick = () => openImportaTess(''); $('#tExp').onclick = () => openEsporta(''); $('#tLim').onclick = openLimiti; }
   if(S.tab === 'resp') bindResp(app);
   const fi = $('#aFind');
   if(fi) fi.oninput = () => { S.cerca = fi.value; const k = fi.value.trim().toLowerCase();
@@ -1515,12 +1767,13 @@ function openSquadra(q){
       <h3>${esc(q.nome)}</h3><div class="note">${esc(q.categoria || '')}</div>
       ${schedaBox(q)}
       <section class="stack" style="gap:8px"><div class="eyebrow">Responsabili <span class="cnt">${rs.length + iv.length}/${MAXRESP}</span></div>${rs.map(r => `<div class="rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || '')}${r.telefono && r.email ? ' · ' : ''}${esc(r.email || '')}</span></div><button class="btn btn-ghost sm" data-re="${esc(r.id)}">Modifica</button></div>`).join('')}${iv.map(i => `<div class="rp"><div class="rtx"><b>${esc(nomeR(i))}</b><span>Invitato: entra quando si registra con ${esc(i.email)}</span></div></div>`).join('')}${rs.length + iv.length ? '' : '<p class="note">Nessun responsabile.</p>'}${rs.length + iv.length < MAXRESP ? `<button class="btn btn-ghost sm" data-radd="${esc(q.id)}">+ Aggiungi responsabile</button>` : ''}</section>
-      <section class="stack" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="eyebrow">Tesserati <span class="cnt">${ts.length}</span></div><button class="btn btn-primary sm" id="sqAddT">+ Tesserato</button></div>
+      <section class="stack" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="eyebrow">Tesserati <span class="cnt">${ts.length}</span></div><div class="row" style="gap:6px"><button class="btn btn-ghost sm" id="sqImp" aria-label="Importa tesserati">📥</button><button class="btn btn-ghost sm" id="sqExp" aria-label="Esporta tesserati">⬇️</button><button class="btn btn-primary sm" id="sqAddT">+ Tesserato</button></div></div>
       <ul class="list">${ts.map(itemT).join('') || '<p class="note">Nessun tesserato.</p>'}</ul></section>
       <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
     root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
     root.querySelector('[data-x]').onclick = close;
     $('#sqAddT').onclick = () => openTess({squadraId: q.id, squadra: q.nome, categoria: q.categoria});
+    $('#sqImp').onclick = () => openImportaTess(q.id); $('#sqExp').onclick = () => openEsporta(q.id);
     root.querySelector('[data-scheda]').onclick = () => openSchedaSq(q);
     root.querySelectorAll('[data-re]').forEach(b => b.onclick = () => openRespEdit(b.dataset.re));
     root.querySelectorAll('[data-radd]').forEach(b => b.onclick = () => openInvito(q));
