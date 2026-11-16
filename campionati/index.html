@@ -225,7 +225,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 .seg::-webkit-scrollbar{display:none}
 .seg button{flex:1 0 auto;border-radius:99px;padding:9px 14px;border:1.5px solid color-mix(in srgb,var(--royal) 35%,transparent);background:var(--card);color:var(--fg);font-weight:800;font-size:14px;line-height:1.15;white-space:nowrap}
 .seg button[aria-pressed=true]{background:var(--royal);border-color:var(--royal);color:#fff;box-shadow:0 4px 12px color-mix(in srgb,var(--royal) 35%,transparent)}
-.seg button[aria-pressed=true] .cnt{background:rgba(255,255,255,.25);color:#fff}
+.seg button[aria-pressed=true] .cnt{background:rgba(255,255,255,.25);color:#fff}.seg button[aria-pressed=true] .cnt.hot{background:#E5372B;color:#fff;box-shadow:0 0 0 1.5px #fff}
 /* titoli di sezione */
 .lbl{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--lbl);text-transform:uppercase;margin:0}
 .ttl{font-family:var(--display);font-size:30px;font-weight:800;text-transform:uppercase;margin:-10px 0 0;line-height:1}
@@ -406,6 +406,40 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .pen-n{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--muted);padding:0 4px}
 @media (prefers-color-scheme:dark){.pen-n{color:#C3D0E6}}
 .ricf{display:flex;align-items:center;gap:10px}.ricf img{width:56px;height:70px;object-fit:cover;border-radius:8px}
+.cico{width:40px;height:40px;border-radius:11px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.gs{display:flex;flex-direction:column;gap:6px;min-width:0}
+.gs-h{display:flex;align-items:center;gap:10px}.gs-h img{width:40px;height:40px;border-radius:9px;background:#fff;padding:3px;flex:none}.gs-h b{display:block;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;line-height:1.2}.gs-h span{display:block;font-size:12px;color:var(--muted)}
+.gs-t{margin:6px 0 2px;font-size:18px;line-height:1.2}.gs-t small{display:block;font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none}
+.gs h4{margin:10px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--royal,#1F4FB8)}
+@media (prefers-color-scheme:dark){.gs h4{color:#8FB3FF}}
+.gs h5{margin:6px 0 0;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.gs-r{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.gs-r li{display:flex;flex-direction:column;font-size:14px;line-height:1.25;padding-left:9px;border-left:3px solid var(--surface-2);overflow-wrap:anywhere}.gs-r li span{font-size:13px;color:var(--muted)}
+.gs-x,.com-x{line-height:1.45;margin:0;overflow-wrap:anywhere}.com-x a,.gs-x a{color:inherit;text-decoration:underline}
+.gs-f{text-align:right;font-weight:800;margin:10px 0 0}
+.alg-img{min-height:60px;display:flex;align-items:center;justify-content:center}.alg-img img{width:100%;border-radius:12px;display:block;cursor:zoom-in}
+.alg .btn small{font-weight:600;opacity:.7;margin-left:4px}
+.alls{display:flex;flex-direction:column;gap:6px;align-items:flex-start;width:100%}.alr{display:flex;align-items:center;gap:8px;width:100%;font-size:13.5px}.alr span{flex:1;min-width:0;overflow-wrap:anywhere}.alr small{color:var(--muted)}
+.alr .x{border:0;background:var(--surface-2);color:var(--fg);border-radius:9px;width:34px;height:34px;flex:none;cursor:pointer}
+.viewer{position:fixed;inset:0;z-index:90;background:#141824;display:flex;flex-direction:column;color:#fff}
+.vw-h{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px}.vw-h b{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px}
+.vw-h .btn{color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+.vw-b{flex:1;overflow:auto;padding:0 8px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;align-items:center;-webkit-overflow-scrolling:touch}.vw-b canvas{background:#fff;max-width:100%;height:auto}.vw-b img{max-width:100%;height:auto}.vw-b .note,.vw-b .err{color:#fff;text-align:center;margin-top:30px}
+.hcom{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));z-index:3;width:46px;height:46px;background:rgba(6,12,40,.55);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:50%;font-size:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:0}
+.hcom .cnt{position:absolute;top:-4px;right:-4px;background:#FF4D4D;color:#fff;border-radius:99px;font-size:11.5px;min-width:20px;height:20px;line-height:20px;padding:0 5px;font-weight:800;text-align:center}
+.hcom .t{position:absolute;top:calc(100% + 3px);font-size:10.5px;font-weight:700;letter-spacing:.02em;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.tabbar nav{grid-template-columns:repeat(5,1fr)}.tabbar button{position:relative}
+@media (max-width:380px){.tabbar button{font-size:11px}.tabbar nav{gap:3px}}
+.tdot{position:absolute;top:5px;left:calc(50% + 7px);width:9px;height:9px;border-radius:50%;background:#FF4D4D;box-shadow:0 0 0 2px rgba(0,0,0,.2)}
+.sqchk{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow:auto;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.field .sqchk label.check{display:flex;flex-direction:row;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font-size:14.5px;font-weight:600;color:var(--fg);padding:4px 2px}.field .sqchk input{min-height:0;height:22px;width:22px;padding:0;margin:0}.field .sqchk label.check small{font-weight:500;color:var(--muted);font-size:12px}
+.gsp{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit}.gsp .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.gsp .tx span{font-size:13px;color:var(--muted)}
+.nb{width:100%;text-align:left;font:inherit;font-weight:700;cursor:pointer;color:inherit}
+.msg-n b{font-weight:900}
+.sdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#FF4D4D;margin-left:6px;vertical-align:middle;flex:none}
+.gsb{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-radius:16px;padding:12px 14px;background:#1E8A4F;color:#fff;font:inherit;font-size:14.5px;line-height:1.3;cursor:pointer;box-shadow:0 6px 18px rgba(30,138,79,.3)}
+.gsb .ar{margin-left:auto;font-size:22px;line-height:1}.gsb .gi{position:relative;width:40px;height:40px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}.gsb .sdot{position:absolute;top:-4px;right:-4px;margin:0;background:#FF4D4D;box-shadow:0 0 0 2px #fff;animation:pl 1.6s ease-out infinite}
+@keyframes pl{0%{box-shadow:0 0 0 2px #fff,0 0 0 2px rgba(255,77,77,.7)}70%{box-shadow:0 0 0 2px #fff,0 0 0 10px rgba(255,77,77,0)}100%{box-shadow:0 0 0 2px #fff,0 0 0 2px rgba(255,77,77,0)}}
+@media (prefers-reduced-motion:reduce){.gsb .sdot{animation:none}}
 .legenda span{display:flex;align-items:center;gap:5px}.legenda i{width:9px;height:9px;border-radius:3px;flex:none}
 
 /* impostazioni */
@@ -463,7 +497,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 <div id="app"><div id="home"><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
 <div class="camp"><a class="c f" href="#futsal"><img src="logo-futsal.png" alt=""><div class="n">Futsal League</div><div class="s">Calcio a 5</div></a>
 <a class="c l" href="#liga"><img src="logo-liga.png" alt=""><div class="n">R.E. Liga</div><div class="s">Calcio a 7</div></a></div></div>
-<div class="acc"><span id="accTx">Sei responsabile di una squadra?</span><br><a href="#area" id="accBtn">Area squadre · Accedi</a></div></div></div></div>
+<div class="acc"><span id="accTx">Sei responsabile di una squadra?</span><br><a href="#area" id="accBtn">Area squadre · Accedi</a></div></div><button class="hcom" id="hCom" hidden aria-label="Comunicati">📣<span class="t">Comunicati</span><span class="cnt" id="hComN" hidden></span></button></div></div>
 <script>(function(){function l(){var W=innerWidth,H=innerHeight,s=Math.max(W/1472,H/2616),o=(H-2616*s)*.3;document.documentElement.style.setProperty('--tb',Math.round(o+790*s)+'px')}l();addEventListener('resize',l)})();</script>
 <div id="sheetRoot"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -514,7 +548,7 @@ function loadFB(){
 const db = () => firebase.firestore();
 
 /* ---------- stato ---------- */
-const S = {ready: false, user: null, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, amm: [], dt: null, pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
+const S = {ready: false, user: null, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, amm: [], dt: null, pubCom: [], comAll: [], comz: [], msgAll: [], msg: [], pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
 const VIEW = () => ({'#futsal': 'futsal', '#liga': 'liga', '#area': 'area'})[location.hash] || 'home';
 const CAMP = {futsal: {cat: 'C5 AICS', nome: 'Futsal League', sub: 'Calcio a 5 · AICS Reggio Emilia', logo: 'logo-futsal.png', cls: 'camp-f'}, liga: {cat: 'C7 AICS', nome: 'R.E. Liga', sub: 'Calcio a 7 · AICS Reggio Emilia', logo: 'logo-liga.png', cls: 'camp-l'}};
 const sqById = id => S.squadre.find(q => q.id === id) || {};
@@ -522,7 +556,7 @@ const live = (q, k, fn) => S.unsub.push(q.onSnapshot(s => { fn(s.docs.map(d => (
 
 async function onUser(u){
   S.unsub.forEach(f => f()); S.unsub = [];
-  Object.assign(S, {user: u, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], tess: [], resps: [], amm: [], loaded: {}, err: '', accInv: false});
+  Object.assign(S, {user: u, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], tess: [], resps: [], amm: [], comAll: [], comz: [], msgAll: [], msg: [], loaded: {}, err: '', accInv: false});
   if(!u){ S.ready = true; render(); return; }
   S.admin = ADMINS().includes(String(u.email || '').toLowerCase());
   live(db().collection('squadre'), 'squadre', l => { S.squadre = l; });
@@ -536,6 +570,9 @@ async function onUser(u){
     live(db().collection('designazioni'), 'des', l => { S.des = l; });
     live(db().collection('distinte'), 'dist', l => { S.dist = l; });
     live(db().collection('ammende'), 'amm', l => { S.amm = l; });
+    live(db().collection('comunicati'), 'comAll', l => { S.comAll = l; });
+    live(db().collection('comunicazioni'), 'comz', l => { S.comz = l; });
+    live(db().collection('messaggi'), 'msgAll', l => { S.msgAll = l; });
     pubStart();
     S.ready = true; render(); return;
   }
@@ -561,11 +598,12 @@ function aggiornaResp(){
 }
 function subSq(id){
   S.unsub = S.unsub.filter(f => { if(f.sq){ f(); return false; } return true; });
-  S.tess = []; S.dist = []; S.amm = []; S.loaded.tess = false; S.loaded.dist = false; S.loaded.amm = false;
+  S.tess = []; S.dist = []; S.amm = []; S.msg = []; S.loaded.tess = false; S.loaded.dist = false; S.loaded.amm = false; S.loaded.msg = false;
   const f = db().collection('tesserati').where('squadraId', '==', id).onSnapshot(x => { S.tess = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.tess = true; render(); }, e => { S.err = fbErr(e); S.loaded.tess = true; render(); });
   const g = db().collection('distinte').where('squadraId', '==', id).onSnapshot(x => { S.dist = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.dist = true; render(); }, e => { console.warn('dist', e.code); S.loaded.dist = true; render(); });
   const h = db().collection('ammende').where('sqId', '==', id).onSnapshot(x => { S.amm = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.amm = true; render(); }, e => { console.warn('amm', e.code); S.loaded.amm = true; render(); });
-  f.sq = g.sq = h.sq = true; S.unsub.push(f, g, h);
+  const m = db().collection('messaggi').where('sqId', '==', id).onSnapshot(x => { S.msg = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.msg = true; render(); }, e => { console.warn('msg', e.code); S.loaded.msg = true; render(); });
+  f.sq = g.sq = h.sq = m.sq = true; S.unsub.push(f, g, h, m);
 }
 /* invito dell'amministratore: con l'email confermata si entra subito nella squadra */
 async function accettaInviti(){
@@ -663,17 +701,20 @@ function renderHome(app){
   if(!$('#home')){
     app.innerHTML = `<div id="home"><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
       <div class="camp">${['futsal', 'liga'].map(k => `<a class="c ${k === 'futsal' ? 'f' : 'l'}" href="#${k}"><img src="${CAMP[k].logo}" alt=""><div class="n">${CAMP[k].nome}</div><div class="s">${k === 'futsal' ? 'Calcio a 5' : 'Calcio a 7'}</div></a>`).join('')}</div></div>
-      <div class="acc"><span id="accTx"></span><br><a href="#area" id="accBtn"></a></div></div></div>`;
+      <div class="acc"><span id="accTx"></span><br><a href="#area" id="accBtn"></a></div></div><button class="hcom" id="hCom" hidden aria-label="Comunicati">📣<span class="t">Comunicati</span><span class="cnt" id="hComN" hidden></span></button></div>`;
     lay();
   }
   app.dataset.v = 'home';
   const u = S.user, n = u ? (S.prof && S.prof.nome ? S.prof.nome : (u.email || '')) : '';
   $('#accTx').textContent = u ? (S.admin ? 'Sei entrato come amministratore' : 'Sei entrato come ' + n) : 'Sei responsabile di una squadra?';
   $('#accBtn').textContent = u ? 'Area squadre ›' : 'Area squadre · Accedi';
+  comStart(); const lc = S.pubCom || [], nn = lc.filter(nuovoC).length; $('#hCom').onclick = openComHome;
+  $('#hCom').hidden = !lc.length; $('#hComN').hidden = !nn; $('#hComN').textContent = nn;
 }
 
 /* -- pagina pubblica del campionato -- */
 function pubStart(){
+  comStart();
   if(S.pubOn) return; S.pubOn = true;
   loadFB().then(() => db().collection('squadre').onSnapshot(s => { S.pubSq = s.docs.map(d => ({id: d.id, ...d.data()})); S.pubLoaded = true; S.pubErr = ''; if(CAMP[VIEW()]) render(); },
     e => { S.pubErr = fbErr(e); S.pubLoaded = true; S.pubOn = false; if(CAMP[VIEW()]) render(); })
@@ -687,7 +728,8 @@ const ICO = {
   par: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   cl: '<path d="M8 21V11H3v10M16 21V14h5v7M8 21V4h8v17M2 21h20"/>',
   gio: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
-  dis: '<rect x="3" y="4" width="10" height="14" rx="2"/><path d="M15 6.5l4.2.7a2 2 0 0 1 1.6 2.3l-1.7 10a2 2 0 0 1-2.3 1.6l-6-1"/>'};
+  dis: '<rect x="3" y="4" width="10" height="14" rx="2"/><path d="M15 6.5l4.2.7a2 2 0 0 1 1.6 2.3l-1.7 10a2 2 0 0 1-2.3 1.6l-6-1"/>',
+  com: '<path d="M3 10.5v3a1 1 0 0 0 1 1h2.5L12 19V5L6.5 9.5H4a1 1 0 0 0-1 1z"/><path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>'};
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`;
 const COL = ['#2F6FD6', '#C0392B', '#1E8A4F', '#7B3FBF', '#B3600C', '#16303F', '#B8336A', '#0E8C9C', '#5D6D7E', '#A04000'];
 /* schede squadre (squadreInfo/{id}): stemma, maglie [{c1, c2}], campo di casa. Separate da squadre/ che appartiene all'app arbitri */
@@ -1075,7 +1117,7 @@ function cardPar(p){
 function renderCamp(app, v){
   const C = CAMP[v]; pubStart();
   const l = S.pubSq.filter(q => q.categoria === C.cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
-  const tabs = [['par', 'Partite'], ['cl', 'Classifica'], ['gio', 'Giocatori'], ['dis', 'Disciplina']];
+  const tabs = [['par', 'Partite'], ['cl', 'Classifica'], ['gio', 'Giocatori'], ['dis', 'Disciplina'], ['com', 'Comunicati']], lcom = comCat(C.cat), ncom = lcom.filter(nuovoC).length;
   const t = S.ptab, sb = k => S.sub[k];
   let body;
   if(!S.pubLoaded) body = '<div class="status"><span class="spin"></span>Carico…</div>';
@@ -1092,6 +1134,7 @@ function renderCamp(app, v){
         <div class="card par">${lg.map(cardPar).join('')}</div>${riposa.length && riposa.length < l.length ? `<p class="note">Riposa: ${esc(riposa.join(', '))}</p>` : ''}`;
     }
   }
+  else if(t === 'com') body = testa('Comunicati', 'Campionato') + (!S.pubComOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lcom.length ? `<ul class="list">${lcom.map(c => itemC(c)).join('')}</ul>` : vuoto('Nessun comunicato', 'Qui trovi i comunicati del giudice sportivo, gli avvisi e i documenti del torneo.'));
   else if(t === 'cl') body = testa('Classifica', 'Campionato') + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : l.length ? tabClassifica(C.cat, l) : vuoto('Squadre in arrivo', 'Le squadre del campionato non sono ancora state inserite.'));
   else if(t === 'gio'){
     const k = sb('gio') || 'mar';
@@ -1122,7 +1165,7 @@ function renderCamp(app, v){
   app.className = 'con-tabs ' + C.cls + '-app';
   app.innerHTML = `<header class="band ${C.cls}"><div class="band-in"><button class="casa" data-home aria-label="Torna alla pagina iniziale">‹</button><img class="clogo" src="${C.logo}" alt=""><div><h1>${C.nome}</h1><div class="sub">${C.sub}</div></div><button class="infob" data-info aria-label="Regolamento e informazioni"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.4" fill="currentColor"/></svg></button></div></header>
     <main class="wrap stack">${body}</main>
-    <div class="tabbar"><nav aria-label="Sezioni">${tabs.map(([k, n]) => `<button data-pt="${k}"${t === k ? ' aria-current="page"' : ''}>${svg(k)}${n}</button>`).join('')}</nav></div>`;
+    <div class="tabbar"><nav aria-label="Sezioni">${tabs.map(([k, n]) => `<button data-pt="${k}"${t === k ? ' aria-current="page"' : ''}>${svg(k)}${n}${k === 'com' && ncom && t !== 'com' ? '<i class="tdot" aria-label="nuovi"></i>' : ''}</button>`).join('')}</nav></div>`;
   bindHome(app);
   app.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { S.ptab = b.dataset.pt; S.sqp = ''; render(); window.scrollTo(0, 0); });
   app.querySelectorAll('[data-sqp]').forEach(b => { if(!b.dataset.sqp || !l.some(q => q.id === b.dataset.sqp)) return; b.classList.add('tap'); b.onclick = () => { S.sqp = b.dataset.sqp; render(); window.scrollTo(0, 0); }; });
@@ -1131,6 +1174,7 @@ function renderCamp(app, v){
   app.querySelectorAll('[data-gp]').forEach(b => b.onclick = () => { S.pgPub[v] = +b.dataset.gp; render(); });
   const gf = app.querySelector('#gFil'); if(gf) gf.onchange = () => { S.gsq = {...(S.gsq || {}), [v]: gf.value}; render(); };
   app.querySelector('[data-info]').onclick = () => openInfo(C.cat);
+  bindCom(app);
   const gs = app.querySelector('.gior [aria-pressed=true]'); if(gs) gs.scrollIntoView({block: 'nearest', inline: 'center'});
 }
 
@@ -1228,7 +1272,23 @@ function renderResp(app){
   app.dataset.v = 'resp'; pubStart();
   const att = S.abil.filter(a => a.stato === 'attivo').sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it'));
   const sw = att.length > 1 ? `<div class="seg sqsw" role="group" aria-label="Squadra">${att.map(a => `<button data-rsq="${esc(a.squadraId)}" aria-pressed="${a.squadraId === r.squadraId}">${stemma(a.squadra)}${esc(a.squadra)}</button>`).join('')}</div>` : '';
-  const rt = S.rtab || 'dist', segR = sw + `<div class="seg" role="tablist">${[['dist', 'Partite e distinte', 'Distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra']].map(([k, t, c]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${c ? `<span class="lg">${t}</span><span class="sh">${c}</span>` : t}</button>`).join('')}</div>`;
+  const nl = (S.msg || []).filter(x => !(x.letti || {})[S.user.uid]).length;
+  const rt = S.rtab || 'dist', segR = sw + `<div class="seg" role="tablist">${[['dist', 'Partite e distinte', 'Distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra'], ['com', 'Comunicazioni', 'Messaggi']].map(([k, t, c]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${c ? `<span class="lg">${t}</span><span class="sh">${c}</span>` : t}${k === 'com' && nl ? ` <span class="cnt hot">${nl}</span>` : ''}</button>`).join('')}</div>`
+    + (nl && rt !== 'com' ? `<button class="warn-box nb" data-rt="com">📩 ${nl === 1 ? 'Hai una comunicazione da leggere' : `Hai ${nl} comunicazioni da leggere`} ›</button>` : '');
+  if(rt === 'com'){
+    const ml = (S.msg || []).slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)), cat = q.categoria || r.categoria, pc = comCat(cat).slice(0, 5), ck = Object.keys(CAMP).find(k => CAMP[k].cat === cat);
+    app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}
+      <section class="stack" style="gap:8px"><div class="eyebrow">Messaggi del torneo per ${esc(q.nome || r.squadra)}</div>
+      ${!S.loaded.msg ? '<div class="status"><span class="spin"></span>Carico…</div>' : ml.length ? `<ul class="list">${ml.map(x => { const nu = !(x.letti || {})[S.user.uid];
+        return `<li><button class="item${nu ? ' msg-n' : ''}" data-msg="${esc(x.id)}"><span class="cico">✉️</span><span class="tx"><b>${esc(x.titolo)}</b><span>${dataOra(x.createdAt)}${(x.allegati || []).length ? ' · 📎 ' + x.allegati.length : ''}</span>${nu ? '<span class="pst wait">Da leggere</span>' : ''}</span></button></li>`; }).join('')}</ul>` : vuoto('Nessun messaggio', 'Qui arrivano le comunicazioni dell’amministratore del torneo per la tua squadra.')}</section>
+      <section class="stack" style="gap:8px"><div class="eyebrow">Comunicati pubblici</div>
+      ${pc.length ? `<ul class="list">${pc.map(c => itemC(c)).join('')}</ul>` : '<p class="note">Ancora nessun comunicato pubblico.</p>'}
+      ${ck ? `<a class="btn btn-ghost btn-block" href="#${ck}" id="rTuttiC">Tutti i comunicati di ${esc(NOMECAMP[cat])} ›</a>` : ''}</section></main>`;
+    bindOut(); bindRT(app); bindCom(app);
+    const tc = app.querySelector('#rTuttiC'); if(tc) tc.onclick = () => { S.ptab = 'com'; };
+    app.querySelectorAll('[data-msg]').forEach(b => b.onclick = () => openMsgResp(S.msg.find(x => x.id === b.dataset.msg)));
+    return;
+  }
   if(rt === 'sq'){
     const qq = {id: r.squadraId, nome: q.nome || r.squadra, categoria: q.categoria || r.categoria};
     app.innerHTML = band(qq.nome, `${qq.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}${schedaBox(qq)}
@@ -1686,7 +1746,9 @@ function renderAdmin(app){
   const attT = S.tess.filter(t => t.stato === 'attesa'), attR = S.abil.filter(a => a.stato === 'attesa').map(a => ({...profDi(a.uid), ...a})), ricT = S.tess.filter(t => t.richiesta && ['approvato', 'sospeso'].includes(statoT(t)));
   S.dt = S.tab === 'tess' ? discTags(CATS) : null;
   const daDec = S.pubParOk ? CATS.reduce((a, c) => a + disciplina(c).sanz.filter(z => z.gg == null).length, 0) : 0;
-  const tabs = [['appr', 'Da approvare', attT.length + attR.length + ricT.length], ['partite', 'Partite', 0], ['squ', 'Disciplina', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0]];
+  /* comunicati del giudice sportivo pronti da pubblicare: avviso in alto e pallino rosso su Comunicati */
+  const prC = S.pubParOk && S.loaded.comAll && S.loaded.amm ? CATS.map(c => [c, bozzaGS(c)]).filter(([c, b]) => b.pronto) : [];
+  const tabs = [['appr', 'Da approvare', attT.length + attR.length + ricT.length], ['partite', 'Partite', 0], ['squ', 'Disciplina', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0], ['com', 'Comunicati', 0]];
   app.dataset.v = 'admin';
   let body = '';
   if(!S.loaded.tess || !S.loaded.resps || !S.loaded.abil || !S.loaded.inviti || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
@@ -1697,6 +1759,7 @@ function renderAdmin(app){
   else if(S.tab === 'partite') body = adminPartite();
   else if(S.tab === 'resp') body = adminResp();
   else if(S.tab === 'squ') body = adminSqu();
+  else if(S.tab === 'com') body = adminCom();
   else if(S.tab === 'squadre'){
     const l = S.squadre.filter(q => q.categoria === S.cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
     body = `<div class="seg" role="group" aria-label="Categoria">${CATS.map(c => `<button data-c="${c}" aria-pressed="${c === S.cat}">${c} <span class="cnt">${S.squadre.filter(q => q.categoria === c).length}</span></button>`).join('')}</div>
@@ -1711,8 +1774,10 @@ function renderAdmin(app){
       <ul class="list" id="aList">${l.map(itemT).join('') || '<div class="empty"><h3>Nessun tesserato</h3></div>'}</ul>`;
   }
   app.innerHTML = band('Torneo AICS', 'Amministratore · ' + S.user.email) + `<main class="wrap stack">
-    <div class="seg" role="tablist">${tabs.map(([k, t, n]) => `<button data-tab="${k}" aria-pressed="${S.tab === k}">${t}${n ? ` <span class="cnt hot">${n}</span>` : ''}</button>`).join('')}</div>
+    <div class="seg" role="tablist">${tabs.map(([k, t, n]) => `<button data-tab="${k}" aria-pressed="${S.tab === k}">${t}${n ? ` <span class="cnt hot">${n}</span>` : ''}${k === 'com' && prC.length ? '<i class="sdot" aria-label="comunicato pronto"></i>' : ''}</button>`).join('')}</div>
+    ${S.tab !== 'com' ? prC.map(([c, b]) => `<button class="gsb" data-gsb="${c}"><span class="gi" aria-hidden="true">⚖️<i class="sdot"></i></span><span><b>Comunicato n. ${b.numero} · ${esc(NOMECAMP[c])}</b><br>è pronto da pubblicare${b.G ? ` (${b.G}ª giornata)` : ''}</span><span class="ar">›</span></button>`).join('') : ''}
     ${S.err ? `<p class="err">${esc(S.err)}</p>` : ''}${body}</main>`;
+  app.querySelectorAll('[data-gsb]').forEach(b => b.onclick = () => { S.tab = 'com'; S.sub.com = 'pub'; render(); openGS(b.dataset.gsb); });
   bindOut();
   app.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
   app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { S.cat = b.dataset.c; render(); });
@@ -1720,6 +1785,7 @@ function renderAdmin(app){
   app.querySelectorAll('[data-q]').forEach(b => b.onclick = () => openSquadra(sqById(b.dataset.q)));
   if(S.tab === 'partite') bindPartite(app);
   if(S.tab === 'squ') bindSqu(app);
+  if(S.tab === 'com') bindAdmCom(app);
   bindRichAdm(app); bindAttT(app);
   if($('#tImp')){ $('#tImp').onclick = () => openImportaTess(''); $('#tExp').onclick = () => openEsporta(''); $('#tLim').onclick = openLimiti; }
   if(S.tab === 'resp') bindResp(app);
@@ -2071,6 +2137,322 @@ function openAmm(cat, a){
   if(pg) pg.onclick = async () => { try{ await ref.update({pagata: !a.pagata, pagataAt: a.pagata ? firebase.firestore.FieldValue.delete() : Date.now()}); toast(a.pagata ? 'Segnata da pagare' : 'Segnata pagata'); close(); }catch(err){ toast(fbErr(err)); } };
   const d = root.querySelector('#amDel');
   if(d) d.onclick = async () => { if(!confirm(`Eliminare l’ammenda di ${euro(a.importo)} a ${a.sq}?`)) return; try{ await ref.delete(); toast('Ammenda eliminata'); close(); }catch(err){ toast(fbErr(err)); } };
+}
+
+/* ===================== COMUNICATI ===================== */
+/* comunicati/{id}: pubblici (giudice sportivo, avvisi, documenti); allegati/{id} con parti/{n}: i file a pezzi.
+   comunicazioni/{id}: messaggio dell'amministratore alle squadre; messaggi/{id_squadra}: la copia per ogni squadra, con chi l'ha letto */
+const TIPC = {gs: ['Giudice sportivo', '⚖️'], avviso: ['Avviso', '📣'], doc: ['Documento', '📄']};
+const comOrd = (a, b) => (b.data || '').localeCompare(a.data || '') || (b.pubAt || b.createdAt || 0) - (a.pubAt || a.createdAt || 0);
+const comCat = cat => (S.pubCom || []).filter(c => !c.camp || c.camp === cat).sort(comOrd);
+const comTit = c => c.tipo === 'gs' ? `Comunicato ufficiale n. ${c.numero}` : c.titolo || (TIPC[c.tipo] || TIPC.avviso)[0];
+const comSub = c => [(TIPC[c.tipo] || TIPC.avviso)[0], c.tipo === 'gs' && c.giornata ? c.giornata + 'ª giornata' : '', c.camp ? NOMECAMP[c.camp] : 'Tutti i campionati', fmt(c.data)].filter(Boolean).join(' · ');
+const vistiC = () => { try{ return JSON.parse(localStorage.getItem('aics-com') || '{}'); }catch(e){ return {}; } };
+const segnaVistoC = id => { try{ const v = vistiC(); v[id] = 1; localStorage.setItem('aics-com', JSON.stringify(v)); }catch(e){} };
+const nuovoC = c => !vistiC()[c.id] && Date.now() - (c.pubAt || c.createdAt || 0) < 30 * 864e5;
+const dataOra = ms => ms ? `${new Date(ms).toLocaleDateString('it-IT')} ${new Date(ms).toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'})}` : '';
+const dim = n => n >= 1048576 ? (n / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+const linkify = t => esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
+function comStart(){
+  if(S.comOn) return; S.comOn = true;
+  loadFB().then(() => db().collection('comunicati').where('pubblicato', '==', true).onSnapshot(x => { S.pubCom = x.docs.map(d => ({id: d.id, ...d.data()})); S.pubComOk = true; render(); }, e => { console.warn('com', e.code); S.pubComOk = true; S.comOn = false; }))
+    .catch(() => { S.comOn = false; });
+}
+const itemC = (c, k = 'data-com') => `<li><button class="item" ${k}="${esc(c.id)}"><span class="cico">${(TIPC[c.tipo] || TIPC.avviso)[1]}</span><span class="tx"><b>${esc(comTit(c))}</b><span>${esc(comSub(c))}</span>${(c.allegati || []).length ? `<span>📎 ${c.allegati.length} ${c.allegati.length === 1 ? 'allegato' : 'allegati'}</span>` : ''}${c.pubblicato === false ? '<span class="pst">Ritirato</span>' : k === 'data-com' && nuovoC(c) ? '<span class="pst wait">Nuovo</span>' : ''}</span></button></li>`;
+const bindCom = root => root.querySelectorAll('[data-com]').forEach(b => b.onclick = () => openCom((S.pubCom || []).find(c => c.id === b.dataset.com)));
+function openComHome(){
+  const l = (S.pubCom || []).slice().sort(comOrd).slice(0, 20);
+  const {root} = sheet(`<div class="stack"><h3>Comunicati</h3><p class="note">Gli ultimi comunicati di tutti i campionati: giudice sportivo, avvisi e documenti.</p>
+    ${l.length ? `<ul class="list">${l.map(c => itemC(c)).join('')}</ul>` : vuoto('Nessun comunicato', '')}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Comunicati');
+  bindCom(root);
+}
+/* --- allegati: il file si divide in pezzi da 700 KB (un documento del database arriva a 1 MB) --- */
+const PARTE = 700000, MAXF = 5.5e6;
+const b64 = u8 => { let x = ''; for(let i = 0; i < u8.length; i += 0x8000) x += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(x); };
+const b64d = x => { const b = atob(x), u = new Uint8Array(b.length); for(let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+const imgBlob = (file, max = 1800, q = .82) => new Promise((res, rej) => { const img = new Image(), u = URL.createObjectURL(file);
+  img.onload = () => { const r = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); c.toBlob(b => b ? res(b) : rej(new Error('img')), 'image/jpeg', q); };
+  img.onerror = () => { URL.revokeObjectURL(u); rej(new Error('img')); }; img.src = u; });
+async function caricaAll(file, pub){
+  let blob = file, nome = file.name || 'file';
+  if(/^image\/(jpeg|png|webp|heic|heif)/.test(file.type)){ try{ blob = await imgBlob(file); nome = nome.replace(/\.\w+$/, '') + '.jpg'; }catch(e){ blob = file; } }
+  if(blob.size > MAXF) throw new Error('grande');
+  const u8 = new Uint8Array(await blob.arrayBuffer()), n = Math.max(1, Math.ceil(u8.length / PARTE)), ref = db().collection('allegati').doc();
+  const meta = {nome, tipo: blob.type || 'application/octet-stream', size: u8.length, parti: n, pub: !!pub, createdAt: Date.now()};
+  await ref.set(meta);
+  for(let i = 0; i < n; i++) await ref.collection('parti').doc(String(i)).set({d: b64(u8.subarray(i * PARTE, (i + 1) * PARTE))});
+  return {id: ref.id, nome, tipo: meta.tipo, size: meta.size, parti: n};
+}
+async function togliAll(a){ const ref = db().collection('allegati').doc(a.id); for(let i = 0; i < (a.parti || 1); i++) await ref.collection('parti').doc(String(i)).delete().catch(() => {}); await ref.delete().catch(() => {}); }
+const pubAll = (l, pub) => Promise.all((l || []).map(a => db().collection('allegati').doc(a.id).update({pub}).catch(() => {})));
+const ALLC = new Map();
+const prendiAll = a => { if(!ALLC.has(a.id)) ALLC.set(a.id, loadFB().then(() => Promise.all([...Array(a.parti || 1)].map((_, i) => db().collection('allegati').doc(a.id).collection('parti').doc(String(i)).get())))
+  .then(ps => new Blob(ps.map(p => b64d(p.data().d)), {type: a.tipo})).catch(e => { ALLC.delete(a.id); throw e; })); return ALLC.get(a.id); };
+const icoAll = a => /pdf/.test(a.tipo) ? '📄' : /^image\//.test(a.tipo) ? '🖼️' : '📎';
+const alHtml = l => (l || []).length ? `<div class="stack" style="gap:8px">${l.map((a, i) => `<div class="alg">${/^image\//.test(a.tipo) ? `<div class="alg-img" data-ali="${i}"><span class="spin"></span></div>` : `<button class="btn btn-ghost btn-block" data-alo="${i}">${icoAll(a)} ${esc(a.nome)}<small>${dim(a.size)}</small></button>`}</div>`).join('')}</div>` : '';
+const bindAl = (root, l) => { (l || []).forEach((a, i) => { const im = root.querySelector(`[data-ali="${i}"]`);
+    if(im) prendiAll(a).then(b => { im.innerHTML = `<img src="${URL.createObjectURL(b)}" alt="${esc(a.nome)}">`; im.querySelector('img').onclick = () => viewer(a); }).catch(() => { im.innerHTML = `<button class="btn btn-ghost btn-block">${icoAll(a)} ${esc(a.nome)}</button>`; im.querySelector('button').onclick = () => viewer(a); }); });
+  root.querySelectorAll('[data-alo]').forEach(b => b.onclick = () => viewer(l[+b.dataset.alo])); };
+async function viewer(a){
+  if(!a) return;
+  const v = document.createElement('div'); v.className = 'viewer'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-label', a.nome);
+  v.innerHTML = `<div class="vw-h"><b>${esc(a.nome)}</b><button class="btn btn-ghost sm" data-vs>⬇️ Salva</button><button class="btn btn-ghost sm" data-vx aria-label="Chiudi">✕</button></div><div class="vw-b"><div class="status"><span class="spin"></span>Apro il file…</div></div>`;
+  document.body.appendChild(v); let blob = null;
+  v.querySelector('[data-vx]').onclick = () => v.remove();
+  v.querySelector('[data-vs]').onclick = () => { if(blob) salvaFile(blob, a.nome); };
+  const bx = v.querySelector('.vw-b');
+  try{ blob = await prendiAll(a);
+    if(/^image\//.test(a.tipo)) bx.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="">`;
+    else if(/pdf/.test(a.tipo)){ const lib = await caricaPdf(), doc = await lib.getDocument({data: new Uint8Array(await blob.arrayBuffer())}).promise; bx.innerHTML = '';
+      for(let i = 1; i <= doc.numPages; i++){ if(!document.body.contains(v)) return; const pg = await doc.getPage(i), w = Math.min((bx.clientWidth || innerWidth) - 16, 900), v0 = pg.getViewport({scale: 1}), dpr = Math.min(devicePixelRatio || 1, 2), vp = pg.getViewport({scale: w / v0.width * dpr});
+        const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height; cv.style.width = w + 'px'; bx.appendChild(cv); await pg.render({canvasContext: cv.getContext('2d'), viewport: vp}).promise; } }
+    else bx.innerHTML = '<p class="note">Questo file non si può vedere qui: tocca «Salva» per aprirlo con un’altra app.</p>'; }
+  catch(e){ console.warn(e); bx.innerHTML = `<p class="err">${e.message === 'net' ? 'Serve internet per aprire il file.' : 'Non riesco ad aprire il file.'}</p>`; }
+}
+/* scelta dei file in un modulo: tiene quelli già caricati e i nuovi da caricare */
+function filePick(root, id, init){
+  const st = {l: (init || []).slice(), nuovi: [], via: []};
+  const draw = () => { const box = root.querySelector('#' + id);
+    box.innerHTML = [...st.l.map((a, i) => ['v', i, a.nome, a.size]), ...st.nuovi.map((f, i) => ['n', i, f.name, f.size])].map(([k, i, n, z]) => `<div class="alr"><span>📎 ${esc(n)} <small>${dim(z)}</small></span><button type="button" class="x" data-alx="${k}:${i}" aria-label="Togli ${esc(n)}">✕</button></div>`).join('')
+      + `<label class="btn btn-ghost sm" for="${id}-f">📎 Aggiungi file</label><input id="${id}-f" type="file" multiple hidden accept=".pdf,image/*,.doc,.docx,.xls,.xlsx">`;
+    box.querySelectorAll('[data-alx]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.alx.split(':'); if(k === 'v') st.via.push(...st.l.splice(+i, 1)); else st.nuovi.splice(+i, 1); draw(); });
+    box.querySelector('#' + id + '-f').onchange = e => { const fs = [...e.target.files], big = fs.filter(f => /^image\//.test(f.type) ? f.size > 30e6 : f.size > MAXF);
+      if(big.length) alert(`Troppo grande (massimo 5 MB): ${big.map(f => f.name).join(', ')}`); st.nuovi.push(...fs.filter(f => !big.includes(f))); draw(); }; };
+  draw(); return st;
+}
+async function caricaNuovi(fp, pub, bt){ const out = []; for(let i = 0; i < fp.nuovi.length; i++){ if(bt) bt.textContent = `Carico i file… ${i + 1}/${fp.nuovi.length}`; out.push(await caricaAll(fp.nuovi[i], pub)); } return out; }
+const errFile = err => err.message === 'grande' ? 'Un file è troppo grande (massimo 5 MB).' : fbErr(err);
+/* --- vista di un comunicato --- */
+function gsSez(c){ const l = (c.sez || []).slice(); if(c.testo) l.push({liv: 1, t: `${l.filter(x => x.liv === 1).length + 1}. Comunicazioni`, testo: c.testo}); return l; }
+const gsHtml = c => `<div class="gs"><div class="gs-h"><img src="../icon-aics.png" alt=""><div><b>AICS Reggio Emilia – Settore Calcio</b><span>${esc(NOMECAMP[c.camp] || '')} · Stagione ${esc(c.stagione || STAG)}</span></div></div>
+  <h3 class="gs-t">Comunicato ufficiale n. ${esc(c.numero)}<small>del ${fmt(c.data)}</small></h3>
+  ${gsSez(c).map(x => `${x.liv === 1 ? `<h4>${esc(x.t)}</h4>` : `<h5>${esc(x.t)}</h5>`}${(x.r || []).length ? `<ul class="gs-r">${x.r.map(y => `<li><b>${esc(y.a)}</b>${y.b ? `<span>${esc(y.b)}</span>` : ''}</li>`).join('')}</ul>` : x.testo ? `<p class="gs-x">${linkify(x.testo)}</p>` : x.vuoto ? `<p class="note">${esc(x.vuoto)}</p>` : ''}`).join('')}
+  <p class="gs-f">Il Giudice Sportivo</p></div>`;
+function openCom(c, adm){
+  if(!c) return; if(!vistiC()[c.id]){ segnaVistoC(c.id); render(); }
+  const {root, close} = sheet(`<div class="stack"><p class="note">${esc(comSub(c))}</p>
+    ${c.tipo === 'gs' ? gsHtml(c) : `<h3>${esc(comTit(c))}</h3>${c.testo ? `<p class="com-x">${linkify(c.testo)}</p>` : ''}`}
+    ${alHtml(c.allegati)}
+    ${c.tipo === 'gs' ? '<button class="btn btn-primary btn-block" id="cPdf">⬇️ Scarica PDF</button>' : ''}
+    ${adm ? `<div class="row">${c.tipo !== 'gs' ? '<button class="btn btn-ghost" data-ca="mod">Modifica</button>' : ''}${c.tipo !== 'gs' ? `<button class="btn btn-ghost" data-ca="pub">${c.pubblicato === false ? 'Pubblica di nuovo' : 'Ritira'}</button>` : ''}<button class="btn btn-danger" data-ca="del">Elimina</button></div>` : ''}
+    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, comTit(c));
+  bindAl(root, c.allegati);
+  const pd = root.querySelector('#cPdf');
+  if(pd) pd.onclick = async () => { pd.disabled = true; pd.textContent = 'Preparo il PDF…'; try{ await salvaFile(await pdfGS(c), `comunicato-${c.numero}-${(NOMECAMP[c.camp] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`); }catch(e){ console.warn(e); toast(e.message === 'net' ? 'Serve internet per creare il PDF' : 'Non riesco a creare il PDF'); } pd.disabled = false; pd.textContent = '⬇️ Scarica PDF'; };
+  root.querySelectorAll('[data-ca]').forEach(b => b.onclick = async () => { const ref = db().collection('comunicati').doc(c.id), k = b.dataset.ca;
+    try{
+      if(k === 'mod'){ close(); openAvviso(c); return; }
+      if(k === 'pub'){ const p = c.pubblicato === false; await ref.update({pubblicato: p, ...(p ? {pubAt: Date.now()} : {})}); await pubAll(c.allegati, p); toast(p ? 'Pubblicato di nuovo' : 'Ritirato: non si vede più nell’app pubblica'); close(); return; }
+      if(!confirm(c.tipo === 'gs' ? `Eliminare il comunicato n. ${c.numero}? L’app lo ripreparerà con i dati di adesso.` : `Eliminare «${comTit(c)}»?`)) return;
+      await ref.delete(); for(const a of c.allegati || []) await togliAll(a); toast('Comunicato eliminato'); close();
+    }catch(err){ toast(fbErr(err)); } });
+}
+/* --- PDF del comunicato del giudice sportivo --- */
+const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+let jspP = null;
+const caricaJsPdf = () => jspP || (jspP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = JSPDF; sc.onload = () => res(window.jspdf.jsPDF); sc.onerror = () => { jspP = null; rej(new Error('net')); }; document.head.appendChild(sc); }));
+const imgData = src => new Promise(res => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'), k = Math.min(1, 240 / Math.max(i.naturalWidth, i.naturalHeight)); c.width = Math.round(i.naturalWidth * k); c.height = Math.round(i.naturalHeight * k); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(i, 0, 0, c.width, c.height); try{ res(c.toDataURL('image/jpeg', .9)); }catch(e){ res(null); } }; i.onerror = () => res(null); i.src = src; });
+async function pdfGS(c){
+  const J = await caricaJsPdf(), d = new J({unit: 'mm', format: 'a4'}), W = 210, M = 18, L = W - 2 * M; let y = 18;
+  /* i caratteri che il PDF semplice non ha: meno, emoji */
+  const pt = t => String(t == null ? '' : t).replace(/[−‐‑]/g, '-').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\uFE0F]/gu, ''), tx = d.text.bind(d), sp = d.splitTextToSize.bind(d);
+  d.text = (t, ...a) => tx(Array.isArray(t) ? t.map(pt) : pt(t), ...a); d.splitTextToSize = (t, ...a) => sp(pt(t), ...a);
+  const logo = await imgData('../icon-aics.png'); if(logo) d.addImage(logo, 'JPEG', M, 12, 18, 18);
+  d.setFont('helvetica', 'bold'); d.setFontSize(13); d.text('AICS REGGIO EMILIA – Settore Calcio', W / 2, y + 2, {align: 'center'});
+  d.setFont('helvetica', 'normal'); d.setFontSize(11); d.text(`${(NOMECAMP[c.camp] || '').toUpperCase()} · Stagione ${c.stagione || STAG}`, W / 2, y + 8, {align: 'center'});
+  y += 22; d.setFont('helvetica', 'bold'); d.setFontSize(14); d.text(`COMUNICATO UFFICIALE N. ${c.numero} del ${fmt(c.data)}`, W / 2, y, {align: 'center'});
+  y += 4; d.setLineWidth(.4); d.line(M, y, W - M, y); y += 9;
+  const posto = h => { if(y + h > 278){ d.addPage(); y = 20; } };
+  gsSez(c).forEach(x => {
+    if(x.liv === 1){ posto(16); d.setFont('helvetica', 'bold'); d.setFontSize(12); d.text(x.t.toUpperCase(), M, y); y += 7; }
+    else { posto(13); d.setFont('helvetica', 'bold'); d.setFontSize(10.5); d.text(x.t, M + 3, y); y += 5.5; }
+    (x.r || []).forEach(z => { d.setFontSize(10.5); d.setFont('helvetica', 'bold'); const a = d.splitTextToSize(z.a, L - 8); d.setFont('helvetica', 'normal'); const b = z.b ? d.splitTextToSize(z.b, L - 12) : [];
+      posto((a.length + b.length) * 4.8 + 2); d.setFont('helvetica', 'bold'); d.text(a, M + 6, y); y += a.length * 4.8; if(b.length){ d.setFont('helvetica', 'normal'); d.text(b, M + 10, y); y += b.length * 4.8; } y += 1.6; });
+    if(x.testo){ d.setFont('helvetica', 'normal'); d.setFontSize(10.5); d.splitTextToSize(x.testo, L - 6).forEach(t => { posto(5); d.text(t, M + 6, y); y += 4.9; }); }
+    if(!(x.r || []).length && !x.testo && x.vuoto){ posto(6); d.setFont('helvetica', 'italic'); d.setFontSize(10.5); d.text(x.vuoto, M + 6, y); y += 5; }
+    y += 3; });
+  posto(16); y += 6; d.setFont('helvetica', 'bold'); d.setFontSize(11); d.text('Il Giudice Sportivo', W - M, y, {align: 'right'});
+  const np = d.getNumberOfPages(); for(let i = 1; i <= np; i++){ d.setPage(i); d.setFont('helvetica', 'normal'); d.setFontSize(8.5); d.setTextColor(110); d.text(`Comunicato n. ${c.numero} · ${NOMECAMP[c.camp] || ''} · pagina ${i} di ${np}`, W / 2, 290, {align: 'center'}); d.setTextColor(0); }
+  return d.output('blob');
+}
+/* --- comunicato del giudice sportivo: lo prepara l'app con tutto quello che non è ancora uscito in un comunicato --- */
+function bozzaGS(cat, da, incAmm = true){
+  const imp = impDi(cat), par = parDi(S.pubPar, cat).sort(ordCr), fatta = p => !!esito(p, imp);
+  const prev = (S.comAll || []).filter(c => c.tipo === 'gs' && c.camp === cat && (c.stagione || STAG) === STAG && c.pubblicato !== false);
+  const usati = new Set(prev.flatMap(c => c.ids || [])), giorn = giornateDi(par).filter(g => g > 0);
+  /* il primo comunicato della stagione può partire da una giornata: quelle prima non entrano mai */
+  const base = prev.length ? Math.min(...prev.map(c => +c.da || 1)) : 1;
+  const libere = par.filter(p => fatta(p) && !usati.has('p:' + p.id) && (+p.giornata || 0) >= base);
+  const G = libere.length ? Math.max(...libere.map(p => +p.giornata || 0)) : null;
+  if(da == null) da = prev.length ? base : (G || 1);
+  const nuove = libere.filter(p => (+p.giornata || 0) >= da).sort((a, b) => (+a.giornata || 0) - (+b.giornata || 0) || ordCr(a, b)), nset = new Set(nuove.map(p => p.id));
+  const lg = G == null ? [] : par.filter(p => +p.giornata === G), dataDa = da > 1 ? (par.filter(p => +p.giornata === da).map(p => p.data).filter(Boolean).sort()[0] || '') : '';
+  const ids = nuove.map(p => 'p:' + p.id), R = (a, b) => ({a, b: b || ''}), vs = p => `${p.casa} – ${p.ospite}`, sez = [];
+  const rr = nuove.map(p => { const e = esito(p, imp); return R(vs(p), `${e.gc}-${e.go}${e.tav ? (e.rit ? ' (a tavolino, squadra ritirata)' : ' (a tavolino)') : ''}${+p.giornata !== G ? ` · ${p.giornata}ª giornata, recupero` : ''}`); });
+  const rinv = lg.filter(p => !fatta(p) && p.stato === 'rinviata').map(p => R(vs(p), 'Rinviata')), manca = lg.filter(p => !fatta(p) && p.stato !== 'rinviata');
+  sez.push({liv: 1, t: `1. Risultati${G ? ` · ${G}ª giornata` : ''}`, r: [...rr, ...rinv], vuoto: 'Nessun risultato nuovo.'});
+  const dd = disciplina(cat), ruo = new Map(dd.gioc.map(r => [r.id, r.ruolo])), chi = (nome, sq, ru) => `${nome} (${sq}${ru && !/Giocatore|Portiere/.test(ru) ? ', ' + ru.toLowerCase() : ''})`;
+  const kz = z => z.man ? 'm:' + z.docId : z.dir ? 's:' + z.docId : `a:${z.dopo.id}_${z.id}_${z.motivo}`, daDec = [], squ = [];
+  dd.sanz.forEach(z => { const k = kz(z); if(usati.has(k)) return;
+    if(z.man){ if(dataDa && (z.dal || '') < dataDa) return; }
+    else if(!z.dopo || !(nset.has(z.dopo.id) || usati.has('p:' + z.dopo.id))) return;
+    if(z.gg == null){ daDec.push(z); return; }
+    ids.push(k); squ.push(R(chi(z.nome, z.sq, ruo.get(z.id)), `${z.fino ? 'fino al ' + fmt(z.fino) : `${z.gg} ${z.gg === 1 ? 'giornata' : 'giornate'}`} – ${z.dir && z.motivo !== 'Espulsione diretta' ? 'espulsione diretta, ' + z.motivo : z.motivo}`)); });
+  const cnt = new Map(), amm = [], dif = [];
+  par.filter(p => fatta(p) && valida(p)).forEach(p => (p.amm || []).forEach(x => { const c = (cnt.get(x.id) || 0) + 1; cnt.set(x.id, c); if(!nset.has(p.id) || c % 4 === 0) return;
+    (c % 4 === 3 ? dif : amm).push(R(chi(x.nome, p[x.sq], x.ruolo || ruo.get(x.id)), `${c}ª ammonizione`)); }));
+  const ord = (a, b) => a.a.localeCompare(b.a, 'it');
+  const pen = penDi(cat).filter(x => !usati.has('n:' + x.id) && (!dataDa || (x.data || '') >= dataDa));
+  pen.forEach(x => ids.push('n:' + x.id));
+  const am = incAmm ? (S.amm || []).filter(a => a.camp === cat && (a.stagione || STAG) === STAG && !usati.has('f:' + a.id) && (!dataDa || (a.data || '') >= dataDa)) : [];
+  am.forEach(a => ids.push('f:' + a.id));
+  const subs = [['Squalifiche', squ.sort(ord)], ['Diffidati (alla prossima ammonizione 1 giornata di squalifica)', dif.sort(ord)], ['Ammoniti', amm.sort(ord)],
+    ['Penalizzazioni in classifica', pen.map(x => R(x.sq, `−${ptTxt(x.punti)}${x.motivo ? ' – ' + x.motivo : ''}`))], ['Ammende', am.map(a => R(a.sq, `${euro(a.importo)}${a.motivo ? ' – ' + a.motivo : ''}`))]].filter(x => x[1].length);
+  sez.push({liv: 1, t: '2. Decisioni del giudice sportivo', r: [], vuoto: subs.length ? '' : 'Nessun provvedimento.'}, ...subs.map(([t, r]) => ({liv: 2, t, r})));
+  const numero = Math.max(0, ...prev.map(c => +c.numero || 0)) + 1;
+  return {sez, ids, G, da, giorn, numero, daDec, manca, prev: prev.length, nuove: nuove.length, pronto: ids.length > 0 && !manca.length && !daDec.length};
+}
+const comPronti = () => S.admin && S.pubParOk && S.loaded.comAll && S.loaded.amm ? CATS.filter(c => bozzaGS(c).pronto).length : 0;
+function openGS(cat){
+  let da = null, incAmm = true, testo = '';
+  const {root, close} = sheet(`<div class="stack"><h3>Comunicato del giudice sportivo</h3>
+    <p class="note">${esc(NOMECAMP[cat])}: l’app lo prepara da sola con i risultati, i cartellini, le squalifiche, le penalizzazioni e le ammende non ancora usciti in un comunicato. Se un dato è sbagliato correggilo nella partita o in Disciplina: il comunicato si aggiorna.</p>
+    <div id="gsAvv"></div><div id="gsDa"></div>
+    <label class="check"><input type="checkbox" id="gs-am" checked><span>Metti le ammende nel comunicato (lo vedono tutti)</span></label>
+    <div class="field"><label for="gs-x">Comunicazioni (facoltative)</label><textarea id="gs-x" rows="4" maxlength="5000" placeholder="Es. recuperi, avvisi alle società…"></textarea></div>
+    <div class="eyebrow">Anteprima</div><div class="card" id="gsPrev"></div>
+    <div class="err" id="gsErr" role="alert"></div>
+    <button class="btn btn-primary btn-block" id="gsGo">Pubblica</button><button class="btn btn-ghost btn-block" data-x>Annulla</button></div>`, 'Comunicato del giudice sportivo');
+  const $r = x => root.querySelector(x);
+  const agg = () => { const b = bozzaGS(cat, da, incAmm); da = b.da;
+    $r('#gsAvv').innerHTML = (b.manca.length ? `<div class="warn-box">⏳ ${b.manca.length === 1 ? 'Manca il risultato di' : `Mancano ${b.manca.length} risultati:`} ${b.manca.map(p => esc(p.casa + ' – ' + p.ospite)).join(', ')}.</div>` : '')
+      + (b.daDec.length ? `<div class="warn-box">⚠️ Espulsioni dirette ancora da decidere: <b>${b.daDec.map(z => esc(z.nome)).join(', ')}</b>. Decidi le giornate in Disciplina e il comunicato si aggiorna.</div>` : '');
+    if(!b.prev && b.giorn.length > 1 && !$r('#gs-da')){ $r('#gsDa').innerHTML = `<div class="field"><label for="gs-da">Primo comunicato della stagione: comprende dalla</label><select id="gs-da">${b.giorn.map(g => `<option value="${g}" ${g === da ? 'selected' : ''}>${g}ª giornata</option>`).join('')}</select></div>`; $r('#gs-da').onchange = e => { da = +e.target.value; agg(); }; }
+    $r('#gsPrev').innerHTML = gsHtml({tipo: 'gs', camp: cat, stagione: STAG, numero: b.numero, data: oggi(), sez: b.sez, testo});
+    const go = $r('#gsGo'); go.textContent = `Pubblica il comunicato n. ${b.numero}`; go.disabled = !b.ids.length; return b; };
+  $r('#gs-am').onchange = e => { incAmm = e.target.checked; agg(); };
+  $r('#gs-x').oninput = e => { testo = e.target.value.trim(); agg(); };
+  agg();
+  $r('#gsGo').onclick = async () => { const b = agg(), er = $r('#gsErr'), go = $r('#gsGo'); er.textContent = '';
+    if(!b.ids.length){ er.textContent = 'Non c’è niente di nuovo da comunicare.'; return; }
+    if((b.manca.length || b.daDec.length) && !confirm(`${b.manca.length ? 'Mancano dei risultati della giornata. ' : ''}${b.daDec.length ? 'Ci sono espulsioni ancora da decidere: usciranno nel prossimo comunicato. ' : ''}Pubblicare lo stesso?`)) return;
+    go.disabled = true;
+    try{ await db().collection('comunicati').add({tipo: 'gs', camp: cat, stagione: STAG, numero: b.numero, giornata: b.G || null, da: b.da, data: oggi(), titolo: `Comunicato ufficiale n. ${b.numero}`, sez: b.sez, testo, ids: b.ids, pubblicato: true, pubAt: Date.now(), createdAt: Date.now(), by: S.user.uid});
+      toast(`Comunicato n. ${b.numero} pubblicato`); close(); }
+    catch(err){ go.disabled = false; er.textContent = fbErr(err); } };
+}
+function scegliCat(fn){
+  const {root, close} = sheet(`<div class="stack"><h3>Quale campionato?</h3>${CATS.map(c => `<button class="btn btn-ghost btn-block" data-sc2="${c}">${esc(NOMECAMP[c])}</button>`).join('')}<button class="btn btn-ghost btn-block" data-x>Annulla</button></div>`, 'Campionato');
+  root.querySelectorAll('[data-sc2]').forEach(b => b.onclick = () => { close(); fn(b.dataset.sc2); });
+}
+/* --- avvisi e documenti --- */
+function openAvviso(c){
+  const nuovo = !c; c = c || {tipo: 'avviso', camp: '', data: oggi(), allegati: []};
+  let tipo = c.tipo === 'doc' ? 'doc' : 'avviso';
+  const {root, close} = sheet(`<form class="form" id="avF" novalidate><h3 style="grid-column:1/-1">${nuovo ? 'Nuovo comunicato' : 'Modifica comunicato'}</h3>
+    <div class="seg" role="group" aria-label="Tipo" style="grid-column:1/-1"><button type="button" data-tc="avviso" aria-pressed="${tipo === 'avviso'}">📣 Avviso</button><button type="button" data-tc="doc" aria-pressed="${tipo === 'doc'}">📄 Documento</button></div>
+    <div class="field" style="align-self:end"><label for="av-c">Campionato</label><select id="av-c"><option value="">Tutti</option>${CATS.map(k => `<option value="${k}" ${c.camp === k ? 'selected' : ''}>${esc(NOMECAMP[k])}</option>`).join('')}</select></div>
+    <div class="field" style="align-self:end"><label for="av-d">Data</label><input id="av-d" type="date" value="${esc(c.data || oggi())}"></div>
+    <div class="field full"><label for="av-t">Titolo</label><input id="av-t" maxlength="120" value="${esc(c.titolo || '')}" placeholder="Es. Rinvio partite per maltempo"></div>
+    <div class="field full"><label for="av-x">Testo</label><textarea id="av-x" rows="6" maxlength="5000" placeholder="Facoltativo se alleghi un documento">${esc(c.testo || '')}</textarea></div>
+    <div class="field full"><label>Allegati (PDF o foto, fino a 5 MB l’uno)</label><div class="alls" id="avAl"></div></div>
+    <div class="err" id="avErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="avGo">Pubblica</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Comunicato');
+  root.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => { tipo = b.dataset.tc; root.querySelectorAll('[data-tc]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
+  const fp = filePick(root, 'avAl', c.allegati);
+  root.querySelector('#avF').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim(), er = root.querySelector('#avErr'), bt = root.querySelector('#avGo');
+    er.textContent = ''; if(!v('av-t')){ er.textContent = 'Scrivi il titolo.'; return; } if(!v('av-x') && !fp.l.length && !fp.nuovi.length){ er.textContent = 'Scrivi il testo o allega un file.'; return; }
+    bt.disabled = true;
+    try{ const nu = await caricaNuovi(fp, true, bt); bt.textContent = 'Pubblico…';
+      const o = {tipo, camp: v('av-c'), data: v('av-d') || oggi(), titolo: v('av-t'), testo: v('av-x'), allegati: [...fp.l, ...nu], stagione: STAG, pubblicato: true, updatedAt: Date.now()};
+      if(nuovo) await db().collection('comunicati').add({...o, pubAt: Date.now(), createdAt: Date.now(), by: S.user.uid}); else await db().collection('comunicati').doc(c.id).update(o);
+      await pubAll(fp.l, true); for(const a of fp.via) await togliAll(a);
+      toast(nuovo ? 'Comunicato pubblicato' : 'Comunicato aggiornato'); close(); }
+    catch(err){ console.warn(err); bt.disabled = false; bt.textContent = 'Pubblica'; er.textContent = errFile(err); } };
+}
+/* --- scheda Comunicati dell'amministratore --- */
+function adminCom(){
+  const sb = S.sub.com || 'pub', pd = S.pubParOk && S.loaded.comAll && S.loaded.amm && CATS.some(c => bozzaGS(c).pronto) ? '<i class="sdot"></i>' : '';
+  const sub = segSub('com', [['pub', 'Comunicati pubblici' + pd, 'Pubblici' + pd], ['sq', 'Alle squadre']]);
+  if(sb === 'sq') return sub + adminMsg();
+  if(!S.loaded.comAll || !S.pubParOk || !S.loaded.amm) return sub + '<div class="status"><span class="spin"></span>Carico…</div>';
+  const pr = CATS.map(c => [c, bozzaGS(c)]).filter(([c, b]) => b.ids.length), l = (S.comAll || []).slice().sort(comOrd);
+  return sub + pr.map(([c, b]) => `<button class="card gsp" data-gs="${c}"><span class="cico">⚖️</span><span class="tx"><b>Comunicato n. ${b.numero} · ${esc(NOMECAMP[c])}${b.pronto ? '<i class="sdot"></i>' : ''}</b><span>${b.G ? b.G + 'ª giornata · ' : 'nuovi provvedimenti · '}${b.pronto ? 'pronto da pubblicare' : b.manca.length ? `aspetta ${b.manca.length === 1 ? 'un risultato' : b.manca.length + ' risultati'}` : 'espulsioni da decidere'}</span></span><span class="pst ${b.pronto ? 'ok' : 'wait'}">${b.pronto ? 'Pronto' : 'In arrivo'}</span></button>`).join('')
+    + `<div class="row tbtn"><button class="btn btn-primary sm" id="cNew">+ Nuovo avviso</button><button class="btn btn-ghost sm" id="cGs">⚖️ Giudice sportivo</button></div>
+    ${l.length ? `<ul class="list">${l.map(c => itemC(c, 'data-cadm')).join('')}</ul>` : vuoto('Nessun comunicato', 'I comunicati del giudice sportivo li prepara l’app quando una giornata ha tutti i risultati: li trovi qui sopra, pronti da pubblicare.')}`;
+}
+function adminMsg(){
+  if(!S.loaded.comz || !S.loaded.msgAll) return '<div class="status"><span class="spin"></span>Carico…</div>';
+  const l = (S.comz || []).slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  return `<button class="btn btn-primary btn-block" id="mNew">+ Messaggio alle squadre</button>
+    ${l.length ? `<ul class="list">${l.map(m => { const ms = S.msgAll.filter(x => x.cid === m.id), lt = ms.filter(x => Object.keys(x.letti || {}).length).length;
+      return `<li><button class="item" data-mz="${esc(m.id)}"><span class="cico">✉️</span><span class="tx"><b>${esc(m.titolo)}</b><span>${dataOra(m.createdAt)} · ${ms.length === 1 ? esc(ms[0].sq) : ms.length + ' squadre'}</span><span class="pst ${lt === ms.length ? 'ok' : 'wait'}">${ms.length === 1 ? (lt ? '✓ Letto' : 'Non ancora letto') : `Letto da ${lt} su ${ms.length}`}</span></span></button></li>`; }).join('')}</ul>`
+      : vuoto('Nessun messaggio', 'Scrivi a una, ad alcune o a tutte le squadre: lo leggono i responsabili nella loro area e tu vedi chi l’ha letto.')}`;
+}
+function bindAdmCom(app){
+  app.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => { const [k, id] = b.dataset.sub.split(':'); S.sub[k] = id; render(); });
+  app.querySelectorAll('[data-gs]').forEach(b => b.onclick = () => openGS(b.dataset.gs));
+  app.querySelectorAll('[data-cadm]').forEach(b => b.onclick = () => openCom(S.comAll.find(c => c.id === b.dataset.cadm), true));
+  app.querySelectorAll('[data-mz]').forEach(b => b.onclick = () => openMsg(S.comz.find(m => m.id === b.dataset.mz)));
+  const x = id => app.querySelector('#' + id);
+  if(x('cNew')) x('cNew').onclick = () => openAvviso(null);
+  if(x('cGs')) x('cGs').onclick = () => scegliCat(openGS);
+  if(x('mNew')) x('mNew').onclick = openMsgNew;
+}
+/* --- messaggi alle squadre --- */
+function openMsgNew(){
+  let cat = '';
+  const {root, close} = sheet(`<form class="form" id="mzF" novalidate><h3 style="grid-column:1/-1">Messaggio alle squadre</h3>
+    <div class="field full"><label for="mz-c">Campionato</label><select id="mz-c"><option value="">Tutti</option>${CATS.map(k => `<option value="${k}">${esc(NOMECAMP[k])}</option>`).join('')}</select></div>
+    <div class="field full"><label>A chi</label><div class="sqchk" id="mzSq"></div></div>
+    <div class="field full"><label for="mz-t">Oggetto</label><input id="mz-t" maxlength="120" placeholder="Es. Documenti da consegnare"></div>
+    <div class="field full"><label for="mz-x">Messaggio</label><textarea id="mz-x" rows="6" maxlength="5000"></textarea></div>
+    <div class="field full"><label>Allegati (PDF o foto, fino a 5 MB l’uno)</label><div class="alls" id="mzAl"></div></div>
+    <div class="err" id="mzErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="mzGo">Invia</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Messaggio alle squadre');
+  const $r = x => root.querySelector(x), teams = () => S.squadre.filter(q => !cat || q.categoria === cat).sort((a, b) => (a.categoria || '').localeCompare(b.categoria || '') || (a.nome || '').localeCompare(b.nome || '', 'it'));
+  const drawSq = () => { const l = teams();
+    $r('#mzSq').innerHTML = `<label class="check"><input type="checkbox" id="mz-all"><span><b>Tutte le squadre (${l.length})</b></span></label>` + l.map(q => `<label class="check"><input type="checkbox" data-mq="${esc(q.id)}"><span>${esc(q.nome)}${!cat ? ` <small>· ${esc(NOMECAMP[q.categoria] || q.categoria || '')}</small>` : ''}${respSq(q.id).length ? '' : ' <small>· nessun responsabile</small>'}</span></label>`).join('');
+    $r('#mz-all').onchange = e => root.querySelectorAll('[data-mq]').forEach(x => { x.checked = e.target.checked; });
+    root.querySelectorAll('[data-mq]').forEach(x => x.onchange = () => { $r('#mz-all').checked = [...root.querySelectorAll('[data-mq]')].every(y => y.checked); }); };
+  $r('#mz-c').onchange = e => { cat = e.target.value; drawSq(); }; drawSq();
+  const fp = filePick(root, 'mzAl', []);
+  $r('#mzF').onsubmit = async e => { e.preventDefault(); const v = id => $r('#' + id).value.trim(), er = $r('#mzErr'), bt = $r('#mzGo');
+    const sel = [...root.querySelectorAll('[data-mq]:checked')].map(x => sqById(x.dataset.mq)).filter(q => q.id);
+    er.textContent = ''; if(!sel.length){ er.textContent = 'Scegli almeno una squadra.'; return; } if(!v('mz-t')){ er.textContent = 'Scrivi l’oggetto.'; return; } if(!v('mz-x') && !fp.nuovi.length){ er.textContent = 'Scrivi il messaggio o allega un file.'; return; }
+    bt.disabled = true;
+    try{ const al = await caricaNuovi(fp, false, bt); bt.textContent = 'Invio…';
+      const ref = db().collection('comunicazioni').doc(), now = Date.now(), m = {titolo: v('mz-t'), testo: v('mz-x'), allegati: al, camp: cat, sqIds: sel.map(q => q.id), createdAt: now, by: S.user.uid};
+      for(let i = 0; i < sel.length; i += 400){ const b = db().batch(); if(!i) b.set(ref, m);
+        sel.slice(i, i + 400).forEach(q => b.set(db().collection('messaggi').doc(ref.id + '_' + q.id), {cid: ref.id, sqId: q.id, sq: q.nome || '', titolo: m.titolo, testo: m.testo, allegati: al, createdAt: now, letti: {}}));
+        await b.commit(); }
+      toast(sel.length === 1 ? `Messaggio inviato a ${sel[0].nome}` : `Messaggio inviato a ${sel.length} squadre`); close(); }
+    catch(err){ console.warn(err); bt.disabled = false; bt.textContent = 'Invia'; er.textContent = errFile(err); } };
+}
+function openMsg(m){
+  if(!m) return;
+  const ms = S.msgAll.filter(x => x.cid === m.id).sort((a, b) => (a.sq || '').localeCompare(b.sq || '', 'it')), url = location.origin + location.pathname + '#area';
+  const non = ms.filter(x => !Object.keys(x.letti || {}).length);
+  const riga = x => { const lt = Object.entries(x.letti || {}).sort((a, b) => a[1] - b[1]), rs = respSq(x.sqId);
+    return `<div class="card stack" style="gap:8px"><div class="rhead">${stemma(x.sq)}<div class="rtx"><b>${esc(x.sq)}</b><span>${lt.length ? '✓ Letto da ' + lt.map(([u, t]) => `${esc(nomeR(profDi(u)))} il ${dataOra(t)}`).join(', ') : 'Non ancora letto'}</span></div></div>
+      ${lt.length ? '' : rs.length ? rs.map(r => `<div class="rper"><div class="rtx"><b>${esc(nomeR(r))}</b></div>${contatti(r, `Ciao ${r.nome || ''}, c’è un messaggio del torneo AICS per ${x.sq}: «${m.titolo}». Lo trovi nell’app AICS League, area squadre: ${url}`)}</div>`).join('') : '<p class="note">Nessun responsabile per questa squadra.</p>'}</div>`; };
+  const {root, close} = sheet(`<div class="stack"><h3>${esc(m.titolo)}</h3><p class="note">Inviato il ${dataOra(m.createdAt)} a ${ms.length === 1 ? esc(ms[0].sq) : ms.length + ' squadre'}</p>
+    ${m.testo ? `<p class="com-x">${linkify(m.testo)}</p>` : ''}${alHtml(m.allegati)}
+    <div class="eyebrow">${non.length ? `Da leggere <span class="cnt hot">${non.length}</span>` : 'Letto da tutti ✓'}</div>${non.map(riga).join('')}
+    ${ms.length > non.length ? `<div class="eyebrow">Già letto <span class="cnt">${ms.length - non.length}</span></div>${ms.filter(x => !non.includes(x)).map(riga).join('')}` : ''}
+    <button class="btn btn-danger btn-block" id="mzDel">Elimina messaggio</button><button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Messaggio');
+  bindAl(root, m.allegati);
+  root.querySelector('#mzDel').onclick = async () => { if(!confirm(`Eliminare «${m.titolo}»? Sparisce anche dall’area delle squadre.`)) return;
+    try{ const b = db().batch(); b.delete(db().collection('comunicazioni').doc(m.id)); ms.forEach(x => b.delete(db().collection('messaggi').doc(x.id))); await b.commit(); for(const a of m.allegati || []) await togliAll(a); toast('Messaggio eliminato'); close(); }
+    catch(err){ toast(fbErr(err)); } };
+}
+function openMsgResp(x){
+  if(!x) return;
+  const {root} = sheet(`<div class="stack"><p class="note">Messaggio del torneo per ${esc(x.sq)} · ${dataOra(x.createdAt)}</p><h3>${esc(x.titolo)}</h3>
+    ${x.testo ? `<p class="com-x">${linkify(x.testo)}</p>` : ''}${alHtml(x.allegati)}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Messaggio');
+  bindAl(root, x.allegati);
+  if(!(x.letti || {})[S.user.uid]) db().collection('messaggi').doc(x.id).update({['letti.' + S.user.uid]: Date.now()}).catch(err => console.warn('letto', err.code));
 }
 
 /* --- menu calendario --- */
