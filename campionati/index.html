@@ -501,6 +501,21 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sheet{border-radius:22px;max-width:560px;max-height:100%;padding:16px 16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.35);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box}
 .sheet .grab{display:none}
 .sheet > *,.sheet .form > *{flex-shrink:0}
+/* barre di scorrimento: sottili, arrotondate e dentro i bordi delle finestre (anche su PC) */
+.sheet::-webkit-scrollbar,.ante::-webkit-scrollbar,.sqchk::-webkit-scrollbar,.tab-wrap::-webkit-scrollbar,.vw-b::-webkit-scrollbar,.scorre::-webkit-scrollbar{width:12px;height:12px}
+.sheet::-webkit-scrollbar-track,.ante::-webkit-scrollbar-track,.sqchk::-webkit-scrollbar-track,.tab-wrap::-webkit-scrollbar-track,.vw-b::-webkit-scrollbar-track,.scorre::-webkit-scrollbar-track{background:transparent;margin:10px}
+.sheet::-webkit-scrollbar-track{margin:22px 0}
+.sheet::-webkit-scrollbar-thumb,.ante::-webkit-scrollbar-thumb,.sqchk::-webkit-scrollbar-thumb,.tab-wrap::-webkit-scrollbar-thumb,.vw-b::-webkit-scrollbar-thumb,.scorre::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 45%,transparent);border-radius:99px;border:4px solid transparent;background-clip:padding-box}
+.sheet::-webkit-scrollbar-thumb:hover,.ante::-webkit-scrollbar-thumb:hover,.sqchk::-webkit-scrollbar-thumb:hover,.tab-wrap::-webkit-scrollbar-thumb:hover,.scorre::-webkit-scrollbar-thumb:hover{background-color:var(--muted)}
+.vw-b::-webkit-scrollbar-thumb{background-color:rgba(255,255,255,.3)}
+.sheet::-webkit-scrollbar-button,.ante::-webkit-scrollbar-button,.sqchk::-webkit-scrollbar-button,.tab-wrap::-webkit-scrollbar-button,.vw-b::-webkit-scrollbar-button,.scorre::-webkit-scrollbar-button{display:none;width:0;height:0}
+.sheet::-webkit-scrollbar-corner,.tab-wrap::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){.sheet,.ante,.sqchk,.tab-wrap,.scorre{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 45%,transparent) transparent}.vw-b{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.3) transparent}}
+@media (min-width:900px) and (pointer:fine){
+  html::-webkit-scrollbar{width:14px}html::-webkit-scrollbar-track{background:var(--bg)}
+  html::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:4px solid var(--bg)}html::-webkit-scrollbar-thumb:hover{background-color:var(--muted)}
+  html::-webkit-scrollbar-button{display:none;height:0}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 
 /* PC e tablet in orizzontale: le pagine si allargano e gli elenchi vanno su più colonne */
@@ -513,11 +528,27 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
   .sheet .list{display:flex;flex-direction:column}
   .card.par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   .card.par > *{border-right:1px solid var(--line)}.card.par > *:nth-child(2n){border-right:0}
+  /* finestre su PC: più larghe e più ariose, sempre centrate */
+  .sheet-bg{padding:32px}
+  .sheet{max-width:680px;max-height:min(100%,920px);padding:24px 28px 26px}
+  .sheet.largo{max-width:880px}
+  .sheet h3{font-size:28px}
+  .vw-b{padding-left:24px;padding-right:24px}.vw-b canvas,.vw-b img{max-width:min(100%,960px)}
 }
 @media (min-width:1400px){
   .wrap,.band-in{max-width:1320px}
   .card.par{grid-template-columns:repeat(3,minmax(0,1fr))}.card.par > *:nth-child(2n){border-right:1px solid var(--line)}.card.par > *:nth-child(3n){border-right:0}
 }
+/* finestre: o la X in alto a destra (se ci sono altri tasti) o il tasto Chiudi fisso in fondo */
+.sheet-x{position:sticky;top:8px;z-index:7;display:flex;justify-content:flex-end;height:36px;margin:-4px -8px 0 0;flex-shrink:0;pointer-events:none}
+.sheet-x.in-riga{height:0;margin:0 -8px 0 0}
+.sheet-x.in-riga button{position:absolute;right:0}
+.sheet-x button{pointer-events:auto;width:36px;height:36px;border-radius:10px;border:0;background:transparent!important;color:var(--fg);filter:drop-shadow(0 0 1.5px var(--bg)) drop-shadow(0 0 3px var(--bg));display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;opacity:.7;transition:opacity .15s}
+.sheet-x button:hover{opacity:1}
+.sheet-x button:focus-visible{opacity:1;outline:3px solid color-mix(in srgb,var(--fg) 40%,transparent);outline-offset:0}
+.spazio-x{padding-right:36px!important}
+.sheet .x-fisso{position:sticky;bottom:0;z-index:6;background:linear-gradient(var(--surface-2),var(--surface-2)) var(--bg)!important;box-shadow:0 0 0 10px var(--bg),0 30px 0 10px var(--bg)}
+.sheet .x-fisso:hover{filter:brightness(.97)}
 </style>
 </head><body>
 <div id="app"><div id="home"><div class="hbg"></div><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
@@ -906,7 +937,7 @@ function openDistinta(p, sqId){
     sheet(`${testa}${distOk(old, p) ? '' : '<div class="warn-box">Questa distinta era per la data precedente alla riprogrammazione.</div>'}
       <ol class="dlist">${old.giocatori.map(x => `<li><span>${esc(x.numero || '–')}</span><b>${esc(x.nome)}</b>${x.id === old.capitano ? '<em>C</em>' : x.id === old.vice ? '<em>VC</em>' : ''}${x.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}</li>`).join('')}</ol>
       ${(old.dirigenti || []).length ? `<div class="eyebrow">Dirigenti</div><ul class="dlist dir">${old.dirigenti.map(x => `<li><b>${esc(x.nome)}</b><i>${esc((x.ruolo || '').toLowerCase())}</i></li>`).join('')}</ul>` : ''}
-      <p class="note">La distinta si chiude all’orario d’inizio: ora la può cambiare solo l’amministratore.</p><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Distinta');
+      <p class="note">La distinta si chiude all’orario d’inizio: ora la può cambiare solo l’amministratore.</p><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Distinta', 'largo');
     return;
   }
   const valido = id => rosa.some(t => t.id === id) && !sid.has(id);
@@ -925,7 +956,7 @@ function openDistinta(p, sqId){
       <div id="dBody" class="stack" style="gap:10px"></div>
       <div class="err" id="dErr"></div>
       <div class="actions"><button class="btn btn-primary" id="dGo">${old ? 'Invia di nuovo' : 'Invia distinta'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
-      <p class="note">Puoi cambiarla fino all’orario d’inizio della partita.</p>`, 'Distinta');
+      <p class="note">Puoi cambiarla fino all’orario d’inizio della partita.</p>`, 'Distinta', 'largo');
     const body = root.querySelector('#dBody');
     const tend = (k, i, lista, cur, usati) => `<div class="tend" role="listbox">${cur ? `<button type="button" data-pk="${k}:${i}:" class="svuota">Svuota la riga</button>` : ''}${lista.map(t => sid.has(t.id)
         ? `<button type="button" class="sq" disabled aria-disabled="true"><span>${esc(nomeT(t))}</span><em>squalificato</em></button>`
@@ -1609,7 +1640,7 @@ function anteprimaImport(q, l, nomeFile){
     <p class="note" id="imCnt"></p>
     <label class="check"><input type="checkbox" id="im-ok"><span>La società ha raccolto il consenso dei tesserati (o dei genitori, se minorenni) all’uso dei dati per il torneo AICS.</span></label>
     <div class="err" id="imErr" role="alert"></div>
-    <button class="btn btn-primary btn-block" id="imGo">${S.admin ? 'Importa e approva' : 'Invia all’amministratore'}</button><button type="button" class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Importa tesserati');
+    <button class="btn btn-primary btn-block" id="imGo">${S.admin ? 'Importa e approva' : 'Invia all’amministratore'}</button><button type="button" class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Importa tesserati', 'largo');
   const scelti = () => [...root.querySelectorAll('[data-ii]:checked')].map(x => l[+x.dataset.ii]);
   const cnt = () => { const sc = scelti(), dopo = contaTess(q.id, cat) + sc.filter(o => contaGioc(o, L)).length, over = L.max && dopo > L.max;
     root.querySelector('#imCnt').innerHTML = `Da importare: <b>${sc.length}</b>.${L.max ? ` In squadra diventano <b${over ? ' style="color:var(--danger,#D0342C)"' : ''}>${dopo} su ${L.max}</b>${L.soloGioc ? ' (solo giocatori)' : ''}${over ? ': oltre il massimo' : ''}.` : ''}`;
@@ -1964,7 +1995,7 @@ function openSquadra(q){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '';
   const draw = () => {
     const ts = S.tess.filter(t => t.squadraId === q.id).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')), rs = respSq(q.id), iv = invSq(q.id);
-    root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="${esc(q.nome)}"><div class="grab"></div>
+    root.innerHTML = `<div class="sheet-bg"><div class="sheet stack largo" role="dialog" aria-modal="true" aria-label="${esc(q.nome)}"><div class="grab"></div>
       <h3>${esc(q.nome)}</h3><div class="note">${esc(q.categoria || '')}</div>
       ${schedaBox(q)}
       <section class="stack" style="gap:8px"><div class="eyebrow">Responsabili <span class="cnt">${rs.length + iv.length}/${MAXRESP}</span></div>${rs.map(r => `<div class="rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || '')}${r.telefono && r.email ? ' · ' : ''}${esc(r.email || '')}</span></div><button class="btn btn-ghost sm" data-re="${esc(r.id)}">Modifica</button></div>`).join('')}${iv.map(i => `<div class="rp"><div class="rtx"><b>${esc(nomeR(i))}</b><span>Invitato: entra quando si registra con ${esc(i.email)}</span></div></div>`).join('')}${rs.length + iv.length ? '' : '<p class="note">Nessun responsabile.</p>'}${rs.length + iv.length < MAXRESP ? `<button class="btn btn-ghost sm" data-radd="${esc(q.id)}">+ Aggiungi responsabile</button>` : ''}</section>
@@ -2040,7 +2071,7 @@ function bindPartite(app){
   app.querySelectorAll('[data-cal]').forEach(b => b.onclick = () => ({file: openImporta, gen: openGenera, mano: () => openPartita({camp: S.pcat, giornata: S.pgio[S.pcat] || 1}), menu: openCalMenu})[b.dataset.cal]());
   const sel = app.querySelector('.gior [aria-pressed=true]'); if(sel) sel.scrollIntoView({block: 'nearest', inline: 'center'});
 }
-const sheet = (html, label) => { const root = $('#sheetRoot'); root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="${esc(label)}"><div class="grab"></div>${html}</div></div>`;
+const sheet = (html, label, cls = '') => { const root = $('#sheetRoot'); root.innerHTML = `<div class="sheet-bg"><div class="sheet stack${cls ? ' ' + cls : ''}" role="dialog" aria-modal="true" aria-label="${esc(label)}"><div class="grab"></div>${html}</div></div>`;
   const close = () => root.innerHTML = ''; root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
   root.querySelectorAll('[data-x]').forEach(b => b.onclick = close); return {root, close}; };
 
@@ -2205,7 +2236,7 @@ const bindCom = root => root.querySelectorAll('[data-com]').forEach(b => b.oncli
 function openComHome(){
   const l = (S.pubCom || []).slice().sort(comOrd).slice(0, 20);
   const {root} = sheet(`<div class="stack"><h3>Comunicati</h3><p class="note">Gli ultimi comunicati di tutti i campionati: giudice sportivo, avvisi e documenti.</p>
-    ${l.length ? `<ul class="list">${l.map(c => itemC(c)).join('')}</ul>` : vuoto('Nessun comunicato', '')}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Comunicati');
+    ${l.length ? `<ul class="list">${l.map(c => itemC(c)).join('')}</ul>` : vuoto('Nessun comunicato', '')}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Comunicati', 'largo');
   bindCom(root);
 }
 /* --- allegati: il file si divide in pezzi da 700 KB (un documento del database arriva a 1 MB) --- */
@@ -2278,7 +2309,7 @@ function openCom(c, adm){
     ${alHtml(c.allegati)}
     ${c.tipo === 'gs' ? '<button class="btn btn-primary btn-block" id="cPdf">⬇️ Scarica PDF</button>' : ''}
     ${adm ? `<div class="row">${c.tipo !== 'gs' ? '<button class="btn btn-ghost" data-ca="mod">Modifica</button>' : ''}${c.tipo !== 'gs' ? `<button class="btn btn-ghost" data-ca="pub">${c.pubblicato === false ? 'Pubblica di nuovo' : 'Ritira'}</button>` : ''}<button class="btn btn-danger" data-ca="del">Elimina</button></div>` : ''}
-    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, comTit(c));
+    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, comTit(c), 'largo');
   bindAl(root, c.allegati);
   const pd = root.querySelector('#cPdf');
   if(pd) pd.onclick = async () => { pd.disabled = true; pd.textContent = 'Preparo il PDF…'; try{ await salvaFile(await pdfGS(c), `comunicato-${c.numero}-${(NOMECAMP[c.camp] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`); }catch(e){ console.warn(e); toast(e.message === 'net' ? 'Serve internet per creare il PDF' : 'Non riesco a creare il PDF'); } pd.disabled = false; pd.textContent = '⬇️ Scarica PDF'; };
@@ -2365,7 +2396,7 @@ function openGS(cat){
     <div class="field"><label for="gs-x">Comunicazioni (facoltative)</label><textarea id="gs-x" rows="4" maxlength="5000" placeholder="Es. recuperi, avvisi alle società…"></textarea></div>
     <div class="eyebrow">Anteprima</div><div class="card" id="gsPrev"></div>
     <div class="err" id="gsErr" role="alert"></div>
-    <button class="btn btn-primary btn-block" id="gsGo">Pubblica</button><button class="btn btn-ghost btn-block" data-x>Annulla</button></div>`, 'Comunicato del giudice sportivo');
+    <button class="btn btn-primary btn-block" id="gsGo">Pubblica</button><button class="btn btn-ghost btn-block" data-x>Annulla</button></div>`, 'Comunicato del giudice sportivo', 'largo');
   const $r = x => root.querySelector(x);
   const agg = () => { const b = bozzaGS(cat, da, incAmm); da = b.da;
     $r('#gsAvv').innerHTML = (b.manca.length ? `<div class="warn-box">⏳ ${b.manca.length === 1 ? 'Manca il risultato di' : `Mancano ${b.manca.length} risultati:`} ${b.manca.map(p => esc(p.casa + ' – ' + p.ospite)).join(', ')}.</div>` : '')
@@ -2483,7 +2514,7 @@ function openMsg(m){
     ${m.testo ? `<p class="com-x">${linkify(m.testo)}</p>` : ''}${alHtml(m.allegati)}
     <div class="eyebrow">${non.length ? `Da leggere <span class="cnt hot">${non.length}</span>` : 'Letto da tutti ✓'}</div>${non.map(riga).join('')}
     ${ms.length > non.length ? `<div class="eyebrow">Già letto <span class="cnt">${ms.length - non.length}</span></div>${ms.filter(x => !non.includes(x)).map(riga).join('')}` : ''}
-    <button class="btn btn-danger btn-block" id="mzDel">Elimina messaggio</button><button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Messaggio');
+    <button class="btn btn-danger btn-block" id="mzDel">Elimina messaggio</button><button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Messaggio', 'largo');
   bindAl(root, m.allegati);
   root.querySelector('#mzDel').onclick = async () => { if(!confirm(`Eliminare «${m.titolo}»? Sparisce anche dall’area delle squadre.`)) return;
     try{ const b = db().batch(); b.delete(db().collection('comunicazioni').doc(m.id)); ms.forEach(x => b.delete(db().collection('messaggi').doc(x.id))); await b.commit(); for(const a of m.allegati || []) await togliAll(a); toast('Messaggio eliminato'); close(); }
@@ -2492,7 +2523,7 @@ function openMsg(m){
 function openMsgResp(x){
   if(!x) return;
   const {root} = sheet(`<div class="stack"><p class="note">Messaggio del torneo per ${esc(x.sq)} · ${dataOra(x.createdAt)}</p><h3>${esc(x.titolo)}</h3>
-    ${x.testo ? `<p class="com-x">${linkify(x.testo)}</p>` : ''}${alHtml(x.allegati)}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Messaggio');
+    ${x.testo ? `<p class="com-x">${linkify(x.testo)}</p>` : ''}${alHtml(x.allegati)}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Messaggio', 'largo');
   bindAl(root, x.allegati);
   if(!(x.letti || {})[S.user.uid]) db().collection('messaggi').doc(x.id).update({['letti.' + S.user.uid]: Date.now()}).catch(err => console.warn('letto', err.code));
 }
@@ -2506,7 +2537,7 @@ function openCalMenu(){
     <button class="btn btn-ghost btn-block" data-m="info">ℹ️ Informazioni, regolamento e premi</button>
     <button class="btn btn-ghost btn-block" data-m="imp">⚙️ Impostazioni classifica (zone, tavolino, ritiri)</button>
     <button class="btn btn-danger btn-block" data-m="del">Cancella il calendario (${liberi.length} partite non ancora mandate agli arbitri)</button>
-    <button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Calendario');
+    <button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Calendario', 'largo');
   root.querySelector('[data-m=mano]').onclick = () => openPartita({camp: S.pcat, giornata: S.pgio[S.pcat] || 1});
   root.querySelector('[data-m=file]').onclick = openImporta;
   root.querySelector('[data-m=imp]').onclick = openImpostazioni;
@@ -2547,7 +2578,7 @@ function openGenera(){
       <div class="seg"><button data-r="0" aria-pressed="${!rit}">Solo andata</button><button data-r="1" aria-pressed="${rit}">Andata e ritorno</button></div>
       <button class="btn btn-ghost btn-block" id="gMix">🔀 Mescola l’ordine delle squadre</button>
       ${anteprima(rows)}
-      <button class="btn btn-primary btn-block" id="gOk">Crea queste ${m.length} partite</button><button class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Genera calendario');
+      <button class="btn btn-primary btn-block" id="gOk">Crea queste ${m.length} partite</button><button class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Genera calendario', 'largo');
     root.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { rit = b.dataset.r === '1'; draw(); });
     root.querySelector('#gMix').onclick = () => { teams = teams.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]); draw(); };
     root.querySelector('#gOk').onclick = async e => { e.target.disabled = true;
@@ -2573,7 +2604,7 @@ function openImporta(){
     <p class="note">Un file Excel (.xlsx) o CSV con 3 colonne: <b>Giornata</b>, <b>Casa</b>, <b>Ospite</b>. I nomi delle squadre devono essere uguali a quelli dell’archivio squadre di ${esc(NOMECAMP[cat])}.</p>
     <button class="btn btn-ghost btn-block" id="iMod">⬇️ Scarica il modello da compilare</button>
     <label class="btn btn-primary btn-block" for="iFile">📄 Scegli il file</label><input type="file" id="iFile" accept=".csv,.xlsx,.xls,text/csv" hidden>
-    <div id="iOut"></div><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Importa calendario');
+    <div id="iOut"></div><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Importa calendario', 'largo');
   root.querySelector('#iMod').onclick = scaricaModello;
   root.querySelector('#iFile').onchange = async e => {
     const f = e.target.files[0], out = root.querySelector('#iOut'); if(!f) return;
@@ -2888,7 +2919,7 @@ function openInfo(cat){
       <li><b>Squalifiche:</b> doppia ammonizione nella stessa partita 1 giornata; ogni 4 ammonizioni 1 giornata; espulsione diretta: le giornate le decide l’amministratore del torneo.</li>
       <li><b>In distinta</b> solo tesserati con cartellino valido, non scaduto e non squalificati.</li>
     </ul>
-    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Regolamento e informazioni');
+    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Regolamento e informazioni', 'largo');
   root.querySelector('.sheet').scrollTop = 0;
 }
 /* --- informazioni del campionato (amministratore) --- */
@@ -2907,7 +2938,7 @@ function openInfoAdmin(){
       <div class="eyebrow" style="grid-column:1/-1">Premi</div>
       ${premi.map((p, i) => `<div class="field"><label for="ip-t${i}">${i + 1}° premio</label><input id="ip-t${i}" data-p="${i}:t" value="${esc(p.t)}" placeholder="Es. Campione"></div><div class="field"><label for="ip-d${i}">Cosa si vince</label><input id="ip-d${i}" data-p="${i}:d" value="${esc(p.d)}"></div>`).join('')}
       <div class="row" style="grid-column:1/-1"><button type="button" class="btn btn-ghost sm" id="ipAdd">+ Premio</button>${premi.length ? '<button type="button" class="btn btn-ghost sm" id="ipDel">− Togli l’ultimo</button>' : ''}</div>
-      <div class="actions"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Informazioni campionato');
+      <div class="actions"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Informazioni campionato', 'largo');
     const f = root.querySelector('#infForm'), v = id => f.querySelector('#' + id).value.trim();
     const leggi = () => { f.querySelectorAll('[data-p]').forEach(el => { const [i, k] = el.dataset.p.split(':'); premi[i][k] = el.value.trim(); });
       Object.assign(inf, {formula: f.querySelector('#if-f').value.trim(), dal: v('if-dal'), al: v('if-al'), org: v('if-org'), sito: v('if-sito'), email: v('if-mail'), pdf: v('if-pdf')});
@@ -2927,6 +2958,56 @@ addEventListener('hashchange', vista);
 addEventListener('resize', () => { if($('#home')) lay(); });
 render();
 loadFB().then(fb => fb.auth().onAuthStateChanged(u => onUser(u))).catch(() => { S.netErr = true; render(); });
+})();
+</script>
+<script>
+/* finestre: o la X in alto a destra (se ci sono altri tasti) o il tasto Chiudi fisso in fondo; Esc chiude (PC) */
+(() => {
+  const chiudi = bg => {
+    if(!bg) return;
+    if(bg.onclick){ bg.click(); return; }
+    const b = [...bg.querySelectorAll('button')].reverse().find(x => x.matches('[data-x],[data-k=""]') || /^\s*(Chiudi|Annulla)\s*$/i.test(x.textContent));
+    if(b) b.click(); else bg.remove();
+  };
+  const X = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  const fondo = el => { for(let e = el; e; e = e.parentElement){ const c = getComputedStyle(e).backgroundColor; if(c && c !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(c)) return c; if(e.classList.contains('sheet')) break; } return ''; };
+  const allinea = (sh, xr) => requestAnimationFrame(() => {
+    if(!xr.isConnected || xr.dataset.ok) return; xr.dataset.ok = '1';
+    const h = sh.querySelector('h2, h3'); if(!h) return;
+    const a = xr.getBoundingClientRect(), b = h.getBoundingClientRect();
+    if(b.top - a.bottom > 44 || b.width < 120) return;
+    xr.classList.add('in-riga'); h.classList.add('spazio-x');
+    xr.style.marginBottom = '-' + (parseFloat(getComputedStyle(sh).rowGap) || 0) + 'px';
+    requestAnimationFrame(() => {
+      const r = xr.getBoundingClientRect(), hb = h.getBoundingClientRect(), lh = Math.min(hb.height, parseFloat(getComputedStyle(h).lineHeight) || hb.height);
+      const btn = xr.firstChild; btn.style.top = Math.round(hb.top - r.top + (lh - 36) / 2) + 'px';
+    });
+  });
+  const prepara = sh => {
+    let el = sh.lastElementChild;
+    while(el && !el.matches('button') && el.lastElementChild) el = el.lastElementChild;
+    const ch = el && el.matches('button') && /^\s*Chiudi\s*$/i.test(el.textContent) ? el : null;
+    const altri = [...sh.querySelectorAll('button, .btn, select, input:not([type=hidden]), textarea')].some(b => b !== ch && !b.closest('.sheet-x'));
+    const fisso = !!ch && !altri;
+    if(ch) ch.classList.toggle('x-fisso', fisso);
+    let xr = sh.querySelector(':scope > .sheet-x');
+    if(fisso){ if(xr) xr.remove(); return; }
+    if(!xr){
+      xr = document.createElement('div'); xr.className = 'sheet-x';
+      xr.innerHTML = '<button type="button" aria-label="Chiudi" title="Chiudi (Esc)">' + X + '</button>';
+      xr.firstChild.onclick = e => { e.preventDefault(); e.stopPropagation(); chiudi(sh.closest('.sheet-bg')); };
+      sh.insertBefore(xr, sh.firstChild);
+    }
+    allinea(sh, xr);
+  };
+  let att = false;
+  const scan = () => { att = false; document.querySelectorAll('.sheet').forEach(prepara); };
+  new MutationObserver(() => { if(!att){ att = true; queueMicrotask(scan); } }).observe(document.body, {childList: true, subtree: true});
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Escape') return;
+    const v = document.querySelector('.viewer [data-vx]'); if(v){ v.click(); return; }
+    const l = document.querySelectorAll('.sheet-bg'); if(l.length) chiudi(l[l.length - 1]);
+  });
 })();
 </script>
 </body></html>
