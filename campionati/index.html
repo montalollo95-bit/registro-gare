@@ -270,6 +270,13 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .pst.multi{border-radius:12px;padding:6px 10px;line-height:1.35;align-self:stretch;font-weight:700}
 .pst.ok{background:rgba(30,138,79,.16);color:var(--ok)}.pst.wait{background:rgba(232,163,60,.18);color:var(--warn)}.pst.no{background:rgba(210,58,46,.14);color:var(--red)}
 .item .stemma{width:40px;height:40px;border-radius:11px;font-size:15px;margin:0}
+.item .tx .vsr{display:flex;align-items:center;gap:8px;min-width:0;font-size:inherit;color:var(--fg)}
+.item .tx .vsr+.vsr{margin-top:5px}
+.item .tx .vsr+span:not(.vsr){margin-top:6px}
+.item .tx .vsr .stemma{width:30px;height:30px;border-radius:9px;font-size:14px;color:#fff;margin:0}
+.item .tx .vsr i{font-style:normal;font-family:var(--display);font-size:22px;font-weight:800;min-width:28px;text-align:right;color:var(--fg)}
+.item .tx .vsr.perde b,.item .tx .vsr.perde i{opacity:.55}
+.item .tx .vsr b{flex:1;min-width:0;line-height:1.2;overflow-wrap:anywhere}
 .sheet.stack > *{flex-shrink:0}
 .ante{max-height:42vh;overflow:auto;display:flex;flex-direction:column;gap:10px;background:var(--surface-2);border-radius:14px;padding:12px;font-size:14px}
 .ante div{display:flex;flex-direction:column;gap:2px}.ante b{font-family:var(--display);font-size:17px}
@@ -821,6 +828,9 @@ const okImg = d => typeof d === 'string' && /^data:image\/(png|jpeg|webp);base64
 const okCol = c => typeof c === 'string' && /^#[0-9A-Fa-f]{6}$/.test(c) ? c : '';
 const olCls = b => (String(b || '').includes('l') ? ' ol-l' : '') + (String(b || '').includes('d') ? ' ol-d' : '');
 const stemmaImg = n => { if(!STEMMI){ STEMMI = new Map(); [...(S.pubSq || []), ...(S.squadre || [])].forEach(q => { const i = S.info[q.id]; if(i && okImg(i.stemma)) STEMMI.set(q.nome, {img: i.stemma, b: i.stemmaBordo || ''}); }); } return STEMMI.get(n); };
+/* le due squadre una sotto l'altra, ognuna con il suo stemma */
+const righeSq = p => { const e = esito(p), r = (s, g, o) => `<span class="vsr${e && g !== o ? (g > o ? ' vince' : ' perde') : ''}">${stemma(p[s])}<b>${esc(p[s])}</b>${e ? `<i>${esc(g)}</i>` : ''}</span>`;
+  return r('casa', e && e.gc, e && e.go) + r('ospite', e && e.go, e && e.gc); };
 const stemma = n => { const im = stemmaImg(n); if(im) return `<span class="stemma img${olCls(im.b)}"><img src="${im.img}" alt=""></span>`; const t = String(n || ''); let h = 0; for(const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; const ini = t.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(); return `<span class="stemma" style="background:${COL[h % COL.length]}">${esc(ini)}</span>`; };
 const testa = (l, t) => `<p class="lbl">${l}</p><h2 class="ttl">${t}</h2>`;
 const vuoto = (t, x) => `<div class="empty"><h3>${t}</h3><span>${x}</span></div>`;
@@ -1393,7 +1403,7 @@ function renderResp(app){
     const cat = q.categoria || r.categoria, lp = parDi(S.pubPar, cat).filter(p => p.casaId === r.squadraId || p.ospiteId === r.squadraId).sort(ordCr);
     const prox = lp.filter(p => !esito(p)), fatte = lp.filter(p => esito(p)).reverse();
     const item = p => { const [k, t] = statoDist(p, r.squadraId), vs = p.casaId === r.squadraId ? p.ospite : p.casa, sq = !esito(p) && p.data && p.stato !== 'rinviata' ? squPer(p, r.squadraId) : [];
-      return `<li><button class="item" data-dp="${esc(p.id)}">${stemma(vs)}<span class="tx"><b>${esc(p.giornata)}ª · ${esc(p.casa)} – ${esc(p.ospite)}</b><span>${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>
+      return `<li><button class="item" data-dp="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${esc(p.giornata)}ª giornata · ${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>
         <span class="pst ${k}">${esc(t)}</span>${sq.length ? `<span class="pst no">⛔ ${sq.length === 1 ? '1 squalificato' : sq.length + ' squalificati'}</span>` : ''}</span></button></li>`; };
     app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}
       ${!S.pubParOk || !S.loaded.dist ? '<div class="status"><span class="spin"></span>Carico le partite…</div>' : !lp.length ? '<div class="empty"><h3>Calendario in arrivo</h3><span>Qui troverai le partite della tua squadra: per ognuna si compila la distinta.</span></div>'
@@ -2078,7 +2088,7 @@ function adminPartite(){
   return seg + `<div class="row"><button class="btn btn-primary sm" data-cal="mano">+ Partita</button><button class="btn btn-ghost sm" data-cal="menu">Calendario…</button></div>
     <p class="note">${l.length} partite in ${giorn.length} giornate · ${daProg ? `<b>${daProg} senza data</b>` : 'tutte con la data'}. Appena una partita ha data, ora e campo passa da sola nell’app arbitri, pronta da designare.</p>
     <div class="seg gior" role="tablist" aria-label="Giornate">${giorn.map(n => `<button data-pg="${n}" aria-pressed="${n === g}">${n}ª giornata</button>`).join('')}</div>
-    <ul class="list">${lg.map(p => { const [k, t] = statoPar(p); return `<li><button class="item" data-par="${esc(p.id)}">${stemma(p.casa)}<span class="tx"><b>${esc(p.casa)} – ${esc(p.ospite)}</b><span>${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span><span class="pst ${k}">${esc(t)}</span></span></button></li>`; }).join('')}</ul>`;
+    <ul class="list">${lg.map(p => { const [k, t] = statoPar(p); return `<li><button class="item" data-par="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>${t.startsWith('Finale') ? '' : `<span class="pst ${k}">${esc(t)}</span>`}</span></button></li>`; }).join('')}</ul>`;
 }
 function bindPartite(app){
   app.querySelectorAll('[data-pc]').forEach(b => b.onclick = () => { S.pcat = b.dataset.pc; render(); });
@@ -2788,7 +2798,7 @@ const latoR = s => s === 'ospite' ? 'ospite' : 'casa';
 function itemRef(p){
   const r = refNuovo(p), R = r.referto || {}, man = refVoci(R).filter(v => !v.tid || v.tid === '__man').length;
   const es = R.esito === 'rinviata' ? 'Gara rinviata' : `${R.esito === 'sospesa' ? `Sospesa al ${R.minSosp || '?'}’ · ` : ''}${R.gc ?? '?'}-${R.go ?? '?'}`;
-  return `<li><button class="item" data-rc="${esc(p.id)}">${stemma(p.casa)}<span class="tx"><b>${esc(p.casa)} – ${esc(p.ospite)}</b><span>${esc(NOMECAMP[p.camp] || p.camp)} · ${esc(p.giornata)}ª giornata${p.data ? ' · ' + esc(giornoCorto(p.data)) : ''}</span>
+  return `<li><button class="item" data-rc="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${esc(NOMECAMP[p.camp] || p.camp)} · ${esc(p.giornata)}ª giornata${p.data ? ' · ' + esc(giornoCorto(p.data)) : ''}</span>
     <span class="pst ${R.esito ? 'no' : 'wait'}">${esc(es)}${man ? ` · ${man} ${man === 1 ? 'nome scritto a mano' : 'nomi scritti a mano'}` : ''}</span></span></button></li>`;
 }
 /* tutte le persone citate nel referto */
