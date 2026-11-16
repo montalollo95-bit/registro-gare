@@ -89,7 +89,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .b-attesa{background:rgba(232,163,60,.18);color:var(--warn)}
 .b-approvato{background:rgba(30,138,79,.16);color:var(--ok)}
 .b-rifiutato,.b-sospeso,.b-revocato{background:rgba(210,58,46,.14);color:var(--red)}
-.b-scaduto{background:var(--surface-2);color:var(--muted)}
+.b-scaduto,.b-svincolato{background:var(--surface-2);color:var(--muted)}
 .empty{text-align:center;padding:26px 16px;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
 .empty h3{color:var(--fg);font-size:22px;margin-bottom:4px}
 .status{display:flex;gap:10px;align-items:center;justify-content:center;padding:14px;color:var(--muted)}
@@ -156,7 +156,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tessera .k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-top:4px}
 .tessera .v{font-size:14px;font-weight:600}
 .tessera .stato{white-space:nowrap;flex:none;margin-left:auto;align-self:flex-start;z-index:1;font-weight:800;font-size:12px;letter-spacing:.08em;padding:4px 10px;border-radius:99px;background:#1E8A4F}
-.tessera.scaduto{filter:grayscale(.85)}
+.tessera.scaduto,.tessera.svincolato{filter:grayscale(.85)}.tessera.svincolato .stato{background:#5B6577}
 .tessera.scaduto .stato,.tessera.sospeso .stato{background:#D23A2E}
 
 /* home: scelta del campionato */
@@ -301,7 +301,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .gioc.car .gr,.gioc.car .gh{grid-template-columns:36px 1fr 38px 38px}.gioc.car .gh span:first-child{grid-column:1/3}
 .gioc .gx{grid-column:2/-1;font-size:12.5px;color:var(--muted);margin-top:-4px}.gioc .gx b{color:var(--fg);font-weight:700}
 .gioc .gg{text-align:center;min-width:64px}.gioc .gg b{display:block;font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}.gioc .gg small{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.gioc .gg.att b{color:#E8A33C}
+.gioc .gg.att b{color:#E8A33C}.gioc .gg b.fd{font-size:16px}
 .cy,.cr{display:inline-block;width:11px;height:15px;border-radius:2.5px;vertical-align:-2px;box-shadow:0 1px 2px rgba(0,0,0,.25)}.cy{background:#F5C518}.cr{background:#E5333A}
 .gioc .gc{text-align:center;font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}.gioc .gc.z{color:var(--muted);opacity:.5;font-weight:600}
 .ckr{display:grid;grid-template-columns:1fr 40px;align-items:center;gap:4px 6px;font-size:14px}.ckr + .ckr{border-top:1px solid var(--line);padding-top:8px}.ckr > span{grid-column:1/-1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
@@ -316,7 +316,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .stemma.img.ol-l img{filter:drop-shadow(1px 0 0 #1b1f2a) drop-shadow(-1px 0 0 #1b1f2a) drop-shadow(0 1px 0 #1b1f2a) drop-shadow(0 -1px 0 #1b1f2a)}
 @media (prefers-color-scheme:dark){.stemma.img.ol-l img{filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}.stemma.img.ol-d img{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff)}}
 .stm-duo{display:flex;gap:6px;flex:none}.stm-duo .stm-prev{width:78px;height:78px;border-style:solid}
-.stm-prev.chiaro{background:#EEF3FB}.stm-prev.scuro{background:#0D183A}.stm-prev.scuro .vuoto{color:#9fb0d0}
+.stm-prev.chiaro{background:#EEF3FB}.stm-prev.scuro{background:#0D183A}.stm-prev:not(.scuro) .vuoto{color:#5B6577}.stm-prev.scuro .vuoto{color:#9fb0d0}
 .stm-prev.chiaro.ol img{filter:drop-shadow(1px 0 0 #1b1f2a) drop-shadow(-1px 0 0 #1b1f2a) drop-shadow(0 1px 0 #1b1f2a) drop-shadow(0 -1px 0 #1b1f2a)}
 .stm-prev.scuro.ol img{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff)}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--fg)}.chk input{width:20px;height:20px}
@@ -402,6 +402,10 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .legenda{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;font-weight:700;color:var(--muted);padding:0 4px}
 @media (prefers-color-scheme:dark){.legenda{color:#C3D0E6}}
 .card .note{color:var(--muted)}
+.tab-cl sup.pen{color:var(--red);font-weight:800;margin-left:2px;font-size:13px}
+.pen-n{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:600;color:var(--muted);padding:0 4px}
+@media (prefers-color-scheme:dark){.pen-n{color:#C3D0E6}}
+.ricf{display:flex;align-items:center;gap:10px}.ricf img{width:56px;height:70px;object-fit:cover;border-radius:8px}
 .legenda span{display:flex;align-items:center;gap:5px}.legenda i{width:9px;height:9px;border-radius:3px;flex:none}
 
 /* impostazioni */
@@ -483,7 +487,7 @@ const ADMINS = () => [].concat(window.FIREBASE_ADMINS || window.FIREBASE_ADMIN |
 const nomeT = t => `${t.cognome || ''} ${t.nome || ''}`.trim();
 const iniz = t => ((t.cognome || '?')[0] + (t.nome || '')[0] || '').toUpperCase();
 const statoT = t => t.stato === 'approvato' && t.scadenza && t.scadenza < oggi() ? 'scaduto' : (t.stato || 'attesa');
-const ST_L = {attesa: 'In attesa', approvato: 'Valido', rifiutato: 'Rifiutato', sospeso: 'Sospeso', scaduto: 'Scaduto', attivo: 'Attivo', revocato: 'Revocato'};
+const ST_L = {attesa: 'In attesa', approvato: 'Valido', rifiutato: 'Rifiutato', sospeso: 'Sospeso', scaduto: 'Scaduto', attivo: 'Attivo', revocato: 'Revocato', svincolato: 'Svincolato'};
 const badge = s => `<span class="badge b-${s}">${ST_L[s] || s}</span>`;
 const fbErr = e => { const c = (e && e.code) || ''; return ({
   'auth/invalid-credential': 'Email o password sbagliate.', 'auth/wrong-password': 'Email o password sbagliate.', 'auth/user-not-found': 'Non c’è nessun account con questa email.',
@@ -510,7 +514,7 @@ function loadFB(){
 const db = () => firebase.firestore();
 
 /* ---------- stato ---------- */
-const S = {ready: false, user: null, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
+const S = {ready: false, user: null, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, amm: [], dt: null, pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
 const VIEW = () => ({'#futsal': 'futsal', '#liga': 'liga', '#area': 'area'})[location.hash] || 'home';
 const CAMP = {futsal: {cat: 'C5 AICS', nome: 'Futsal League', sub: 'Calcio a 5 · AICS Reggio Emilia', logo: 'logo-futsal.png', cls: 'camp-f'}, liga: {cat: 'C7 AICS', nome: 'R.E. Liga', sub: 'Calcio a 7 · AICS Reggio Emilia', logo: 'logo-liga.png', cls: 'camp-l'}};
 const sqById = id => S.squadre.find(q => q.id === id) || {};
@@ -518,7 +522,7 @@ const live = (q, k, fn) => S.unsub.push(q.onSnapshot(s => { fn(s.docs.map(d => (
 
 async function onUser(u){
   S.unsub.forEach(f => f()); S.unsub = [];
-  Object.assign(S, {user: u, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], tess: [], resps: [], loaded: {}, err: '', accInv: false});
+  Object.assign(S, {user: u, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], tess: [], resps: [], amm: [], loaded: {}, err: '', accInv: false});
   if(!u){ S.ready = true; render(); return; }
   S.admin = ADMINS().includes(String(u.email || '').toLowerCase());
   live(db().collection('squadre'), 'squadre', l => { S.squadre = l; });
@@ -531,6 +535,7 @@ async function onUser(u){
     live(db().collection('impianti'), 'impianti', l => { S.impianti = l; });
     live(db().collection('designazioni'), 'des', l => { S.des = l; });
     live(db().collection('distinte'), 'dist', l => { S.dist = l; });
+    live(db().collection('ammende'), 'amm', l => { S.amm = l; });
     pubStart();
     S.ready = true; render(); return;
   }
@@ -556,10 +561,11 @@ function aggiornaResp(){
 }
 function subSq(id){
   S.unsub = S.unsub.filter(f => { if(f.sq){ f(); return false; } return true; });
-  S.tess = []; S.dist = []; S.loaded.tess = false; S.loaded.dist = false;
+  S.tess = []; S.dist = []; S.amm = []; S.loaded.tess = false; S.loaded.dist = false; S.loaded.amm = false;
   const f = db().collection('tesserati').where('squadraId', '==', id).onSnapshot(x => { S.tess = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.tess = true; render(); }, e => { S.err = fbErr(e); S.loaded.tess = true; render(); });
   const g = db().collection('distinte').where('squadraId', '==', id).onSnapshot(x => { S.dist = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.dist = true; render(); }, e => { console.warn('dist', e.code); S.loaded.dist = true; render(); });
-  f.sq = g.sq = true; S.unsub.push(f, g);
+  const h = db().collection('ammende').where('sqId', '==', id).onSnapshot(x => { S.amm = x.docs.map(d => ({id: d.id, ...d.data()})); S.loaded.amm = true; render(); }, e => { console.warn('amm', e.code); S.loaded.amm = true; render(); });
+  f.sq = g.sq = h.sq = true; S.unsub.push(f, g, h);
 }
 /* invito dell'amministratore: con l'email confermata si entra subito nella squadra */
 async function accettaInviti(){
@@ -618,7 +624,20 @@ async function migraResp(){
 }
 
 /* ---------- disegno ---------- */
-function render(){
+/* le file di schede che scorrono di lato: dopo ogni aggiornamento restano dove erano e la scheda scelta si vede tutta */
+const segKey = el => { const b = el.querySelector('button'); if(!b) return ''; const a = [...b.attributes].find(x => x.name.startsWith('data-')); return a ? a.name + '=' + a.value.split(':')[0] : ''; };
+function segFerme(fn){
+  const prima = new Map(); document.querySelectorAll('#app .seg').forEach(el => { const k = segKey(el); if(k && !prima.has(k)) prima.set(k, el.scrollLeft); });
+  fn();
+  document.querySelectorAll('#app .seg').forEach(el => { if(el.scrollWidth <= el.clientWidth + 2) return; const k = segKey(el);
+    if(prima.has(k)) el.scrollLeft = prima.get(k);
+    const b = el.querySelector('[aria-pressed="true"]'); if(!b) return;
+    const sx = el.scrollLeft, l = b.getBoundingClientRect().left - el.getBoundingClientRect().left + sx, pad = 16;
+    const dove = l - pad < sx ? l - pad : l + b.offsetWidth + pad > sx + el.clientWidth ? l + b.offsetWidth + pad - el.clientWidth : null;
+    if(dove != null){ if(prima.has(k)) el.scrollTo({left: dove, behavior: 'smooth'}); else el.scrollLeft = dove; } });
+}
+function render(){ segFerme(render_); }
+function render_(){
   STEMMI = null;
   const app = $('#app'), v = VIEW();
   if(!CAMP[v]) app.className = '';
@@ -670,7 +689,7 @@ const ICO = {
   gio: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
   dis: '<rect x="3" y="4" width="10" height="14" rx="2"/><path d="M15 6.5l4.2.7a2 2 0 0 1 1.6 2.3l-1.7 10a2 2 0 0 1-2.3 1.6l-6-1"/>'};
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`;
-const COL = ['#2F6FD6', '#C0392B', '#1E8A4F', '#7B3FBF', '#E08A1E', '#16303F', '#B8336A', '#0E8C9C', '#5D6D7E', '#A04000'];
+const COL = ['#2F6FD6', '#C0392B', '#1E8A4F', '#7B3FBF', '#B3600C', '#16303F', '#B8336A', '#0E8C9C', '#5D6D7E', '#A04000'];
 /* schede squadre (squadreInfo/{id}): stemma, maglie [{c1, c2}], campo di casa. Separate da squadre/ che appartiene all'app arbitri */
 let STEMMI = null;
 const okImg = d => typeof d === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(d) ? d : '';
@@ -719,9 +738,9 @@ function disciplina(cat){
     (p.amm || []).forEach(x => { const r = G(x, p); r.g++; if(r.g % 4 === 0) sanz.push({...chi(r), gg: 1, motivo: r.g + ' ammonizioni', dopo: p}); });
     (p.esp || []).forEach(x => { const r = G(x, p); r.r++;
       if(x.tipo === 'doppia') sanz.push({...chi(r), gg: 1, motivo: 'Doppia ammonizione', dopo: p});
-      else { const d = qs.find(q => q.id === p.id + '_' + x.id); sanz.push({...chi(r), gg: d ? +d.gg : null, motivo: (d && d.motivo) || 'Espulsione diretta', dopo: p, docId: p.id + '_' + x.id, dir: true, x}); } });
+      else { const d = qs.find(q => q.id === p.id + '_' + x.id); sanz.push({...chi(r), gg: d ? (d.fino ? 0 : +d.gg) : null, fino: (d && d.fino) || '', motivo: (d && d.motivo) || 'Espulsione diretta', dopo: p, docId: p.id + '_' + x.id, dir: true, x}); } });
   });
-  qs.filter(q => q.manuale && q.camp === cat && (q.stagione || STAG) === STAG).forEach(q => sanz.push({id: q.tid, nome: q.nome, sq: q.sq, sqId: q.sqId, gg: +q.gg, motivo: q.motivo || 'Decisione del giudice', dal: q.dal || '', docId: q.id, man: true, doc: q}));
+  qs.filter(q => q.manuale && q.camp === cat && (q.stagione || STAG) === STAG).forEach(q => sanz.push({id: q.tid, nome: q.nome, sq: q.sq, sqId: q.sqId, gg: q.fino ? 0 : +q.gg, fino: q.fino || '', motivo: q.motivo || 'Decisione del giudice', dal: q.dal || '', docId: q.id, man: true, doc: q}));
   /* le giornate si scontano con le partite successive della squadra che hanno un risultato; più squalifiche si scontano una dopo l'altra */
   const perG = new Map(), trs = (S.pubTrasf || []).filter(t => (t.stagione || STAG) === STAG).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.at || 0) - (b.at || 0));
   /* periodi in cui il tesserato è stato in ogni squadra, a partire da quella con cui ha preso la squalifica */
@@ -732,6 +751,8 @@ function disciplina(cat){
     if(pe.length > 1){ const u = pe[pe.length - 1]; z.sqId = u.id; z.sq = u.nome; } z.ini = z.dopo ? z.tm.indexOf(z.dopo) + 1 : z.tm.findIndex(p => (p.data || '9999') >= z.dal); if(z.ini < 0) z.ini = z.tm.length; if(!perG.has(z.id)) perG.set(z.id, []); perG.get(z.id).push(z); });
   perG.forEach(l => { l.sort((a, b) => a.ini - b.ini); let lib = 0;
     l.forEach(z => { z.scontate = 0; z.prossime = []; const tm = z.tm, da = Math.max(z.ini, lib);
+      /* squalifica fino a una data: salta tutte le partite fino a quel giorno, insieme alle altre */
+      if(z.fino){ z.prossime = tm.slice(z.ini).filter(x => !fatta(x) && x.stato !== 'rinviata' && (x.data || '9999') <= z.fino); z.rest = z.fino >= oggi() ? 1 : 0; return; }
       /* rosso diretto non ancora deciso: intanto salta la prossima partita */
       if(z.gg == null){ z.rest = null; const m = tm.slice(da).find(x => !fatta(x) && x.stato !== 'rinviata'); if(m) z.prossime.push(m); return; }
       let ult = da - 1;
@@ -742,14 +763,17 @@ function disciplina(cat){
 /* chi è squalificato adesso (anche in attesa di decisione), raggruppato per tesserato */
 function squalificati(cat){
   const m = new Map();
-  disciplina(cat).sanz.filter(z => z.rest == null || z.rest > 0).forEach(z => { const r = m.get(z.id) || {id: z.id, nome: z.nome, sq: z.sq, sqId: z.sqId, rest: 0, att: false, motivi: [], prossima: null}; m.set(z.id, r);
-    if(z.rest == null) r.att = true; else { r.rest += z.rest; if(!r.prossima && z.prossime[0]) r.prossima = z.prossime[0]; } r.motivi.push(z.motivo); });
+  disciplina(cat).sanz.filter(z => z.rest == null || z.rest > 0).forEach(z => { const r = m.get(z.id) || {id: z.id, nome: z.nome, sq: z.sq, sqId: z.sqId, rest: 0, att: false, fino: '', motivi: [], prossima: null}; m.set(z.id, r);
+    if(z.rest == null) r.att = true;
+    else if(z.fino){ if(z.fino > r.fino) r.fino = z.fino; if(z.prossime[0] && (!r.prossima || ordCr(z.prossime[0], r.prossima) < 0)) r.prossima = z.prossime[0]; }
+    else { r.rest += z.rest; if(!r.prossima && z.prossime[0]) r.prossima = z.prossime[0]; }
+    r.motivi.push(z.motivo + (z.fino ? ' (fino al ' + fmt(z.fino) + ')' : '')); });
   return [...m.values()].sort((a, b) => (a.sq || '').localeCompare(b.sq || '', 'it') || (a.nome || '').localeCompare(b.nome || '', 'it'));
 }
 const vsDi = (p, sqId) => p ? `${p.giornata}ª giornata contro <span class="nw">${esc(p.casaId === sqId ? p.ospite : p.casa)}</span>` : '';
 function tabSqu(l){
   return `<div class="gioc dis"><div class="gh"><span>Squalificato</span><span>Giornate</span></div>${l.map(r => `<div class="gr" data-sqp="${esc(r.sqId || '')}">${stemma(r.sq)}<span class="gn"><b>${esc(r.nome)}</b><span>${esc(r.sq)}</span></span>
-    <span class="gg${r.att && !r.rest ? ' att' : ''}"><b>${r.rest || (r.att ? '?' : 0)}</b><small>${r.rest ? (r.att ? '+ da decidere' : r.rest === 1 ? 'giornata' : 'giornate') : 'da decidere'}</small></span>
+    <span class="gg${r.att && !r.rest && !r.fino ? ' att' : ''}">${!r.rest && r.fino ? `<small>fino al</small><b class="fd">${fmt(r.fino).slice(0, 5)}</b>` : `<b>${r.rest || (r.att ? '?' : 0)}</b><small>${r.rest ? (r.att ? '+ da decidere' : r.rest === 1 ? 'giornata' : 'giornate') : 'da decidere'}</small>`}</span>
     <span class="gx">${esc(r.motivi.join(' · '))}${r.prossima ? `<span class="sl">Salta la <b>${vsDi(r.prossima, r.sqId)}</b></span>` : ''}</span></div>`).join('')}</div>`;
 }
 function tabDif(l){
@@ -1199,7 +1223,7 @@ const bindRT = app => { app.querySelectorAll('[data-rt]').forEach(b => b.onclick
   app.querySelectorAll('[data-rsq]').forEach(b => b.onclick = () => { S.rsq = b.dataset.rsq; scriviRsq(S.rsq); aggiornaResp(); render(); window.scrollTo(0, 0); }); };
 function renderResp(app){
   const r = S.resp, q = sqById(r.squadraId) || {}, l = S.tess.slice().sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
-  const gr = {attesa: [], rifiutato: [], approvato: [], sospeso: [], scaduto: []};
+  const gr = {attesa: [], rifiutato: [], approvato: [], sospeso: [], scaduto: [], svincolato: []};
   l.forEach(t => (gr[statoT(t)] || gr.attesa).push(t));
   app.dataset.v = 'resp'; pubStart();
   const att = S.abil.filter(a => a.stato === 'attivo').sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it'));
@@ -1209,6 +1233,7 @@ function renderResp(app){
     const qq = {id: r.squadraId, nome: q.nome || r.squadra, categoria: q.categoria || r.categoria};
     app.innerHTML = band(qq.nome, `${qq.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}${schedaBox(qq)}
       <p class="note">Carica lo stemma e scegli i colori delle maglie: si vedono nell’app pubblica, nelle partite e in classifica. Il campo di casa lo imposta l’amministratore del torneo.</p>
+      ${(l => l.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Ammende ${l.some(a => !a.pagata) ? `<span class="cnt hot">${euro(totAmm(l.filter(a => !a.pagata)))} da pagare</span>` : ''}</div><ul class="list">${l.map(a => ammItem(a, false)).join('')}</ul><p class="note">Per pagare o per chiarimenti contatta l’amministratore del torneo.</p></section>` : '')(ammStag(S.amm || []))}
       <section class="stack" style="gap:8px"><div class="eyebrow">${att.length > 1 ? 'Le tue squadre' : 'La tua squadra'}</div>
         <div class="card stack" style="gap:8px">${att.map(a => `<div class="rp"><div class="rhead">${stemma(a.squadra)}<div class="rtx"><b>${esc(a.squadra)}</b><span>${esc(a.categoria || '')}</span></div></div></div>`).join('')}</div>
         ${richHtml()}<button class="btn btn-ghost btn-block" id="rAltra">+ Chiedi un’altra squadra</button>
@@ -1239,22 +1264,34 @@ function renderResp(app){
       openDistinta(p, r.squadraId); });
     return;
   }
+  S.dt = discTags([q.categoria || r.categoria]);
   const blocco = (k, tit) => gr[k].length ? `<section class="stack" style="gap:8px"><div class="eyebrow">${tit} <span class="cnt">${gr[k].length}</span></div><ul class="list">${gr[k].map(itemT).join('')}</ul></section>` : '';
   app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}
     <button class="btn btn-primary btn-block" id="tNew">+ Nuovo tesserato</button>
+    <div class="row tbtn"><button class="btn btn-ghost sm" id="rImp">📥 Importa elenco</button><button class="btn btn-ghost sm" id="rExp">⬇️ Esporta elenco</button></div>
     ${!S.loaded.tess ? '<div class="status"><span class="spin"></span>Carico i tesserati…</div>' : !l.length ? `<div class="empty"><h3>Nessun tesserato</h3><span>Aggiungi i giocatori e lo staff: l’amministratore del torneo li controlla e approva. Solo i tesserati approvati potranno andare in distinta.</span></div>` : ''}
-    ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('scaduto', 'Scaduti (stagioni passate)')}
+    ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('svincolato', 'Svincolati')}${blocco('scaduto', 'Scaduti (stagioni passate)')}
     ${(() => { const cat = q.categoria || r.categoria, L = limDi(cat); return `<p class="note">${L.max ? `Tesserati: <b>${contaTess(r.squadraId, cat)} su ${L.max}</b>${L.soloGioc ? ' (contano solo giocatori e portieri)' : ''}. ` : ''}${L.etaMin ? `Età minima: ${L.etaMin} anni compiuti entro il 30 giugno ${fineStagione().slice(0, 4)}.` : ''}</p>`; })()}
     <p class="note">I cartellini valgono fino al 30 giugno. Dopo la scadenza restano in archivio per un anno, poi i dati si cancellano da soli.</p></main>`;
   bindOut();
   bindRT(app);
   $('#tNew').onclick = () => { const cat = q.categoria || r.categoria, L = limDi(cat); if(L.max && !L.soloGioc && contaTess(r.squadraId, cat) >= L.max){ alert(`Hai già ${L.max} tesserati: è il massimo. Per aggiungerne un altro chiedi all’amministratore.`); return; } openTess({squadraId: r.squadraId, squadra: q.nome || r.squadra, categoria: q.categoria || r.categoria || ''}); };
+  $('#rImp').onclick = () => { const cat = q.categoria || r.categoria, L = limDi(cat); if(L.max && contaTess(r.squadraId, cat) >= L.max){ alert(`Hai già ${L.max} tesserati: è il massimo. Per aggiungerne altri chiedi all’amministratore.`); return; } openImportaTess(r.squadraId); };
+  $('#rExp').onclick = () => openEsporta(r.squadraId);
   bindItems(app);
 }
-const itemT = t => { const s = statoT(t); return `<li><button class="item" data-t="${esc(t.id)}">${t.foto ? `<img class="ph" src="${esc(t.foto)}" alt="">` : `<span class="ph">${esc(iniz(t))}</span>`}
-  <span class="tx"><b>${esc(nomeT(t))}</b><span>${esc([t.ruolo, t.numero ? 'n. ' + t.numero : '', S.admin ? t.squadra : '', t.dataNascita ? 'nato il ' + fmt(t.dataNascita) : ''].filter(Boolean).join(' · '))}</span>${avvT(t).length ? `<span class="avv">⚠️ ${esc(avvT(t).join(' · '))}</span>` : ''}</span>${badge(s)}</button></li>`; };
+/* squalificati e diffidati per l'elenco dei tesserati */
+const discTags = cats => { if(!S.pubParOk) return null; const m = new Map();
+  cats.filter(Boolean).forEach(c => { squalificati(c).forEach(r => m.set(r.id, {k: 'no', t: `⛔ Squalificato${r.rest ? `: ${r.rest} ${r.rest === 1 ? 'giornata' : 'giornate'}` : r.fino ? ' fino al ' + fmt(r.fino).slice(0, 5) : ''}${r.att ? (r.rest || r.fino ? ' + da decidere' : ': giornate da decidere') : ''}`}));
+    disciplina(c).gioc.filter(r => r.g % 4 === 3 && !m.has(r.id)).forEach(r => m.set(r.id, {k: 'wait', t: '⚠️ Diffidato'})); });
+  return m; };
+const DEL = () => firebase.firestore.FieldValue.delete();
+const campiTxt = c => Object.keys(c || {}).map(k => k === 'numero' ? (c.numero ? 'maglia n. ' + c.numero : 'senza numero') : k === 'ruolo' ? 'ruolo ' + String(c.ruolo).toLowerCase() : 'foto').join(', ');
+const ricTxt = r => r.tipo === 'svincolo' ? 'Chiesto lo svincolo' : Object.keys(r.campi || {}).length ? 'Chiesta modifica: ' + campiTxt(r.campi) : 'Chiesta una correzione';
+const itemT = t => { const s = statoT(t), dt = S.dt && (s === 'approvato' || s === 'sospeso') && S.dt.get(t.id); return `<li><button class="item" data-t="${esc(t.id)}">${t.foto ? `<img class="ph" src="${esc(t.foto)}" alt="">` : `<span class="ph">${esc(iniz(t))}</span>`}
+  <span class="tx"><b>${esc(nomeT(t))}</b><span>${esc([t.ruolo, t.numero ? 'n. ' + t.numero : '', S.admin ? t.squadra : '', t.dataNascita ? 'nato il ' + fmt(t.dataNascita) : ''].filter(Boolean).join(' · '))}</span>${avvT(t).length ? `<span class="avv">⚠️ ${esc(avvT(t).join(' · '))}</span>` : ''}${dt ? `<span class="pst ${dt.k}">${esc(dt.t)}</span>` : ''}${t.richiesta && (s === 'approvato' || s === 'sospeso') ? `<span class="pst wait">📝 ${esc(ricTxt(t.richiesta))}</span>` : ''}</span>${badge(s)}</button></li>`; };
 const bindItems = root => root.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const t = S.tess.find(x => x.id === b.dataset.t); if(!t) return;
-  const s = statoT(t); if(S.admin || s === 'approvato' || s === 'sospeso' || s === 'scaduto') openCard(t); else openTess(t); });
+  const s = statoT(t); if(S.admin || s === 'approvato' || s === 'sospeso' || s === 'scaduto' || s === 'svincolato') openCard(t); else openTess(t); });
 
 /* foto: ridotta sul telefono prima di salvarla */
 const riduci = file => new Promise((res, rej) => { const img = new Image(), u = URL.createObjectURL(file);
@@ -1339,7 +1376,7 @@ const msgEta = cat => `Per il ${NOMECAMP[cat] || cat} servono ${limDi(cat).etaMi
 const lc = x => String(x || '').trim().toLowerCase();
 const stessa = (x, t) => lc(x.cognome) === lc(t.cognome) && lc(x.nome) === lc(t.nome) && (!x.dataNascita || !t.dataNascita || x.dataNascita === t.dataNascita);
 const doppioDi = t => S.tess.find(x => x.id !== t.id && stessa(x, t) && statoT(x) !== 'scaduto');
-const avvT = t => S.admin && t.stato === 'attesa' ? [t.daSquadraId ? 'trasferimento da ' + t.daSquadra : '', troppoGiovane(t, t.categoria) ? 'troppo giovane' : '', !t.daSquadraId && doppioDi(t) ? 'già tesserato con ' + doppioDi(t).squadra : ''].filter(Boolean) : [];
+const avvT = t => S.admin && t.stato === 'attesa' ? [t.daSquadraId ? 'trasferimento da ' + t.daSquadra : '', troppoGiovane(t, t.categoria) ? 'troppo giovane' : '', !t.daSquadraId && doppioDi(t) ? (doppioDi(t).stato === 'svincolato' ? 'svincolato da ' : 'già tesserato con ') + doppioDi(t).squadra : ''].filter(Boolean) : [];
 /* trasferimento: lo stesso tesserato (stesso id: statistiche e squalifiche lo seguono) passa a un'altra squadra */
 async function trasferisci(x, q, extra = {}, delId = '', registra = true){
   const b = db().batch(), mov = {da: x.squadra || '', daId: x.squadraId || '', a: q.nome || '', aId: q.id, data: oggi()};
@@ -1362,7 +1399,7 @@ function statHtml(t){
   const dif = !sq && gi && gi.g % 4 === 3;
   const box = [['Presenze', n.pres], ['Gol', n.gol], ['MVP', n.mvp], ...(n.por || /Portiere/.test(t.ruolo || '') ? [['Miglior portiere', n.por]] : []), ['Ammonizioni', n.amm], ['Espulsioni', n.esp]];
   return `<section class="stack" style="gap:8px"><div class="eyebrow">Stagione ${STAG}</div><div class="tstat">${box.map(([k, v]) => `<div><b>${v}</b><span>${k}</span></div>`).join('')}</div>
-    ${sq ? `<div class="warn-box">⛔ <b>Squalificato</b>${sq.rest ? `: ${sq.rest} ${sq.rest === 1 ? 'giornata' : 'giornate'}` : ''}${sq.att ? ' (espulsione diretta, giornate da decidere)' : ''}${sq.prossima ? `. Salta la ${vsDi(sq.prossima, sq.sqId)}` : ''}</div>` : dif ? `<div class="warn-box">⚠️ <b>Diffidato</b>: ${gi.g} ammonizioni, alla prossima salta una giornata</div>` : ''}
+    ${sq ? `<div class="warn-box">⛔ <b>Squalificato</b>${sq.rest ? `: ${sq.rest} ${sq.rest === 1 ? 'giornata' : 'giornate'}` : ''}${sq.fino ? `${sq.rest ? ' e' : ''} fino al ${fmt(sq.fino)}` : ''}${sq.att ? ' (espulsione diretta, giornate da decidere)' : ''}${sq.prossima ? `. Salta la ${vsDi(sq.prossima, sq.sqId)}` : ''}</div>` : dif ? `<div class="warn-box">⚠️ <b>Diffidato</b>: ${gi.g} ammonizioni, alla prossima salta una giornata</div>` : ''}
     ${(t.trasferimenti || []).map(m => `<p class="note">🔁 Trasferito da <b>${esc(m.da)}</b> a <b>${esc(m.a)}</b> il ${fmt(m.data)}</p>`).join('')}
     <p class="note">Presenze: partite giocate in cui era in distinta.</p></section>`;
 }
@@ -1444,12 +1481,12 @@ function leggiTess(rows){
 function openImportaTess(sqId){
   caricaXlsx().catch(() => {});
   const {root, close} = sheet(`<form class="form" id="imF"><h3 style="grid-column:1/-1">Importa tesserati</h3>
-    <div class="field full"><label for="im-sq">Squadra</label><select id="im-sq" required><option value="">Scegli la squadra…</option>${optSq([], sqId)}</select></div>
+    ${S.admin ? `<div class="field full"><label for="im-sq">Squadra</label><select id="im-sq" required><option value="">Scegli la squadra…</option>${optSq([], sqId)}</select></div>` : ''}
     <div class="field full"><label for="im-f">File</label><input id="im-f" type="file" required accept=".xlsx,.xls,.ods,.csv,.txt,.pdf,application/pdf,text/plain,text/csv"></div>
-    <p class="note" style="grid-column:1/-1">Excel, CSV, TXT o PDF con un tesserato per riga: cognome, nome e data di nascita. Se ci sono prendo anche luogo di nascita, ruolo, numero di maglia, tessera AICS e documento. Prima di importare ti faccio vedere cosa ho letto.</p>
+    <p class="note" style="grid-column:1/-1">Excel, CSV, TXT o PDF con un tesserato per riga: cognome, nome e data di nascita. Se ci sono prendo anche luogo di nascita, ruolo, numero di maglia, tessera AICS e documento. Prima di importare ti faccio vedere cosa ho letto.${S.admin ? '' : ' I tesserati importati vanno all’amministratore, che li controlla e li approva; la foto la aggiungi dopo dalla scheda di ognuno.'}</p>
     <div class="err" id="imErr" role="alert" style="grid-column:1/-1"></div>
     <div class="actions"><button class="btn btn-primary" id="imGo">Leggi il file</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Importa tesserati');
-  root.querySelector('#imF').onsubmit = async e => { e.preventDefault(); const q = sqById(root.querySelector('#im-sq').value), file = root.querySelector('#im-f').files[0], er = root.querySelector('#imErr'), bt = root.querySelector('#imGo');
+  root.querySelector('#imF').onsubmit = async e => { e.preventDefault(); const q = S.admin ? sqById(root.querySelector('#im-sq').value) : {...sqById(sqId), id: sqId, nome: sqById(sqId).nome || S.resp.squadra, categoria: sqById(sqId).categoria || S.resp.categoria}, file = root.querySelector('#im-f').files[0], er = root.querySelector('#imErr'), bt = root.querySelector('#imGo');
     if(!q.id || !file) return; bt.disabled = true; er.textContent = ''; bt.textContent = 'Leggo…';
     try{ const l = leggiTess(await righeDaFile(file));
       if(!l.length){ er.textContent = 'Non ho trovato tesserati nel file: su ogni riga servono almeno cognome, nome e data di nascita.'; bt.disabled = false; bt.textContent = 'Leggi il file'; return; }
@@ -1462,30 +1499,31 @@ function anteprimaImport(q, l, nomeFile){
   l.forEach(o => { const k = lc(o.cognome) + '|' + lc(o.nome) + '|' + o.dataNascita; o.ok = true; o.dis = false; o.pb = '';
     const qui = S.tess.find(x => x.squadraId === q.id && stessa(x, o) && statoT(x) !== 'scaduto'), alt = S.tess.find(x => x.squadraId !== q.id && stessa(x, o) && statoT(x) !== 'scaduto');
     if(visti.has(k)){ o.dis = true; o.pb = 'Doppione nel file'; } else if(qui){ o.dis = true; o.pb = 'Già in questa squadra'; }
-    else if(alt){ o.ok = false; o.pb = 'Già tesserato con ' + alt.squadra; } else if(!o.dataNascita){ o.ok = false; o.pb = 'Manca la data di nascita'; }
-    else if(troppoGiovane(o, cat)){ o.ok = false; o.pb = 'Troppo giovane'; }
+    else if(alt){ o.ok = false; o.pb = 'Già tesserato con ' + alt.squadra; } else if(!o.dataNascita){ o.ok = false; o.dis = !S.admin; o.pb = 'Manca la data di nascita'; }
+    else if(troppoGiovane(o, cat)){ o.ok = false; o.dis = !S.admin; o.pb = 'Troppo giovane'; }
     if(o.dis) o.ok = false; visti.add(k); });
   const {root, close} = sheet(`<h3>Importa in ${esc(q.nome)}</h3><p class="note">Ho letto <b>${l.length}</b> ${l.length === 1 ? 'tesserato' : 'tesserati'} da ${esc(nomeFile)}. Togli la spunta a chi non vuoi importare: dopo potrai correggere e aggiungere la foto dalla scheda di ognuno.</p>
     <div class="imp-l">${l.map((o, i) => `<label class="imp-r${o.dis ? ' dis' : ''}"><input type="checkbox" data-ii="${i}" ${o.ok ? 'checked' : ''} ${o.dis ? 'disabled' : ''}><span class="tx"><b>${esc(nomeT(o))}</b><span>${[o.dataNascita ? 'nato il ' + fmt(o.dataNascita) : '', o.luogoNascita, o.ruolo, o.numero ? 'n. ' + o.numero : '', o.tesseraAics ? 'tessera ' + o.tesseraAics : ''].filter(Boolean).map(esc).join(' · ')}</span>${o.pb ? `<span class="pst ${o.dis ? '' : 'no'}">${esc(o.pb)}</span>` : ''}</span></label>`).join('')}</div>
     <p class="note" id="imCnt"></p>
     <label class="check"><input type="checkbox" id="im-ok"><span>La società ha raccolto il consenso dei tesserati (o dei genitori, se minorenni) all’uso dei dati per il torneo AICS.</span></label>
     <div class="err" id="imErr" role="alert"></div>
-    <button class="btn btn-primary btn-block" id="imGo">Importa e approva</button><button type="button" class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Importa tesserati');
+    <button class="btn btn-primary btn-block" id="imGo">${S.admin ? 'Importa e approva' : 'Invia all’amministratore'}</button><button type="button" class="btn btn-ghost btn-block" data-x>Annulla</button>`, 'Importa tesserati');
   const scelti = () => [...root.querySelectorAll('[data-ii]:checked')].map(x => l[+x.dataset.ii]);
   const cnt = () => { const sc = scelti(), dopo = contaTess(q.id, cat) + sc.filter(o => contaGioc(o, L)).length, over = L.max && dopo > L.max;
     root.querySelector('#imCnt').innerHTML = `Da importare: <b>${sc.length}</b>.${L.max ? ` In squadra diventano <b${over ? ' style="color:var(--danger,#D0342C)"' : ''}>${dopo} su ${L.max}</b>${L.soloGioc ? ' (solo giocatori)' : ''}${over ? ': oltre il massimo' : ''}.` : ''}`;
-    root.querySelector('#imGo').textContent = sc.length ? `Importa e approva (${sc.length})` : 'Importa e approva'; return {sc, over, dopo}; };
+    const lb = S.admin ? 'Importa e approva' : 'Invia all’amministratore'; root.querySelector('#imGo').textContent = sc.length ? `${lb} (${sc.length})` : lb; return {sc, over, dopo}; };
   root.querySelectorAll('[data-ii]').forEach(x => x.onchange = cnt); cnt();
   root.querySelector('#imGo').onclick = async () => { const {sc, over, dopo} = cnt(), er = root.querySelector('#imErr');
     if(!sc.length){ er.textContent = 'Non hai scelto nessun tesserato'; return; }
     if(!root.querySelector('#im-ok').checked){ er.textContent = 'Conferma il consenso al trattamento dei dati'; return; }
+    if(over && !S.admin){ er.textContent = `Così arrivi a ${dopo} tesserati: il massimo è ${L.max}. Togli qualche spunta.`; return; }
     if(over && !confirm(`${q.nome} arriva a ${dopo} tesserati: il massimo è ${L.max}. Importare lo stesso?`)) return;
     const bt = root.querySelector('#imGo'); bt.disabled = true; bt.textContent = 'Importo…';
     try{ for(let i = 0; i < sc.length; i += 400){ const b = db().batch();
         sc.slice(i, i + 400).forEach(o => { const {ok, dis, pb, ...d} = o, t = {...d, foto: '', squadraId: q.id, squadra: q.nome || '', categoria: cat || ''};
-          b.set(db().collection('tesserati').doc(), {...t, ...approva(t), consenso: true, importato: true, creatoDa: S.user.uid, createdAt: Date.now()}); });
+          b.set(db().collection('tesserati').doc(), {...t, ...(S.admin ? approva(t) : {stato: 'attesa', motivo: ''}), consenso: true, importato: true, creatoDa: S.user.uid, createdAt: Date.now()}); });
         await b.commit(); }
-      toast(`Importati ${sc.length} tesserati in ${q.nome}`); close(); }
+      toast(S.admin ? `Importati ${sc.length} tesserati in ${q.nome}` : `Inviati ${sc.length} tesserati all’amministratore`); close(); }
     catch(err){ bt.disabled = false; cnt(); er.textContent = fbErr(err); }
   };
 }
@@ -1498,12 +1536,12 @@ async function salvaFile(blob, nome){
 function openEsporta(sqId){
   caricaXlsx().catch(() => {});
   const {root, close} = sheet(`<form class="form" id="exF"><h3 style="grid-column:1/-1">Esporta tesserati</h3>
-    <div class="field full"><label for="ex-sq">Squadra</label><select id="ex-sq"><option value="">Tutte le squadre</option>${optSq([], sqId)}</select></div>
+    ${S.admin ? `<div class="field full"><label for="ex-sq">Squadra</label><select id="ex-sq"><option value="">Tutte le squadre</option>${optSq([], sqId)}</select></div>` : `<p class="note" style="grid-column:1/-1">Elenco di <b>${esc(sqById(sqId).nome || S.resp.squadra)}</b> in un file Excel.</p>`}
     <label class="check"><input type="checkbox" id="ex-at" checked><span>Anche quelli in attesa di approvazione</span></label>
     <label class="check"><input type="checkbox" id="ex-sc"><span>Anche gli scaduti delle stagioni passate</span></label>
     <div class="err" id="exErr" role="alert" style="grid-column:1/-1"></div>
     <div class="actions"><button class="btn btn-primary" id="exGo">⬇️ Scarica</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Esporta tesserati');
-  root.querySelector('#exF').onsubmit = async e => { e.preventDefault(); const id = root.querySelector('#ex-sq').value, at = root.querySelector('#ex-at').checked, scd = root.querySelector('#ex-sc').checked, er = root.querySelector('#exErr');
+  root.querySelector('#exF').onsubmit = async e => { e.preventDefault(); const id = S.admin ? root.querySelector('#ex-sq').value : sqId, at = root.querySelector('#ex-at').checked, scd = root.querySelector('#ex-sc').checked, er = root.querySelector('#exErr');
     const l = S.tess.filter(t => (!id || t.squadraId === id) && t.stato !== 'rifiutato' && (at || t.stato !== 'attesa') && (scd || statoT(t) !== 'scaduto'))
       .sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it') || nomeT(a).localeCompare(nomeT(b), 'it'));
     if(!l.length){ er.textContent = 'Nessun tesserato da esportare'; return; }
@@ -1511,7 +1549,7 @@ function openEsporta(sqId){
       const ws = X.utils.json_to_sheet(l.map(t => ({Squadra: t.squadra || '', Campionato: NOMECAMP[t.categoria] || t.categoria || '', Cognome: t.cognome || '', Nome: t.nome || '', 'Data di nascita': fmt(t.dataNascita), 'Luogo di nascita': t.luogoNascita || '', Ruolo: t.ruolo || 'Giocatore', Maglia: t.numero || '', 'Tessera AICS': t.tesseraAics || '', Documento: t.documento || '', Stato: ST_L[statoT(t)] || '', 'Valido fino al': t.scadenza ? fmt(t.scadenza) : '', Cartellino: t.codice || ''})));
       ws['!cols'] = [22, 14, 18, 16, 14, 18, 12, 8, 14, 26, 11, 14, 14].map(w => ({wch: w}));
       const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Tesserati');
-      const nome = `tesserati-${(id ? sqById(id).nome : 'tutte-le-squadre').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${oggi()}.xlsx`;
+      const nome = `tesserati-${(id ? sqById(id).nome || S.resp.squadra : 'tutte-le-squadre').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${oggi()}.xlsx`;
       await salvaFile(new Blob([X.write(wb, {bookType: 'xlsx', type: 'array'})], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), nome);
       toast(`Esportati ${l.length} tesserati`); close(); }
     catch(err){ console.warn(err); er.textContent = 'Serve internet per creare il file Excel.'; }
@@ -1555,21 +1593,60 @@ const tesseraHTML = t => { const s = statoT(t); return `<div class="tessera ${s}
     <span class="k">Nato il</span><span class="v">${esc(fmt(t.dataNascita))}${t.luogoNascita ? ' · ' + esc(t.luogoNascita) : ''}</span>
     <span class="k">Ruolo</span><span class="v">${esc(t.ruolo || 'Giocatore')}${t.numero ? ' · maglia n. ' + esc(t.numero) : ''}</span>${t.tesseraAics ? `<span class="k">Tessera AICS</span><span class="v">${esc(t.tesseraAics)}</span>` : ''}</div>
   <div class="piede"><span>Cartellino<br><b>${esc(t.codice || '—')}</b></span><span style="text-align:right">Valida fino al<br><b>${esc(fmt(t.scadenza))}</b></span></div></div>`; };
+/* richieste del responsabile su un tesserato già approvato: modifica (maglia, ruolo, foto) o svincolo */
+const azResp = t => { const r = t.richiesta, e = t.richiestaEsito;
+  if(r) return `<div class="warn-box">⏳ ${esc(ricTxt(r))}${r.nota ? ` («${esc(r.nota)}»)` : ''}: aspetta la risposta dell’amministratore.</div><div class="row"><button class="btn btn-ghost" data-a="chMod">✏️ Maglia e ruolo</button><button class="btn btn-ghost" data-a="annRic">Annulla la richiesta</button></div>`;
+  return `${e && e.ok === false ? `<div class="warn-box">L’amministratore non ha accettato la richiesta di ${e.tipo === 'svincolo' ? 'svincolo' : 'modifica'}${e.motivo ? ': <b>' + esc(e.motivo) + '</b>' : ''}.</div>` : ''}
+    <div class="row"><button class="btn btn-ghost" data-a="chMod">✏️ Modifica</button><button class="btn btn-danger" data-a="chSvi">Chiedi lo svincolo</button></div>`; };
+const ricAdm = t => { const r = t.richiesta, s = statoT(t); if(!r || (s !== 'approvato' && s !== 'sospeso')) return ''; const c = r.campi || {};
+  const righe = r.tipo === 'svincolo' ? '' : Object.keys(c).map(k => k === 'foto' ? `<div class="ricf"><span>Foto nuova</span>${c.foto ? `<img src="${esc(c.foto)}" alt="Foto nuova">` : '<i>senza foto</i>'}</div>` : `<div>${k === 'numero' ? 'Maglia' : 'Ruolo'}: <s>${esc(t[k] || '—')}</s> → <b>${esc(c[k] || '—')}</b></div>`).join('');
+  return `<div class="warn-box stack" style="gap:6px"><div>📝 Il responsabile chiede ${r.tipo === 'svincolo' ? '<b>lo svincolo</b>' : Object.keys(c).length ? '<b>una modifica</b>' : '<b>una correzione</b>'}${r.nota ? `: «${esc(r.nota)}»` : ''}</div>${righe}
+    ${r.tipo !== 'svincolo' && !Object.keys(c).length ? '<div class="note">Correggi tu i dati con «Modifica», poi accetta.</div>' : ''}
+    <div class="row"><button class="btn btn-ok sm" data-a="ricOk">✓ Accetta</button><button class="btn btn-danger sm" data-a="ricNo">Rifiuta</button></div></div>`; };
+function openModRic(t){
+  let foto = t.foto || '';
+  const {root, close} = sheet(`<form class="form" id="mrF" novalidate><h3 style="grid-column:1/-1">${esc(nomeT(t))}</h3>
+    <p class="note" style="grid-column:1/-1">Ruolo e numero di maglia li cambi subito. La foto nuova e le correzioni di cognome, nome o data di nascita le approva l’amministratore.</p>
+    <div class="foto-pick" style="grid-column:1/-1"><span id="mr-fprev">${foto ? `<img src="${esc(foto)}" alt="Foto">` : '<span class="ph">Foto<br>tessera</span>'}</span>
+      <div class="stack" style="gap:6px"><label class="btn btn-ghost sm" for="mr-file">📷 ${foto ? 'Cambia foto' : 'Aggiungi foto'}</label><input id="mr-file" type="file" accept="image/*" hidden></div></div>
+    <div class="field" style="align-self:end"><label for="mr-ruolo">Ruolo</label><select id="mr-ruolo">${RUOLI.map(x => `<option ${x === (t.ruolo || 'Giocatore') ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+    <div class="field" style="align-self:end"><label for="mr-num">Numero di maglia</label><input id="mr-num" type="number" min="0" max="99" inputmode="numeric" value="${esc(t.numero || '')}"></div>
+    <div class="field full"><label for="mr-nota">Nota per l’amministratore (facoltativa)</label><input id="mr-nota" maxlength="300" placeholder="Es. il cognome è scritto male"></div>
+    <div class="err" id="mrErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="mrGo">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Modifica tesserato');
+  root.querySelector('#mr-file').onchange = async e => { const f = e.target.files[0]; if(!f) return; try{ foto = await riduci(f); root.querySelector('#mr-fprev').innerHTML = `<img src="${foto}" alt="Foto">`; }catch(err){ toast('Non riesco a leggere questa foto'); } };
+  root.querySelector('#mrF').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim(), er = root.querySelector('#mrErr'), campi = {}, nota = v('mr-nota');
+    if(foto !== (t.foto || '')) campi.foto = foto; if(v('mr-ruolo') !== (t.ruolo || 'Giocatore')) campi.ruolo = v('mr-ruolo'); if(v('mr-num') !== String(t.numero || '')) campi.numero = v('mr-num');
+    er.textContent = ''; if(!Object.keys(campi).length && !nota){ er.textContent = 'Non hai cambiato niente.'; return; }
+    if(campi.numero && !/^\d{1,2}$/.test(campi.numero)){ er.textContent = 'Il numero di maglia va da 0 a 99.'; return; }
+    if(campi.ruolo && pienoTess(t.squadraId, t.categoria, {...t, ruolo: campi.ruolo})){ er.textContent = `Con questo ruolo superi il massimo di ${limDi(t.categoria).max} tesserati.`; return; }
+    /* maglia e ruolo: subito; foto e correzioni: richiesta all'amministratore */
+    const o = {}; if('ruolo' in campi) o.ruolo = campi.ruolo; if('numero' in campi) o.numero = campi.numero;
+    const ric = 'foto' in campi || nota;
+    if(ric && t.richiesta && t.richiesta.tipo === 'svincolo'){ er.textContent = 'Hai già chiesto lo svincolo: per chiedere una foto nuova o una correzione annulla prima quella richiesta.'; return; }
+    if(ric) Object.assign(o, {richiesta: {tipo: 'modifica', campi: 'foto' in campi ? {foto: campi.foto} : {}, nota: nota.slice(0, 300), at: Date.now(), by: S.user.uid}, richiestaEsito: DEL()});
+    const b = root.querySelector('#mrGo'); b.disabled = true;
+    try{ await db().collection('tesserati').doc(t.id).update(o); toast(ric ? (o.ruolo || o.numero != null ? 'Salvato. Foto e correzioni vanno all’amministratore' : 'Richiesta inviata all’amministratore') : 'Salvato'); close(); }
+    catch(err){ b.disabled = false; er.textContent = fbErr(err); } };
+}
 function openCard(t){
   const root = $('#sheetRoot'), close = () => root.innerHTML = '', s = statoT(t);
   const azioni = S.admin ? `<div class="row">
       ${s === 'attesa' || s === 'rifiutato' ? '<button class="btn btn-ok" data-a="ok">✓ Approva</button><button class="btn btn-danger" data-a="no">Rifiuta</button>' : ''}
       ${s === 'approvato' ? '<button class="btn btn-danger" data-a="sosp">Sospendi</button>' : ''}${s === 'sospeso' ? '<button class="btn btn-ok" data-a="riatt">Riattiva</button>' : ''}
+      ${s === 'approvato' || s === 'sospeso' ? '<button class="btn btn-ghost" data-a="svi">Svincola</button>' : ''}${s === 'svincolato' ? '<button class="btn btn-ok" data-a="nosvi">Annulla svincolo</button>' : ''}
       ${s === 'scaduto' ? '<button class="btn btn-ok" data-a="ok">Rinnova per questa stagione</button>' : ''}
-      <button class="btn btn-ghost" data-a="mod">Modifica</button></div>` : s === 'scaduto' ? '<button class="btn btn-primary btn-block" data-a="rinnova">Rinnova per la nuova stagione</button>' : '';
-  const cand = S.admin && (s === 'attesa' || s === 'rifiutato') ? S.tess.filter(x => x.id !== t.id && x.squadraId !== t.squadraId && x.stato !== 'attesa' && x.stato !== 'rifiutato' && (stessa(x, t) || (x.squadraId === t.daSquadraId && lc(x.cognome) === lc(t.cognome) && lc(x.nome) === lc(t.nome)))) : [];
+      <button class="btn btn-ghost" data-a="mod">Modifica</button></div>` : s === 'scaduto' ? '<button class="btn btn-primary btn-block" data-a="rinnova">Rinnova per la nuova stagione</button>' : s === 'approvato' || s === 'sospeso' ? azResp(t) : '';
+  const cand = S.admin && (s === 'attesa' || s === 'rifiutato') ? S.tess.filter(x => x.id !== t.id && (x.squadraId !== t.squadraId || x.stato === 'svincolato') && x.stato !== 'attesa' && x.stato !== 'rifiutato' && (stessa(x, t) || (x.squadraId === t.daSquadraId && lc(x.cognome) === lc(t.cognome) && lc(x.nome) === lc(t.nome)))) : [];
   const dup = S.admin && S.tess.filter(x => x.id !== t.id && x.dataNascita === t.dataNascita && (x.cognome || '').toLowerCase() === (t.cognome || '').toLowerCase() && (x.nome || '').toLowerCase() === (t.nome || '').toLowerCase() && statoT(x) !== 'scaduto');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="Cartellino"><div class="grab"></div>
     ${tesseraHTML(t)}
     ${s === 'attesa' ? '<p class="note" style="text-align:center">Cartellino in attesa: diventa valido quando l’amministratore lo approva.</p>' : ''}
     ${dup && dup.length ? `<div class="warn-box">⚠️ Risulta già tesserato con: ${dup.map(x => `<b>${esc(x.squadra)}</b> (${ST_L[statoT(x)]})`).join(', ')}</div>` : ''}
     ${S.admin && t.daSquadraId ? `<div class="warn-box">🔁 Chiede il trasferimento da <b>${esc(t.daSquadra)}</b>${cand.some(x => x.squadraId === t.daSquadraId) ? '' : '. Non trovo un tesserato con questo nome in quella squadra: controlla, oppure approvalo come nuovo.'}</div>` : ''}
-    ${cand.length ? `<div class="stack" style="gap:8px">${cand.map(x => `<button class="btn btn-ok btn-block" data-tr="${esc(x.id)}">${statoT(x) === 'scaduto' ? `♻️ Rinnova (la scorsa stagione era con ${esc(x.squadra)})` : `🔁 Trasferisci da ${esc(x.squadra)}`}</button>`).join('')}<p class="note">${statoT(cand[0]) === 'scaduto' ? 'Rinnovando tiene il suo cartellino e i dati nuovi della richiesta.' : 'Con il trasferimento resta lo stesso tesserato: statistiche e squalifiche da scontare lo seguono.'}</p></div>` : ''}
+    ${cand.length ? `<div class="stack" style="gap:8px">${cand.map(x => `<button class="btn btn-ok btn-block" data-tr="${esc(x.id)}">${statoT(x) === 'scaduto' ? `♻️ Rinnova (la scorsa stagione era con ${esc(x.squadra)})` : x.stato === 'svincolato' ? (x.squadraId === t.squadraId ? '♻️ Riprendi (era stato svincolato)' : `🔁 Tessera di nuovo (svincolato da ${esc(x.squadra)})`) : `🔁 Trasferisci da ${esc(x.squadra)}`}</button>`).join('')}<p class="note">${statoT(cand[0]) === 'scaduto' ? 'Rinnovando tiene il suo cartellino e i dati nuovi della richiesta.' : 'Con il trasferimento resta lo stesso tesserato: statistiche e squalifiche da scontare lo seguono.'}</p></div>` : ''}
+    ${S.admin ? ricAdm(t) : ''}
+    ${s === 'svincolato' ? `<p class="note" style="text-align:center">Svincolato${t.svincolatoAt ? ' il ' + new Date(t.svincolatoAt).toLocaleDateString('it-IT') : ''}: non fa più parte della squadra e non conta nel massimo dei tesserati.${S.admin ? '' : ' Se torna, aggiungilo come nuovo tesserato.'}</p>` : ''}
     ${S.admin && (s === 'attesa' || s === 'rifiutato') && troppoGiovane(t, t.categoria) ? `<div class="warn-box">⚠️ ${esc(msgEta(t.categoria))}</div>` : ''}
     ${s !== 'attesa' && s !== 'rifiutato' ? statHtml(t) : ''}
     ${S.admin && t.documento ? `<p class="note">Documento: ${esc(t.documento)}</p>` : ''}
@@ -1579,16 +1656,26 @@ function openCard(t){
   root.querySelector('[data-x]').onclick = close;
   const ref = db().collection('tesserati').doc(t.id);
   const go = async (o, msg) => { try{ await ref.update(o); toast(msg); close(); }catch(err){ toast(fbErr(err)); } };
-  root.querySelectorAll('[data-tr]').forEach(b => b.onclick = async () => { const x = S.tess.find(y => y.id === b.dataset.tr); if(!x) return; const scad = statoT(x) === 'scaduto', q = {...sqById(t.squadraId)}; if(!q.id) Object.assign(q, {id: t.squadraId, nome: t.squadra, categoria: t.categoria});
-    if(!confirm(scad ? `Rinnovare ${nomeT(x)} con ${q.nome}?` : `Trasferire ${nomeT(x)} da ${x.squadra} a ${q.nome}?`)) return;
+  root.querySelectorAll('[data-tr]').forEach(b => b.onclick = async () => { const x = S.tess.find(y => y.id === b.dataset.tr); if(!x) return; const scad = statoT(x) === 'scaduto', lib = x.stato === 'svincolato', q = {...sqById(t.squadraId)}; if(!q.id) Object.assign(q, {id: t.squadraId, nome: t.squadra, categoria: t.categoria});
+    if(!confirm(scad ? `Rinnovare ${nomeT(x)} con ${q.nome}?` : lib ? `Tesserare di nuovo ${nomeT(x)} con ${q.nome}? Tiene il suo cartellino, le statistiche e le squalifiche da scontare.` : `Trasferire ${nomeT(x)} da ${x.squadra} a ${q.nome}?`)) return;
     const extra = {}; ['foto', 'numero', 'ruolo', 'documento', 'luogoNascita', 'tesseraAics', 'dataNascita'].forEach(k => { if(t[k]) extra[k] = t[k]; });
-    if(scad) Object.assign(extra, approva({...x, categoria: q.categoria}));
-    b.disabled = true; try{ await trasferisci(x, q, extra, t.id, !scad); toast(scad ? 'Rinnovato' : `Trasferito in ${q.nome}`); close(); }catch(err){ b.disabled = false; toast(fbErr(err)); } });
+    if(scad || lib) Object.assign(extra, approva({...x, categoria: q.categoria}));
+    if(lib) Object.assign(extra, {svincolatoAt: DEL(), richiesta: DEL(), richiestaEsito: DEL()});
+    b.disabled = true; try{ await trasferisci(x, q, extra, t.id, !scad && x.squadraId !== q.id); toast(scad ? 'Rinnovato' : lib ? `Di nuovo tesserato con ${q.nome}` : `Trasferito in ${q.nome}`); close(); }catch(err){ b.disabled = false; toast(fbErr(err)); } });
   root.querySelectorAll('[data-a]').forEach(b => b.onclick = () => ({
     ok: () => go(approva(t), `${nomeT(t)} approvato: cartellino valido fino al ${fmt(fineStagione())}`),
     no: () => { const m = prompt('Perché lo rifiuti? (lo legge il responsabile della squadra)', ''); if(m === null) return; go({stato: 'rifiutato', motivo: m.trim()}, 'Tesserato rifiutato'); },
     sosp: () => { const m = prompt('Motivo della sospensione', ''); if(m === null) return; go({stato: 'sospeso', motivo: m.trim()}, 'Cartellino sospeso'); },
     riatt: () => go({stato: 'approvato', motivo: ''}, 'Cartellino riattivato'),
+    svi: () => { if(!confirm(`Svincolare ${nomeT(t)} da ${t.squadra}? Esce dalla squadra e libera il posto; le squalifiche da scontare restano.`)) return; go({stato: 'svincolato', svincolatoAt: Date.now(), motivo: '', richiesta: DEL(), richiestaEsito: DEL()}, `${nomeT(t)} svincolato`); },
+    nosvi: () => go({stato: 'approvato', motivo: '', svincolatoAt: DEL()}, 'Svincolo annullato'),
+    ricOk: () => { const r = t.richiesta; if(!r) return;
+      if(r.tipo === 'svincolo'){ if(!confirm(`Svincolare ${nomeT(t)} da ${t.squadra}? Esce dalla squadra e libera il posto; le squalifiche da scontare restano.`)) return; go({stato: 'svincolato', svincolatoAt: Date.now(), motivo: r.nota || '', richiesta: DEL(), richiestaEsito: DEL()}, `${nomeT(t)} svincolato`); }
+      else go({...(r.campi || {}), richiesta: DEL(), richiestaEsito: DEL()}, 'Richiesta accettata'); },
+    ricNo: () => { const m = prompt('Perché non la accetti? (lo legge il responsabile della squadra)', ''); if(m === null) return; go({richiesta: DEL(), richiestaEsito: {tipo: t.richiesta.tipo, ok: false, motivo: m.trim(), at: Date.now()}}, 'Richiesta rifiutata'); },
+    chMod: () => { close(); openModRic(t); },
+    chSvi: () => { const m = prompt(`Chiedi all’amministratore di svincolare ${nomeT(t)}: esce dalla squadra e libera il posto. Vuoi scrivere il motivo? (facoltativo)`, ''); if(m === null) return; go({richiesta: {tipo: 'svincolo', nota: m.trim().slice(0, 300), at: Date.now(), by: S.user.uid}, richiestaEsito: DEL()}, 'Richiesta inviata all’amministratore'); },
+    annRic: () => go({richiesta: DEL()}, 'Richiesta annullata'),
     mod: () => { close(); openTess(t); },
     rinnova: () => go({stato: 'attesa', motivo: ''}, 'Richiesta di rinnovo inviata all’amministratore')
   })[b.dataset.a]());
@@ -1596,15 +1683,17 @@ function openCard(t){
 
 /* -- amministratore del torneo -- */
 function renderAdmin(app){
-  const attT = S.tess.filter(t => t.stato === 'attesa'), attR = S.abil.filter(a => a.stato === 'attesa').map(a => ({...profDi(a.uid), ...a}));
+  const attT = S.tess.filter(t => t.stato === 'attesa'), attR = S.abil.filter(a => a.stato === 'attesa').map(a => ({...profDi(a.uid), ...a})), ricT = S.tess.filter(t => t.richiesta && ['approvato', 'sospeso'].includes(statoT(t)));
+  S.dt = S.tab === 'tess' ? discTags(CATS) : null;
   const daDec = S.pubParOk ? CATS.reduce((a, c) => a + disciplina(c).sanz.filter(z => z.gg == null).length, 0) : 0;
-  const tabs = [['appr', 'Da approvare', attT.length + attR.length], ['partite', 'Partite', 0], ['squ', 'Squalifiche', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0]];
+  const tabs = [['appr', 'Da approvare', attT.length + attR.length + ricT.length], ['partite', 'Partite', 0], ['squ', 'Disciplina', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0]];
   app.dataset.v = 'admin';
   let body = '';
   if(!S.loaded.tess || !S.loaded.resps || !S.loaded.abil || !S.loaded.inviti || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
   else if(S.tab === 'appr') body = (attR.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Responsabili di squadra <span class="cnt hot">${attR.length}</span></div><ul class="list">${attR.map(richAdm).join('')}</ul></section>` : '')
       + (attT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Tesserati <span class="cnt hot">${attT.length}</span></div>${gruppiAtt(attT)}<p class="note">Tocca un tesserato per vedere il cartellino e approvarlo. «Approva tutti» salta chi chiede un trasferimento, chi è troppo giovane e chi risulta già tesserato: quelli vanno guardati uno per uno.</p></section>` : '')
-      + (!attT.length && !attR.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
+      + (ricT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Richieste dei responsabili <span class="cnt hot">${ricT.length}</span></div><ul class="list">${ricT.sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it') || nomeT(a).localeCompare(nomeT(b), 'it')).map(itemT).join('')}</ul><p class="note">Modifiche (maglia, ruolo, foto) e svincoli chiesti dai responsabili per tesserati già approvati. Tocca per accettare o rifiutare.</p></section>` : '')
+      + (!attT.length && !attR.length && !ricT.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
   else if(S.tab === 'partite') body = adminPartite();
   else if(S.tab === 'resp') body = adminResp();
   else if(S.tab === 'squ') body = adminSqu();
@@ -1618,7 +1707,7 @@ function renderAdmin(app){
     const f = S.filtro, l = S.tess.filter(t => f === 'tutti' || statoT(t) === f).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
     body = `<div class="row tbtn"><button class="btn btn-primary sm" id="tImp">📥 Importa</button><button class="btn btn-ghost sm" id="tExp">⬇️ Esporta</button><button class="btn btn-ghost sm" id="tLim">⚙️ Limiti</button></div>
       <div class="field"><label for="aFind">Cerca</label><input id="aFind" type="search" placeholder="Cognome, nome o squadra" value="${esc(S.cerca || '')}"></div>
-      <div class="seg" role="group" aria-label="Filtro">${[['tutti', 'Tutti'], ['approvato', 'Validi'], ['sospeso', 'Sospesi'], ['scaduto', 'Scaduti']].map(([k, t]) => `<button data-f="${k}" aria-pressed="${k === f}">${t}</button>`).join('')}</div>
+      <div class="seg" role="group" aria-label="Filtro">${[['tutti', 'Tutti'], ['approvato', 'Validi'], ['sospeso', 'Sospesi'], ['svincolato', 'Svincolati'], ['scaduto', 'Scaduti']].map(([k, t]) => `<button data-f="${k}" aria-pressed="${k === f}">${t}</button>`).join('')}</div>
       <ul class="list" id="aList">${l.map(itemT).join('') || '<div class="empty"><h3>Nessun tesserato</h3></div>'}</ul>`;
   }
   app.innerHTML = band('Torneo AICS', 'Amministratore · ' + S.user.email) + `<main class="wrap stack">
@@ -1851,13 +1940,16 @@ const sheet = (html, label) => { const root = $('#sheetRoot'); root.innerHTML = 
 function adminSqu(){
   const cat = S.pcat, seg = `<div class="seg" role="group" aria-label="Campionato">${CATS.map(c => `<button data-sc="${c}" aria-pressed="${c === cat}">${NOMECAMP[c]}</button>`).join('')}</div>`;
   if(!S.pubParOk) return seg + '<div class="status"><span class="spin"></span>Carico…</div>';
+  const sb = S.sub.dsc || 'squ', sub = segSub('dsc', [['squ', 'Squalifiche'], ['pen', 'Penalità'], ['amm', 'Ammende']]);
+  if(sb === 'pen') return seg + sub + adminPen(cat);
+  if(sb === 'amm') return seg + sub + adminAmm(cat);
   const {sanz} = disciplina(cat); S.sanz = sanz;
   const dec = sanz.filter(z => z.gg == null), inc = sanz.filter(z => z.rest > 0), fin = sanz.filter(z => z.gg != null && z.rest <= 0).reverse();
   const nw = t => `<span class="nw">${esc(t)}</span>`, da = z => z.dopo ? `${z.dopo.giornata}ª giornata${z.dopo.data ? ' del ' + fmt(z.dopo.data) : ''}:<br>${nw(z.dopo.casa)} – ${nw(z.dopo.ospite)}` : z.dal ? 'dal ' + fmt(z.dal) : '';
   const it = (z, i, k) => `<li><button class="item" data-sz="${i}"${z.dir || z.man ? '' : ' data-auto="1"'}>${stemma(z.sq)}<span class="tx"><b>${esc(z.nome)}</b><span>${esc(z.sq)} · ${esc(z.motivo)}</span><span>${da(z)}</span>
-    ${k === 'dec' ? '<span class="pst wait">Decidi le giornate</span>' : k === 'inc' ? `<span class="pst ok multi">${z.scontate} di ${z.gg} ${z.gg === 1 ? 'giornata scontata' : 'giornate scontate'}${z.prossime[0] ? '<span class="sl">Salta la ' + vsDi(z.prossime[0], z.sqId) + '</span>' : ''}</span>` : `<span class="pst">Scontata (${z.gg} ${z.gg === 1 ? 'giornata' : 'giornate'})</span>`}</span></button></li>`;
+    ${k === 'dec' ? '<span class="pst wait">Decidi le giornate</span>' : k === 'inc' ? `<span class="pst ok multi">${z.fino ? 'Fino al ' + fmt(z.fino) : `${z.scontate} di ${z.gg} ${z.gg === 1 ? 'giornata scontata' : 'giornate scontate'}`}${z.prossime[0] ? '<span class="sl">Salta la ' + vsDi(z.prossime[0], z.sqId) + '</span>' : ''}</span>` : `<span class="pst">Scontata (${z.fino ? 'fino al ' + fmt(z.fino) : `${z.gg} ${z.gg === 1 ? 'giornata' : 'giornate'}`})</span>`}</span></button></li>`;
   const idx = z => sanz.indexOf(z);
-  return seg + `<div class="row"><button class="btn btn-primary sm" id="sqNew">+ Squalifica a mano</button></div>
+  return seg + sub + `<div class="row"><button class="btn btn-primary sm" id="sqNew">+ Squalifica a mano</button></div>
     ${dec.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Espulsioni dirette da decidere <span class="cnt hot">${dec.length}</span></div><ul class="list">${dec.map(z => it(z, idx(z), 'dec')).join('')}</ul></section>` : ''}
     <section class="stack" style="gap:8px"><div class="eyebrow">In corso <span class="cnt">${inc.length}</span></div>${inc.length ? `<ul class="list">${inc.map(z => it(z, idx(z), 'inc')).join('')}</ul>` : '<p class="note">Nessuna squalifica da scontare.</p>'}</section>
     ${fin.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Già scontate <span class="cnt">${fin.length}</span></div><ul class="list">${fin.map(z => it(z, idx(z), 'fin')).join('')}</ul></section>` : ''}
@@ -1866,6 +1958,11 @@ function adminSqu(){
 function bindSqu(app){
   app.querySelectorAll('[data-sc]').forEach(b => b.onclick = () => { S.pcat = b.dataset.sc; render(); });
   const nb = app.querySelector('#sqNew'); if(nb) nb.onclick = () => openSqualifica(null);
+  app.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => { const [k, id] = b.dataset.sub.split(':'); S.sub[k] = id; render(); });
+  const pn = app.querySelector('#penNew'); if(pn) pn.onclick = () => openPen(S.pcat, null);
+  app.querySelectorAll('[data-pen]').forEach(b => b.onclick = () => openPen(S.pcat, (impDi(S.pcat).pen || []).find(x => x.id === b.dataset.pen)));
+  const an = app.querySelector('#ammNew'); if(an) an.onclick = () => openAmm(S.pcat, null);
+  app.querySelectorAll('[data-amm]').forEach(b => b.onclick = () => openAmm(S.pcat, S.amm.find(x => x.id === b.dataset.amm)));
   app.querySelectorAll('[data-sz]').forEach(b => b.onclick = () => { const z = S.sanz[+b.dataset.sz]; if(!z) return; if(b.dataset.auto) toast('Squalifica automatica: per toglierla correggi i cartellini nella scheda della partita'); else openSqualifica(z); });
 }
 function openSqualifica(z){
@@ -1875,27 +1972,34 @@ function openSqualifica(z){
     <p class="note" style="grid-column:1/-1">${esc(NOMECAMP[cat])}${z ? ' · ' + esc(z.sq) : ''}${z && z.dir ? ` · espulso in ${esc(z.dopo.casa)} – ${esc(z.dopo.ospite)} (${z.dopo.giornata}ª giornata)` : ''}</p>
     ${nuovo ? `<div class="field full"><label for="sq-q">Squadra</label><select id="sq-q"><option value="">Scegli…</option>${teams.map(q => `<option value="${esc(q.id)}">${esc(q.nome)}</option>`).join('')}</select></div>
     <div class="field full"><label for="sq-t">Tesserato</label><select id="sq-t" disabled><option value="">Prima scegli la squadra</option></select></div>` : ''}
-    <div class="field"><label for="sq-g">Giornate</label><input id="sq-g" type="number" min="1" max="99" inputmode="numeric" value="${esc(z && z.gg != null ? z.gg : '')}"></div>
-    ${nuovo || z.man ? `<div class="field"><label for="sq-d">A partire dal</label><input id="sq-d" type="date" value="${esc(z ? z.dal : oggi())}"></div>` : '<div></div>'}
+    <div class="seg" role="group" aria-label="Durata" style="grid-column:1/-1"><button type="button" data-dt="g" aria-pressed="${!(z && z.fino)}">A giornate</button><button type="button" data-dt="d" aria-pressed="${!!(z && z.fino)}">Fino a una data</button></div>
+    ${nuovo || z.man ? `<div class="field"><label for="sq-d">A partire dal</label><input id="sq-d" type="date" value="${esc(z ? z.dal : oggi())}"></div>` : ''}
+    <div class="field" id="sq-gf"><label for="sq-g">Giornate</label><input id="sq-g" type="number" min="1" max="99" inputmode="numeric" value="${esc(z && z.gg != null && !z.fino ? z.gg : '')}"></div>
+    <div class="field" id="sq-ff"><label for="sq-f">Fino al</label><input id="sq-f" type="date" value="${esc((z && z.fino) || '')}"></div>
     <div class="field full"><label for="sq-m">Motivo</label><input id="sq-m" value="${esc(z ? z.motivo : '')}" placeholder="${z && z.dir ? 'Espulsione diretta' : 'Es. comportamento a fine gara'}"></div>
     ${z && z.dir ? '' : '<p class="note" style="grid-column:1/-1">Si scontano le partite della squadra giocate (o decise a tavolino) da quella data in poi.</p>'}
     <div class="err" id="sqErr" style="grid-column:1/-1"></div>
     <div class="actions"><button class="btn btn-primary" id="sqGo">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
     ${z && (z.man || z.gg != null) ? `<button type="button" class="btn btn-danger btn-block" id="sqDel" style="grid-column:1/-1">${z.man ? 'Elimina squalifica' : 'Togli la decisione'}</button>` : ''}</form>`, 'Squalifica');
   const v = id => root.querySelector('#' + id).value.trim();
+  const setDt = k => { root.querySelectorAll('[data-dt]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dt === k))); root.querySelector('#sq-gf').style.display = k === 'g' ? '' : 'none'; root.querySelector('#sq-ff').style.display = k === 'd' ? '' : 'none'; };
+  root.querySelectorAll('[data-dt]').forEach(b => b.onclick = () => setDt(b.dataset.dt)); setDt(z && z.fino ? 'd' : 'g');
   if(nuovo) root.querySelector('#sq-q').onchange = e => { const r = rosa(e.target.value), t = root.querySelector('#sq-t'); t.disabled = !r.length;
     t.innerHTML = r.length ? '<option value="">Scegli…</option>' + r.map(x => `<option value="${esc(x.id)}">${esc(nomeT(x))}${x.ruolo && x.ruolo !== 'Giocatore' ? ' · ' + esc(x.ruolo.toLowerCase()) : ''}</option>`).join('') : '<option value="">Nessun tesserato approvato</option>'; };
   root.querySelector('#sqForm').onsubmit = async e => {
     e.preventDefault(); const er = root.querySelector('#sqErr'), gg = parseInt(v('sq-g'), 10); er.textContent = '';
-    if(!(gg >= 1)) { er.textContent = 'Scrivi quante giornate (almeno 1).'; return; }
+    const tipo = root.querySelector('[data-dt][aria-pressed="true"]').dataset.dt, fino = v('sq-f'), DL = firebase.firestore.FieldValue.delete();
+    if(tipo === 'g' && !(gg >= 1)) { er.textContent = 'Scrivi quante giornate (almeno 1).'; return; }
+    if(tipo === 'd'){ const ini = z && z.dir ? z.dopo.data || '' : v('sq-d'); if(!fino){ er.textContent = 'Scegli fino a quando vale.'; return; } if(ini && fino < ini){ er.textContent = 'La data di fine viene prima dell’inizio.'; return; } }
+    const dur = tipo === 'g' ? {gg, fino: DL} : {fino, gg: DL};
     let id, o;
-    if(z && z.dir){ id = z.docId; o = {camp: cat, stagione: STAG, tid: z.id, nome: z.nome, sq: z.sq, sqId: z.sqId, gg, motivo: v('sq-m') || 'Espulsione diretta', partitaId: z.dopo.id, manuale: false, updatedAt: Date.now()}; }
+    if(z && z.dir){ id = z.docId; o = {camp: cat, stagione: STAG, tid: z.id, nome: z.nome, sq: z.sq, sqId: z.sqId, ...dur, motivo: v('sq-m') || 'Espulsione diretta', partitaId: z.dopo.id, manuale: false, updatedAt: Date.now()}; }
     else {
       let t = null, q = null;
       if(nuovo){ q = teams.find(x => x.id === v('sq-q')); t = q && rosa(q.id).find(x => x.id === v('sq-t')); if(!t){ er.textContent = 'Scegli squadra e tesserato.'; return; } }
       if(!v('sq-d')){ er.textContent = 'Scegli da quando vale.'; return; }
       id = nuovo ? db().collection('squalifiche').doc().id : z.docId;
-      o = {camp: cat, stagione: STAG, gg, motivo: v('sq-m') || 'Decisione del giudice', dal: v('sq-d'), manuale: true, updatedAt: Date.now(), ...(nuovo ? {tid: t.id, nome: nomeT(t), sq: q.nome, sqId: q.id, createdAt: Date.now()} : {})};
+      o = {camp: cat, stagione: STAG, ...dur, motivo: v('sq-m') || 'Decisione del giudice', dal: v('sq-d'), manuale: true, updatedAt: Date.now(), ...(nuovo ? {tid: t.id, nome: nomeT(t), sq: q.nome, sqId: q.id, createdAt: Date.now()} : {})};
     }
     const b = root.querySelector('#sqGo'); b.disabled = true;
     try{ await db().collection('squalifiche').doc(id).set(o, {merge: true}); toast('Squalifica salvata'); close(); }catch(err){ b.disabled = false; er.textContent = fbErr(err); }
@@ -1903,6 +2007,70 @@ function openSqualifica(z){
   const del = root.querySelector('#sqDel');
   if(del) del.onclick = async () => { if(!confirm(z.man ? `Eliminare la squalifica di ${z.nome}?` : `Togliere la decisione? L’espulsione di ${z.nome} torna da decidere.`)) return;
     try{ await db().collection('squalifiche').doc(z.docId).delete(); toast('Fatto'); close(); }catch(err){ toast(fbErr(err)); } };
+}
+
+/* --- penalizzazioni in classifica (nel documento del campionato) --- */
+const penDi = cat => (impDi(cat).pen || []).filter(x => (x.stagione || STAG) === STAG);
+const ptTxt = n => `${n} ${+n === 1 ? 'punto' : 'punti'}`;
+function adminPen(cat){
+  const l = penDi(cat).slice().sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+  return `<div class="row"><button class="btn btn-primary sm" id="penNew">+ Penalizzazione</button></div>
+    ${l.length ? `<ul class="list">${l.map(x => `<li><button class="item" data-pen="${esc(x.id)}">${stemma(x.sq)}<span class="tx"><b>${esc(x.sq)}</b><span>${esc(x.motivo || 'Senza motivo')}${x.data ? ' · ' + fmt(x.data) : ''}</span><span class="pst no">−${esc(ptTxt(x.punti))}</span></span></button></li>`).join('')}</ul>` : '<p class="note">Nessuna penalizzazione in questo campionato.</p>'}
+    <p class="note">I punti tolti valgono subito nella classifica pubblica: accanto alla squadra c’è un asterisco e sotto la classifica il motivo.</p>`;
+}
+function openPen(cat, x){
+  const teams = squadreCat(cat), nuovo = !x;
+  const {root, close} = sheet(`<form class="form" id="penF" novalidate><h3 style="grid-column:1/-1">${nuovo ? 'Penalizzazione' : 'Modifica penalizzazione'}</h3>
+    <p class="note" style="grid-column:1/-1">${esc(NOMECAMP[cat])}: i punti si tolgono dalla classifica.</p>
+    <div class="field full"><label for="pn-q">Squadra</label><select id="pn-q"><option value="">Scegli…</option>${teams.map(q => `<option value="${esc(q.id)}" ${x && x.sqId === q.id ? 'selected' : ''}>${esc(q.nome)}</option>`).join('')}</select></div>
+    <div class="field" style="align-self:end"><label for="pn-p">Punti tolti</label><input id="pn-p" type="number" min="1" max="99" inputmode="numeric" value="${esc(x ? x.punti : '')}"></div>
+    <div class="field" style="align-self:end"><label for="pn-d">Data</label><input id="pn-d" type="date" value="${esc(x ? x.data : oggi())}"></div>
+    <div class="field full"><label for="pn-m">Motivo</label><input id="pn-m" value="${esc(x ? x.motivo : '')}" placeholder="Es. rinuncia alla partita" maxlength="120"></div>
+    <div class="err" id="pnErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+    ${nuovo ? '' : '<button type="button" class="btn btn-danger btn-block" id="pnDel" style="grid-column:1/-1">Elimina penalizzazione</button>'}</form>`, 'Penalizzazione');
+  const tutte = () => (impDi(cat).pen || []).slice(), salva = l => db().collection('campionati').doc(cat).set({pen: l, updatedAt: Date.now()}, {merge: true});
+  root.querySelector('#penF').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim(), er = root.querySelector('#pnErr'), q = teams.find(t => t.id === v('pn-q')), p = parseInt(v('pn-p'), 10);
+    er.textContent = ''; if(!q){ er.textContent = 'Scegli la squadra.'; return; } if(!(p >= 1)){ er.textContent = 'Scrivi quanti punti togliere (almeno 1).'; return; }
+    const o = {id: x ? x.id : Date.now().toString(36), sqId: q.id, sq: q.nome || '', punti: p, motivo: v('pn-m'), data: v('pn-d'), stagione: STAG};
+    const l = tutte(), i = l.findIndex(y => y.id === o.id); if(i >= 0) l[i] = o; else l.push(o);
+    try{ await salva(l); toast('Penalizzazione salvata'); close(); }catch(err){ er.textContent = fbErr(err); } };
+  const d = root.querySelector('#pnDel');
+  if(d) d.onclick = async () => { if(!confirm(`Eliminare la penalizzazione di ${x.sq}? I punti tornano in classifica.`)) return; try{ await salva(tutte().filter(y => y.id !== x.id)); toast('Penalizzazione eliminata'); close(); }catch(err){ toast(fbErr(err)); } };
+}
+/* --- ammende (le vedono solo l'amministratore e i responsabili della squadra) --- */
+const euro = n => (+n || 0).toLocaleString('it-IT', {style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n || 0) ? 0 : 2});
+const totAmm = l => l.reduce((a, x) => a + (+x.importo || 0), 0);
+const ammStag = l => l.filter(a => (a.stagione || STAG) === STAG).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+const ammItem = (a, btn) => `<li><${btn ? `button class="item" data-amm="${esc(a.id)}"` : 'div class="item"'}>${stemma(a.sq)}<span class="tx"><b>${btn ? esc(a.sq) : esc(a.motivo || 'Ammenda')}</b><span>${btn ? esc(a.motivo || 'Ammenda') + ' · ' : ''}${a.data ? fmt(a.data) : ''}</span><span class="pst ${a.pagata ? 'ok' : 'wait'}">${euro(a.importo)} · ${a.pagata ? 'pagata' + (a.pagataAt ? ' il ' + new Date(a.pagataAt).toLocaleDateString('it-IT') : '') : 'da pagare'}</span></span></${btn ? 'button' : 'div'}></li>`;
+function adminAmm(cat){
+  if(!S.loaded.amm) return '<div class="status"><span class="spin"></span>Carico…</div>';
+  const l = ammStag(S.amm.filter(a => a.camp === cat)), dp = l.filter(a => !a.pagata), pg = l.filter(a => a.pagata);
+  return `<div class="row"><button class="btn btn-primary sm" id="ammNew">+ Ammenda</button></div>
+    <section class="stack" style="gap:8px"><div class="eyebrow">Da pagare <span class="cnt${dp.length ? ' hot' : ''}">${euro(totAmm(dp))}</span></div>${dp.length ? `<ul class="list">${dp.map(a => ammItem(a, true)).join('')}</ul>` : '<p class="note">Nessuna ammenda da pagare.</p>'}</section>
+    ${pg.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Pagate <span class="cnt">${euro(totAmm(pg))}</span></div><ul class="list">${pg.map(a => ammItem(a, true)).join('')}</ul></section>` : ''}
+    <p class="note">Le ammende le vedono solo gli amministratori e i responsabili della squadra, non il pubblico. Tocca un’ammenda per segnarla pagata.</p>`;
+}
+function openAmm(cat, a){
+  const teams = squadreCat(cat), nuovo = !a;
+  const {root, close} = sheet(`<form class="form" id="amF" novalidate><h3 style="grid-column:1/-1">${nuovo ? 'Nuova ammenda' : 'Ammenda'}</h3>
+    ${a ? `<p class="note" style="grid-column:1/-1">${esc(NOMECAMP[cat])} · <span class="pst ${a.pagata ? 'ok' : 'wait'}">${a.pagata ? `✓ Pagata${a.pagataAt ? ' il ' + new Date(a.pagataAt).toLocaleDateString('it-IT') : ''}` : 'Da pagare'}</span></p>` : ''}
+    <div class="field full"><label for="am-q">Squadra</label><select id="am-q"><option value="">Scegli…</option>${teams.map(q => `<option value="${esc(q.id)}" ${a && a.sqId === q.id ? 'selected' : ''}>${esc(q.nome)}</option>`).join('')}</select></div>
+    <div class="field" style="align-self:end"><label for="am-i">Importo (€)</label><input id="am-i" inputmode="decimal" value="${esc(a ? (Number.isInteger(+a.importo) ? String(a.importo) : (+a.importo).toFixed(2).replace('.', ',')) : '')}" placeholder="Es. 30"></div>
+    <div class="field" style="align-self:end"><label for="am-d">Data</label><input id="am-d" type="date" value="${esc(a ? a.data : oggi())}"></div>
+    <div class="field full"><label for="am-m">Motivo</label><input id="am-m" value="${esc(a ? a.motivo : '')}" placeholder="Es. ritardo nella consegna della distinta" maxlength="120"></div>
+    <div class="err" id="amErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary">Salva</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
+    ${a ? `<button type="button" class="btn ${a.pagata ? 'btn-ghost' : 'btn-ok'} btn-block" id="amPag" style="grid-column:1/-1">${a.pagata ? 'Segna da pagare' : '✓ Segna pagata'}</button><button type="button" class="btn btn-danger btn-block" id="amDel" style="grid-column:1/-1">Elimina ammenda</button>` : ''}</form>`, 'Ammenda');
+  const ref = a ? db().collection('ammende').doc(a.id) : null;
+  root.querySelector('#amF').onsubmit = async e => { e.preventDefault(); const v = id => root.querySelector('#' + id).value.trim(), er = root.querySelector('#amErr'), q = teams.find(t => t.id === v('am-q')), imp = Math.round(parseFloat(v('am-i').replace(/\s|€/g, '').replace(',', '.')) * 100) / 100;
+    er.textContent = ''; if(!q){ er.textContent = 'Scegli la squadra.'; return; } if(!(imp > 0)){ er.textContent = 'Scrivi l’importo.'; return; } if(!v('am-d')){ er.textContent = 'Scegli la data.'; return; }
+    const o = {camp: cat, stagione: STAG, sqId: q.id, sq: q.nome || '', importo: imp, motivo: v('am-m'), data: v('am-d'), updatedAt: Date.now()};
+    try{ if(a) await ref.update(o); else await db().collection('ammende').add({...o, pagata: false, createdAt: Date.now(), by: S.user.uid}); toast('Ammenda salvata'); close(); }catch(err){ er.textContent = fbErr(err); } };
+  const pg = root.querySelector('#amPag');
+  if(pg) pg.onclick = async () => { try{ await ref.update({pagata: !a.pagata, pagataAt: a.pagata ? firebase.firestore.FieldValue.delete() : Date.now()}); toast(a.pagata ? 'Segnata da pagare' : 'Segnata pagata'); close(); }catch(err){ toast(fbErr(err)); } };
+  const d = root.querySelector('#amDel');
+  if(d) d.onclick = async () => { if(!confirm(`Eliminare l’ammenda di ${euro(a.importo)} a ${a.sq}?`)) return; try{ await ref.delete(); toast('Ammenda eliminata'); close(); }catch(err){ toast(fbErr(err)); } };
 }
 
 /* --- menu calendario --- */
@@ -2201,6 +2369,7 @@ function classifica(cat, squadre, partite){
     giocate.push({c: c.id, o: o.id, gc: e.gc, go: e.go});
     [[c, e.gc, e.go], [o, e.go, e.gc]].forEach(([r, f, a]) => { r.G++; r.GF += f; r.GS += a; if(f > a){ r.V++; r.Pt += 3; } else if(f === a){ r.N++; r.Pt += 1; } else r.P++; });
     c.cart += cartDi(p, 'casa'); o.cart += cartDi(p, 'ospite'); });
+  penDi(cat).forEach(x => { const r = rows.get(x.sqId); if(r){ r.Pt -= +x.punti || 0; r.pen = (r.pen || 0) + (+x.punti || 0); } });
   const l = [...rows.values()], dr = r => r.GF - r.GS;
   const base = (a, b) => dr(b) - dr(a) || b.GF - a.GF || a.cart - b.cart || (a.nome || '').localeCompare(b.nome || '', 'it');
   // a pari punti: prima gli scontri diretti tra le squadre appaiate
@@ -2219,8 +2388,9 @@ function tabClassifica(cat, squadre){
   const {righe, giocate, imp} = classifica(cat, squadre, S.pubPar), sg = n => n > 0 ? '+' + n : String(n);
   const zone = (imp.zone || []).filter(z => z.nome);
   return `<div class="tab-wrap"><table class="tab-cl"><thead><tr><th class="pos"></th><th class="sq">Squadre</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th></tr></thead><tbody>
-    ${righe.map((r, i) => { const z = !r.rit && zonaDi(imp, i + 1); return `<tr class="${r.rit ? 'rit' : ''}"><td class="pos">${r.rit ? '–' : i + 1}</td><td class="sq" data-sqp="${esc(r.id)}"><span class="sqc">${stemma(r.nome)}<span class="nm">${esc(r.nome)}${r.rit ? ' <small>ritirata</small>' : ''}</span></span></td><td class="pt" style="border-left-color:${z ? ZCOL[z.col] || ZCOL.blu : 'transparent'}">${r.Pt}</td><td>${r.G}</td><td>${r.V}</td><td>${r.N}</td><td>${r.P}</td><td>${r.GF}</td><td>${r.GS}</td><td>${sg(r.GF - r.GS)}</td></tr>`; }).join('')}</tbody></table></div>
-    ${zone.length ? `<div class="legenda">${zone.map(z => `<span><i style="background:${ZCOL[z.col] || ZCOL.blu}"></i>${z.da === z.a ? z.da + 'ª' : `${z.da}ª–${z.a}ª`} ${esc(z.nome)}</span>`).join('')}</div>` : ''}`;
+    ${righe.map((r, i) => { const z = !r.rit && zonaDi(imp, i + 1); return `<tr class="${r.rit ? 'rit' : ''}"><td class="pos">${r.rit ? '–' : i + 1}</td><td class="sq" data-sqp="${esc(r.id)}"><span class="sqc">${stemma(r.nome)}<span class="nm">${esc(r.nome)}${r.pen ? '<sup class="pen">*</sup>' : ''}${r.rit ? ' <small>ritirata</small>' : ''}</span></span></td><td class="pt" style="border-left-color:${z ? ZCOL[z.col] || ZCOL.blu : 'transparent'}">${r.Pt}</td><td>${r.G}</td><td>${r.V}</td><td>${r.N}</td><td>${r.P}</td><td>${r.GF}</td><td>${r.GS}</td><td>${sg(r.GF - r.GS)}</td></tr>`; }).join('')}</tbody></table></div>
+    ${zone.length ? `<div class="legenda">${zone.map(z => `<span><i style="background:${ZCOL[z.col] || ZCOL.blu}"></i>${z.da === z.a ? z.da + 'ª' : `${z.da}ª–${z.a}ª`} ${esc(z.nome)}</span>`).join('')}</div>` : ''}
+    ${(l => l.length ? `<div class="pen-n">${l.map(x => `<span>* <b>${esc(x.sq)}</b>: −${esc(ptTxt(x.punti))}${x.motivo ? ' (' + esc(x.motivo) + ')' : ''}</span>`).join('')}</div>` : '')(penDi(cat).filter(x => righe.some(r => r.id === x.sqId)))}`;
 }
 /* --- impostazioni della classifica (amministratore) --- */
 function openImpostazioni(){
