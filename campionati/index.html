@@ -539,6 +539,16 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
   .wrap,.band-in{max-width:1320px}
   .card.par{grid-template-columns:repeat(3,minmax(0,1fr))}.card.par > *:nth-child(2n){border-right:1px solid var(--line)}.card.par > *:nth-child(3n){border-right:0}
 }
+.rc-ris{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;text-align:center;font-weight:700}
+.rc-ris b{font-family:var(--display);font-size:40px;white-space:nowrap}
+.rc-ris span{overflow-wrap:anywhere}
+.rc-man{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+.rc-man select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card,var(--surface));color:var(--fg);font:inherit;font-size:15px}
+.rc-fl{display:flex;flex-wrap:wrap;gap:4px}
+.rc-fl .pst{margin:0}
+.rc-sq{padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+.rc-sq p{margin:4px 0 0;font-size:14px}
+.rc-note{white-space:pre-wrap;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:14px}
 /* finestre: o la X in alto a destra (se ci sono altri tasti) o il tasto Chiudi fisso in fondo */
 .sheet-x{position:sticky;top:8px;z-index:7;display:flex;justify-content:flex-end;height:36px;margin:-4px -8px 0 0;flex-shrink:0;pointer-events:none}
 .sheet-x.in-riga{height:0;margin:0 -8px 0 0}
@@ -911,6 +921,7 @@ function statoDist(p, sqId){
   if(!p.data || !p.ora) return ['', 'Distinta: si compila quando c’è la data'];
   if(distOk(d, p)){ const sid = new Set(squPer(p, sqId).map(x => x.id)), bad = [...d.giocatori, ...(d.dirigenti || [])].filter(x => sid.has(x.id));
     if(bad.length && !chiusa) return ['no', `In distinta c’è uno squalificato (${bad.map(x => x.nome).join(', ')}): correggila`];
+    if((d.tolti || []).length && !chiusa) return ['no', `Tolti dalla distinta: ${d.tolti.map(x => x.nome + ' (' + x.perche + ')').join(', ')}. Controllala`];
     return ['ok', chiusa ? 'Distinta inviata · chiusa' : 'Distinta inviata ✓']; }
   if(chiusa) return ['no', 'Distinta non inviata'];
   if(d) return ['wait', 'Partita riprogrammata: ricompila la distinta'];
@@ -1821,14 +1832,16 @@ function renderAdmin(app){
   const daDec = S.pubParOk ? CATS.reduce((a, c) => a + disciplina(c).sanz.filter(z => z.gg == null).length, 0) : 0;
   /* comunicati del giudice sportivo pronti da pubblicare: avviso in alto e pallino rosso su Comunicati */
   const prC = S.pubParOk && S.loaded.comAll && S.loaded.amm ? CATS.map(c => [c, bozzaGS(c)]).filter(([c, b]) => b.pronto) : [];
-  const tabs = [['appr', 'Da approvare', attT.length + attR.length + ricT.length], ['partite', 'Partite', 0], ['squ', 'Disciplina', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0], ['com', 'Comunicati', 0]];
+  const rcP = refDaConf();
+  const tabs = [['appr', 'Da approvare', attT.length + attR.length + ricT.length + rcP.length], ['partite', 'Partite', 0], ['squ', 'Disciplina', daDec], ['squadre', 'Squadre', 0], ['resp', 'Responsabili', 0], ['tess', 'Tesserati', 0], ['com', 'Comunicati', 0]];
   app.dataset.v = 'admin';
   let body = '';
   if(!S.loaded.tess || !S.loaded.resps || !S.loaded.abil || !S.loaded.inviti || !S.loaded.squadre) body = '<div class="status"><span class="spin"></span>Carico…</div>';
-  else if(S.tab === 'appr') body = (attR.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Responsabili di squadra <span class="cnt hot">${attR.length}</span></div><ul class="list">${attR.map(richAdm).join('')}</ul></section>` : '')
+  else if(S.tab === 'appr') body = (rcP.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Referti da confermare <span class="cnt hot">${rcP.length}</span></div><ul class="list">${rcP.map(itemRef).join('')}</ul><p class="note">Risultato, classifica, marcatori e disciplina si aggiornano solo quando confermi il referto.</p></section>` : '')
+      + (attR.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Responsabili di squadra <span class="cnt hot">${attR.length}</span></div><ul class="list">${attR.map(richAdm).join('')}</ul></section>` : '')
       + (attT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Tesserati <span class="cnt hot">${attT.length}</span></div>${gruppiAtt(attT)}<p class="note">Tocca un tesserato per vedere il cartellino e approvarlo. «Approva tutti» salta chi chiede un trasferimento, chi è troppo giovane e chi risulta già tesserato: quelli vanno guardati uno per uno.</p></section>` : '')
       + (ricT.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Richieste dei responsabili <span class="cnt hot">${ricT.length}</span></div><ul class="list">${ricT.sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it') || nomeT(a).localeCompare(nomeT(b), 'it')).map(itemT).join('')}</ul><p class="note">Modifiche (maglia, ruolo, foto) e svincoli chiesti dai responsabili per tesserati già approvati. Tocca per accettare o rifiutare.</p></section>` : '')
-      + (!attT.length && !attR.length && !ricT.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
+      + (!attT.length && !attR.length && !ricT.length && !rcP.length ? '<div class="empty"><h3>Tutto in ordine</h3><span>Non c’è niente da approvare.</span></div>' : '');
   else if(S.tab === 'partite') body = adminPartite();
   else if(S.tab === 'resp') body = adminResp();
   else if(S.tab === 'squ') body = adminSqu();
@@ -1860,6 +1873,8 @@ function renderAdmin(app){
   if(S.tab === 'squ') bindSqu(app);
   if(S.tab === 'com') bindAdmCom(app);
   bindRichAdm(app); bindAttT(app);
+  app.querySelectorAll('[data-rc]').forEach(b => b.onclick = () => confRef(S.partite.find(p => p.id === b.dataset.rc)));
+  clearTimeout(S.pulT); S.pulT = setTimeout(pulisciDistinte, 1200);
   if($('#tImp')){ $('#tImp').onclick = () => openImportaTess(''); $('#tExp').onclick = () => openEsporta(''); $('#tLim').onclick = openLimiti; }
   if(S.tab === 'resp') bindResp(app);
   const fi = $('#aFind');
@@ -2033,9 +2048,10 @@ const refFatto = d => d && Object.values(d.referti || {}).some(r => r && !r.sblo
 /* stato della partita per l'amministratore */
 function statoPar(p){
   const d = desDi(p), e = esito(p);
+  if(refNuovo(p)) return ['wait', 'Referto da confermare'];
   if(e && e.tav) return ['ok', `A tavolino ${e.gc}-${e.go}${e.rit ? ' (ritiro)' : ''}`];
   if(e) return ['ok', `Finale ${e.gc}-${e.go}`];
-  if(refFatto(d)) return ['ok', 'Referto arrivato'];
+  if(refFatto(d) && p.stato !== 'rinviata') return ['ok', 'Referto arrivato'];
   if(p.stato === 'rinviata') return ['no', 'Rinviata'];
   if(!p.data) return ['grigio', 'Da programmare'];
   if(!p.desId) return ['wait', p.ora && p.impianto ? 'Non è nell’app arbitri: tocca Salva' : 'Manca ora o campo'];
@@ -2632,14 +2648,16 @@ function openImporta(){
 }
 
 /* --- scheda della partita: data, ora, campo; poi passa all'app arbitri --- */
-function openPartita(p){
+function openPartita(p0, pre){
+  const p = pre ? {...p0, ...pre} : p0;
   if(!p) return;
-  const isNew = !p.id, cat = p.camp, teams = squadreCat(cat), d = desDi(p), fatto = refFatto(d);
+  const isNew = !p.id, cat = p.camp, teams = squadreCat(cat), d = desDi(p), fatto = refFatto(d) && !(p0.stato === 'rinviata' && ((refDi(d) || {}).referto || {}).esito === 'rinviata');
   const imp = S.impianti.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
   const opt = (l, sel) => l.map(q => `<option value="${esc(q.id)}" ${q.id === sel ? 'selected' : ''}>${esc(q.nome)}${q.citta ? ' · ' + esc(q.citta) : ''}</option>`).join('');
-  const [k, t] = isNew ? ['', ''] : statoPar(p);
+  const [k, t] = isNew ? ['', ''] : statoPar(p0);
   const {root, close} = sheet(`<form class="form" id="pForm"><h3>${isNew ? 'Nuova partita' : esc(p.casa) + ' – ' + esc(p.ospite)}</h3>
     <p class="note" style="grid-column:1/-1">${esc(NOMECAMP[cat])} · stagione ${esc(p.stagione || STAG)}${isNew ? '' : ` · <span class="pst ${k}">${esc(t)}</span>`}</p>
+    ${pre ? '<div class="warn-box" style="grid-column:1/-1">Compilata con il referto dell’arbitro: correggi quello che serve e salva per confermarlo.</div>' : !isNew && refNuovo(p0) ? '<button type="button" class="btn btn-ok btn-block" id="pRef" style="grid-column:1/-1">📋 Referto dell’arbitro da confermare: aprilo</button>' : ''}
     ${fatto ? '<div class="warn-box" style="grid-column:1/-1">L’arbitro ha già mandato il referto: squadre, data e campo non si possono più cambiare.</div>' : ''}
     <div class="field"><label for="p-g">Giornata</label><input id="p-g" type="number" min="1" inputmode="numeric" value="${esc(p.giornata || '')}" required></div>
     <div class="field"><label for="p-st">Stato</label><select id="p-st"><option value="">Regolare</option><option value="rinviata" ${p.stato === 'rinviata' ? 'selected' : ''}>Rinviata</option></select></div>
@@ -2655,7 +2673,7 @@ function openPartita(p){
     <div class="field" data-ris><label for="p-gc">Gol casa</label><input id="p-gc" type="number" min="0" inputmode="numeric" value="${esc(p.gc ?? '')}"></div>
     <div class="field" data-ris><label for="p-go">Gol ospite</label><input id="p-go" type="number" min="0" inputmode="numeric" value="${esc(p.go ?? '')}"></div>
     <div class="mk" data-ris style="grid-column:1/-1" id="pMk"></div>
-    <p class="note" style="grid-column:1/-1">Il risultato arriverà da solo dal referto dell’arbitro: scrivilo qui solo per correggerlo o se il referto manca. A tavolino: ${esc(impDi(cat).tav.join('-'))} come da impostazioni.</p>
+    <p class="note" style="grid-column:1/-1">Il risultato arriva dal referto dell’arbitro quando lo confermi in «Da approvare»: scrivilo qui solo per correggerlo o se il referto manca. A tavolino: ${esc(impDi(cat).tav.join('-'))} come da impostazioni.</p>
     <p class="note" style="grid-column:1/-1">Con data, ora e campo la partita passa da sola nell’app arbitri tra le gare da designare. Se poi li cambi, la modifica arriva anche lì e l’arbitro deve riconfermare.</p>
     ${isNew ? '' : `<div class="eyebrow" style="grid-column:1/-1">Distinte</div>${[['casaId', 'casa'], ['ospiteId', 'ospite']].map(([k, n]) => { const [c, t] = statoDist(p, p[k]); return `<button type="button" class="item dbtn" data-dd="${esc(p[k])}" style="grid-column:1/-1"><span class="tx"><b>${esc(p[n])}</b><span class="pst ${c}">${esc(t)}</span></span></button>`; }).join('')}`}
     <div class="err" id="pErr" style="grid-column:1/-1"></div>
@@ -2742,7 +2760,8 @@ function openPartita(p){
       tutte = k === 'tutte';
     }
     btn.disabled = true;
-    try{ await salvaPartita(isNew ? {...nuovaPar(cat, n.giornata, c, o), ...n} : {...p, ...n}, p, im); S.pgio[cat] = n.giornata;
+    if(pre) n.refConfAt = pre.refConfAt;
+    try{ await salvaPartita(isNew ? {...nuovaPar(cat, n.giornata, c, o), ...n} : {...p, ...n}, p0, im); S.pgio[cat] = n.giornata;
       if(tutte){ const vecchio = ic.campoId || '';
         await db().collection('squadreInfo').doc(c.id).set({campoId: im.id, campo: im.nome || '', indirizzo: im.indirizzo || '', citta: im.citta || '', mapsUrl: im.mapsUrl || '', updatedAt: Date.now(), by: S.user.uid}, {merge: true});
         const k2 = await campoAlleProssime(c.id, cat, im, vecchio, p.id);
@@ -2751,13 +2770,147 @@ function openPartita(p){
       close(); }
     catch(err){ btn.disabled = false; er.textContent = err.msg || fbErr(err); }
   };
-  root.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => openDistinta(p, b.dataset.dd));
+  root.querySelectorAll('[data-dd]').forEach(b => b.onclick = () => openDistinta(p0, b.dataset.dd));
+  const pr = root.querySelector('#pRef'); if(pr) pr.onclick = () => { close(); confRef(p0); };
   const del = root.querySelector('#pDel');
   if(del) del.onclick = async () => {
     if(d && ((d.ufficiali || []).length || fatto)){ toast('C’è già un arbitro: prima annulla la gara nell’app arbitri'); return; }
     if(!confirm(`Eliminare ${p.casa} – ${p.ospite}?${d ? '\n\nViene tolta anche dall’app arbitri.' : ''}`)) return;
     try{ await scriviTutto([b => b.delete(db().collection('partite').doc(p.id)), ...(d ? [b => b.delete(db().collection('designazioni').doc(d.id))] : [])]); toast('Partita eliminata'); close(); }catch(e){ toast(fbErr(e)); }
   };
+}
+/* ---- referto dell'arbitro: arriva dall'app arbitri, l'amministratore lo controlla e lo conferma ---- */
+const refDi = d => d ? Object.values(d.referti || {}).filter(r => r && !r.sbloccato && r.referto).sort((a, b) => (+b.at || 0) - (+a.at || 0))[0] || null : null;
+const refNuovo = p => { const r = refDi(desDi(p)); return r && (+r.at || 0) > (+p.refConfAt || 0) ? r : null; };
+const refDaConf = () => (S.partite || []).filter(refNuovo).sort(ordPar);
+const normNome = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, ' ').trim().split(' ').filter(Boolean).sort().join(' ');
+const latoR = s => s === 'ospite' ? 'ospite' : 'casa';
+function itemRef(p){
+  const r = refNuovo(p), R = r.referto || {}, man = refVoci(R).filter(v => !v.tid || v.tid === '__man').length;
+  const es = R.esito === 'rinviata' ? 'Gara rinviata' : `${R.esito === 'sospesa' ? `Sospesa al ${R.minSosp || '?'}’ · ` : ''}${R.gc ?? '?'}-${R.go ?? '?'}`;
+  return `<li><button class="item" data-rc="${esc(p.id)}">${stemma(p.casa)}<span class="tx"><b>${esc(p.casa)} – ${esc(p.ospite)}</b><span>${esc(NOMECAMP[p.camp] || p.camp)} · ${esc(p.giornata)}ª giornata${p.data ? ' · ' + esc(giornoCorto(p.data)) : ''}</span>
+    <span class="pst ${R.esito ? 'no' : 'wait'}">${esc(es)}${man ? ` · ${man} ${man === 1 ? 'nome scritto a mano' : 'nomi scritti a mano'}` : ''}</span></span></button></li>`;
+}
+/* tutte le persone citate nel referto */
+function refVoci(R){
+  const v = [], add = (k, e, x = {}) => v.push({k, e, s: latoR(e.sq), tid: e.tid || '', nome: e.nome || '', num: e.num || '', ...x});
+  (R.marcatori || []).forEach(e => add('mar', e, {aut: e.mot === 'Autorete'}));
+  (R.ammoniti || []).forEach(e => add('amm', e));
+  (R.espulsi || []).forEach(e => add('esp', e, {doppia: e.mot === 'Doppia ammonizione'}));
+  (R.dirigenti || []).forEach(e => add('dir', e, {amm: /^Ammonizione/i.test(e.prov || '')}));
+  ['mvp', 'por'].forEach(k => { const e = R[k]; if(e && (e.tid || e.nome)) add(k, e); });
+  return v;
+}
+const VOCE = {mar: e => e.mot === 'Autorete' ? 'Autorete' : 'Rete', amm: () => 'Ammonito', esp: e => e.mot === 'Doppia ammonizione' ? 'Espulso (doppia amm.)' : 'Espulso', dir: e => (e.prov || '').startsWith('Ammon') ? 'Dirigente ammonito' : 'Dirigente espulso', mvp: () => 'Migliore in campo', por: () => 'Miglior portiere'};
+function confRef(p){
+  const d = desDi(p), r = refDi(d); if(!r){ toast('Il referto non c’è più'); return; }
+  const R = r.referto || {}, rinv = R.esito === 'rinviata', voci = refVoci(R), id = {casa: p.casaId, ospite: p.ospiteId};
+  const squ = {casa: new Set(squPer(p, p.casaId).map(x => x.id)), ospite: new Set(squPer(p, p.ospiteId).map(x => x.id))};
+  const dist = {casa: distDi(p, p.casaId), ospite: distDi(p, p.ospiteId)};
+  const inDist = (s, tid) => { const x = dist[s]; return !x || !distOk(x, p) ? null : [...(x.giocatori || []), ...(x.dirigenti || [])].some(y => y.id === tid); };
+  const rosa = s => S.tess.filter(t => t.squadraId === id[s]).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
+  /* i nomi scritti a mano: uno per persona (stessa squadra e stesso nome), con la proposta di chi può essere */
+  const SC = {}, gruppi = [];
+  voci.filter(v => !v.tid || v.tid === '__man').forEach(v => { const k = v.s + '|' + normNome(v.nome); v.key = k;
+    let gr = gruppi.find(x => x.key === k); if(!gr){ gr = {key: k, s: v.s, nome: v.nome, num: v.num, voci: []}; gruppi.push(gr);
+      const n = normNome(v.nome), m = rosa(v.s).filter(t => normNome(nomeT(t)) === n), o = S.tess.filter(t => t.squadraId !== id[v.s] && normNome(nomeT(t)) === n);
+      gr.altri = o; SC[k] = m.length === 1 ? m[0].id : !m.length && o.length === 1 ? o[0].id : ''; }
+    if(!gr.num && v.num) gr.num = v.num; gr.voci.push(v); });
+  const tessDi = tid => S.tess.find(t => t.id === tid) || null;
+  const flags = (s, t, picked) => { const f = [];
+    if(!t){ f.push(['no', 'Non tesserato']); return f; }
+    if(t.squadraId !== id[s]) f.push(['no', `Tesserato con ${t.squadra || 'un’altra squadra'}`]);
+    const st = statoT(t); if(st !== 'approvato') f.push(['no', `Cartellino non valido (${st === 'attesa' ? 'da approvare' : st})`]);
+    if(squ[s].has(t.id)) f.push(['no', 'Squalificato']);
+    if(!picked && inDist(s, t.id) === false) f.push(['wait', 'Non era in distinta']);
+    return f; };
+  const chi = v => { const tid = v.tid && v.tid !== '__man' ? v.tid : SC[v.key], t = tid ? tessDi(tid) : null;
+    if(t) return {id: t.id, nome: nomeT(t), cog: t.cognome || '', ruolo: t.ruolo || 'Giocatore'};
+    if(v.tid && v.tid !== '__man') return {id: v.tid, nome: v.nome, cog: v.nome.split(' ')[0] || '', ruolo: 'Giocatore'};
+    return {id: 'nt-' + v.s + '-' + normNome(v.nome).replace(/ /g, '-'), nome: v.nome, cog: v.nome.split(' ')[0] || '', ruolo: v.k === 'dir' ? 'Dirigente' : 'Giocatore', nt: true}; };
+  /* dal referto ai dati della partita */
+  const mappa = () => {
+    if(rinv) return {stato: 'rinviata', giocata: false, tavolino: '', gc: null, go: null, mar: [], aut: null, mvp: null, por: null, amm: [], esp: [], cart: null};
+    const n = {stato: '', giocata: true, tavolino: '', gc: +R.gc || 0, go: +R.go || 0, mar: [], aut: {casa: 0, ospite: 0}, mvp: null, por: null, amm: [], esp: []};
+    const altra = s => s === 'casa' ? 'ospite' : 'casa', cc = (c, s, ruolo) => ({id: c.id, nome: c.nome, cog: c.cog, sq: s, ruolo: ruolo || c.ruolo || 'Giocatore'});
+    const V = k => voci.filter(v => v.k === k), dop = new Set(V('esp').filter(v => v.doppia).map(v => chi(v).id));
+    V('mar').forEach(v => { if(v.aut){ n.aut[altra(v.s)]++; return; } const c = chi(v), m = n.mar.find(x => x.id === c.id && x.sq === v.s); if(m) m.n++; else n.mar.push({id: c.id, nome: c.nome, cog: c.cog, sq: v.s, n: 1}); });
+    V('amm').forEach(v => { const c = chi(v); if(!dop.has(c.id) && !n.amm.some(x => x.id === c.id)) n.amm.push(cc(c, v.s)); });
+    V('esp').forEach(v => { const c = chi(v); if(!n.esp.some(x => x.id === c.id)) n.esp.push({...cc(c, v.s), tipo: v.doppia ? 'doppia' : 'diretta'}); });
+    V('dir').forEach(v => { const c = chi(v), ru = c.ruolo && c.ruolo !== 'Giocatore' ? c.ruolo : /allenatore/i.test(v.e.qual || '') ? 'Allenatore' : 'Dirigente';
+      if(v.amm){ if(!n.amm.some(x => x.id === c.id)) n.amm.push(cc(c, v.s, ru)); } else if(!n.esp.some(x => x.id === c.id)) n.esp.push({...cc(c, v.s, ru), tipo: 'diretta'}); });
+    ['mvp', 'por'].forEach(k => { const v = V(k)[0]; if(v){ const c = chi(v); n[k] = {id: c.id, nome: c.nome, cog: c.cog, sq: v.s}; } });
+    n.cart = {casa: cartDi(n, 'casa'), ospite: cartDi(n, 'ospite')};
+    return n; };
+  const quando = v => [v.e.min ? v.e.min + '’' : '', VOCE[v.k](v.e)].filter(Boolean).join(' ');
+  const chip = f => f.map(([c, t]) => `<span class="pst ${c}">${c === 'no' ? '⛔ ' : ''}${esc(t)}</span>`).join(' ');
+  const nomeSq = s => p[s] || s;
+  const {root, close} = sheet(`<h3>Referto · ${esc(p.casa)} – ${esc(p.ospite)}</h3>
+    <p class="note">${esc(NOMECAMP[p.camp] || p.camp)} · ${esc(p.giornata)}ª giornata${p.data ? ' · ' + esc(giornoCorto(p.data)) + (p.ora ? ' ore ' + esc(p.ora) : '') : ''}<br>Arbitro: <b>${esc(r.nome || '—')}</b>${r.at ? ' · inviato il ' + esc(new Date(r.at).toLocaleString('it-IT', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'})) : ''}</p>
+    <div id="rcBody" class="stack" style="gap:12px"></div>
+    <div class="err" id="rcErr"></div>
+    <div class="stack" style="gap:8px"><button class="btn btn-primary btn-block" id="rcGo">${rinv ? 'Conferma: partita rinviata' : 'Conferma e aggiorna'}</button>${rinv ? '' : '<button type="button" class="btn btn-ghost btn-block" id="rcMod">Correggi prima di confermare</button>'}</div>
+    <p class="note">${rinv ? 'Confermando la partita diventa “rinviata”: poi le dai la nuova data dalla scheda della partita.' : 'Confermando si aggiornano risultato, classifica, marcatori, premi e disciplina. Con «Correggi» apri la scheda della partita già compilata con il referto e cambi quello che serve prima di salvare.'}</p>`, 'Referto', 'largo');
+  const body = root.querySelector('#rcBody');
+  const draw = () => {
+    const n = mappa();
+    const lista = (s, l, f) => l.filter(x => x.sq === s).map(f).join(', ') || '—';
+    const daVedere = voci.filter(v => v.tid && v.tid !== '__man').map(v => [v, flags(v.s, tessDi(v.tid), true)]).filter(([v, f]) => f.length);
+    body.innerHTML = `${R.esito === 'sospesa' ? `<div class="warn-box"><b>Gara sospesa al ${esc(R.minSosp || '?')}’.</b> ${esc(R.motivo || '')}<br>Il risultato qui sotto è quello al momento della sospensione: se il giudice decide diversamente usa «Correggi prima di confermare».</div>` : ''}
+      ${rinv ? `<div class="warn-box"><b>L’arbitro segnala che la gara non si è giocata (rinviata).</b>${R.motivo ? '<br>Motivo: ' + esc(R.motivo) : ''}</div>` : `
+      <div class="rc-ris"><span>${esc(p.casa)}</span><b>${esc(R.gc ?? '?')} – ${esc(R.go ?? '?')}</b><span>${esc(p.ospite)}</span></div>
+      ${R.gc1 !== '' || R.go1 !== '' ? `<p class="note" style="text-align:center;margin-top:-6px">1° tempo ${esc(R.gc1 || 0)}-${esc(R.go1 || 0)}</p>` : ''}`}
+      ${gruppi.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Scritti a mano <span class="cnt hot">${gruppi.length}</span></div>
+        <p class="note" style="margin:0">Non erano in distinta: scegli chi sono. Se non li trovi lascia «Non tesserato».</p>
+        ${gruppi.map(gr => { const t = SC[gr.key] ? tessDi(SC[gr.key]) : null;
+          return `<div class="rc-man"><div><b>${esc(gr.nome || '(senza nome)')}</b>${gr.num ? ` <span class="note">n. ${esc(gr.num)}</span>` : ''} <span class="note">· ${esc(nomeSq(gr.s))} · ${esc(gr.voci.map(quando).join(', '))}</span></div>
+            <select data-sc="${esc(gr.key)}" aria-label="Chi è ${esc(gr.nome)}"><option value="">Non tesserato: tieni solo il nome</option>
+              <optgroup label="${esc(nomeSq(gr.s))}">${rosa(gr.s).map(x => { const f = flags(gr.s, x, false).filter(y => y[0] === 'no'); return `<option value="${esc(x.id)}" ${SC[gr.key] === x.id ? 'selected' : ''}>${esc(nomeT(x))}${x.numero ? ' · n. ' + esc(x.numero) : ''}${f.length ? ' — ' + esc(f.map(y => y[1].toLowerCase()).join(', ')) : ''}</option>`; }).join('')}</optgroup>
+              ${gr.altri.length ? `<optgroup label="Altre squadre">${gr.altri.map(x => `<option value="${esc(x.id)}" ${SC[gr.key] === x.id ? 'selected' : ''}>${esc(nomeT(x))} · ${esc(x.squadra || '')}</option>`).join('')}</optgroup>` : ''}</select>
+            <div class="rc-fl">${chip(flags(gr.s, t, false))}</div></div>`; }).join('')}</section>` : ''}
+      ${daVedere.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Da controllare</div>${daVedere.map(([v, f]) => `<div class="rc-man"><div><b>${esc(v.nome)}</b> <span class="note">· ${esc(nomeSq(v.s))} · ${esc(quando(v))}</span></div><div class="rc-fl">${chip(f)}</div></div>`).join('')}</section>` : ''}
+      ${rinv ? '' : `<section class="stack" style="gap:6px"><div class="eyebrow">Cosa entra nel campionato</div>
+        ${['casa', 'ospite'].map(s => `<div class="rc-sq"><div class="mkh">${stemma(nomeSq(s))}<span>${esc(nomeSq(s))}</span></div>
+          <p><b>Gol:</b> ${lista(s, n.mar, x => esc(x.nome) + (x.n > 1 ? ' ×' + x.n : ''))}${n.aut[s] ? ` · autogol degli avversari ×${n.aut[s]}` : ''}</p>
+          <p><b>Ammoniti:</b> ${lista(s, n.amm, x => esc(x.nome) + (x.ruolo && x.ruolo !== 'Giocatore' ? ` (${esc(x.ruolo.toLowerCase())})` : ''))}</p>
+          <p><b>Espulsi:</b> ${lista(s, n.esp, x => esc(x.nome) + (x.tipo === 'doppia' ? ' (doppia amm.)' : ' (rosso diretto)'))}</p></div>`).join('')}
+        <p><b>Migliore in campo:</b> ${n.mvp ? esc(n.mvp.nome) + ' · ' + esc(nomeSq(n.mvp.sq)) : '—'}<br><b>Miglior portiere:</b> ${n.por ? esc(n.por.nome) + ' · ' + esc(nomeSq(n.por.sq)) : '—'}</p>
+        ${(() => { const g = s => n.mar.filter(x => x.sq === s).reduce((a, x) => a + x.n, 0) + n.aut[s]; return g('casa') !== n.gc || g('ospite') !== n.go ? `<div class="warn-box">I gol assegnati (${g('casa')}-${g('ospite')}) non tornano con il risultato ${n.gc}-${n.go}.</div>` : ''; })()}</section>`}
+      ${R.note || R.spettatori || R.campo ? `<section class="stack" style="gap:6px"><div class="eyebrow">Altre informazioni dell’arbitro</div>
+        ${R.spettatori ? `<p class="note" style="margin:0">Spettatori: circa ${esc(R.spettatori)}</p>` : ''}${R.campo ? `<p class="note" style="margin:0">Terreno di gioco: ${esc(R.campo)}</p>` : ''}
+        ${R.note ? `<div class="rc-note">${esc(R.note)}</div>` : ''}</section>` : ''}`;
+    body.querySelectorAll('[data-sc]').forEach(x => x.onchange = () => { SC[x.dataset.sc] = x.value; draw(); });
+  };
+  draw();
+  const im = S.impianti.find(x => x.id === p.impiantoId);
+  root.querySelector('#rcGo').onclick = async () => {
+    const b = root.querySelector('#rcGo'), er = root.querySelector('#rcErr'); er.textContent = '';
+    const n = mappa();
+    if(!rinv){ const g = s => n.mar.filter(x => x.sq === s).reduce((a, x) => a + x.n, 0) + n.aut[s];
+      if(g('casa') > n.gc || g('ospite') > n.go){ er.textContent = 'Ci sono più gol assegnati che nel risultato: usa «Correggi prima di confermare».'; return; } }
+    b.disabled = true;
+    try{ await salvaPartita({...p, ...n, refConfAt: +r.at || Date.now(), updatedAt: Date.now()}, p, im); toast(rinv ? 'Partita segnata come rinviata' : 'Referto confermato: classifica aggiornata'); close(); }
+    catch(err){ b.disabled = false; er.textContent = err.msg || fbErr(err); }
+  };
+  const mod = root.querySelector('#rcMod');
+  if(mod) mod.onclick = () => { const n = mappa(); close(); openPartita(p, {...n, refConfAt: +r.at || Date.now()}); };
+}
+/* l'amministratore toglie dalle distinte non ancora giocate chi è squalificato o non ha più il cartellino valido */
+const PULITE = new Set();
+function pulisciDistinte(){
+  if(!S.admin || !S.pubParOk || !S.loaded.dist || !S.loaded.tess || !S.loaded.partite) return;
+  (S.dist || []).forEach(dd => {
+    const p = S.partite.find(x => x.id === dd.partitaId); if(!p || esito(p) || p.stato === 'rinviata' || !distOk(dd, p)) return;
+    const sid = new Set(squPer(p, dd.squadraId).map(x => x.id)), tt = id => S.tess.find(t => t.id === id);
+    const no = x => sid.has(x.id) || (tt(x.id) && statoT(tt(x.id)) !== 'approvato');
+    const tg = (dd.giocatori || []).filter(no), td = (dd.dirigenti || []).filter(no); if(!tg.length && !td.length) return;
+    const k = dd.id + ':' + [...tg, ...td].map(x => x.id).join(','); if(PULITE.has(k)) return; PULITE.add(k);
+    const via = new Set([...tg, ...td].map(x => x.id));
+    db().collection('distinte').doc(dd.id).update({giocatori: dd.giocatori.filter(x => !via.has(x.id)), dirigenti: (dd.dirigenti || []).filter(x => !via.has(x.id)),
+      capitano: via.has(dd.capitano) ? '' : dd.capitano || '', vice: via.has(dd.vice) ? '' : dd.vice || '',
+      tolti: [...(dd.tolti || []), ...[...tg, ...td].map(x => ({id: x.id, nome: x.nome, perche: sid.has(x.id) ? 'squalificato' : 'cartellino non valido'}))], updatedAt: Date.now()})
+      .catch(e => { PULITE.delete(k); console.warn('pulisci distinta', e && e.code); });
+  });
 }
 /* salva la partita e tiene allineata la designazione nell'app arbitri */
 async function salvaPartita(n, old, im){
@@ -2766,7 +2919,8 @@ async function salvaPartita(n, old, im){
   const pronta = n.data && n.ora && n.impianto && n.stato !== 'rinviata';
   const geo = im && im.lat && im.lng ? {lat: +im.lat, lng: +im.lng} : {lat: null, lng: null};
   const info = {data: n.data, ora: n.ora, categoria: n.camp, casa: n.casa, ospite: n.ospite, impianto: n.impianto, indirizzo: n.indirizzo, citta: n.citta, mapsUrl: im ? im.mapsUrl || '' : '', ...geo};
-  if(!d && pronta){
+  const nuovaDes = d && old && old.stato === 'rinviata' && n.stato !== 'rinviata' && refFatto(d);
+  if((!d || nuovaDes) && pronta){
     const dref = db().collection('designazioni').doc();
     ops.push(b => b.set(dref, {...info, girone: '', numeroGara: '', rimborso: tariffa(n.camp), note: '', ufficiali: [], arbitriIds: [], cronologia: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], storico: [], partitaId: ref.id, giornata: n.giornata, createdAt: now, updatedAt: now}));
     dati.desId = dref.id;
