@@ -3292,13 +3292,14 @@ async function shBase(cat, fmtI, titolo, sotto){
   const ctx = cv.getContext('2d'), acc = shAcc(cat);
   ctx.fillStyle = '#071033'; ctx.fillRect(0, 0, W, H);
   const bg = await shImg(story ? '../sfondo-avvio.jpg' : '../sfondo-barra.jpg');
-  if(bg && story){ const k = Math.max(W / bg.width, H / bg.height), w = bg.width * k, h = bg.height * k, su = 280, lf = 560;
-    /* lo stadio con le stelle sale di 280 px; il logo resta fermo in alto, sfumato sopra */
-    const k2 = (H + su) / h, w2 = w * k2; ctx.drawImage(bg, (W - w2) / 2, -su, w2, h * k2);
-    const t = document.createElement('canvas'); t.width = W; t.height = lf + 140; const tc = t.getContext('2d');
+  if(bg && story){ const k = Math.max(W / bg.width, H / bg.height), w = bg.width * k, h = bg.height * k, su = 420, lf = 585;
+    /* lo stadio con le stelle sale fin sotto il titolo (grandezza originale); il logo resta fermo in alto, sfumato sopra */
+    ctx.drawImage(bg, (W - w) / 2, -su, w, h);
+    ctx.save(); ctx.beginPath(); ctx.rect(0, H - su - 2, W, su + 2); ctx.clip(); ctx.translate(0, 2 * (H - su)); ctx.scale(1, -1); ctx.drawImage(bg, (W - w) / 2, -su, w, h); ctx.restore();
+    const t = document.createElement('canvas'); t.width = W; t.height = lf + 50; const tc = t.getContext('2d');
     tc.drawImage(bg, (W - w) / 2, 0, w, h);
-    const m = tc.createLinearGradient(0, lf, 0, lf + 140); m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(1, 'rgba(0,0,0,0)');
-    tc.globalCompositeOperation = 'destination-in'; tc.fillStyle = m; tc.fillRect(0, 0, W, lf + 140);
+    const m = tc.createLinearGradient(0, lf, 0, lf + 50); m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(1, 'rgba(0,0,0,0)');
+    tc.globalCompositeOperation = 'destination-in'; tc.fillStyle = m; tc.fillRect(0, 0, W, lf + 50);
     ctx.drawImage(t, 0, 0); }
   else if(bg){ const k = Math.max(W / bg.width, H / bg.height), w = bg.width * k, h = bg.height * k; ctx.drawImage(bg, (W - w) / 2, (H - h) / 2, w, h); }
   let g = ctx.createLinearGradient(0, 0, 0, H);
@@ -3309,9 +3310,9 @@ async function shBase(cat, fmtI, titolo, sotto){
   const tit = (t, x, y, size, maxW, align) => { ctx.save(); ctx.translate(x, y); ctx.transform(1, 0, -.18, 1, 0, 0); ctx.shadowColor = acc + 'aa'; ctx.shadowBlur = 28; shTxt(ctx, t, 0, 0, maxW, 'D', 800, size, '#fff', align, Math.round(size * .55)); ctx.restore(); };
   let y0;
   if(story){
-    ctx.save(); ctx.shadowColor = acc; ctx.shadowBlur = 18; shTxt(ctx, nome, W / 2, 652, W - 120, 'D', 800, 50, acc, 'center'); ctx.restore();
+    ctx.save(); ctx.shadowColor = 'rgba(2,6,24,.95)'; ctx.shadowBlur = 16; shTxt(ctx, nome, W / 2, 652, W - 120, 'D', 800, 50, acc, 'center'); shTxt(ctx, nome, W / 2, 652, W - 120, 'D', 800, 50, acc, 'center'); ctx.restore();
     tit(titolo, W / 2, 778, 150, W - 140, 'center');
-    if(sotto) shTxt(ctx, sotto, W / 2, 838, W - 140, 'B', 600, 36, SH_MUTO, 'center');
+    if(sotto){ ctx.save(); ctx.shadowColor = 'rgba(2,6,24,.95)'; ctx.shadowBlur = 12; shTxt(ctx, sotto, W / 2, 838, W - 140, 'B', 600, 36, '#E6ECFF', 'center'); ctx.restore(); }
     y0 = sotto ? 882 : 836;
   } else {
     const lg = await shImg('../marchio-aics.png'); if(lg){ const h = 200, w = lg.width * h / lg.height; ctx.drawImage(lg, 46, 34, w, h); }
@@ -3327,7 +3328,7 @@ async function shBase(cat, fmtI, titolo, sotto){
 }
 /* riga a barra blu con bordo chiaro, come nelle grafiche delle coppe */
 function shBar(ctx, x, y, w, h, zona){
-  ctx.fillStyle = 'rgba(10,28,92,.62)'; shRR(ctx, x, y, w, h, 10); ctx.fill();
+  ctx.fillStyle = 'rgba(10,28,92,.5)'; shRR(ctx, x, y, w, h, 10); ctx.fill();
   ctx.strokeStyle = 'rgba(140,180,255,.55)'; ctx.lineWidth = 2; shRR(ctx, x + 1, y + 1, w - 2, h - 2, 10); ctx.stroke();
   if(zona){ ctx.fillStyle = zona; shRR(ctx, x + 2, y + 2, 9, h - 4, 4); ctx.fill(); }
 }
