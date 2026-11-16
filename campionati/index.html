@@ -169,9 +169,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 #home .sub{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:3px;text-transform:uppercase;text-align:center;color:#e8c77a;margin:0 0 14px;text-shadow:0 2px 8px rgba(0,0,0,.6)}
 #home .camp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 /* schermo largo (PC, tablet): l'immagine resta intera al centro e sfuma ai lati */
-@media (min-aspect-ratio:1472/2616){#home,#gate{background-size:auto 100%,auto 100%;background-position:center top,center top;background-color:#07144c}
-  #home:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#07144c calc(50% - var(--hw,100vw) / 2),rgba(7,20,76,0) calc(50% - var(--hw,100vw) / 2 + 60px),rgba(7,20,76,0) calc(50% + var(--hw,100vw) / 2 - 60px),#07144c calc(50% + var(--hw,100vw) / 2))}
-  #gate{isolation:isolate}#gate:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#07144c calc(50% - 50vh * 1472 / 2616),rgba(7,20,76,0) calc(50% - 50vh * 1472 / 2616 + 60px),rgba(7,20,76,0) calc(50% + 50vh * 1472 / 2616 - 60px),#07144c calc(50% + 50vh * 1472 / 2616))}
+#home .hbg{display:none}
+@media (min-aspect-ratio:1472/2616){#home,#gate{background:#07144c;isolation:isolate}#home{--cw:var(--hw,100vw)}#gate{--cw:calc(100vh * 1472 / 2616)}
+  #home .hbg,#gate:before{content:"";display:block;position:absolute;inset:-40px;z-index:-2;pointer-events:none;background:linear-gradient(180deg,rgba(18,52,170,.65) 0,rgba(18,52,170,.25) 18%,rgba(18,52,170,0) 34%),url(../sfondo-avvio.jpg) center 48%/cover no-repeat;filter:blur(7px) brightness(.75) saturate(1.15)}
+  #home:after,#gate:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:url(../sfondo-avvio.jpg) center top/auto 100% no-repeat;-webkit-mask-image:linear-gradient(90deg,transparent calc(50% - var(--cw) / 2),#000 calc(50% - var(--cw) / 2 + 90px),#000 calc(50% + var(--cw) / 2 - 90px),transparent calc(50% + var(--cw) / 2));mask-image:linear-gradient(90deg,transparent calc(50% - var(--cw) / 2),#000 calc(50% - var(--cw) / 2 + 90px),#000 calc(50% + var(--cw) / 2 - 90px),transparent calc(50% + var(--cw) / 2))}
 }
 #home .c{display:block;color:#fff;text-decoration:none;border-radius:22px;padding:14px 8px;text-align:center;background:rgba(10,18,60,.45);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);transition:transform .15s ease}
 #home .c:active{transform:scale(.96)}
@@ -501,9 +502,25 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sheet .grab{display:none}
 .sheet > *,.sheet .form > *{flex-shrink:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* PC e tablet in orizzontale: le pagine si allargano e gli elenchi vanno su più colonne */
+@media (min-width:900px){
+  .wrap,.band-in{max-width:1180px}
+  .wrap{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;align-items:stretch}
+  .list > li{display:flex;flex-direction:column}.list > li > .item{flex:1}
+  .list > .empty,.list > p,.list > div{grid-column:1/-1}
+  .sheet .list{display:flex;flex-direction:column}
+  .card.par{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card.par > *{border-right:1px solid var(--line)}.card.par > *:nth-child(2n){border-right:0}
+}
+@media (min-width:1400px){
+  .wrap,.band-in{max-width:1320px}
+  .card.par{grid-template-columns:repeat(3,minmax(0,1fr))}.card.par > *:nth-child(2n){border-right:1px solid var(--line)}.card.par > *:nth-child(3n){border-right:0}
+}
 </style>
 </head><body>
-<div id="app"><div id="home"><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
+<div id="app"><div id="home"><div class="hbg"></div><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
 <div class="camp"><a class="c f" href="#futsal"><img src="logo-futsal.png" alt=""><div class="n">Futsal League</div><div class="s">Calcio a 5</div></a>
 <a class="c l" href="#liga"><img src="logo-liga.png" alt=""><div class="n">R.E. Liga</div><div class="s">Calcio a 7</div></a></div></div>
 <div class="acc"><span id="accTx">Sei responsabile di una squadra?</span><br><a href="#area" id="accBtn">Area squadre · Accedi</a></div></div><button class="hcom" id="hCom" hidden aria-label="Comunicati">📣<span class="t">Comunicati</span><span class="cnt" id="hComN" hidden></span></button></div></div>
@@ -724,7 +741,7 @@ function vista(){ const app = $('#app'); $('#sheetRoot').innerHTML = ''; app.dat
 const lay = () => { const H = innerHeight, W = Math.min(innerWidth, H * 1472 / 2616), k = Math.max(W / 1472, H / 2616), o = (H - 2616 * k) * .3, r = document.documentElement.style; r.setProperty('--tb', Math.round(o + 790 * k) + 'px'); r.setProperty('--hw', Math.round(W) + 'px'); };
 function renderHome(app){
   if(!$('#home')){
-    app.innerHTML = `<div id="home"><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
+    app.innerHTML = `<div id="home"><div class="hbg"></div><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
       <div class="camp">${['futsal', 'liga'].map(k => `<a class="c ${k === 'futsal' ? 'f' : 'l'}" href="#${k}"><img src="${CAMP[k].logo}" alt=""><div class="n">${CAMP[k].nome}</div><div class="s">${k === 'futsal' ? 'Calcio a 5' : 'Calcio a 7'}</div></a>`).join('')}</div></div>
       <div class="acc"><span id="accTx"></span><br><a href="#area" id="accBtn"></a></div></div><button class="hcom" id="hCom" hidden aria-label="Comunicati">📣<span class="t">Comunicati</span><span class="cnt" id="hComN" hidden></span></button></div>`;
     lay();
