@@ -587,6 +587,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .tb-pr > div{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--chip)}
 .tb-pr .pi{font-size:22px}
 .tb-pr small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.btn-warn{background:rgba(232,163,60,.16);color:var(--fg);border:1px solid rgba(232,163,60,.55)}
 /* finestre: o la X in alto a destra (se ci sono altri tasti) o il tasto Chiudi fisso in fondo */
 .sheet-x{position:sticky;top:8px;z-index:7;display:flex;justify-content:flex-end;height:36px;margin:-4px -8px 0 0;flex-shrink:0;pointer-events:none}
 .sheet-x.in-riga{height:0;margin:0 -8px 0 0}
@@ -1273,6 +1274,7 @@ function cardPar(p){
   const e = esito(p), fin = !!e;
   const mid = fin ? `<span class="st${e.tav ? ' no' : ''}">${e.tav ? 'A tavolino' : 'Finale'}</span><span class="num">${e.gc} : ${e.go}</span>`
     : p.stato === 'rinviata' ? '<span class="st no">Rinviata</span><span class="ora">– : –</span>'
+    : p.rigiocare && !p.data ? '<span class="st no">Da rigiocare</span><span class="ora">– : –</span>'
     : p.data ? `<span class="st prox">${GIORNI[dataObj(p.data).getDay()]}</span><span class="ora">${esc(p.ora || '--:--')}</span>`
     : '<span class="st">Da definire</span><span class="ora">– : –</span>';
   const piede = !p.data && !p.impianto ? 'Data e luogo da definire' : [p.impianto || (fin ? '' : 'Luogo da definire'), p.data ? giornoCorto(p.data) : 'Data da definire'].filter(Boolean).join(' · ');
@@ -2134,6 +2136,7 @@ function statoPar(p){
   if(refNuovo(p)) return ['wait', 'Referto da confermare'];
   if(e && e.tav) return ['ok', `A tavolino ${e.gc}-${e.go}${e.rit ? ' (ritiro)' : ''}`];
   if(e) return ['ok', `Finale ${e.gc}-${e.go}`];
+  if(p.rigiocare) return ['wait', p.data ? 'Da rigiocare: tocca Salva per la designazione' : 'Da rigiocare: metti la nuova data'];
   if(refFatto(d) && p.stato !== 'rinviata') return ['ok', 'Referto arrivato'];
   if(p.stato === 'rinviata') return ['no', 'Rinviata'];
   if(!p.data) return ['grigio', 'Da programmare'];
@@ -2462,7 +2465,7 @@ function bozzaGS(cat, da, incAmm = true){
   const lg = G == null ? [] : par.filter(p => +p.giornata === G), dataDa = da > 1 ? (par.filter(p => +p.giornata === da).map(p => p.data).filter(Boolean).sort()[0] || '') : '';
   const ids = nuove.map(p => 'p:' + p.id), R = (a, b) => ({a, b: b || ''}), vs = p => `${p.casa} – ${p.ospite}`, sez = [];
   const rr = nuove.map(p => { const e = esito(p, imp); return R(vs(p), `${e.gc}-${e.go}${e.tav ? (e.rit ? ' (a tavolino, squadra ritirata)' : ' (a tavolino)') : ''}${+p.giornata !== G ? ` · ${p.giornata}ª giornata, recupero` : ''}`); });
-  const rinv = lg.filter(p => !fatta(p) && p.stato === 'rinviata').map(p => R(vs(p), 'Rinviata')), manca = lg.filter(p => !fatta(p) && p.stato !== 'rinviata');
+  const rinv = lg.filter(p => !fatta(p) && (p.stato === 'rinviata' || p.rigiocare)).map(p => R(vs(p), p.rigiocare ? 'Sospesa, da rigiocare' : 'Rinviata')), manca = lg.filter(p => !fatta(p) && p.stato !== 'rinviata' && !p.rigiocare);
   sez.push({liv: 1, t: `1. Risultati${G ? ` · ${G}ª giornata` : ''}`, r: [...rr, ...rinv], vuoto: 'Nessun risultato nuovo.'});
   const dd = disciplina(cat), ruo = new Map(dd.gioc.map(r => [r.id, r.ruolo])), chi = (nome, sq, ru) => `${nome} (${sq}${ru && !/Giocatore|Portiere/.test(ru) ? ', ' + ru.toLowerCase() : ''})`;
   const kz = z => z.man ? 'm:' + z.docId : z.dir ? 's:' + z.docId : `a:${z.dopo.id}_${z.id}_${z.motivo}`, daDec = [], squ = [];
@@ -2734,7 +2737,7 @@ function openImporta(){
 function openPartita(p0, pre){
   const p = pre ? {...p0, ...pre} : p0;
   if(!p) return;
-  const isNew = !p.id, cat = p.camp, teams = squadreCat(cat), d = desDi(p), fatto = refFatto(d) && !(p0.stato === 'rinviata' && ((refDi(d) || {}).referto || {}).esito === 'rinviata');
+  const isNew = !p.id, cat = p.camp, teams = squadreCat(cat), d = desDi(p), fatto = refFatto(d) && !p0.rigiocare && !(p0.stato === 'rinviata' && ((refDi(d) || {}).referto || {}).esito === 'rinviata');
   const imp = S.impianti.slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
   const opt = (l, sel) => l.map(q => `<option value="${esc(q.id)}" ${q.id === sel ? 'selected' : ''}>${esc(q.nome)}${q.citta ? ' · ' + esc(q.citta) : ''}</option>`).join('');
   const [k, t] = isNew ? ['', ''] : statoPar(p0);
@@ -2871,7 +2874,7 @@ const normNome = s => String(s || '').toLowerCase().normalize('NFD').replace(/[�
 const latoR = s => s === 'ospite' ? 'ospite' : 'casa';
 function itemRef(p){
   const r = refNuovo(p), R = r.referto || {}, man = refVoci(R).filter(v => !v.tid || v.tid === '__man').length;
-  const es = R.esito === 'rinviata' ? 'Gara rinviata' : `${R.esito === 'sospesa' ? `Sospesa al ${R.minSosp || '?'}’ · ` : ''}${R.gc ?? '?'}-${R.go ?? '?'}`;
+  const es = R.esito === 'rinviata' ? 'Gara rinviata' : R.esito === 'assente' ? `Non si è presentata: ${R.assente === 'ospite' ? p.ospite : p.casa}` : `${R.esito === 'sospesa' ? `Sospesa al ${R.minSosp || '?'}’ · ` : ''}${R.gc ?? '?'}-${R.go ?? '?'}`;
   return `<li><button class="item" data-rc="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${esc(NOMECAMP[p.camp] || p.camp)} · ${esc(p.giornata)}ª giornata${p.data ? ' · ' + esc(giornoCorto(p.data)) : ''}</span>
     <span class="pst ${R.esito ? 'no' : 'wait'}">${esc(es)}${man ? ` · ${man} ${man === 1 ? 'nome scritto a mano' : 'nomi scritti a mano'}` : ''}</span></span></button></li>`;
 }
@@ -2888,7 +2891,7 @@ function refVoci(R){
 const VOCE = {mar: e => e.mot === 'Autorete' ? 'Autorete' : 'Rete', amm: () => 'Ammonito', esp: e => e.mot === 'Doppia ammonizione' ? 'Espulso (doppia amm.)' : 'Espulso', dir: e => (e.prov || '').startsWith('Ammon') ? 'Dirigente ammonito' : 'Dirigente espulso', mvp: () => 'Migliore in campo', por: () => 'Miglior portiere'};
 function confRef(p){
   const d = desDi(p), r = refDi(d); if(!r){ toast('Il referto non c’è più'); return; }
-  const R = r.referto || {}, rinv = R.esito === 'rinviata', voci = refVoci(R), id = {casa: p.casaId, ospite: p.ospiteId};
+  const R = r.referto || {}, rinv = R.esito === 'rinviata', ass = R.esito === 'assente', vince = R.assente === 'ospite' ? 'casa' : 'ospite', voci = ass ? [] : refVoci(R), id = {casa: p.casaId, ospite: p.ospiteId};
   const squ = {casa: new Set(squPer(p, p.casaId).map(x => x.id)), ospite: new Set(squPer(p, p.ospiteId).map(x => x.id))};
   const dist = {casa: distDi(p, p.casaId), ospite: distDi(p, p.ospiteId)};
   const inDist = (s, tid) => { const x = dist[s]; return !x || !distOk(x, p) ? null : [...(x.giocatori || []), ...(x.dirigenti || [])].some(y => y.id === tid); };
@@ -2914,6 +2917,7 @@ function confRef(p){
     return {id: 'nt-' + v.s + '-' + normNome(v.nome).replace(/ /g, '-'), nome: v.nome, cog: v.nome.split(' ')[0] || '', ruolo: v.k === 'dir' ? 'Dirigente' : 'Giocatore', nt: true}; };
   /* dal referto ai dati della partita */
   const mappa = () => {
+    if(ass) return {stato: '', giocata: true, tavolino: vince, gc: null, go: null, mar: [], aut: null, autMin: null, mvp: null, por: null, amm: [], esp: [], cart: null};
     if(rinv) return {stato: 'rinviata', giocata: false, tavolino: '', gc: null, go: null, mar: [], aut: null, autMin: null, mvp: null, por: null, amm: [], esp: [], cart: null};
     const n = {stato: '', giocata: true, tavolino: '', gc: +R.gc || 0, go: +R.go || 0, mar: [], aut: {casa: 0, ospite: 0}, mvp: null, por: null, amm: [], esp: []};
     const altra = s => s === 'casa' ? 'ospite' : 'casa', cc = (c, s, ruolo, v) => ({id: c.id, nome: c.nome, cog: c.cog, sq: s, ruolo: ruolo || c.ruolo || 'Giocatore', min: v ? String(v.e.min || '').trim() : ''});
@@ -2935,17 +2939,17 @@ function confRef(p){
     <p class="note">${esc(NOMECAMP[p.camp] || p.camp)} · ${esc(p.giornata)}ª giornata${p.data ? ' · ' + esc(giornoCorto(p.data)) + (p.ora ? ' ore ' + esc(p.ora) : '') : ''}<br>Arbitro: <b>${esc(r.nome || '—')}</b>${r.at ? ' · inviato il ' + esc(new Date(r.at).toLocaleString('it-IT', {day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'})) : ''}</p>
     <div id="rcBody" class="stack" style="gap:12px"></div>
     <div class="err" id="rcErr"></div>
-    <div class="stack" style="gap:8px"><button class="btn btn-primary btn-block" id="rcGo">${rinv ? 'Conferma: partita rinviata' : 'Conferma e aggiorna'}</button>${rinv ? '' : '<button type="button" class="btn btn-ghost btn-block" id="rcMod">Correggi prima di confermare</button>'}</div>
-    <p class="note">${rinv ? 'Confermando la partita diventa “rinviata”: poi le dai la nuova data dalla scheda della partita.' : 'Confermando si aggiornano risultato, classifica, marcatori, premi e disciplina. Con «Correggi» apri la scheda della partita già compilata con il referto e cambi quello che serve prima di salvare.'}</p>`, 'Referto', 'largo');
+    <div class="stack" style="gap:8px"><button class="btn btn-primary btn-block" id="rcGo">${rinv ? 'Conferma: partita rinviata' : ass ? `Conferma: vittoria a tavolino di ${esc(p[vince])}` : 'Conferma e aggiorna'}</button>${R.esito === 'sospesa' ? '<button type="button" class="btn btn-warn btn-block" id="rcRig">🔄 Da rigiocare: rimetti in calendario</button>' : ''}${rinv || ass ? '' : '<button type="button" class="btn btn-ghost btn-block" id="rcMod">Correggi prima di confermare</button>'}</div>
+    <p class="note">${rinv ? 'Confermando la partita diventa “rinviata”: poi le dai la nuova data dalla scheda della partita.' : ass ? `${esc(p[R.assente === 'ospite' ? 'ospite' : 'casa'])} perde a tavolino con il punteggio delle impostazioni del campionato.` : R.esito === 'sospesa' ? 'Gara sospesa: confermando vale il risultato del campo. Con «Da rigiocare» la partita torna in calendario da programmare: le dai la nuova data, si designa di nuovo l’arbitro e il referto si compila da capo. Con «Correggi» puoi dare la vittoria a tavolino.' : 'Confermando si aggiornano risultato, classifica, marcatori, premi e disciplina. Con «Correggi» apri la scheda della partita già compilata con il referto e cambi quello che serve prima di salvare.'}</p>`, 'Referto', 'largo');
   const body = root.querySelector('#rcBody');
   const draw = () => {
     const n = mappa();
     const lista = (s, l, f) => l.filter(x => x.sq === s).map(f).join(', ') || '—';
     const daVedere = voci.filter(v => v.tid && v.tid !== '__man').map(v => [v, flags(v.s, tessDi(v.tid), true)]).filter(([v, f]) => f.length);
-    body.innerHTML = `${R.esito === 'sospesa' ? `<div class="warn-box"><b>Gara sospesa al ${esc(R.minSosp || '?')}’.</b> ${esc(R.motivo || '')}<br>Il risultato qui sotto è quello al momento della sospensione: se il giudice decide diversamente usa «Correggi prima di confermare».</div>` : ''}
-      ${rinv ? `<div class="warn-box"><b>L’arbitro segnala che la gara non si è giocata (rinviata).</b>${R.motivo ? '<br>Motivo: ' + esc(R.motivo) : ''}</div>` : `
+    body.innerHTML = `${R.esito === 'sospesa' ? `<div class="warn-box"><b>Gara sospesa al ${esc(R.minSosp || '?')}’.</b> ${esc(R.motivo || '')}<br>Il risultato qui sotto è quello al momento della sospensione. Se va rigiocata usa «Da rigiocare»; per la vittoria a tavolino «Correggi prima di confermare».</div>` : ''}
+      ${ass ? `<div class="warn-box"><b>L’arbitro segnala che ${esc(p[R.assente === 'ospite' ? 'ospite' : 'casa'])} non si è presentata.</b>${R.motivo ? '<br>Note: ' + esc(R.motivo) : ''}</div>` : rinv ? `<div class="warn-box"><b>L’arbitro segnala che la gara non si è giocata (rinviata).</b>${R.motivo ? '<br>Motivo: ' + esc(R.motivo) : ''}</div>` : `
       <div class="rc-ris"><span>${esc(p.casa)}</span><b>${esc(R.gc ?? '?')} – ${esc(R.go ?? '?')}</b><span>${esc(p.ospite)}</span></div>
-      ${R.gc1 !== '' || R.go1 !== '' ? `<p class="note" style="text-align:center;margin-top:-6px">1° tempo ${esc(R.gc1 || 0)}-${esc(R.go1 || 0)}</p>` : ''}`}
+      ${(R.gc1 ?? '') !== '' || (R.go1 ?? '') !== '' ? `<p class="note" style="text-align:center;margin-top:-6px">1° tempo ${esc(R.gc1 || 0)}-${esc(R.go1 || 0)}</p>` : ''}`}
       ${gruppi.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Scritti a mano <span class="cnt hot">${gruppi.length}</span></div>
         <p class="note" style="margin:0">Non erano in distinta: scegli chi sono. Se non li trovi lascia «Non tesserato».</p>
         ${gruppi.map(gr => { const t = SC[gr.key] ? tessDi(SC[gr.key]) : null;
@@ -2955,7 +2959,7 @@ function confRef(p){
               ${gr.altri.length ? `<optgroup label="Altre squadre">${gr.altri.map(x => `<option value="${esc(x.id)}" ${SC[gr.key] === x.id ? 'selected' : ''}>${esc(nomeT(x))} · ${esc(x.squadra || '')}</option>`).join('')}</optgroup>` : ''}</select>
             <div class="rc-fl">${chip(flags(gr.s, t, false))}</div></div>`; }).join('')}</section>` : ''}
       ${daVedere.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Da controllare</div>${daVedere.map(([v, f]) => `<div class="rc-man"><div><b>${esc(v.nome)}</b> <span class="note">· ${esc(nomeSq(v.s))} · ${esc(quando(v))}</span></div><div class="rc-fl">${chip(f)}</div></div>`).join('')}</section>` : ''}
-      ${rinv ? '' : `<section class="stack" style="gap:6px"><div class="eyebrow">Cosa entra nel campionato</div>
+      ${rinv || ass ? '' : `<section class="stack" style="gap:6px"><div class="eyebrow">Cosa entra nel campionato</div>
         ${['casa', 'ospite'].map(s => `<div class="rc-sq"><div class="mkh">${stemma(nomeSq(s))}<span>${esc(nomeSq(s))}</span></div>
           <p><b>Gol:</b> ${lista(s, n.mar, x => esc(x.nome) + (x.n > 1 ? ' ×' + x.n : ''))}${n.aut[s] ? ` · autogol degli avversari ×${n.aut[s]}` : ''}</p>
           <p><b>Ammoniti:</b> ${lista(s, n.amm, x => esc(x.nome) + (x.ruolo && x.ruolo !== 'Giocatore' ? ` (${esc(x.ruolo.toLowerCase())})` : ''))}</p>
@@ -2972,11 +2976,20 @@ function confRef(p){
   root.querySelector('#rcGo').onclick = async () => {
     const b = root.querySelector('#rcGo'), er = root.querySelector('#rcErr'); er.textContent = '';
     const n = mappa();
-    if(!rinv){ const g = s => n.mar.filter(x => x.sq === s).reduce((a, x) => a + x.n, 0) + n.aut[s];
+    if(!rinv && !ass){ const g = s => n.mar.filter(x => x.sq === s).reduce((a, x) => a + x.n, 0) + n.aut[s];
       if(g('casa') > n.gc || g('ospite') > n.go){ er.textContent = 'Ci sono più gol assegnati che nel risultato: usa «Correggi prima di confermare».'; return; } }
     b.disabled = true;
-    try{ await salvaPartita({...p, ...n, refConfAt: +r.at || Date.now(), updatedAt: Date.now()}, p, im); toast(rinv ? 'Partita segnata come rinviata' : 'Referto confermato: classifica aggiornata'); close(); }
+    try{ await salvaPartita({...p, ...n, refConfAt: +r.at || Date.now(), updatedAt: Date.now()}, p, im); toast(rinv ? 'Partita segnata come rinviata' : ass ? 'Vittoria a tavolino: classifica aggiornata' : 'Referto confermato: classifica aggiornata'); close(); }
     catch(err){ b.disabled = false; er.textContent = err.msg || fbErr(err); }
+  };
+  const rig = root.querySelector('#rcRig');
+  if(rig) rig.onclick = async () => {
+    if(!confirm(`Rimettere ${p.casa} – ${p.ospite} in calendario da rigiocare?\n\nTolgo data e ora: la partita torna “da programmare”. Quando le dai la nuova data si crea una nuova designazione e l’arbitro compila un nuovo referto. Le distinte andranno rifatte.`)) return;
+    rig.disabled = true;
+    try{ await salvaPartita({...p, stato: '', giocata: false, tavolino: '', gc: null, go: null, mar: [], aut: null, autMin: null, mvp: null, por: null, amm: [], esp: [], cart: null,
+        data: '', ora: '', rigiocare: true, rinvii: (+p.rinvii || 0) + 1, refConfAt: +r.at || Date.now(), updatedAt: Date.now()}, p, im);
+      toast('Partita rimessa in calendario da rigiocare'); close(); }
+    catch(err){ rig.disabled = false; root.querySelector('#rcErr').textContent = err.msg || fbErr(err); }
   };
   const mod = root.querySelector('#rcMod');
   if(mod) mod.onclick = () => { const n = mappa(); close(); openPartita(p, {...n, refConfAt: +r.at || Date.now()}); };
@@ -3005,11 +3018,11 @@ async function salvaPartita(n, old, im){
   const pronta = n.data && n.ora && n.impianto && n.stato !== 'rinviata';
   const geo = im && im.lat && im.lng ? {lat: +im.lat, lng: +im.lng} : {lat: null, lng: null};
   const info = {data: n.data, ora: n.ora, categoria: n.camp, casa: n.casa, ospite: n.ospite, impianto: n.impianto, indirizzo: n.indirizzo, citta: n.citta, mapsUrl: im ? im.mapsUrl || '' : '', ...geo};
-  const nuovaDes = d && old && old.stato === 'rinviata' && n.stato !== 'rinviata' && refFatto(d);
+  const nuovaDes = d && old && (old.stato === 'rinviata' || old.rigiocare) && n.stato !== 'rinviata' && refFatto(d);
   if((!d || nuovaDes) && pronta){
     const dref = db().collection('designazioni').doc();
     ops.push(b => b.set(dref, {...info, girone: '', numeroGara: '', rimborso: tariffa(n.camp), note: '', ufficiali: [], arbitriIds: [], cronologia: [], risposte: {}, referti: {}, avvisi: {}, inviate: {}, sostituzioni: {}, subentri: {}, sostituiti: [], storico: [], partitaId: ref.id, giornata: n.giornata, createdAt: now, updatedAt: now}));
-    dati.desId = dref.id;
+    dati.desId = dref.id; dati.rigiocare = false;
   } else if(d && !refFatto(d)){
     const CAMPI = ['data', 'ora', 'casa', 'ospite', 'impianto'], ug = (a, b) => String(a || '') === String(b || '');
     if(n.stato === 'rinviata' && !d.annullata){
