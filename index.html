@@ -234,6 +234,26 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ev .wide{grid-column:1/-1}
 .ev.dir{grid-template-columns:62px 1fr 40px}
 .ev .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
+.ev.con-dist{grid-template-columns:62px 1fr 40px}
+.ev.con-dist .nm{grid-column:2/-1}
+.warn-gol{color:var(--card-red);font-weight:600}
+.dteam{display:flex;flex-direction:column;gap:6px}
+.dth{font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;overflow-wrap:anywhere}
+.dgl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:4px}
+@media (min-width:600px){.dgl{grid-template-columns:1fr 1fr}}
+.dg{width:100%;display:flex;align-items:center;gap:10px;padding:6px 8px;border:0;border-radius:12px;background:var(--surface-2);color:var(--fg);text-align:left;cursor:pointer;font:inherit;min-height:56px}
+.dg:hover{filter:brightness(.97)}
+.dfoto{flex:none;width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--line);display:grid;place-items:center}
+.dfoto img{width:100%;height:100%;object-fit:cover;display:block}
+.dfoto i{font-style:normal;font-weight:700;font-size:15px;color:var(--muted)}
+.dfoto.big{width:120px;height:150px;border-radius:14px}
+.dfoto.big i{font-size:34px}
+.dnum{font-family:var(--display);font-size:22px;min-width:26px;text-align:center}
+.dnm{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere;line-height:1.2}
+.dg em{font-style:normal;font-weight:800;font-size:12px;padding:2px 7px;border-radius:99px;background:var(--fg);color:var(--bg)}
+.dg i{font-style:normal;font-size:12px;color:var(--muted)}
+.tess-big{display:flex;gap:16px;align-items:center}
+.tess-big h3{font-size:26px;overflow-wrap:anywhere}
 .copybox{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-family:var(--mono);font-size:13px}
 
 .cat-list{display:flex;flex-direction:column;gap:6px}
@@ -870,7 +890,7 @@ body.app-in .tabs,body.app-in #scroller{animation:appIn 1.2s cubic-bezier(.2,.8,
     <div class="steps">
       <h2>Come funziona</h2>
       <ol>
-        <li><i>1</i><div><b>Prendi la designazione</b><span>Screenshot da Sinfonia4You, dalla mail o da WhatsApp. Va bene anche la foto del foglio.</span></div></li>
+        <li><i>1</i><div><b>Prendi la designazione</b><span>Screenshot dalla mail o da WhatsApp. Va bene anche la foto del foglio.</span></div></li>
         <li><i>2</i><div><b>Leggo i campi</b><span>La foto viene letta direttamente sul telefono: riconosce squadre, data, ora, campionato, girone, campo, numero gara e ruolo.</span></div></li>
         <li><i>3</i><div><b>Controlli e salvi</b><span>Ti mostro cosa ho capito: correggi quello che serve e la gara entra in registro e calendario.</span></div></li>
       </ol>
@@ -1078,7 +1098,7 @@ function renderOggi(){
       box.querySelector('[data-open]').onclick = () => openSheet(n.id);
     } else {
       box.innerHTML = `<div class="next"><span class="eyebrow">Prossima designazione</span><h2>Nessuna gara in programma</h2>
-        <span class="note" style="font-size:15px"><span class="rw-only">Quando ti arriva una designazione su Sinfonia4You, fai uno screenshot e importalo qui.</span><span class="ro-only">Quando un designatore ti assegna una gara compare qui sopra: tocca Accetto e la trovi nelle tue partite.</span></span>
+        <span class="note" style="font-size:15px"><span class="rw-only">Quando ti arriva una designazione per mail o WhatsApp, fai uno screenshot e importalo qui.</span><span class="ro-only">Quando un designatore ti assegna una gara compare qui sopra: tocca Accetto e la trovi nelle tue partite.</span></span>
         <a class="btn btn-yellow btn-block" href="#importa">+ Aggiungi designazione</a></div>`;
     }
   }
@@ -1685,37 +1705,120 @@ function renderReferto(){
     const r = g.referto ? JSON.parse(JSON.stringify(g.referto)) : {};
     const [rc, ro] = String(g.risultato || '').split('-');
     draft = {gc: r.gc ?? (rc ?? '').trim(), go: r.go ?? (ro ?? '').trim(), gc1: r.gc1 ?? '', go1: r.go1 ?? '', rec1: r.rec1 ?? '', rec2: r.rec2 ?? '',
-      esito: r.esito || '', minSosp: r.minSosp ?? '', motivo: r.motivo ?? '', marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
+      esito: r.esito || '', minSosp: r.minSosp ?? '', motivo: r.motivo ?? '', marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], mvp: r.mvp || null, por: r.por || null, spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
+    ['marcatori', 'ammoniti', 'espulsi', 'dirigenti'].forEach(k => draft[k].forEach(e => { if(!e.tid && e.nome) e.tid = '__man'; }));
   }
   renderRefForm(g);
 }
 
+/* distinte del campionato: per le gare designate collegate a una partita l'arbitro vede chi è in distinta (foto, numeri, capitani, panchina) */
+const DIST = {};
+const parDiGara = g => { const d = desDi(g); return d && d.partitaId ? d.partitaId : ''; };
+function caricaDistinte(g){
+  const pid = parDiGara(g); if(!pid || !fbReady() || !ACC.user) return null;
+  if(DIST[g.id] && DIST[g.id].pid === pid && DIST[g.id].st !== 'err') return DIST[g.id];
+  const o = DIST[g.id] = {st: 'load', pid}, db = firebase.firestore();
+  (async () => {
+    try{
+      const ps = await db.collection('partite').doc(pid).get();
+      if(!ps.exists){ o.st = 'no'; return; }
+      const p = ps.data(), ora = Date.now();
+      for(const s of ['casa', 'ospite']){
+        const sid = p[s + 'Id'] || '', T = o[s] = {nome: p[s] || g[s] || '', inviata: false, gioc: [], dir: []};
+        if(!sid) continue;
+        const ds = await db.collection('distinte').doc(pid + '_' + sid).get(), x = ds.exists ? ds.data() : null;
+        if(!x || (+x.rinvii || 0) !== (+p.rinvii || 0)) continue;
+        T.inviata = true;
+        const tutti = [...(x.giocatori || []), ...(x.dirigenti || [])];
+        const tess = await Promise.all(tutti.map(t => db.collection('tesserati').doc(t.id).get().then(r => r.exists ? r.data() : false, () => null)));
+        const info = new Map(tutti.map((t, i) => [t.id, tess[i]]));
+        /* fuori chi non ha più il cartellino valido (le squalifiche le toglie già l'amministratore dalla distinta) */
+        const ok = t => { const r = info.get(t.id); if(r === null){ o.noFoto = true; return true; } return !!r && r.stato === 'approvato' && !(r.scadenzaMs && r.scadenzaMs < ora); };
+        const dati = t => { const r = info.get(t.id) || {}; return {id: t.id, nome: t.nome || `${r.cognome || ''} ${r.nome || ''}`.trim(), foto: r.foto || '', nato: r.dataNascita || ''}; };
+        T.gioc = (x.giocatori || []).filter(ok).map(t => ({...dati(t), num: t.numero || '', ruolo: t.ruolo || 'Giocatore', cap: t.id === x.capitano, vice: t.id === x.vice}));
+        T.dir = (x.dirigenti || []).filter(ok).map(t => ({...dati(t), ruolo: t.ruolo || 'Dirigente'}));
+      }
+      o.st = 'ok';
+    }catch(e){ o.st = 'err'; o.msg = e && e.code === 'permission-denied' ? 'Non riesco a leggere le distinte: avvisa il designatore.' : 'Non riesco a caricare le distinte: controlla la connessione.'; }
+    finally{ if(location.hash === '#referto' && refId === g.id && $('#rfSave')){ readDraft(); renderRefForm(g); } }
+  })();
+  return o;
+}
+const iniz = n => String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+const fotoT = (t, cls = 'dfoto') => `<span class="${cls}">${t.foto ? `<img src="${esc(t.foto)}" alt="">` : `<i>${esc(iniz(t.nome))}</i>`}</span>`;
+function apriTesserato(t, sq){
+  const root = $('#sheetRoot');
+  const close = () => { root.innerHTML = ''; };
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Tesserato"><div class="tess-big">${fotoT(t, 'dfoto big')}
+    <div><div class="eyebrow">${esc(sq)}</div><h3>${t.num ? `<b class="dnum">${esc(t.num)}</b> ` : ''}${esc(t.nome)}</h3>
+    <p class="note">${[t.cap ? 'Capitano' : t.vice ? 'Vice capitano' : '', t.ruolo && t.ruolo !== 'Giocatore' ? t.ruolo : '', t.nato ? 'nato il ' + String(t.nato).split('-').reverse().join('/') : ''].filter(Boolean).map(esc).join(' · ')}</p></div></div>
+    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
+  const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
+  root.querySelector('[data-x]').onclick = close;
+}
+const distHTML = (g, D) => {
+  if(!D) return '';
+  if(D.st === 'load') return `<section class="ref-sec"><h3>Distinte</h3><div class="status"><span class="spin"></span>Carico le distinte…</div></section>`;
+  if(D.st === 'err') return `<section class="ref-sec"><h3>Distinte</h3><p class="note" style="margin:0">${esc(D.msg)}</p><button type="button" class="btn btn-ghost sm" id="rfDistRetry">Riprova</button></section>`;
+  if(D.st !== 'ok') return '';
+  const team = s => { const T = D[s]; if(!T) return '';
+    if(!T.inviata) return `<div class="dteam"><div class="dth">${esc(T.nome)}</div><p class="note" style="margin:0">Distinta non inviata: i giocatori li scrivi a mano nel referto.</p></div>`;
+    return `<div class="dteam"><div class="dth">${esc(T.nome)} <span class="cnt">${T.gioc.length}</span></div>
+      <ul class="dgl">${T.gioc.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:g:${i}">${fotoT(t)}<b class="dnum">${esc(t.num || '–')}</b><span class="dnm">${esc(t.nome)}</span>${t.cap ? '<em>C</em>' : t.vice ? '<em>VC</em>' : ''}${t.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}</button></li>`).join('')}</ul>
+      ${T.dir.length ? `<div class="eyebrow">In panchina</div><ul class="dgl">${T.dir.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:d:${i}">${fotoT(t)}<span class="dnm">${esc(t.nome)}</span><i>${esc(t.ruolo.toLowerCase())}</i></button></li>`).join('')}</ul>` : ''}</div>`; };
+  return `<section class="ref-sec"><header><h3>Distinte</h3></header>${team('casa')}${team('ospite')}
+    <p class="note" style="margin:0">Tocca un tesserato per vedere la foto grande.${D.noFoto ? ' Alcune foto non sono disponibili.' : ''}</p></section>`;
+};
+/* gol scritti nelle reti: l'autorete va alla squadra avversaria */
+const golRef = d => { const n = {casa: 0, ospite: 0}; (d.marcatori || []).forEach(e => { const s = e.sq === 'ospite' ? 'ospite' : 'casa'; n[e.mot === 'Autorete' ? (s === 'casa' ? 'ospite' : 'casa') : s]++; }); return n; };
+
 function renderRefForm(g){
   const d = draft, body = $('#refBody');
+  const pid = parDiGara(g), D = pid ? caricaDistinte(g) : null;
+  const lista = (s, k) => D && D.st === 'ok' && D[s] && D[s].inviata ? D[s][k] : null;
+  const conDist = !!(D && D.st === 'ok' && (lista('casa', 'gioc') || lista('ospite', 'gioc')));
   const sqOpt = v => `<option value="casa" ${v!=='ospite'?'selected':''}>${esc(g.casa||'Casa')}</option><option value="ospite" ${v==='ospite'?'selected':''}>${esc(g.ospite||'Ospite')}</option>`;
   const opts = (list, v) => list.map(m => `<option ${m===v?'selected':''}>${esc(m)}</option>`).join('');
-  const dirRows = () => d.dirigenti.map((e,i) => `<div class="ev dir" data-list="dirigenti" data-i="${i}">
+  const pick = (e, l, cosa) => `<select class="wide" data-k="tid" data-pick aria-label="${cosa}"><option value="">Scegli ${cosa === 'Dirigente' ? 'chi era in panchina' : 'il giocatore'}…</option>${l.map(t => `<option value="${esc(t.id)}" ${t.id === e.tid ? 'selected' : ''}>${t.num ? 'n. ' + esc(t.num) + ' · ' : ''}${esc(t.nome)}${t.cap ? ' (C)' : t.vice ? ' (VC)' : ''}${cosa === 'Dirigente' ? ' · ' + esc(t.ruolo.toLowerCase()) : ''}</option>`).join('')}<option value="__man" ${e.tid === '__man' ? 'selected' : ''}>Altro: scrivi a mano</option></select>`;
+  const dirRows = () => d.dirigenti.map((e,i) => { const l = lista(e.sq === 'ospite' ? 'ospite' : 'casa', 'dir'), man = !l || e.tid === '__man'; return `<div class="ev dir" data-list="dirigenti" data-i="${i}">
       <input data-k="min" inputmode="numeric" placeholder="Min" value="${esc(e.min)}" aria-label="Minuto">
       <select data-k="sq" aria-label="Squadra">${sqOpt(e.sq)}</select>
       <button type="button" class="x" data-del aria-label="Rimuovi">✕</button>
+      ${l ? pick(e, l, 'Dirigente') : ''}
       <select class="wide" data-k="qual" aria-label="Qualifica">${opts(QUAL, e.qual)}</select>
-      <input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Nome">
+      ${man ? `<input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Nome">` : ''}
       <select class="wide" data-k="prov" aria-label="Provvedimento">${opts(PROV, e.prov)}</select>
       <input class="wide" data-k="mot" placeholder="Motivo (es. proteste, frasi offensive)" value="${esc(e.mot)}" aria-label="Motivo">
-    </div>`).join('');
-  const rows = key => key === 'dirigenti' ? dirRows() : d[key].map((e,i) => `<div class="ev" data-list="${key}" data-i="${i}">
+    </div>`; }).join('');
+  const rows = key => key === 'dirigenti' ? dirRows() : d[key].map((e,i) => { const s = e.sq === 'ospite' ? 'ospite' : 'casa', l = lista(s, 'gioc'), man = !l || e.tid === '__man';
+    return `<div class="ev${l ? ' con-dist' : ''}" data-list="${key}" data-i="${i}">
       <input data-k="min" inputmode="numeric" placeholder="Min" value="${esc(e.min)}" aria-label="Minuto">
       <select data-k="sq" aria-label="Squadra">${sqOpt(e.sq)}</select>
-      <input data-k="num" inputmode="numeric" placeholder="N°" value="${esc(e.num)}" aria-label="Numero di maglia">
+      ${l ? '' : `<input data-k="num" inputmode="numeric" placeholder="N°" value="${esc(e.num)}" aria-label="Numero di maglia">`}
       <button type="button" class="x" data-del aria-label="Rimuovi">✕</button>
-      <input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Giocatore">
+      ${l ? pick(e, l, 'Giocatore') : ''}
+      ${l && man ? `<input data-k="num" inputmode="numeric" placeholder="N°" value="${esc(e.num)}" aria-label="Numero di maglia"><input class="nm" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Giocatore">` : ''}
+      ${l ? '' : `<input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Giocatore">`}
       <select class="wide" data-k="mot" aria-label="${LISTS[key].lbl}">${LISTS[key].mot.map(m=>`<option ${m===e.mot?'selected':''}>${esc(m)}</option>`).join('')}</select>
-    </div>`).join('');
-  const sec = key => `<section class="ref-sec"><header><h3>${LISTS[key].chip ? `<span class="${LISTS[key].chip}"></span>` : ''}${LISTS[key].t} <span class="cnt">${d[key].length}</span></h3><button type="button" class="btn btn-ghost sm" data-add="${key}">+ ${LISTS[key].add}</button></header>${d[key].length ? rows(key) : '<p class="note" style="margin:0">Nessuno</p>'}</section>`;
+      ${key === 'marcatori' && e.mot === 'Autorete' ? `<p class="note wide" style="margin:0">Autorete: scegli il giocatore che l’ha fatta. Il gol va a <b>${esc(s === 'casa' ? g.ospite || 'Ospite' : g.casa || 'Casa')}</b>.</p>` : ''}
+    </div>`; }).join('');
+  const nG = golRef(d), golWarn = d.esito !== 'rinviata' && d.marcatori.length && d.gc !== '' && d.go !== '' && (nG.casa !== +d.gc || nG.ospite !== +d.go)
+    ? `<p class="note warn-gol" style="margin:0">Reti scritte: ${esc(g.casa || 'Casa')} ${nG.casa} di ${+d.gc} · ${esc(g.ospite || 'Ospite')} ${nG.ospite} di ${+d.go}</p>` : '';
+  const sec = key => `<section class="ref-sec"><header><h3>${LISTS[key].chip ? `<span class="${LISTS[key].chip}"></span>` : ''}${LISTS[key].t} <span class="cnt">${d[key].length}</span></h3><button type="button" class="btn btn-ghost sm" data-add="${key}">+ ${LISTS[key].add}</button></header>${key === 'marcatori' ? golWarn : ''}${d[key].length ? rows(key) : '<p class="note" style="margin:0">Nessuno</p>'}</section>`;
   const fld = (id, label, val, extra='') => `<div class="field"><label for="${id}">${label}</label><input id="${id}" value="${esc(val)}" ${extra}></div>`;
+  /* migliore in campo e miglior portiere: solo per le partite del campionato */
+  const premio = (k, label, port) => { const v = d[k] || {}, cur = v.tid ? `${v.sq}:${v.tid}` : v.sq && v.man ? `${v.sq}:__man` : '';
+    const grp = s => { let l = lista(s, 'gioc'); if(!l) return ''; if(port) l = [...l.filter(t => t.ruolo === 'Portiere'), ...l.filter(t => t.ruolo !== 'Portiere')];
+      return `<optgroup label="${esc(g[s] || s)}">${l.map(t => `<option value="${s}:${esc(t.id)}" ${cur === s + ':' + t.id ? 'selected' : ''}>${t.num ? 'n. ' + esc(t.num) + ' · ' : ''}${esc(t.nome)}${port && t.ruolo === 'Portiere' ? ' (portiere)' : ''}</option>`).join('')}</optgroup>`; };
+    return `<div class="field full"><label for="rf-${k}">${label}</label><select id="rf-${k}" data-premio="${k}"><option value="">Nessuno</option>${grp('casa')}${grp('ospite')}
+      <optgroup label="Scrivi a mano">${['casa', 'ospite'].map(s => `<option value="${s}:__man" ${cur === s + ':__man' ? 'selected' : ''}>Altro di ${esc(g[s] || s)}</option>`).join('')}</optgroup></select>
+      ${v.man ? `<input id="rf-${k}-nome" data-premio-nome="${k}" placeholder="Cognome e nome" value="${esc(v.nome || '')}" aria-label="${label}: cognome e nome" style="margin-top:6px">` : ''}</div>`; };
+  const premi = pid && d.esito !== 'rinviata' ? `<section class="ref-sec"><h3>Premi</h3>${premio('mvp', 'Migliore in campo')}${premio('por', 'Miglior portiere', true)}</section>` : '';
+  const ufficiale = !!g.desId;
   body.innerHTML = `
     <div class="ref-head view" style="gap:6px"><div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div><h2>${esc(g.casa||'—')} – ${esc(g.ospite||'—')}</h2>
       <div class="pills">${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.numeroGara?`<span class="pill">Gara n. ${esc(g.numeroGara)}</span>`:''}${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}</div></div>
+    ${distHTML(g, D)}
     <section class="ref-sec"><h3>Esito della gara</h3>
       <div class="seg seg3" role="group" aria-label="Esito della gara">${[['', 'Regolare'], ['sospesa', 'Sospesa'], ['rinviata', 'Rinviata']].map(([k, t]) => `<button type="button" data-esito="${k}" aria-pressed="${(d.esito || '') === k}">${t}</button>`).join('')}</div>
       ${d.esito === 'sospesa' ? `<div class="mini">${fld('rf-minsosp', 'Minuto della sospensione', d.minSosp, 'type="number" min="0" inputmode="numeric" placeholder="Es. 32"')}</div>` : ''}
@@ -1725,21 +1828,39 @@ function renderRefForm(g){
       <div class="score"><div><label for="rf-gc">${esc(g.casa||'Casa')}</label><input id="rf-gc" type="number" min="0" inputmode="numeric" value="${esc(d.gc)}"></div><span class="dash">–</span><div><label for="rf-go">${esc(g.ospite||'Ospite')}</label><input id="rf-go" type="number" min="0" inputmode="numeric" value="${esc(d.go)}"></div></div>
       <div class="mini">${fld('rf-gc1','1° tempo casa',d.gc1,'type="number" min="0" inputmode="numeric"')}${fld('rf-go1','1° tempo ospite',d.go1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec1','Recupero 1° T (min)',d.rec1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec2','Recupero 2° T (min)',d.rec2,'type="number" min="0" inputmode="numeric"')}</div>
     </section>`}
-    ${d.esito === 'rinviata' ? '' : sec('marcatori') + sec('ammoniti') + sec('espulsi')}${sec('dirigenti')}
+    ${d.esito === 'rinviata' ? '' : sec('marcatori') + sec('ammoniti') + sec('espulsi')}${sec('dirigenti')}${premi}
     <section class="ref-sec"><h3>Altre informazioni</h3>
       <div class="mini">${fld('rf-spett','Spettatori (circa)',d.spettatori,'type="number" min="0" inputmode="numeric"')}
         <div class="field"><label for="rf-campo">Terreno di gioco</label><select id="rf-campo">${['','Buono','Discreto','Pesante','Allentato','Sintetico','Impraticabile'].map(o=>`<option ${o===d.campo?'selected':''}>${o}</option>`).join('')}</select></div></div>
       <div class="field full"><label for="rf-note">Fatti da segnalare (dirigenti, pubblico, infortuni…)</label><textarea id="rf-note">${esc(d.note)}</textarea></div>
     </section>
-    <div class="row"><button class="btn btn-primary" id="rfSave">Salva referto</button><button class="btn btn-ghost" id="rfCopy">Copia testo</button></div>
+    <div class="row"><button class="btn btn-primary" id="rfSave">${ufficiale ? 'Invia referto' : 'Salva referto'}</button><button class="btn btn-ghost" id="rfCopy">Copia testo</button></div>
     <div id="rfCopyBox"></div>
-    <p class="note" style="margin:0">Questo è il tuo promemoria della gara: il referto ufficiale va comunque inviato su Sinfonia4You. Con “Copia testo” hai tutto pronto da riportare.</p>
+    <p class="note" style="margin:0">${ufficiale ? `Questo è il referto ufficiale della gara: quando lo invii arriva ai designatori${pid ? ' e all’amministratore del campionato, che lo conferma prima di aggiornare risultati e classifica' : ''}. Dopo l’invio non si può più modificare: per correggerlo chiedi a un designatore di sbloccarlo.` : 'Il referto resta nel tuo registro. Con “Copia testo” hai tutto pronto da inviare.'}</p>
     <button class="btn btn-ghost btn-block" id="rfOther">Scegli un'altra gara</button>`;
   body.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
-    readDraft(); const key = b.dataset.add; d[key].push(key === 'dirigenti' ? {min:'', sq:'casa', qual: QUAL[0], nome:'', prov: PROV[0], mot:''} : {min:'', sq:'casa', num:'', nome:'', mot: LISTS[key].mot[0]}); renderRefForm(g);
+    readDraft(); const key = b.dataset.add; d[key].push(key === 'dirigenti' ? {min:'', sq:'casa', tid:'', qual: QUAL[0], nome:'', prov: PROV[0], mot:''} : {min:'', sq:'casa', tid:'', num:'', nome:'', mot: LISTS[key].mot[0]}); renderRefForm(g);
     const last = body.querySelectorAll(`.ev[data-list="${key}"]`); last[last.length-1]?.querySelector('input')?.focus();
   });
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { readDraft(); const ev = b.closest('.ev'); d[ev.dataset.list].splice(+ev.dataset.i, 1); renderRefForm(g); });
+  /* scelta dalla distinta: numero e nome arrivano da soli; cambiando squadra si riparte da capo */
+  body.querySelectorAll('.ev').forEach(ev => {
+    const e = d[ev.dataset.list][+ev.dataset.i], key = ev.dataset.list, cosa = key === 'dirigenti' ? 'dir' : 'gioc';
+    const sqSel = ev.querySelector('[data-k="sq"]'), pk = ev.querySelector('[data-pick]'), mot = ev.querySelector('[data-k="mot"]');
+    sqSel.addEventListener('change', () => { readDraft(); if(e.tid && e.tid !== '__man'){ e.tid = ''; e.nome = ''; e.num = ''; } renderRefForm(g); });
+    if(pk) pk.addEventListener('change', () => { readDraft(); const l = lista(e.sq === 'ospite' ? 'ospite' : 'casa', cosa) || [], t = l.find(x => x.id === e.tid);
+      if(t){ e.nome = t.nome; if(cosa === 'gioc') e.num = t.num || ''; else e.qual = t.ruolo === 'Allenatore' ? 'Allenatore' : 'Dirigente accompagnatore'; }
+      else if(e.tid === '__man'){ e.nome = ''; if(cosa === 'gioc') e.num = ''; }
+      renderRefForm(g); if(e.tid === '__man') body.querySelector(`.ev[data-list="${key}"][data-i="${ev.dataset.i}"] [data-k="nome"]`)?.focus(); });
+    if(key === 'marcatori' && mot) mot.addEventListener('change', () => { readDraft(); renderRefForm(g); });
+  });
+  body.querySelectorAll('[data-premio]').forEach(s => s.onchange = () => { readDraft(); const [sq, tid] = s.value.split(':'), k = s.dataset.premio;
+    if(!s.value) d[k] = null;
+    else if(tid === '__man') d[k] = {sq, tid: '', nome: '', man: true};
+    else { const t = (lista(sq, 'gioc') || []).find(x => x.id === tid); d[k] = {sq, tid, nome: t ? t.nome : '', num: t ? t.num || '' : ''}; }
+    renderRefForm(g); if(d[k] && d[k].man) $(`#rf-${k}-nome`)?.focus(); });
+  body.querySelectorAll('[data-dg]').forEach(b => b.onclick = () => { const [s, k, i] = b.dataset.dg.split(':'), T = D[s]; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome); });
+  const rr = $('#rfDistRetry'); if(rr) rr.onclick = () => { delete DIST[g.id]; readDraft(); renderRefForm(g); };
   $('#rfOther').onclick = () => openReferto(null);
   body.querySelectorAll('[data-esito]').forEach(b => b.onclick = () => { readDraft(); d.esito = b.dataset.esito; renderRefForm(g); });
   $('#rfSave').onclick = async () => {
@@ -1749,13 +1870,26 @@ function renderRefForm(g){
     if(!iniziata(g) && !g.referto){ toast(`Il referto si compila dalle ${g.ora}.`); return; }
     if(refBloccato(g) || refNonMio(g)){ toast('Referto bloccato: chiedi a un designatore di sbloccarlo.'); refId = g.id; draft = null; renderReferto(); return; }
     const rinv = d.esito === 'rinviata';
-    if(rinv){ d.gc = d.go = d.gc1 = d.go1 = d.rec1 = d.rec2 = ''; d.marcatori = []; d.ammoniti = []; d.espulsi = []; }
+    if(!rinv && conDist){
+      const liste = ['marcatori', 'ammoniti', 'espulsi', 'dirigenti'], vuota = liste.flatMap(k => d[k].map((e, i) => [k, i, e])).find(([k, i, e]) => {
+        const l = lista(e.sq === 'ospite' ? 'ospite' : 'casa', k === 'dirigenti' ? 'dir' : 'gioc'); return l ? !e.tid || (e.tid === '__man' && !e.nome) : !e.nome; });
+      if(vuota){ const [k, i, e] = vuota; toast(e.tid === '__man' || !lista(e.sq === 'ospite' ? 'ospite' : 'casa', k === 'dirigenti' ? 'dir' : 'gioc') ? 'Scrivi il nome in ogni riga.' : 'Scegli chi è in ogni riga (oppure «Altro: scrivi a mano»).');
+        body.querySelector(`.ev[data-list="${k}"][data-i="${i}"]`)?.scrollIntoView({block: 'center'}); return; }
+      if(['mvp', 'por'].some(k => d[k] && d[k].man && !d[k].nome)){ toast('Scrivi il nome del premiato o scegli «Nessuno».'); return; }
+    }
+    if(!rinv){
+      const n = golRef(d);
+      if(d.marcatori.length && d.gc !== '' && d.go !== '' && (n.casa !== +d.gc || n.ospite !== +d.go)
+        && !confirm(`Le reti scritte (${g.casa || 'Casa'} ${n.casa}, ${g.ospite || 'Ospite'} ${n.ospite}) non tornano con il risultato ${d.gc}-${d.go}.\n\nRicorda: l’autorete va alla squadra avversaria. ${ufficiale ? 'Inviare' : 'Salvare'} lo stesso?`)) return;
+    }
+    if(ufficiale && !confirm('Inviare il referto?\n\nÈ il referto ufficiale della gara: dopo l’invio non potrai più modificarlo, se non te lo sblocca un designatore.')) return;
+    if(rinv){ d.gc = d.go = d.gc1 = d.go1 = d.rec1 = d.rec2 = ''; d.marcatori = []; d.ammoniti = []; d.espulsi = []; d.mvp = null; d.por = null; }
     if(d.esito !== 'sospesa') d.minSosp = '';
     if(!d.esito) d.motivo = '';
     const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: rinv ? 'rinviata' : 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length, risultato: ''};
     if(!rinv && d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}${d.esito === 'sospesa' ? ` (sosp. ${d.minSosp}')` : ''}`;
     const btn = $('#rfSave'); btn.disabled = true;
-    try{ await Store.saveGara(upd); toast(upd.desId ? 'Referto salvato e inviato ai designatori' : 'Referto salvato'); btn.disabled = false; if(upd.desId) inviaReferto(upd.desId, upd); }
+    try{ await Store.saveGara(upd); toast(upd.desId ? 'Referto inviato' : 'Referto salvato'); btn.disabled = false; if(upd.desId){ await inviaReferto(upd.desId, upd); if(refBloccato(upd) && location.hash === '#referto'){ refId = upd.id; draft = null; renderReferto(); } } }
     catch(e){ btn.disabled = false; toast('Salvataggio non riuscito. Riprova.'); }
   };
   $('#rfCopy').onclick = () => {
@@ -1771,6 +1905,7 @@ function readDraft(){
   d.gc = v('rf-gc'); d.go = v('rf-go'); d.gc1 = v('rf-gc1'); d.go1 = v('rf-go1'); d.rec1 = v('rf-rec1'); d.rec2 = v('rf-rec2');
   d.spettatori = v('rf-spett'); d.campo = v('rf-campo'); d.note = v('rf-note');
   document.querySelectorAll('#refBody .ev').forEach(ev => { const e = d[ev.dataset.list][+ev.dataset.i]; if(!e) return; ev.querySelectorAll('[data-k]').forEach(el => e[el.dataset.k] = el.value.trim()); });
+  document.querySelectorAll('#refBody [data-premio-nome]').forEach(el => { const p = d[el.dataset.premioNome]; if(p) p.nome = el.value.trim(); });
 }
 
 function refText(g, d){
@@ -1793,6 +1928,8 @@ function refText(g, d){
     block('AMMONIZIONI', d.ammoniti, e => ev(e, e.mot));
     block('ESPULSIONI', d.espulsi, e => ev(e, e.mot));
   }
+  if(d.mvp && d.mvp.nome) L.push('', `MIGLIORE IN CAMPO: ${d.mvp.nome} (${team(d.mvp.sq)})`);
+  if(d.por && d.por.nome) L.push(`${d.mvp && d.mvp.nome ? '' : '\n'}MIGLIOR PORTIERE: ${d.por.nome} (${team(d.por.sq)})`);
   block('PROVVEDIMENTI DIRIGENTI', d.dirigenti || [], e => `${e.min ? e.min + "' " : ''}${team(e.sq)} – ${e.qual || ''} ${e.nome || ''}: ${e.prov || ''}${e.mot ? ' (' + e.mot + ')' : ''}`);
   if(d.spettatori || d.campo){ L.push(''); if(d.spettatori) L.push(`Spettatori: circa ${d.spettatori}`); if(d.campo) L.push(`Terreno di gioco: ${d.campo}`); }
   if(d.note){ L.push(''); L.push('Fatti da segnalare:'); L.push(d.note); }
