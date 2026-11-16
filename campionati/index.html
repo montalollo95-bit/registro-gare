@@ -3352,7 +3352,7 @@ async function shPartita(p, fmtI){
   shTxt(ctx, (p.ospite || '').toUpperCase(), cxs[1], y + cs + (story ? 82 : 56), 360, 'D', 800, story ? 44 : 34, '#fff', 'center', 22);
   shPill(ctx, e ? (e.tav ? 'A TAVOLINO' : 'FINALE') : (p.data ? giornoCorto(p.data).toUpperCase() : 'DA DEFINIRE'), W / 2, y + (story ? 52 : 34), story ? 26 : 20, e && e.tav ? 'rgba(229,51,58,.35)' : 'rgba(255,255,255,.14)', '#fff');
   ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 16;
-  shTxt(ctx, e ? `${e.gc} : ${e.go}` : (p.ora || '– : –'), W / 2, y + 20 + cs / 2 + (story ? 62 : 40), 300, 'D', 800, story ? 168 : 112, e ? SH_GIALLO : '#fff', 'center'); ctx.restore();
+  shTxt(ctx, e ? `${e.gc} : ${e.go}` : (p.ora || '– : –'), W / 2, y + 20 + cs / 2 + (story ? 92 : 58), 300, 'D', 800, story ? 168 : 112, '#fff', 'center'); ctx.restore();
   y += hb + (story ? 50 : 22);
   const gol = e && !e.tav ? eventiPar(p) : [], premi = e && !e.tav ? [p.mvp && ['MIGLIORE IN CAMPO', p.mvp], p.por && ['MIGLIOR PORTIERE', p.por]].filter(Boolean) : [];
   const pH = premi.length ? (story ? 130 : 84) : 0, yEnd = B.y1 - pH - (pH ? (story ? 20 : 12) : 0);
