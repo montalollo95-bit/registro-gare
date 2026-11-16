@@ -592,7 +592,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sh-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--royal) 45%,transparent);background:var(--card);color:var(--royal);font-weight:800;font-size:14px;padding:7px 14px;border-radius:99px;cursor:pointer}
 .sh-btn:hover{background:color-mix(in srgb,var(--royal) 10%,var(--card))}
 .btn svg{vertical-align:-3px;margin-right:4px}
-.sh-sheet .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;overflow:visible}.sh-sheet #shF{grid-template-columns:1fr 1fr}.sh-sheet .seg button{white-space:normal;padding:9px 6px;min-width:0}
+.sh-sheet .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;overflow:visible}.sh-sheet .seg button{white-space:normal;padding:9px 6px;min-width:0}
 .sh-prev{display:flex;justify-content:center;align-items:center;min-height:160px;background:var(--chip,var(--surface-2));border-radius:14px;padding:12px}
 .sh-prev img{display:block;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:100%}
 .sh-prev img.story{max-height:min(56vh,520px)}
@@ -3292,19 +3292,21 @@ async function shBase(cat, fmtI, titolo, sotto){
   const ctx = cv.getContext('2d'), acc = shAcc(cat);
   ctx.fillStyle = '#071033'; ctx.fillRect(0, 0, W, H);
   const bg = await shImg(story ? '../sfondo-avvio.jpg' : '../sfondo-barra.jpg');
-  if(bg){ const k = Math.max(W / bg.width, H / bg.height), w = bg.width * k, h = bg.height * k; ctx.drawImage(bg, (W - w) / 2, story ? 0 : (H - h) / 2, w, h); }
+  /* storia: lo sfondo sale di 600 px così il logo stampato nell'immagine esce dal quadro; il nostro logo va più in basso, dove WhatsApp e Instagram non tagliano */
+  if(bg){ const k = Math.max(W / bg.width, H / bg.height), w = bg.width * k, h = bg.height * k; ctx.drawImage(bg, (W - w) / 2, story ? -600 : (H - h) / 2, w, h); }
   let g = ctx.createLinearGradient(0, 0, 0, H);
-  if(story){ g.addColorStop(0, 'rgba(4,9,30,0)'); g.addColorStop(.3, 'rgba(4,9,30,.05)'); g.addColorStop(.42, 'rgba(4,9,30,.55)'); g.addColorStop(1, 'rgba(4,9,30,.82)'); }
+  if(story){ g.addColorStop(0, 'rgba(4,9,30,.35)'); g.addColorStop(.3, 'rgba(4,9,30,.15)'); g.addColorStop(.45, 'rgba(4,9,30,.6)'); g.addColorStop(.62, 'rgba(4,9,30,.85)'); g.addColorStop(1, 'rgba(4,9,30,.95)'); }
   else { g.addColorStop(0, 'rgba(4,9,30,.55)'); g.addColorStop(1, 'rgba(4,9,30,.85)'); }
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   const nome = cat === 'C7 AICS' ? 'R.E. LIGA C7 LEAGUE' : cat === 'C5 AICS' ? 'FUTSAL LEAGUE' : 'FUTSAL E C7 LEAGUE';
   const tit = (t, x, y, size, maxW, align) => { ctx.save(); ctx.translate(x, y); ctx.transform(1, 0, -.18, 1, 0, 0); ctx.shadowColor = acc + 'aa'; ctx.shadowBlur = 28; shTxt(ctx, t, 0, 0, maxW, 'D', 800, size, '#fff', align, Math.round(size * .55)); ctx.restore(); };
   let y0;
   if(story){
-    ctx.save(); ctx.shadowColor = acc; ctx.shadowBlur = 18; shTxt(ctx, nome, W / 2, 652, W - 120, 'D', 800, 50, acc, 'center'); ctx.restore();
-    tit(titolo, W / 2, 778, 150, W - 140, 'center');
-    if(sotto) shTxt(ctx, sotto, W / 2, 838, W - 140, 'B', 600, 36, SH_MUTO, 'center');
-    y0 = sotto ? 882 : 836;
+    const lg = await shImg('../marchio-aics.png'); if(lg){ const h = 300, w = lg.width * h / lg.height; ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 24; ctx.drawImage(lg, (W - w) / 2, 312, w, h); ctx.restore(); }
+    ctx.save(); ctx.shadowColor = acc; ctx.shadowBlur = 18; shTxt(ctx, nome, W / 2, 680, W - 120, 'D', 800, 50, acc, 'center'); ctx.restore();
+    tit(titolo, W / 2, 800, 150, W - 140, 'center');
+    if(sotto) shTxt(ctx, sotto, W / 2, 860, W - 140, 'B', 600, 36, SH_MUTO, 'center');
+    y0 = sotto ? 904 : 858;
   } else {
     const lg = await shImg('../marchio-aics.png'); if(lg){ const h = 200, w = lg.width * h / lg.height; ctx.drawImage(lg, 46, 34, w, h); }
     const x = 270;
@@ -3314,7 +3316,7 @@ async function shBase(cat, fmtI, titolo, sotto){
     y0 = 262;
   }
   const fy = H - (story ? 46 : 26);
-  shTxt(ctx, 'AICS Reggio Emilia · ' + location.host, W / 2, fy, W - 120, 'B', 600, story ? 28 : 22, 'rgba(185,200,238,.85)', 'center');
+  shTxt(ctx, 'AICS Reggio Emilia · Settore Calcio', W / 2, fy, W - 120, 'B', 600, story ? 28 : 22, 'rgba(185,200,238,.85)', 'center');
   return {cv, ctx, W, H, story, acc, y0, y1: fy - (story ? 50 : 34)};
 }
 /* riga a barra blu con bordo chiaro, come nelle grafiche delle coppe */
@@ -3459,49 +3461,34 @@ async function shComunicato(c, fmtI){
   return B.cv;
 }
 
-/* --- finestra Condividi: cosa (immagine + link, solo immagine, solo link) e formato (storia o post) --- */
+/* --- finestra Condividi: solo l'immagine (storia o post), senza link --- */
 function openShare(o){
-  let modo = shLS('shModo') || 'both', fmtI = shLS('shFmt') || 'story', blob = null, url = '', gen = 0;
-  const {root, close} = sheet(`<div class="stack sh-sheet"><h3>Condividi</h3><p class="note">${esc(o.titolo)}</p>
-    <div class="seg" role="group" aria-label="Cosa condividere">${[['both', 'Immagine + link'], ['img', 'Solo immagine'], ['link', 'Solo link']].map(([k, t]) => `<button type="button" data-shm="${k}" aria-pressed="${modo === k}">${t}</button>`).join('')}</div>
+  let fmtI = shLS('shFmt') || 'story', blob = null, url = '', gen = 0;
+  const {root} = sheet(`<div class="stack sh-sheet"><h3>Condividi</h3><p class="note">${esc(o.titolo)}</p>
     <div class="seg" role="group" aria-label="Formato" id="shF">${[['story', 'Storia 9:16'], ['post', 'Post 1:1']].map(([k, t]) => `<button type="button" data-shf="${k}" aria-pressed="${fmtI === k}">${t}</button>`).join('')}</div>
     <div class="sh-prev" id="shPrev"></div>
-    <button class="btn btn-primary btn-block" id="shGo">${ICO_SH} Condividi</button>
-    <div class="row"><button type="button" class="btn btn-ghost" id="shDl">Scarica immagine</button><button type="button" class="btn btn-ghost" id="shCp">Copia link</button></div>
-    <p class="note" id="shNota"></p></div>`, 'Condividi', 'largo');
+    <button class="btn btn-primary btn-block" id="shGo">${ICO_SH} Condividi l’immagine</button>
+    <button type="button" class="btn btn-ghost btn-block" id="shDl">Scarica l’immagine</button></div>`, 'Condividi', 'largo');
   const $s = q => root.querySelector(q);
   const vista = async () => {
-    root.querySelectorAll('[data-shm]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shm === modo)));
     root.querySelectorAll('[data-shf]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shf === fmtI)));
-    const img = modo !== 'link'; $s('#shF').hidden = !img; $s('#shDl').hidden = !img; $s('#shCp').hidden = modo === 'img';
-    $s('#shNota').textContent = modo === 'link' ? 'Il link apre direttamente questa pagina nell’app.' : modo === 'both' ? 'Su Instagram il link non si apre dai post: mettilo come adesivo “Link” nella storia o nella bio.' : '';
-    const pv = $s('#shPrev');
-    if(!img){ pv.innerHTML = `<div class="sh-link">${esc(o.link)}</div>`; blob = null; return; }
-    const my = ++gen; pv.innerHTML = '<div class="status"><span class="spin"></span>Preparo l’immagine…</div>'; blob = null;
+    const pv = $s('#shPrev'), my = ++gen; pv.innerHTML = '<div class="status"><span class="spin"></span>Preparo l’immagine…</div>'; blob = null;
     try{ await shFonts(); const cv = await o.disegna(fmtI); if(my !== gen) return;
       blob = await new Promise(r => cv.toBlob(r, 'image/png'));
       if(url) URL.revokeObjectURL(url); url = URL.createObjectURL(blob);
       pv.innerHTML = `<img src="${url}" alt="Anteprima dell’immagine da condividere" class="${fmtI}">`; }
     catch(e){ console.warn(e); pv.innerHTML = '<p class="err">Non riesco a preparare l’immagine.</p>'; }
   };
-  root.querySelectorAll('[data-shm]').forEach(b => b.onclick = () => { if(modo === b.dataset.shm) return; const prima = modo; modo = b.dataset.shm; shLS('shModo', modo); if(prima === 'link' || modo === 'link') vista(); else vista(); });
   root.querySelectorAll('[data-shf]').forEach(b => b.onclick = () => { if(fmtI === b.dataset.shf) return; fmtI = b.dataset.shf; shLS('shFmt', fmtI); vista(); });
   const nome = () => `${o.file}-${fmtI === 'post' ? 'post' : 'storia'}.png`;
-  const copia = async () => { try{ await navigator.clipboard.writeText(o.link); return true; }catch(e){ const t = document.createElement('textarea'); t.value = o.link; document.body.appendChild(t); t.select(); let ok = false; try{ ok = document.execCommand('copy'); }catch(x){} t.remove(); return ok; } };
-  const scarica = () => { if(!blob) return; const a = document.createElement('a'); a.href = url; a.download = nome(); document.body.appendChild(a); a.click(); a.remove(); };
-  $s('#shCp').onclick = async () => toast(await copia() ? 'Link copiato' : 'Non riesco a copiare il link');
+  const scarica = () => { const a = document.createElement('a'); a.href = url; a.download = nome(); document.body.appendChild(a); a.click(); a.remove(); };
   $s('#shDl').onclick = () => { if(!blob){ toast('Aspetta che l’immagine sia pronta'); return; } scarica(); toast('Immagine scaricata'); };
   $s('#shGo').onclick = async () => {
-    const testo = o.testo;
-    try{
-      if(modo === 'link'){
-        if(navigator.share){ await navigator.share({title: o.titolo, text: testo, url: o.link}); return; }
-        toast(await copia() ? 'Link copiato: incollalo dove vuoi' : 'Non riesco a copiare il link'); return; }
-      if(!blob){ toast('Aspetta che l’immagine sia pronta'); return; }
-      const f = new File([blob], nome(), {type: 'image/png'});
-      if(navigator.canShare && navigator.canShare({files: [f]})){ await navigator.share(modo === 'both' ? {files: [f], title: o.titolo, text: `${testo}\n${o.link}`} : {files: [f], title: o.titolo}); return; }
-      scarica(); if(modo === 'both'){ const ok = await copia(); toast(ok ? 'Immagine scaricata e link copiato' : 'Immagine scaricata'); } else toast('Immagine scaricata');
-    }catch(e){ if(e && e.name === 'AbortError') return; console.warn(e); toast('Condivisione non riuscita: usa Scarica immagine o Copia link'); }
+    if(!blob){ toast('Aspetta che l’immagine sia pronta'); return; }
+    const f = new File([blob], nome(), {type: 'image/png'});
+    try{ if(navigator.canShare && navigator.canShare({files: [f]})){ await navigator.share({files: [f]}); return; } }
+    catch(e){ if(e && e.name === 'AbortError') return; console.warn(e); }
+    scarica(); toast('Immagine scaricata: ora puoi pubblicarla dove vuoi');
   };
   vista();
 }
