@@ -440,7 +440,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .hcom{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px),calc(50% - var(--hw,100vw) / 2 + 14px));z-index:3;width:46px;height:46px;background:rgba(6,12,40,.55);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:50%;font-size:21px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:0}
 .hcom .cnt{position:absolute;top:-4px;right:-4px;background:#FF4D4D;color:#fff;border-radius:99px;font-size:11.5px;min-width:20px;height:20px;line-height:20px;padding:0 5px;font-weight:800;text-align:center}
 .hcom .t{position:absolute;top:calc(100% + 3px);font-size:10.5px;font-weight:700;letter-spacing:.02em;text-shadow:0 1px 6px rgba(0,0,0,.7)}
-.tabbar nav{grid-template-columns:repeat(5,1fr)}.tabbar button{position:relative}
+.tabbar nav{grid-template-columns:repeat(6,1fr);gap:2px}.tabbar button{position:relative}
 @media (max-width:380px){.tabbar button{font-size:11px}.tabbar nav{gap:3px}}
 .tdot{position:absolute;top:5px;left:calc(50% + 7px);width:9px;height:9px;border-radius:50%;background:#FF4D4D;box-shadow:0 0 0 2px rgba(0,0,0,.2)}
 .sqchk{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow:auto;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
@@ -588,6 +588,39 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .tb-pr .pi{font-size:22px}
 .tb-pr small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
 .btn-warn{background:rgba(232,163,60,.16);color:var(--fg);border:1px solid rgba(232,163,60,.55)}
+.sh-row{display:flex;justify-content:flex-end;margin:-4px 0 0}
+.sh-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid color-mix(in srgb,var(--royal) 45%,transparent);background:var(--card);color:var(--royal);font-weight:800;font-size:14px;padding:7px 14px;border-radius:99px;cursor:pointer}
+.sh-btn:hover{background:color-mix(in srgb,var(--royal) 10%,var(--card))}
+.btn svg{vertical-align:-3px;margin-right:4px}
+.sh-sheet .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;overflow:visible}.sh-sheet #shF{grid-template-columns:1fr 1fr}.sh-sheet .seg button{white-space:normal;padding:9px 6px;min-width:0}
+.sh-prev{display:flex;justify-content:center;align-items:center;min-height:160px;background:var(--chip,var(--surface-2));border-radius:14px;padding:12px}
+.sh-prev img{display:block;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:100%}
+.sh-prev img.story{max-height:min(56vh,520px)}
+.sh-prev img.post{max-height:min(46vh,420px)}
+.sh-link{font-family:ui-monospace,Menlo,monospace;font-size:13px;word-break:break-all;color:var(--fg)}
+.tabbar button{font-size:11.5px;min-width:0}
+@media (max-width:380px){.tabbar button{font-size:9.5px;letter-spacing:-.25px;padding-left:0;padding-right:0}.tabbar nav{gap:0}}
+.nw-list{gap:12px}
+.nw-card{display:flex;flex-direction:column;width:100%;padding:0;border:1px solid var(--card-bd,var(--line));border-radius:16px;overflow:hidden;background:var(--card);color:var(--fg);text-align:left;cursor:pointer;box-shadow:var(--card-sh)}
+.nw-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.nw-tx{display:flex;flex-direction:column;gap:4px;padding:12px 14px 14px}
+.nw-tx small{font-size:12.5px;color:var(--muted)}
+.nw-tx b{font-family:var(--display);font-size:22px;line-height:1.1;text-transform:uppercase;overflow-wrap:anywhere}
+.nw-tx > span{font-size:14px;color:var(--muted)}
+.nw-tx .pst{margin-top:2px}
+.nw-cover{width:100%;max-height:min(46vh,420px);object-fit:cover;border-radius:14px;display:block}
+.nw-view h3,.nw-pop h3{font-size:26px;line-height:1.1;text-transform:uppercase}
+.nw-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.nw-th{aspect-ratio:1;border:0;padding:0;border-radius:10px;overflow:hidden;background:var(--chip,var(--surface-2));display:grid;place-items:center;cursor:pointer}
+.nw-th img{width:100%;height:100%;object-fit:cover;display:block}
+.nw-link{justify-content:flex-start;text-decoration:none}
+.nw-covf{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.nw-covf img{width:100%;max-height:220px;object-fit:cover;border-radius:12px}
+.nw-lkr{display:grid;grid-template-columns:1fr 40px;gap:6px}
+.nw-lkr input{min-width:0}
+.nw-lkr [data-lt]{grid-column:1}
+.nw-lkr .x{grid-row:1;grid-column:2;border:0;background:transparent;color:var(--red);font-size:18px;cursor:pointer}
+@media (min-width:700px){.nw-lkr{grid-template-columns:1.4fr 1fr 40px}.nw-lkr [data-lt]{grid-column:auto}.nw-lkr .x{grid-row:auto;grid-column:auto}}
 /* finestre: o la X in alto a destra (se ci sono altri tasti) o il tasto Chiudi fisso in fondo */
 .sheet-x{position:sticky;top:8px;z-index:7;display:flex;justify-content:flex-end;height:36px;margin:-4px -8px 0 0;flex-shrink:0;pointer-events:none}
 .sheet-x.in-riga{height:0;margin:0 -8px 0 0}
@@ -655,7 +688,7 @@ const db = () => firebase.firestore();
 
 /* ---------- stato ---------- */
 const S = {ready: false, user: null, admin: false, resp: null, respOk: false, prof: null, abil: [], inviti: [], squadre: [], tess: [], resps: [], unsub: [], mode: 'login', err: '', tab: 'appr', cat: 'C5 AICS', filtro: 'tutti', loaded: {}, pubSq: [], pubLoaded: false, pubErr: '', ptab: 'par', sub: {}, partite: [], impianti: [], des: [], pcat: 'C5 AICS', pgio: {}, amm: [], dt: null, pubCom: [], comAll: [], comz: [], msgAll: [], msg: [], pubPar: [], pgPub: {}, camp: {}, info: {}, sqp: ''};
-const VIEW = () => ({'#futsal': 'futsal', '#liga': 'liga', '#area': 'area'})[location.hash] || 'home';
+const VIEW = () => ({'#futsal': 'futsal', '#liga': 'liga', '#area': 'area'})[location.hash.split('/')[0]] || 'home';
 const CAMP = {futsal: {cat: 'C5 AICS', nome: 'Futsal League', sub: 'Calcio a 5 · AICS Reggio Emilia', logo: 'logo-futsal.png', cls: 'camp-f'}, liga: {cat: 'C7 AICS', nome: 'R.E. Liga', sub: 'Calcio a 7 · AICS Reggio Emilia', logo: 'logo-liga.png', cls: 'camp-l'}};
 const sqById = id => S.squadre.find(q => q.id === id) || {};
 const NOMI_DATI = {tess: 'tesserati', resps: 'responsabili', abil: 'abilitazioni', inviti: 'inviti', partite: 'partite', impianti: 'campi', des: 'designazioni', dist: 'distinte', amm: 'ammende', comAll: 'comunicati', comz: 'messaggi alle squadre', msgAll: 'letture dei messaggi', squadre: 'squadre'};
@@ -830,7 +863,7 @@ function renderHome(app){
   const u = S.user, n = u ? (S.prof && S.prof.nome ? S.prof.nome : (u.email || '')) : '';
   $('#accTx').textContent = u ? (S.admin ? 'Sei entrato come amministratore' : 'Sei entrato come ' + n) : 'Sei responsabile di una squadra?';
   $('#accBtn').textContent = u ? 'Area squadre ›' : 'Area squadre · Accedi';
-  comStart(); const lc = S.pubCom || [], nn = lc.filter(nuovoC).length; $('#hCom').onclick = openComHome;
+  comStart(); const lc = (S.pubCom || []).filter(c => !isNews(c)), nn = lc.filter(nuovoC).length; $('#hCom').onclick = openComHome; setTimeout(popNews, 600);
   $('#hCom').hidden = !lc.length; $('#hComN').hidden = !nn; $('#hComN').textContent = nn;
 }
 
@@ -851,7 +884,8 @@ const ICO = {
   cl: '<path d="M8 21V11H3v10M16 21V14h5v7M8 21V4h8v17M2 21h20"/>',
   gio: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
   dis: '<rect x="3" y="4" width="10" height="14" rx="2"/><path d="M15 6.5l4.2.7a2 2 0 0 1 1.6 2.3l-1.7 10a2 2 0 0 1-2.3 1.6l-6-1"/>',
-  com: '<path d="M3 10.5v3a1 1 0 0 0 1 1h2.5L12 19V5L6.5 9.5H4a1 1 0 0 0-1 1z"/><path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>'};
+  com: '<path d="M3 10.5v3a1 1 0 0 0 1 1h2.5L12 19V5L6.5 9.5H4a1 1 0 0 0-1 1z"/><path d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
+  news: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h6v5H7zM16 8h1.5M16 11h1.5M7 16h10.5"/>'};
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[k]}</svg>`;
 const COL = ['#2F6FD6', '#C0392B', '#1E8A4F', '#7B3FBF', '#B3600C', '#16303F', '#B8336A', '#0E8C9C', '#5D6D7E', '#A04000'];
 /* schede squadre (squadreInfo/{id}): stemma, maglie [{c1, c2}], campo di casa. Separate da squadre/ che appartiene all'app arbitri */
@@ -1266,7 +1300,8 @@ function openTabellino(p, squadre){
     ${p.impianto ? `<p class="tb-g">${esc(p.impianto)}</p>` : ''}
     ${vuoto}${e.tav ? '' : corpo}
     ${premi.length && !e.tav ? `<div class="tb-pr">${premi.map(([i, t, x]) => `<div><span class="pi" aria-hidden="true">${i}</span><span><small>${t}</small><b>${esc(x.nome)}</b> · ${sqN(x.sq === 'ospite' ? 'ospite' : 'casa')}</span></div>`).join('')}</div>` : ''}
-    </div><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Tabellino', 'largo');
+    </div><button class="btn btn-primary btn-block" id="tbSh">${ICO_SH} Condividi</button><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Tabellino', 'largo');
+  root.querySelector('#tbSh').onclick = () => shareDa('p', Object.keys(CAMP).find(k => CAMP[k].cat === p.camp) || 'futsal', {p});
   root.querySelectorAll('[data-tsq]').forEach(b => b.onclick = () => { close(); S.sqp = b.dataset.tsq; render(); window.scrollTo(0, 0); });
 }
 /* card di una partita nella pagina pubblica */
@@ -1283,9 +1318,9 @@ function cardPar(p){
     <div class="ft">${esc(piede)}</div>${p.arbitro && !fin ? `<div class="arb">Arbitro: <b>${esc(p.arbitro)}</b></div>` : ''}${fin ? '<div class="tb-vai">Tabellino ›</div>' : ''}</div>`;
 }
 function renderCamp(app, v){
-  const C = CAMP[v]; pubStart();
+  const C = CAMP[v]; pubStart(); linkCondiviso(v);
   const l = S.pubSq.filter(q => q.categoria === C.cat).sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
-  const tabs = [['par', 'Partite'], ['cl', 'Classifica'], ['gio', 'Giocatori'], ['dis', 'Disciplina'], ['com', 'Comunicati']], lcom = comCat(C.cat), ncom = lcom.filter(nuovoC).length;
+  const tabs = [['par', 'Partite'], ['cl', 'Classifica'], ['gio', 'Giocatori'], ['dis', 'Disciplina'], ['com', 'Comunicati'], ['news', 'News']], lcom = comCat(C.cat), ncom = lcom.filter(nuovoC).length, lnw = newsCat(C.cat), nnw = lnw.filter(nuovoC).length;
   const t = S.ptab, sb = k => S.sub[k];
   let body;
   if(!S.pubLoaded) body = '<div class="status"><span class="spin"></span>Carico…</div>';
@@ -1299,17 +1334,19 @@ function renderCamp(app, v){
       const lg = lp.filter(p => +p.giornata === g).sort(ordPar), inGioco = new Set(lg.flatMap(p => [p.casaId, p.ospiteId]));
       const riposa = l.filter(q => !inGioco.has(q.id)).map(q => q.nome);
       body = testa('Partite', 'Campionato') + `<div class="seg gior" role="tablist" aria-label="Giornate">${giorn.map(n => `<button data-gp="${n}" aria-pressed="${n === g}">${n}ª giornata</button>`).join('')}</div>
+        <div class="sh-row">${shBtn('g', 'Condividi la giornata')}</div>
         <div class="card par">${lg.map(cardPar).join('')}</div>${riposa.length && riposa.length < l.length ? `<p class="note">Riposa: ${esc(riposa.join(', '))}</p>` : ''}`;
     }
   }
+  else if(t === 'news') body = testa('News', 'Campionato') + (!S.pubComOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lnw.length ? `<ul class="list nw-list">${lnw.map(n => cardNews(n)).join('')}</ul>` : vuoto('Nessuna news', 'Qui trovi le notizie del torneo: foto, video e approfondimenti.'));
   else if(t === 'com') body = testa('Comunicati', 'Campionato') + (!S.pubComOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lcom.length ? `<ul class="list">${lcom.map(c => itemC(c)).join('')}</ul>` : vuoto('Nessun comunicato', 'Qui trovi i comunicati del giudice sportivo, gli avvisi e i documenti del torneo.'));
-  else if(t === 'cl') body = testa('Classifica', 'Campionato') + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : l.length ? tabClassifica(C.cat, l) : vuoto('Squadre in arrivo', 'Le squadre del campionato non sono ancora state inserite.'));
+  else if(t === 'cl') body = testa('Classifica', 'Campionato') + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : l.length ? `<div class="sh-row">${shBtn('cl', 'Condividi la classifica')}</div>` + tabClassifica(C.cat, l) : vuoto('Squadre in arrivo', 'Le squadre del campionato non sono ancora state inserite.'));
   else if(t === 'gio'){
     const k = sb('gio') || 'mar';
     const lg = S.pubParOk ? classGioc(C.cat, k) : [], fq = (S.gsq || {})[v] || '', sqs = [...new Map(lg.map(r => [r.sqId || r.sq, r.sq])).entries()].sort((a, b) => (a[1] || '').localeCompare(b[1] || '', 'it'));
     const lf = fq ? lg.filter(r => (r.sqId || r.sq) === fq) : lg;
     body = segSub('gio', [['mar', 'Marcatori'], ['mvp', 'Migliore in campo', 'MVP'], ['por', 'Miglior portiere', 'Portieri']]) + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lg.length
-      ? (sqs.length > 1 ? `<div class="gfil"><select id="gFil" aria-label="Squadra"><option value="">Tutte le squadre</option>${sqs.map(([id, n]) => `<option value="${esc(id)}" ${id === fq ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : '') + tabGioc(lf, k)
+      ? `<div class="sh-row">${shBtn('gio', 'Condividi')}</div>` + (sqs.length > 1 ? `<div class="gfil"><select id="gFil" aria-label="Squadra"><option value="">Tutte le squadre</option>${sqs.map(([id, n]) => `<option value="${esc(id)}" ${id === fq ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : '') + tabGioc(lf, k)
       : {mar: vuoto('Ancora nessun gol', 'La classifica marcatori si riempie con i gol scritti nei referti degli arbitri.'),
       mvp: vuoto('Ancora nessuna partita', 'A fine partita l’arbitro sceglie il migliore in campo: qui la classifica di chi è stato scelto più volte.'),
       por: vuoto('Ancora nessuna partita', 'A fine partita l’arbitro sceglie il miglior portiere: qui la classifica di chi è stato scelto più volte.')}[k]);
@@ -1333,10 +1370,17 @@ function renderCamp(app, v){
   app.className = 'con-tabs ' + C.cls + '-app';
   app.innerHTML = `<header class="band ${C.cls}"><div class="band-in"><button class="casa" data-home aria-label="Torna alla pagina iniziale">‹</button><img class="clogo" src="${C.logo}" alt=""><div><h1>${C.nome}</h1><div class="sub">${C.sub}</div></div><button class="infob" data-info aria-label="Regolamento e informazioni"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.5" r="1.4" fill="currentColor"/></svg></button></div></header>
     <main class="wrap stack">${body}</main>
-    <div class="tabbar"><nav aria-label="Sezioni">${tabs.map(([k, n]) => `<button data-pt="${k}"${t === k ? ' aria-current="page"' : ''}>${svg(k)}${n}${k === 'com' && ncom && t !== 'com' ? '<i class="tdot" aria-label="nuovi"></i>' : ''}</button>`).join('')}</nav></div>`;
+    <div class="tabbar"><nav aria-label="Sezioni">${tabs.map(([k, n]) => `<button data-pt="${k}"${t === k ? ' aria-current="page"' : ''}>${svg(k)}${n}${(k === 'com' && ncom && t !== 'com') || (k === 'news' && nnw && t !== 'news') ? '<i class="tdot" aria-label="nuovi"></i>' : ''}</button>`).join('')}</nav></div>`;
   bindHome(app);
   app.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => { S.ptab = b.dataset.pt; S.sqp = ''; render(); window.scrollTo(0, 0); });
   app.querySelectorAll('[data-sqp]').forEach(b => { if(!b.dataset.sqp || !l.some(q => q.id === b.dataset.sqp)) return; b.classList.add('tap'); b.onclick = () => { S.sqp = b.dataset.sqp; render(); window.scrollTo(0, 0); }; });
+  app.querySelectorAll('[data-sh]').forEach(b => b.onclick = () => { const k = b.dataset.sh;
+    if(k === 'g'){ const g = S.pgPub[v], lg = parDi(S.pubPar, C.cat).filter(p => +p.giornata === g).sort(ordPar), inG = new Set(lg.flatMap(p => [p.casaId, p.ospiteId])), rip = l.filter(q => !inG.has(q.id)).map(q => q.nome);
+      shareDa('g', v, {g, lg, riposa: rip.length < l.length ? rip : []}); }
+    else if(k === 'cl') shareDa('cl', v, {squadre: l});
+    else if(k === 'gio'){ const kk = S.sub.gio || 'mar'; shareDa('gio', v, {k: kk, l: classGioc(C.cat, kk)}); } });
+  app.querySelectorAll('[data-nw]').forEach(b => b.onclick = () => openNews((S.pubCom || []).find(c => c.id === b.dataset.nw)));
+  apriCondiviso(v, l);
   app.querySelectorAll('[data-tb]').forEach(b => { const apri = () => openTabellino(S.pubPar.find(x => x.id === b.dataset.tb), l); b.onclick = apri; b.onkeydown = ev => { if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); apri(); } }; });
   const bk = app.querySelector('[data-sqback]'); if(bk) bk.onclick = () => { S.sqp = ''; render(); window.scrollTo(0, 0); };
   app.querySelectorAll('[data-sub]').forEach(b => b.onclick = () => { const [k, id] = b.dataset.sub.split(':'); S.sub[k] = id; render(); });
@@ -2319,7 +2363,7 @@ function openAmm(cat, a){
    comunicazioni/{id}: messaggio dell'amministratore alle squadre; messaggi/{id_squadra}: la copia per ogni squadra, con chi l'ha letto */
 const TIPC = {gs: ['Giudice sportivo', '⚖️'], avviso: ['Avviso', '📣'], doc: ['Documento', '📄']};
 const comOrd = (a, b) => (b.data || '').localeCompare(a.data || '') || (b.pubAt || b.createdAt || 0) - (a.pubAt || a.createdAt || 0);
-const comCat = cat => (S.pubCom || []).filter(c => !c.camp || c.camp === cat).sort(comOrd);
+const comCat = cat => (S.pubCom || []).filter(c => c.tipo !== 'news' && (!c.camp || c.camp === cat)).sort(comOrd);
 const comTit = c => c.tipo === 'gs' ? `Comunicato ufficiale n. ${c.numero}` : c.titolo || (TIPC[c.tipo] || TIPC.avviso)[0];
 const comSub = c => [(TIPC[c.tipo] || TIPC.avviso)[0], c.tipo === 'gs' && c.giornata ? c.giornata + 'ª giornata' : '', c.camp ? NOMECAMP[c.camp] : 'Tutti i campionati', fmt(c.data)].filter(Boolean).join(' · ');
 const vistiC = () => { try{ return JSON.parse(localStorage.getItem('aics-com') || '{}'); }catch(e){ return {}; } };
@@ -2336,7 +2380,7 @@ function comStart(){
 const itemC = (c, k = 'data-com') => `<li><button class="item" ${k}="${esc(c.id)}"><span class="cico">${(TIPC[c.tipo] || TIPC.avviso)[1]}</span><span class="tx"><b>${esc(comTit(c))}</b><span>${esc(comSub(c))}</span>${(c.allegati || []).length ? `<span>📎 ${c.allegati.length} ${c.allegati.length === 1 ? 'allegato' : 'allegati'}</span>` : ''}${c.pubblicato === false ? '<span class="pst">Ritirato</span>' : k === 'data-com' && nuovoC(c) ? '<span class="pst wait">Nuovo</span>' : ''}</span></button></li>`;
 const bindCom = root => root.querySelectorAll('[data-com]').forEach(b => b.onclick = () => openCom((S.pubCom || []).find(c => c.id === b.dataset.com)));
 function openComHome(){
-  const l = (S.pubCom || []).slice().sort(comOrd).slice(0, 20);
+  const l = (S.pubCom || []).filter(c => !isNews(c)).sort(comOrd).slice(0, 20);
   const {root} = sheet(`<div class="stack"><h3>Comunicati</h3><p class="note">Gli ultimi comunicati di tutti i campionati: giudice sportivo, avvisi e documenti.</p>
     ${l.length ? `<ul class="list">${l.map(c => itemC(c)).join('')}</ul>` : vuoto('Nessun comunicato', '')}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, 'Comunicati', 'largo');
   bindCom(root);
@@ -2410,9 +2454,11 @@ function openCom(c, adm){
     ${c.tipo === 'gs' ? gsHtml(c) : `<h3>${esc(comTit(c))}</h3>${c.testo ? `<p class="com-x">${linkify(c.testo)}</p>` : ''}`}
     ${alHtml(c.allegati)}
     ${c.tipo === 'gs' ? '<button class="btn btn-primary btn-block" id="cPdf">⬇️ Scarica PDF</button>' : ''}
+    ${!adm && c.pubblicato !== false ? `<button class="btn btn-ghost btn-block" id="cSh">${ICO_SH} Condividi</button>` : ''}
     ${adm ? `<div class="row">${c.tipo !== 'gs' ? '<button class="btn btn-ghost" data-ca="mod">Modifica</button>' : ''}${c.tipo !== 'gs' ? `<button class="btn btn-ghost" data-ca="pub">${c.pubblicato === false ? 'Pubblica di nuovo' : 'Ritira'}</button>` : ''}<button class="btn btn-danger" data-ca="del">Elimina</button></div>` : ''}
     <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, comTit(c), 'largo');
   bindAl(root, c.allegati);
+  const csh = root.querySelector('#cSh'); if(csh) csh.onclick = () => shareDa('c', Object.keys(CAMP).find(k => CAMP[k].cat === c.camp) || (CAMP[VIEW()] ? VIEW() : 'futsal'), {c});
   const pd = root.querySelector('#cPdf');
   if(pd) pd.onclick = async () => { pd.disabled = true; pd.textContent = 'Preparo il PDF…'; try{ await salvaFile(await pdfGS(c), `comunicato-${c.numero}-${(NOMECAMP[c.camp] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`); }catch(e){ console.warn(e); toast(e.message === 'net' ? 'Serve internet per creare il PDF' : 'Non riesco a creare il PDF'); } pd.disabled = false; pd.textContent = '⬇️ Scarica PDF'; };
   root.querySelectorAll('[data-ca]').forEach(b => b.onclick = async () => { const ref = db().collection('comunicati').doc(c.id), k = b.dataset.ca;
@@ -2549,10 +2595,11 @@ function openAvviso(c){
 /* --- scheda Comunicati dell'amministratore --- */
 function adminCom(){
   const sb = S.sub.com || 'pub', pd = S.pubParOk && S.loaded.comAll && S.loaded.amm && CATS.some(c => bozzaGS(c).pronto) ? '<i class="sdot"></i>' : '';
-  const sub = segSub('com', [['pub', 'Comunicati pubblici' + pd, 'Pubblici' + pd], ['sq', 'Alle squadre']]);
+  const sub = segSub('com', [['pub', 'Comunicati pubblici' + pd, 'Pubblici' + pd], ['news', 'News'], ['sq', 'Alle squadre']]);
   if(sb === 'sq') return sub + adminMsg();
+  if(sb === 'news') return sub + adminNews();
   if(!S.loaded.comAll || !S.pubParOk || !S.loaded.amm) return sub + '<div class="status"><span class="spin"></span>Carico…</div>';
-  const pr = CATS.map(c => [c, bozzaGS(c)]).filter(([c, b]) => b.ids.length), l = (S.comAll || []).slice().sort(comOrd);
+  const pr = CATS.map(c => [c, bozzaGS(c)]).filter(([c, b]) => b.ids.length), l = (S.comAll || []).filter(c => !isNews(c)).sort(comOrd);
   return sub + pr.map(([c, b]) => `<button class="card gsp" data-gs="${c}"><span class="cico">⚖️</span><span class="tx"><b>Comunicato n. ${b.numero} · ${esc(NOMECAMP[c])}${b.pronto ? '<i class="sdot"></i>' : ''}</b><span>${b.G ? b.G + 'ª giornata · ' : 'nuovi provvedimenti · '}${b.pronto ? 'pronto da pubblicare' : b.manca.length ? `aspetta ${b.manca.length === 1 ? 'un risultato' : b.manca.length + ' risultati'}` : 'espulsioni da decidere'}</span></span><span class="pst ${b.pronto ? 'ok' : 'wait'}">${b.pronto ? 'Pronto' : 'In arrivo'}</span></button>`).join('')
     + `<div class="row tbtn"><button class="btn btn-primary sm" id="cNew">+ Nuovo avviso</button><button class="btn btn-ghost sm" id="cGs">⚖️ Giudice sportivo</button></div>
     ${l.length ? `<ul class="list">${l.map(c => itemC(c, 'data-cadm')).join('')}</ul>` : vuoto('Nessun comunicato', 'I comunicati del giudice sportivo li prepara l’app quando una giornata ha tutti i risultati: li trovi qui sopra, pronti da pubblicare.')}`;
@@ -2574,6 +2621,8 @@ function bindAdmCom(app){
   if(x('cNew')) x('cNew').onclick = () => openAvviso(null);
   if(x('cGs')) x('cGs').onclick = () => scegliCat(openGS);
   if(x('mNew')) x('mNew').onclick = openMsgNew;
+  if(x('nNew')) x('nNew').onclick = () => openNewsForm(null);
+  app.querySelectorAll('[data-nadm]').forEach(b => b.onclick = () => openNews(S.comAll.find(c => c.id === b.dataset.nadm), true));
 }
 /* --- messaggi alle squadre --- */
 function openMsgNew(){
@@ -3203,6 +3252,406 @@ function openInfoAdmin(){
       catch(err){ toast(fbErr(err)); } };
   };
   draw();
+}
+
+/* ===================== CONDIVIDI SUI SOCIAL ===================== */
+/* immagine (storia 9:16 o post 1:1) disegnata su canvas + link che apre la stessa cosa nell'app */
+const ICO_SH = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const shBtn = (k, t) => `<button type="button" class="sh-btn" data-sh="${k}">${ICO_SH}<span>${t}</span></button>`;
+const shLS = (k, v) => { try{ if(v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){} return null; };
+const shLink = path => location.origin + location.pathname + '#' + path;
+const SHF = {D: (w, s) => `${w} ${s}px "Barlow Condensed","Arial Narrow",Arial,sans-serif`, B: (w, s) => `${w} ${s}px "Source Sans 3",Arial,sans-serif`};
+const shImgs = new Map();
+const shImg = src => { if(!shImgs.has(src)) shImgs.set(src, new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; })); return shImgs.get(src); };
+async function shFonts(){ try{ await Promise.race([Promise.all(['800 40px "Barlow Condensed"', '700 40px "Barlow Condensed"', '600 30px "Source Sans 3"', '400 30px "Source Sans 3"', '700 30px "Source Sans 3"'].map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 2500))]); }catch(e){} }
+/* testo che sta nella larghezza: rimpicciolisce fino a min, poi taglia con … */
+function shFit(ctx, t, maxW, fam, w, size, min = Math.round(size * .7)){
+  t = String(t == null ? '' : t); let s = size; ctx.font = SHF[fam](w, s);
+  while(s > min && ctx.measureText(t).width > maxW){ s -= 2; ctx.font = SHF[fam](w, s); }
+  if(ctx.measureText(t).width > maxW){ while(t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1); t = t.trim() + '…'; }
+  return t;
+}
+function shTxt(ctx, t, x, y, maxW, fam, w, size, col, align = 'left', min){ const s = shFit(ctx, t, maxW, fam, w, size, min); ctx.fillStyle = col; ctx.textAlign = align; ctx.fillText(s, x, y); }
+function shWrap(ctx, t, maxW){ const out = []; String(t || '').split(/\n/).forEach(par => { let line = ''; par.split(/\s+/).forEach(w => { const p = line ? line + ' ' + w : w; if(ctx.measureText(p).width > maxW && line){ out.push(line); line = w; } else line = p; }); out.push(line); }); return out; }
+const shRR = (ctx, x, y, w, h, r) => { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); };
+async function shCrest(ctx, nome, cx, cy, size){
+  const im = stemmaImg(nome);
+  if(im){ const i = await shImg(im.img); if(i){ const k = Math.min(size / i.width, size / i.height), w = i.width * k, h = i.height * k;
+    if(String(im.b || '').includes('d')){ ctx.save(); ctx.shadowColor = 'rgba(255,255,255,.95)'; ctx.shadowBlur = 0; [[2, 0], [-2, 0], [0, 2], [0, -2]].forEach(([dx, dy]) => { ctx.shadowOffsetX = dx; ctx.shadowOffsetY = dy; ctx.drawImage(i, cx - w / 2, cy - h / 2, w, h); }); ctx.restore(); }
+    ctx.drawImage(i, cx - w / 2, cy - h / 2, w, h); return; } }
+  const t = String(nome || ''); let hh = 0; for(const c of t) hh = (hh * 31 + c.charCodeAt(0)) >>> 0;
+  const ini = t.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  ctx.fillStyle = COL[hh % COL.length]; shRR(ctx, cx - size / 2, cy - size / 2, size, size, size * .24); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = SHF.D(800, Math.round(size * .44)); ctx.fillText(ini, cx, cy + size * .03); ctx.textBaseline = 'alphabetic';
+}
+const shAcc = cat => cat === 'C7 AICS' ? '#E36BF5' : '#4FD3FF';
+const SH_GIALLO = '#FFD447', SH_MUTO = '#B9C8EE';
+/* sfondo dello stadio + logo + nome della competizione + titolo grande in corsivo */
+async function shBase(cat, fmtI, titolo, sotto){
+  const W = 1080, story = fmtI !== 'post', H = story ? 1920 : 1080, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d'), acc = shAcc(cat);
+  ctx.fillStyle = '#071033'; ctx.fillRect(0, 0, W, H);
+  const bg = await shImg(story ? '../sfondo-avvio.jpg' : '../sfondo-barra.jpg');
+  if(bg){ const k = Math.max(W / bg.width, H / bg.height), w = bg.width * k, h = bg.height * k; ctx.drawImage(bg, (W - w) / 2, story ? 0 : (H - h) / 2, w, h); }
+  let g = ctx.createLinearGradient(0, 0, 0, H);
+  if(story){ g.addColorStop(0, 'rgba(4,9,30,0)'); g.addColorStop(.3, 'rgba(4,9,30,.05)'); g.addColorStop(.42, 'rgba(4,9,30,.55)'); g.addColorStop(1, 'rgba(4,9,30,.82)'); }
+  else { g.addColorStop(0, 'rgba(4,9,30,.55)'); g.addColorStop(1, 'rgba(4,9,30,.85)'); }
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const nome = cat === 'C7 AICS' ? 'R.E. LIGA C7 LEAGUE' : cat === 'C5 AICS' ? 'FUTSAL LEAGUE' : 'FUTSAL E C7 LEAGUE';
+  const tit = (t, x, y, size, maxW, align) => { ctx.save(); ctx.translate(x, y); ctx.transform(1, 0, -.18, 1, 0, 0); ctx.shadowColor = acc + 'aa'; ctx.shadowBlur = 28; shTxt(ctx, t, 0, 0, maxW, 'D', 800, size, '#fff', align, Math.round(size * .55)); ctx.restore(); };
+  let y0;
+  if(story){
+    ctx.save(); ctx.shadowColor = acc; ctx.shadowBlur = 18; shTxt(ctx, nome, W / 2, 652, W - 120, 'D', 800, 50, acc, 'center'); ctx.restore();
+    tit(titolo, W / 2, 778, 150, W - 140, 'center');
+    if(sotto) shTxt(ctx, sotto, W / 2, 838, W - 140, 'B', 600, 36, SH_MUTO, 'center');
+    y0 = sotto ? 882 : 836;
+  } else {
+    const lg = await shImg('../marchio-aics.png'); if(lg){ const h = 200, w = lg.width * h / lg.height; ctx.drawImage(lg, 46, 34, w, h); }
+    const x = 270;
+    ctx.save(); ctx.shadowColor = acc; ctx.shadowBlur = 14; shTxt(ctx, nome, x, 86, W - x - 50, 'D', 800, 40, acc); ctx.restore();
+    tit(titolo, x + 6, 182, titolo.length > 14 ? 78 : 100, W - x - 60, 'left');
+    if(sotto) shTxt(ctx, sotto, x, 228, W - x - 50, 'B', 600, 28, SH_MUTO);
+    y0 = 262;
+  }
+  const fy = H - (story ? 46 : 26);
+  shTxt(ctx, 'AICS Reggio Emilia · ' + location.host, W / 2, fy, W - 120, 'B', 600, story ? 28 : 22, 'rgba(185,200,238,.85)', 'center');
+  return {cv, ctx, W, H, story, acc, y0, y1: fy - (story ? 50 : 34)};
+}
+/* riga a barra blu con bordo chiaro, come nelle grafiche delle coppe */
+function shBar(ctx, x, y, w, h, zona){
+  ctx.fillStyle = 'rgba(10,28,92,.80)'; shRR(ctx, x, y, w, h, 10); ctx.fill();
+  ctx.strokeStyle = 'rgba(140,180,255,.55)'; ctx.lineWidth = 2; shRR(ctx, x + 1, y + 1, w - 2, h - 2, 10); ctx.stroke();
+  if(zona){ ctx.fillStyle = zona; shRR(ctx, x + 2, y + 2, 9, h - 4, 4); ctx.fill(); }
+}
+const shPill = (ctx, t, cx, cy, fs, bg, col) => { ctx.font = SHF.B(700, fs); const w = ctx.measureText(t).width + fs * 1.4, h = fs * 1.7; ctx.fillStyle = bg; shRR(ctx, cx - w / 2, cy - h / 2, w, h, h / 2); ctx.fill(); ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.fillText(t, cx, cy + fs * .36); };
+function shIco(ctx, x, y, s, t = 'g'){
+  if(t === 'g' || t === 'a'){ ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, s / 2, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#0A1C5C'; ctx.beginPath();
+    for(let i = 0; i < 5; i++){ const a = -Math.PI / 2 + i * 2 * Math.PI / 5; ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * s * .2, y + Math.sin(a) * s * .2); } ctx.closePath(); ctx.fill(); return; }
+  const card = (c, dx) => { ctx.fillStyle = c; shRR(ctx, x - s * .3 + dx, y - s * .42, s * .6, s * .84, 4); ctx.fill(); };
+  if(t === 'y') card('#F5C518', 0); else if(t === 'r') card('#E5333A', 0); else { card('#F5C518', -s * .2); card('#E5333A', s * .2); }
+}
+const shBrv = n => { const p = String(n || '').split(/\s+/); if(p.length < 2) return n || ''; const up = p.filter(w => w === w.toUpperCase() && /[A-Z]/.test(w)); return up.length && up.length < p.length ? `${up.join(' ')} ${p.find(w => !up.includes(w))[0]}.` : n; };
+const shHead = (ctx, cols, y, fs) => cols.forEach(([t, x]) => shTxt(ctx, t, x, y, 110, 'B', 700, fs, SH_MUTO, 'center'));
+
+/* --- una partita: risultato, gol, cartellini, premi --- */
+async function shPartita(p, fmtI){
+  const e = esito(p), B = await shBase(p.camp, fmtI, e ? 'RISULTATO' : 'PROSSIMA PARTITA', `${p.giornata}ª giornata${p.data ? ' · ' + giornoCorto(p.data) : ''}${p.impianto ? ' · ' + p.impianto : ''}`), {ctx, W, story} = B;
+  let y = B.y0 + (story ? 30 : 6); const cs = story ? 200 : 128, cxs = [W * .21, W * .79], hb = cs + (story ? 110 : 70);
+  shBar(ctx, 50, y, W - 100, hb);
+  await shCrest(ctx, p.casa, cxs[0], y + 20 + cs / 2, cs); await shCrest(ctx, p.ospite, cxs[1], y + 20 + cs / 2, cs);
+  shTxt(ctx, (p.casa || '').toUpperCase(), cxs[0], y + cs + (story ? 82 : 56), 360, 'D', 800, story ? 44 : 34, '#fff', 'center', 22);
+  shTxt(ctx, (p.ospite || '').toUpperCase(), cxs[1], y + cs + (story ? 82 : 56), 360, 'D', 800, story ? 44 : 34, '#fff', 'center', 22);
+  shPill(ctx, e ? (e.tav ? 'A TAVOLINO' : 'FINALE') : (p.data ? giornoCorto(p.data).toUpperCase() : 'DA DEFINIRE'), W / 2, y + (story ? 52 : 34), story ? 26 : 20, e && e.tav ? 'rgba(229,51,58,.35)' : 'rgba(255,255,255,.14)', '#fff');
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 16;
+  shTxt(ctx, e ? `${e.gc} : ${e.go}` : (p.ora || '– : –'), W / 2, y + 20 + cs / 2 + (story ? 62 : 40), 300, 'D', 800, story ? 168 : 112, e ? SH_GIALLO : '#fff', 'center'); ctx.restore();
+  y += hb + (story ? 50 : 22);
+  const gol = e && !e.tav ? eventiPar(p) : [], premi = e && !e.tav ? [p.mvp && ['MIGLIORE IN CAMPO', p.mvp], p.por && ['MIGLIOR PORTIERE', p.por]].filter(Boolean) : [];
+  const pH = premi.length ? (story ? 130 : 84) : 0, yEnd = B.y1 - pH - (pH ? (story ? 20 : 12) : 0);
+  if(e && e.tav) shTxt(ctx, `${p[e.gc > e.go ? 'casa' : 'ospite']} vince a tavolino${e.rit ? ' (squadra ritirata)' : ''}`, W / 2, y + 50, W - 160, 'B', 600, story ? 40 : 32, SH_MUTO, 'center');
+  else if(gol.length){
+    shTxt(ctx, 'TABELLINO', W / 2, y + (story ? 34 : 26), 400, 'D', 800, story ? 38 : 30, B.acc, 'center'); y += story ? 56 : 40;
+    const conMin = gol.some(x => x.min !== ''), rh = story ? 60 : 44, fs = story ? 31 : 24;
+    let righe;
+    if(conMin) righe = gol.map((x, i) => ({...x, i})).sort((a, b) => (a.min === '') - (b.min === '') || minNum(a.min) - minNum(b.min) || a.i - b.i).map(x => ({c: x.sq === 'casa' ? x : null, o: x.sq !== 'casa' ? x : null, m: x.min}));
+    else { const col = s => { const m = new Map(); gol.filter(x => x.sq === s).sort((a, b) => 'gayyrr'.indexOf(a.t) - 'gayyrr'.indexOf(b.t)).forEach(x => { const k = x.t + '|' + x.nome; m.set(k, {...x, n: (m.get(k) || {n: 0}).n + 1}); }); return [...m.values()]; };
+      const c = col('casa'), o = col('ospite'); righe = Array.from({length: Math.max(c.length, o.length)}, (_, i) => ({c: c[i] || null, o: o[i] || null, m: ''})); }
+    const max = Math.max(1, Math.floor((yEnd - y) / rh)), vis = righe.length > max ? righe.slice(0, max - 1) : righe;
+    const nm = x => (x.t === 'a' ? 'Autogol' : shBrv(x.nome)) + (x.n > 1 ? ` ×${x.n}` : '');
+    vis.forEach((r, i) => { const yy = y + i * rh, cy = yy + (rh - 8) / 2, mid = W / 2; shBar(ctx, 50, yy, W - 100, rh - 8);
+      if(r.m) shTxt(ctx, r.m + '’', mid, cy + fs * .36, 90, 'D', 800, fs, SH_GIALLO, 'center');
+      if(r.c){ shIco(ctx, mid - 66, cy, fs * .85, r.c.t); shTxt(ctx, nm(r.c), mid - 96, cy + fs * .36, mid - 170, 'B', 700, fs, '#fff', 'right', 20); }
+      if(r.o){ shIco(ctx, mid + 66, cy, fs * .85, r.o.t); shTxt(ctx, nm(r.o), mid + 96, cy + fs * .36, mid - 170, 'B', 700, fs, '#fff', 'left', 20); } });
+    if(vis.length < righe.length) shTxt(ctx, `… e altri ${righe.length - vis.length} nel tabellino`, W / 2, y + vis.length * rh + fs * .6, W - 160, 'B', 600, fs - 4, SH_MUTO, 'center');
+  }
+  premi.forEach(([t, x], i) => { const bw = premi.length > 1 ? (W - 130) / 2 : W - 100, bx = 50 + i * (bw + 30), by = B.y1 - pH;
+    shBar(ctx, bx, by, bw, pH);
+    shTxt(ctx, t, bx + 26, by + pH * .42, bw - 52, 'B', 700, story ? 24 : 18, B.acc);
+    shTxt(ctx, `${shBrv(x.nome)} · ${p[x.sq === 'ospite' ? 'ospite' : 'casa']}`, bx + 26, by + pH * .42 + (story ? 46 : 32), bw - 52, 'D', 800, story ? 38 : 28, '#fff', 'left', 18); });
+  return B.cv;
+}
+/* --- una giornata --- */
+async function shGiornata(cat, g, lg, fmtI, riposa){
+  const B = await shBase(cat, fmtI, `${g}ª GIORNATA`, lg.some(p => esito(p)) ? 'Risultati' : 'Programma'), {ctx, W, story} = B;
+  const n = lg.length, note = riposa.length ? (story ? 60 : 40) : 0, gap = story ? 14 : 8, rh = Math.min(story ? 150 : 104, (B.y1 - B.y0 - note) / Math.max(n, 1)), cs = Math.min((rh - gap) * .62, 84), fs = Math.min((rh - gap) * .3, 40);
+  for(let i = 0; i < n; i++){ const p = lg[i], e = esito(p), y = B.y0 + i * rh, h = rh - gap, cy = y + h / 2;
+    shBar(ctx, 50, y, W - 100, h);
+    await shCrest(ctx, p.casa, 76 + cs / 2, cy, cs); await shCrest(ctx, p.ospite, W - 76 - cs / 2, cy, cs);
+    const nw = W / 2 - 76 - cs - 18 - 110;
+    shTxt(ctx, (p.casa || '').toUpperCase(), 76 + cs + 18, cy + fs * .36, nw, 'D', 800, fs, '#fff', 'left', 16);
+    shTxt(ctx, (p.ospite || '').toUpperCase(), W - 76 - cs - 18, cy + fs * .36, nw, 'D', 800, fs, '#fff', 'right', 16);
+    if(e) shTxt(ctx, `${e.gc} - ${e.go}`, W / 2, cy + fs * .5, 200, 'D', 800, fs * 1.4, e.tav ? '#FF8A8F' : SH_GIALLO, 'center');
+    else { const a = p.stato === 'rinviata' ? 'RINVIATA' : p.rigiocare && !p.data ? 'DA RIGIOCARE' : p.data ? (p.ora || '--:--') : 'DA DEFINIRE', b = p.data && p.stato !== 'rinviata' ? giornoCorto(p.data) : '';
+      shTxt(ctx, a, W / 2, cy + (b ? -2 : fs * .36), 190, 'D', 800, b ? fs * 1.05 : fs * .75, p.stato === 'rinviata' ? '#FF8A8F' : B.acc, 'center', 12);
+      if(b) shTxt(ctx, b, W / 2, cy + fs * .95, 190, 'B', 600, fs * .62, SH_MUTO, 'center'); } }
+  if(riposa.length) shTxt(ctx, 'Riposa: ' + riposa.join(', '), W / 2, B.y1 - 6, W - 140, 'B', 600, story ? 30 : 24, SH_MUTO, 'center');
+  return B.cv;
+}
+/* --- classifica come nell'app: colori delle zone e leggenda --- */
+async function shClassifica(cat, squadre, fmtI){
+  const {righe, giocate, imp} = classifica(cat, squadre, S.pubPar), B = await shBase(cat, fmtI, 'CLASSIFICA', giocate ? `dopo ${giocate} ${giocate === 1 ? 'partita giocata' : 'partite giocate'}` : ''), {ctx, W, story} = B;
+  const zone = (imp.zone || []).filter(z => z.nome), leg = zone.length ? (story ? 70 : 46) : 0, head = story ? 40 : 30, n = righe.length, gap = story ? 8 : 5;
+  const rh = Math.min(story ? 86 : 64, (B.y1 - B.y0 - head - leg) / Math.max(n, 1)), h = rh - gap, cs = h * .68, fs = Math.min(h * .44, 36);
+  const ks = story ? ['G', 'V', 'N', 'P', 'GF', 'GS', 'DR'] : ['G', 'V', 'N', 'P', 'DR'], xPt = 1006, xs = Object.fromEntries(ks.map((k, i) => [k, xPt - 56 - (ks.length - i) * (story ? 65 : 74)]));
+  shHead(ctx, [...ks.map(k => [k, xs[k]]), ['PT', xPt]], B.y0 + head * .55, story ? 22 : 18);
+  for(let i = 0; i < n; i++){ const r = righe[i], y = B.y0 + head + i * rh, cy = y + h / 2, z = !r.rit && zonaDi(imp, i + 1);
+    shBar(ctx, 40, y, W - 80, h, z ? ZCOL[z.col] || ZCOL.blu : '');
+    shTxt(ctx, r.rit ? '–' : `${i + 1}°`, 92, cy + fs * .36, 70, 'D', 800, fs, '#fff', 'center');
+    await shCrest(ctx, r.nome, 150 + cs / 2, cy, cs);
+    shTxt(ctx, (r.nome || '').toUpperCase() + (r.pen ? '*' : ''), 150 + cs + 14, cy + fs * .36, xs.G - 40 - (150 + cs + 14), 'D', 800, fs, r.rit ? '#8292B8' : '#fff', 'left', 14);
+    const dr = r.GF - r.GS;
+    [['G', r.G], ['V', r.V], ['N', r.N], ['P', r.P], ['GF', r.GF], ['GS', r.GS], ['DR', dr > 0 ? '+' + dr : dr]].filter(([k]) => k in xs).forEach(([k, v]) => shTxt(ctx, String(v), xs[k], cy + fs * .36, 64, 'D', 700, fs * .92, '#fff', 'center'));
+    ctx.fillStyle = 'rgba(140,180,255,.55)'; ctx.fillRect(xPt - 36, y + h * .2, 2, h * .6);
+    shTxt(ctx, String(r.Pt), xPt + 4, cy + fs * .4, 70, 'D', 800, fs * 1.12, SH_GIALLO, 'center'); }
+  if(zone.length){ const yy = B.y0 + head + n * rh + leg * .62; ctx.font = SHF.B(600, story ? 24 : 19);
+    const it = zone.map(z => `${z.da === z.a ? z.da + 'ª' : `${z.da}ª–${z.a}ª`} ${z.nome}`), ws = it.map(t => ctx.measureText(t).width + (story ? 44 : 34)), tot = ws.reduce((a, b) => a + b, 0);
+    let x = Math.max(50, (W - tot) / 2);
+    it.forEach((t, i) => { ctx.fillStyle = ZCOL[zone[i].col] || ZCOL.blu; ctx.beginPath(); ctx.arc(x + 9, yy - 7, story ? 9 : 7, 0, Math.PI * 2); ctx.fill(); shTxt(ctx, t, x + 24, yy, W - 100, 'B', 600, story ? 24 : 19, SH_MUTO); x += ws[i]; }); }
+  return B.cv;
+}
+/* --- marcatori, migliore in campo, miglior portiere: i primi 5 --- */
+async function shGiocatori(cat, k, l, fmtI){
+  const tit = {mar: 'CLASSIFICA MARCATORI', mvp: 'MIGLIORE IN CAMPO', por: 'MIGLIOR PORTIERE'}[k], B = await shBase(cat, fmtI, tit, ''), {ctx, W, story} = B;
+  const vis = l.filter((r, i) => i < 5), tw = W - 80, gap = story ? 12 : 8, head = story ? 44 : 32, rh = Math.min(story ? 190 : 132, (B.y1 - B.y0 - head) / 5), h = rh - gap, cs = h * .5, fs = Math.min(h * .3, 40);
+  const xv = tw - 70;
+  shHead(ctx, [[k === 'mar' ? 'GOL' : 'VOLTE', xv]], B.y0 + head * .6, story ? 22 : 17);
+  let pos = 0;
+  for(let i = 0; i < vis.length; i++){ const r = vis[i], y = B.y0 + head + i * rh, cy = y + h / 2; if(!i || r.v !== vis[i - 1].v) pos = i + 1;
+    shBar(ctx, 40, y, tw - 40, h);
+    const gv = ctx.createLinearGradient(0, y, 0, y + h), a = 1 - i * .14; gv.addColorStop(0, `rgba(96,150,255,${a})`); gv.addColorStop(1, `rgba(56,104,230,${a})`);
+    ctx.fillStyle = gv; shRR(ctx, xv - 60, y + 2, 120, h - 4, 8); ctx.fill();
+    shTxt(ctx, String(pos), 82, cy + fs * .36, 60, 'D', 800, fs, pos === 1 ? SH_GIALLO : B.acc, 'center');
+    await shCrest(ctx, r.sq, 128 + cs / 2, cy, cs);
+    const nx = 128 + cs + 18, nw = xv - 80 - nx;
+    shTxt(ctx, (r.nome || '').toUpperCase(), nx, cy - fs * .08, nw, 'D', 800, fs, '#fff', 'left', 16);
+    shTxt(ctx, r.sq || '', nx, cy + fs * .88, nw, 'B', 600, fs * .6, SH_MUTO, 'left', 12);
+    shTxt(ctx, String(r.v), xv, cy + fs * .5, 110, 'D', 800, fs * 1.4, '#fff', 'center'); }
+  if(!vis.length) shTxt(ctx, 'Classifica in arrivo', W / 2, B.y0 + 120, W - 160, 'B', 600, 36, SH_MUTO, 'center');
+  return B.cv;
+}
+/* --- comunicato: risultati e testo; la disciplina resta nell'app --- */
+async function shComunicato(c, fmtI){
+  const cat = c.camp || 'C5 AICS', gs = c.tipo === 'gs';
+  const B = await shBase(cat, fmtI, gs ? `COMUNICATO N. ${c.numero}` : (c.tipo === 'doc' ? 'DOCUMENTO' : 'AVVISO'), gs ? [c.giornata ? c.giornata + 'ª giornata' : '', fmt(c.data)].filter(Boolean).join(' · ') : fmt(c.data)), {ctx, W, story} = B;
+  let y = B.y0 + (story ? 10 : 0); const fs = story ? 30 : 23, rh = story ? 58 : 40, fine = B.y1 - (story ? 70 : 46);
+  if(gs){
+    const sez = c.sez || []; let pieno = false;
+    for(const z of sez){ if(pieno) break; const t = (z.t || '').replace(/^\d+\.\s*/, '').toUpperCase();
+      if(y + fs * 2 > fine){ pieno = true; break; }
+      shTxt(ctx, t, z.liv === 1 ? W / 2 : 60, y + fs, W - 120, z.liv === 1 ? 'D' : 'B', 800, z.liv === 1 ? fs * 1.2 : fs * .8, z.liv === 1 ? B.acc : SH_MUTO, z.liv === 1 ? 'center' : 'left'); y += fs * (z.liv === 1 ? 1.8 : 1.5);
+      for(const r of z.r || []){ if(y + rh > fine){ pieno = true; break; } const h = rh - (story ? 10 : 7), cy = y + h / 2; shBar(ctx, 50, y, W - 100, h);
+        ctx.font = SHF.B(700, fs * .9); const bw = r.b ? Math.min(ctx.measureText(r.b).width + 30, W * .42) : 0, ris = z.liv === 1;
+        shTxt(ctx, ris ? (r.a || '').toUpperCase() : r.a || '', 76, cy + fs * .36, W - 152 - bw, ris ? 'D' : 'B', ris ? 800 : 700, fs * (ris ? 1 : .86), '#fff', 'left', 14);
+        if(r.b) shTxt(ctx, r.b, W - 76, cy + fs * .36, W * .42, ris ? 'D' : 'B', ris ? 800 : 600, fs * (ris ? 1.05 : .8), ris ? SH_GIALLO : SH_MUTO, 'right', 12);
+        y += rh; }
+      if(!(z.r || []).length && z.vuoto && z.liv === 1){ shTxt(ctx, z.vuoto, W / 2, y + fs * .8, W - 160, 'B', 600, fs * .85, SH_MUTO, 'center'); y += fs * 1.4; }
+      y += fs * .4; }
+    if(pieno) shTxt(ctx, '… continua nell’app', W / 2, fine + fs * .2, W - 160, 'B', 700, fs * .85, SH_MUTO, 'center');
+  } else {
+    const tl = (() => { ctx.font = SHF.D(800, story ? 56 : 44); return shWrap(ctx, (c.titolo || '').toUpperCase(), W - 160).slice(0, 3); })();
+    ctx.font = SHF.B(500, fs); const lines = shWrap(ctx, c.testo || '', W - 160), lh = fs * 1.4, th = (story ? 64 : 50) * tl.length;
+    const maxL = Math.max(0, Math.floor((fine - y - th - 60) / lh)), vis = lines.slice(0, maxL), hp = th + vis.length * lh + (story ? 70 : 50);
+    shBar(ctx, 50, y, W - 100, hp); let yy = y + (story ? 66 : 52);
+    tl.forEach(t => { shTxt(ctx, t, 80, yy, W - 160, 'D', 800, story ? 56 : 44, '#fff'); yy += story ? 64 : 50; }); yy += lh * .2;
+    vis.forEach(t => { shTxt(ctx, t, 80, yy, W - 160, 'B', 500, fs, '#E6ECFF'); yy += lh; });
+    if(vis.length < lines.length) shTxt(ctx, '…', 80, yy, 100, 'B', 600, fs, SH_MUTO);
+  }
+  shTxt(ctx, gs ? 'Comunicato completo e PDF nell’app' : (c.allegati || []).length ? `Allegati e testo completo nell’app` : 'Lo trovi nell’app, in Comunicati', W / 2, B.y1 - 6, W - 140, 'B', 700, story ? 30 : 23, B.acc, 'center');
+  return B.cv;
+}
+
+/* --- finestra Condividi: cosa (immagine + link, solo immagine, solo link) e formato (storia o post) --- */
+function openShare(o){
+  let modo = shLS('shModo') || 'both', fmtI = shLS('shFmt') || 'story', blob = null, url = '', gen = 0;
+  const {root, close} = sheet(`<div class="stack sh-sheet"><h3>Condividi</h3><p class="note">${esc(o.titolo)}</p>
+    <div class="seg" role="group" aria-label="Cosa condividere">${[['both', 'Immagine + link'], ['img', 'Solo immagine'], ['link', 'Solo link']].map(([k, t]) => `<button type="button" data-shm="${k}" aria-pressed="${modo === k}">${t}</button>`).join('')}</div>
+    <div class="seg" role="group" aria-label="Formato" id="shF">${[['story', 'Storia 9:16'], ['post', 'Post 1:1']].map(([k, t]) => `<button type="button" data-shf="${k}" aria-pressed="${fmtI === k}">${t}</button>`).join('')}</div>
+    <div class="sh-prev" id="shPrev"></div>
+    <button class="btn btn-primary btn-block" id="shGo">${ICO_SH} Condividi</button>
+    <div class="row"><button type="button" class="btn btn-ghost" id="shDl">Scarica immagine</button><button type="button" class="btn btn-ghost" id="shCp">Copia link</button></div>
+    <p class="note" id="shNota"></p></div>`, 'Condividi', 'largo');
+  const $s = q => root.querySelector(q);
+  const vista = async () => {
+    root.querySelectorAll('[data-shm]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shm === modo)));
+    root.querySelectorAll('[data-shf]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.shf === fmtI)));
+    const img = modo !== 'link'; $s('#shF').hidden = !img; $s('#shDl').hidden = !img; $s('#shCp').hidden = modo === 'img';
+    $s('#shNota').textContent = modo === 'link' ? 'Il link apre direttamente questa pagina nell’app.' : modo === 'both' ? 'Su Instagram il link non si apre dai post: mettilo come adesivo “Link” nella storia o nella bio.' : '';
+    const pv = $s('#shPrev');
+    if(!img){ pv.innerHTML = `<div class="sh-link">${esc(o.link)}</div>`; blob = null; return; }
+    const my = ++gen; pv.innerHTML = '<div class="status"><span class="spin"></span>Preparo l’immagine…</div>'; blob = null;
+    try{ await shFonts(); const cv = await o.disegna(fmtI); if(my !== gen) return;
+      blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+      if(url) URL.revokeObjectURL(url); url = URL.createObjectURL(blob);
+      pv.innerHTML = `<img src="${url}" alt="Anteprima dell’immagine da condividere" class="${fmtI}">`; }
+    catch(e){ console.warn(e); pv.innerHTML = '<p class="err">Non riesco a preparare l’immagine.</p>'; }
+  };
+  root.querySelectorAll('[data-shm]').forEach(b => b.onclick = () => { if(modo === b.dataset.shm) return; const prima = modo; modo = b.dataset.shm; shLS('shModo', modo); if(prima === 'link' || modo === 'link') vista(); else vista(); });
+  root.querySelectorAll('[data-shf]').forEach(b => b.onclick = () => { if(fmtI === b.dataset.shf) return; fmtI = b.dataset.shf; shLS('shFmt', fmtI); vista(); });
+  const nome = () => `${o.file}-${fmtI === 'post' ? 'post' : 'storia'}.png`;
+  const copia = async () => { try{ await navigator.clipboard.writeText(o.link); return true; }catch(e){ const t = document.createElement('textarea'); t.value = o.link; document.body.appendChild(t); t.select(); let ok = false; try{ ok = document.execCommand('copy'); }catch(x){} t.remove(); return ok; } };
+  const scarica = () => { if(!blob) return; const a = document.createElement('a'); a.href = url; a.download = nome(); document.body.appendChild(a); a.click(); a.remove(); };
+  $s('#shCp').onclick = async () => toast(await copia() ? 'Link copiato' : 'Non riesco a copiare il link');
+  $s('#shDl').onclick = () => { if(!blob){ toast('Aspetta che l’immagine sia pronta'); return; } scarica(); toast('Immagine scaricata'); };
+  $s('#shGo').onclick = async () => {
+    const testo = o.testo;
+    try{
+      if(modo === 'link'){
+        if(navigator.share){ await navigator.share({title: o.titolo, text: testo, url: o.link}); return; }
+        toast(await copia() ? 'Link copiato: incollalo dove vuoi' : 'Non riesco a copiare il link'); return; }
+      if(!blob){ toast('Aspetta che l’immagine sia pronta'); return; }
+      const f = new File([blob], nome(), {type: 'image/png'});
+      if(navigator.canShare && navigator.canShare({files: [f]})){ await navigator.share(modo === 'both' ? {files: [f], title: o.titolo, text: `${testo}\n${o.link}`} : {files: [f], title: o.titolo}); return; }
+      scarica(); if(modo === 'both'){ const ok = await copia(); toast(ok ? 'Immagine scaricata e link copiato' : 'Immagine scaricata'); } else toast('Immagine scaricata');
+    }catch(e){ if(e && e.name === 'AbortError') return; console.warn(e); toast('Condivisione non riuscita: usa Scarica immagine o Copia link'); }
+  };
+  vista();
+}
+/* cosa si condivide da ogni pagina pubblica */
+function shareDa(k, v, ctx){
+  const C = CAMP[v], cat = C.cat;
+  if(k === 'p'){ const p = ctx.p, e = esito(p);
+    openShare({titolo: `${p.casa} – ${p.ospite}`, file: `partita-${slugSh(p.casa)}-${slugSh(p.ospite)}`, link: shLink(`${v}/p/${p.id}`),
+      testo: `${p.casa} ${e ? e.gc + '-' + e.go : 'vs'} ${p.ospite} · ${C.nome}, ${p.giornata}ª giornata`, disegna: f => shPartita(p, f)}); return; }
+  if(k === 'g'){ const {g, lg, riposa} = ctx;
+    openShare({titolo: `${C.nome} · ${g}ª giornata`, file: `${v}-giornata-${g}`, link: shLink(`${v}/g/${g}`), testo: `${C.nome} · ${g}ª giornata`, disegna: f => shGiornata(cat, g, lg, f, riposa)}); return; }
+  if(k === 'cl'){ openShare({titolo: `Classifica ${C.nome}`, file: `${v}-classifica`, link: shLink(`${v}/cl`), testo: `Classifica ${C.nome}`, disegna: f => shClassifica(cat, ctx.squadre, f)}); return; }
+  if(k === 'gio'){ const t = {mar: 'Classifica marcatori', mvp: 'Migliore in campo', por: 'Miglior portiere'}[ctx.k];
+    openShare({titolo: `${t} · ${C.nome}`, file: `${v}-${ctx.k === 'mar' ? 'marcatori' : ctx.k === 'mvp' ? 'migliore-in-campo' : 'miglior-portiere'}`, link: shLink(`${v}/gio/${ctx.k}`), testo: `${t} · ${C.nome}`, disegna: f => shGiocatori(cat, ctx.k, ctx.l, f)}); return; }
+  if(k === 'n'){ const n = ctx.n;
+    openShare({titolo: n.titolo || 'News', file: `news-${slugSh(n.titolo)}`, link: shLink(`${v}/n/${n.id}`), testo: `${n.titolo} · ${C.nome}`, disegna: f => shNews(n, f)}); return; }
+  if(k === 'c'){ const c = ctx.c;
+    openShare({titolo: comTit(c), file: `comunicato-${c.numero || slugSh(c.titolo)}`, link: shLink(`${v}/c/${c.id}`), testo: `${comTit(c)} · ${C.nome}`, disegna: f => shComunicato({...c, camp: c.camp || cat}, f)}); }
+}
+const slugSh = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+/* link condivisi: #futsal/p/<id>, #futsal/g/3, #futsal/cl, #futsal/gio/mar, #futsal/c/<id>, #futsal/n/<id> */
+function linkCondiviso(v){
+  const parti = location.hash.slice(1).split('/'); if(parti.length < 2) return;
+  history.replaceState(null, '', '#' + v);
+  const [, t, id] = parti; S.sqp = '';
+  if(t === 'g'){ S.ptab = 'par'; S.pgPub[v] = +id || S.pgPub[v]; }
+  else if(t === 'cl') S.ptab = 'cl';
+  else if(t === 'gio'){ S.ptab = 'gio'; if(['mar', 'mvp', 'por'].includes(id)) S.sub.gio = id; }
+  else if(t === 'p'){ S.ptab = 'par'; S.dlApri = {t, id, v}; }
+  else if(t === 'c'){ S.ptab = 'com'; S.dlApri = {t, id, v}; }
+  else if(t === 'n'){ S.ptab = 'news'; S.dlApri = {t, id, v}; }
+}
+function apriCondiviso(v, squadre){
+  const d = S.dlApri; if(!d || d.v !== v) return;
+  if(d.t === 'p'){ if(!S.pubParOk) return; S.dlApri = null; const p = S.pubPar.find(x => x.id === d.id);
+    if(!p){ toast('Partita non trovata'); return; } if(+p.giornata !== S.pgPub[v]){ S.pgPub[v] = +p.giornata; render(); } if(esito(p)) openTabellino(p, squadre); return; }
+  if(d.t === 'c' || d.t === 'n'){ if(!S.pubComOk) return; S.dlApri = null; const c = (S.pubCom || []).find(x => x.id === d.id);
+    if(!c){ toast(d.t === 'n' ? 'News non trovata' : 'Comunicato non trovato'); return; } if(d.t === 'n') openNews(c); else openCom(c); }
+}
+
+/* ===================== NEWS ===================== */
+/* le news stanno con i comunicati (tipo 'news'): stesse regole, stessi allegati. Copertina dentro il documento, galleria e PDF come allegati */
+const isNews = c => c && c.tipo === 'news';
+const newsCat = cat => (S.pubCom || []).filter(c => isNews(c) && (!c.camp || c.camp === cat)).sort(comOrd);
+const estratto = (t, n) => { t = String(t || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n).replace(/\s\S*$/, '') + '…' : t; };
+const okUrl = u => /^https?:\/\/[^\s<>"']+$/i.test(String(u || '').trim());
+const isVideo = u => /youtu\.?be|vimeo\.com|tiktok\.com|instagram\.com\/(reel|tv)|facebook\.com\/.*video/i.test(u || '');
+const cardNews = (n, k = 'data-nw') => `<li><button class="nw-card" ${k}="${esc(n.id)}">${okImg(n.cover) ? `<img src="${n.cover}" alt="">` : ''}<span class="nw-tx"><small>${esc(fmt(n.data))}${n.camp ? '' : ' · Tutti i campionati'}${n.pubblicato === false ? ' · <b>Ritirata</b>' : ''}</small><b>${esc(n.titolo || 'News')}</b>${n.testo ? `<span>${esc(estratto(n.testo, 140))}</span>` : ''}${k === 'data-nw' && nuovoC(n) ? '<span class="pst wait">Nuova</span>' : ''}</span></button></li>`;
+function openNews(n, adm){
+  if(!n) return; if(!vistiC()[n.id]){ segnaVistoC(n.id); render(); }
+  const imgs = (n.allegati || []).filter(a => /^image\//.test(a.tipo)), altri = (n.allegati || []).filter(a => !/^image\//.test(a.tipo)), links = (n.link || []).filter(l => okUrl(l.u));
+  const {root, close} = sheet(`<div class="stack nw-view">${okImg(n.cover) ? `<img class="nw-cover" src="${n.cover}" alt="">` : ''}
+    <p class="note" style="margin:0">News · ${esc(n.camp ? NOMECAMP[n.camp] : 'Tutti i campionati')} · ${esc(fmt(n.data))}</p>
+    <h3>${esc(n.titolo || 'News')}</h3>
+    ${n.testo ? `<p class="com-x">${linkify(n.testo)}</p>` : ''}
+    ${links.length ? `<div class="stack" style="gap:8px">${links.map(l => `<a class="btn btn-ghost btn-block nw-link" href="${esc(l.u.trim())}" target="_blank" rel="noopener">${isVideo(l.u) ? '▶️' : '🔗'} ${esc(l.t || (isVideo(l.u) ? 'Guarda il video' : (() => { try{ return new URL(l.u.trim()).hostname.replace(/^www\./, ''); }catch(e){ return 'Apri il link'; } })()))}</a>`).join('')}</div>` : ''}
+    ${imgs.length ? `<div class="eyebrow">Foto <span class="cnt">${imgs.length}</span></div><div class="nw-gal">${imgs.map((a, i) => `<button type="button" class="nw-th" data-gi="${i}" aria-label="Apri la foto ${i + 1}"><span class="spin"></span></button>`).join('')}</div>` : ''}
+    ${altri.length ? `<div class="eyebrow">Documenti</div>${alHtml(altri)}` : ''}
+    ${adm ? `<div class="row"><button class="btn btn-ghost" data-na="mod">Modifica</button><button class="btn btn-ghost" data-na="pub">${n.pubblicato === false ? 'Pubblica di nuovo' : 'Ritira'}</button><button class="btn btn-danger" data-na="del">Elimina</button></div>`
+      : n.pubblicato !== false ? `<button class="btn btn-primary btn-block" id="nwSh">${ICO_SH} Condividi</button>` : ''}
+    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div>`, n.titolo || 'News', 'largo');
+  imgs.forEach((a, i) => { const b = root.querySelector(`[data-gi="${i}"]`);
+    prendiAll(a).then(bl => { b.innerHTML = `<img src="${URL.createObjectURL(bl)}" alt="">`; }).catch(() => { b.textContent = '🖼️'; }); b.onclick = () => viewer(a); });
+  bindAl(root, altri);
+  const sh = root.querySelector('#nwSh'); if(sh) sh.onclick = () => shareDa('n', Object.keys(CAMP).find(k => CAMP[k].cat === n.camp) || (CAMP[VIEW()] ? VIEW() : 'futsal'), {n});
+  root.querySelectorAll('[data-na]').forEach(b => b.onclick = async () => { const ref = db().collection('comunicati').doc(n.id), k = b.dataset.na;
+    try{
+      if(k === 'mod'){ close(); openNewsForm(n); return; }
+      if(k === 'pub'){ const p = n.pubblicato === false; await ref.update({pubblicato: p, ...(p ? {pubAt: Date.now()} : {})}); await pubAll(n.allegati, p); toast(p ? 'News pubblicata di nuovo' : 'News ritirata: non si vede più nell’app pubblica'); close(); return; }
+      if(!confirm(`Eliminare la news «${n.titolo}»?`)) return;
+      await ref.delete(); for(const a of n.allegati || []) await togliAll(a); toast('News eliminata'); close();
+    }catch(err){ toast(fbErr(err)); } });
+}
+/* copertina: ridotta e salvata dentro la news */
+const coverDa = async file => { for(const [max, q] of [[1400, .8], [1200, .72], [1000, .65], [800, .6]]){ const bl = await imgBlob(file, max, q);
+  const d = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(bl); }); if(d.length < 450000) return d; } throw new Error('grande'); };
+function openNewsForm(n){
+  const nuova = !n; n = n || {tipo: 'news', camp: '', data: oggi(), allegati: [], link: []};
+  let cover = okImg(n.cover) ? n.cover : '', links = (n.link || []).map(l => ({...l}));
+  const {root, close} = sheet(`<form class="form" id="nwF" novalidate><h3 style="grid-column:1/-1">${nuova ? 'Nuova news' : 'Modifica news'}</h3>
+    <div class="field"><label for="nw-c">Campionato</label><select id="nw-c"><option value="">Tutti</option>${CATS.map(k => `<option value="${k}" ${n.camp === k ? 'selected' : ''}>${esc(NOMECAMP[k])}</option>`).join('')}</select></div>
+    <div class="field"><label for="nw-d">Data</label><input id="nw-d" type="date" value="${esc(n.data || oggi())}"></div>
+    <div class="field full"><label for="nw-t">Titolo</label><input id="nw-t" maxlength="140" value="${esc(n.titolo || '')}" placeholder="Es. Al via la nuova stagione"></div>
+    <div class="field full"><label>Foto di copertina</label><div id="nwCov" class="nw-covf"></div></div>
+    <div class="field full"><label for="nw-x">Testo</label><textarea id="nw-x" rows="8" maxlength="10000" placeholder="Scrivi la news…">${esc(n.testo || '')}</textarea></div>
+    <div class="field full"><label>Video e link (YouTube, Instagram, siti…)</label><div id="nwLk" class="stack" style="gap:8px"></div></div>
+    <div class="field full"><label>Galleria di foto e PDF (fino a 5 MB l’uno)</label><div class="alls" id="nwAl"></div></div>
+    <div class="err" id="nwErr" role="alert" style="grid-column:1/-1"></div>
+    <div class="actions"><button class="btn btn-primary" id="nwGo">${nuova ? 'Pubblica' : 'Salva'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'News', 'largo');
+  const $f = q => root.querySelector(q);
+  const drawCov = () => { $f('#nwCov').innerHTML = (cover ? `<img src="${cover}" alt="Copertina"><button type="button" class="btn btn-ghost sm" id="nwCx">Togli la copertina</button>` : '')
+      + `<label class="btn btn-ghost sm" for="nwCf">🖼️ ${cover ? 'Cambia' : 'Scegli'} la foto</label><input id="nwCf" type="file" accept="image/*" hidden>`;
+    if($f('#nwCx')) $f('#nwCx').onclick = () => { cover = ''; drawCov(); };
+    $f('#nwCf').onchange = async e => { const f = e.target.files[0]; if(!f) return; try{ cover = await coverDa(f); drawCov(); }catch(err){ toast('Non riesco a usare questa foto'); } }; };
+  const leggiLk = () => root.querySelectorAll('[data-lk]').forEach(r => { const i = +r.dataset.lk; links[i] = {u: r.querySelector('[data-lu]').value.trim(), t: r.querySelector('[data-lt]').value.trim()}; });
+  const drawLk = () => { $f('#nwLk').innerHTML = links.map((l, i) => `<div class="nw-lkr" data-lk="${i}"><input data-lu type="url" inputmode="url" placeholder="https://…" value="${esc(l.u || '')}" aria-label="Indirizzo del link"><input data-lt placeholder="Testo del tasto (facoltativo)" value="${esc(l.t || '')}" aria-label="Testo del tasto"><button type="button" class="x" data-lx="${i}" aria-label="Togli il link">✕</button></div>`).join('')
+      + '<button type="button" class="btn btn-ghost sm" id="nwLa">+ Aggiungi video o link</button>';
+    root.querySelectorAll('[data-lx]').forEach(b => b.onclick = () => { leggiLk(); links.splice(+b.dataset.lx, 1); drawLk(); });
+    $f('#nwLa').onclick = () => { leggiLk(); links.push({u: '', t: ''}); drawLk(); root.querySelectorAll('[data-lu]')[links.length - 1].focus(); }; };
+  drawCov(); drawLk();
+  const fp = filePick(root, 'nwAl', n.allegati);
+  $f('#nwF').onsubmit = async e => { e.preventDefault(); leggiLk(); const v = id => $f('#' + id).value.trim(), er = $f('#nwErr'), bt = $f('#nwGo'); er.textContent = '';
+    if(!v('nw-t')){ er.textContent = 'Scrivi il titolo.'; return; }
+    const lk = links.filter(l => l.u); if(lk.some(l => !okUrl(l.u))){ er.textContent = 'Un link non è valido: deve iniziare con https://'; return; }
+    bt.disabled = true;
+    try{ const nu = await caricaNuovi(fp, n.pubblicato !== false, bt); bt.textContent = 'Pubblico…';
+      const o = {tipo: 'news', camp: v('nw-c'), data: v('nw-d') || oggi(), titolo: v('nw-t'), testo: v('nw-x'), cover, link: lk, allegati: [...fp.l, ...nu], stagione: STAG, updatedAt: Date.now()};
+      if(nuova) await db().collection('comunicati').add({...o, pubblicato: true, pubAt: Date.now(), createdAt: Date.now(), by: S.user.uid}); else await db().collection('comunicati').doc(n.id).update(o);
+      if(n.pubblicato !== false) await pubAll(fp.l, true); for(const a of fp.via) await togliAll(a);
+      toast(nuova ? 'News pubblicata' : 'News aggiornata'); close(); }
+    catch(err){ console.warn(err); bt.disabled = false; bt.textContent = nuova ? 'Pubblica' : 'Salva'; er.textContent = errFile(err); } };
+}
+function adminNews(){
+  if(!S.loaded.comAll) return '<div class="status"><span class="spin"></span>Carico…</div>';
+  const l = (S.comAll || []).filter(isNews).sort(comOrd);
+  return `<button class="btn btn-primary btn-block" id="nNew">+ Nuova news</button>
+    ${l.length ? `<ul class="list nw-list">${l.map(n => cardNews(n, 'data-nadm')).join('')}</ul>` : vuoto('Nessuna news', 'Le news compaiono nella scheda News di ogni campionato e, appena pubblicate, in un avviso nella pagina iniziale.')}`;
+}
+/* pagina iniziale: la news nuova compare in un pop-up che porta alla scheda News del campionato */
+const popVisti = () => { try{ return JSON.parse(localStorage.getItem('aics-nwpop') || '{}'); }catch(e){ return {}; } };
+const segnaPop = id => { try{ const v = popVisti(); v[id] = 1; localStorage.setItem('aics-nwpop', JSON.stringify(v)); }catch(e){} };
+function popNews(){
+  if(S.nwPopFatto || !S.pubComOk || VIEW() !== 'home' || $('#sheetRoot .sheet')) return;
+  const n = (S.pubCom || []).filter(c => isNews(c) && nuovoC(c) && !popVisti()[c.id]).sort(comOrd)[0]; S.nwPopFatto = true; if(!n) return;
+  segnaPop(n.id);
+  const vai = v => { S.ptab = 'news'; S.sqp = ''; S.dlApri = {t: 'n', id: n.id, v}; location.hash = '#' + v; };
+  const dove = n.camp ? [Object.keys(CAMP).find(k => CAMP[k].cat === n.camp) || 'futsal'] : ['futsal', 'liga'];
+  const {root, close} = sheet(`<div class="stack nw-pop">${okImg(n.cover) ? `<img class="nw-cover" src="${n.cover}" alt="">` : ''}
+    <p class="note" style="margin:0"><span class="pst wait">News</span> ${esc(n.camp ? NOMECAMP[n.camp] : 'Tutti i campionati')} · ${esc(fmt(n.data))}</p>
+    <h3>${esc(n.titolo || 'News')}</h3>${n.testo ? `<p class="note" style="margin:0">${esc(estratto(n.testo, 180))}</p>` : ''}
+    ${dove.map(v => `<button class="btn btn-primary btn-block" data-nv="${v}">Leggi la news${dove.length > 1 ? ' · ' + esc(CAMP[v].nome) : ''}</button>`).join('')}
+    <button class="btn btn-ghost btn-block" data-x>Più tardi</button></div>`, 'News', '');
+  root.querySelectorAll('[data-nv]').forEach(b => b.onclick = () => { close(); vai(b.dataset.nv); });
+}
+/* immagine da condividere: copertina, titolo e inizio del testo */
+async function shNews(n, fmtI){
+  const B = await shBase(n.camp || '', fmtI, 'NEWS', fmt(n.data)), {ctx, W, story} = B;
+  let y = B.y0 + (story ? 10 : 0);
+  if(okImg(n.cover)){ const im = await shImg(n.cover); if(im){ const cw = W - 100, ch = story ? 540 : 300, k = Math.max(cw / im.width, ch / im.height), w = im.width * k, h = im.height * k;
+    ctx.save(); shRR(ctx, 50, y, cw, ch, 18); ctx.clip(); ctx.drawImage(im, 50 + (cw - w) / 2, y + (ch - h) / 2, w, h); ctx.restore();
+    ctx.strokeStyle = 'rgba(140,180,255,.6)'; ctx.lineWidth = 3; shRR(ctx, 51, y + 1, cw - 2, ch - 2, 18); ctx.stroke(); y += ch + (story ? 30 : 16); } }
+  const fs = story ? 32 : 24, lh = fs * 1.4, fine = B.y1 - (story ? 70 : 46);
+  ctx.font = SHF.D(800, story ? 60 : 44); const tl = shWrap(ctx, (n.titolo || '').toUpperCase(), W - 160).slice(0, 3);
+  ctx.font = SHF.B(500, fs); const all = shWrap(ctx, n.testo || '', W - 160), th = (story ? 66 : 50) * tl.length;
+  const maxL = Math.max(0, Math.floor((fine - y - th - (story ? 70 : 46)) / lh)), vis = all.slice(0, maxL), hp = th + vis.length * lh + (story ? 64 : 44);
+  shBar(ctx, 50, y, W - 100, Math.min(hp, fine - y)); let yy = y + (story ? 66 : 50);
+  tl.forEach(t => { shTxt(ctx, t, 80, yy, W - 160, 'D', 800, story ? 60 : 44, '#fff'); yy += story ? 66 : 50; }); yy += lh * .1;
+  vis.forEach((t, i) => { shTxt(ctx, i === vis.length - 1 && vis.length < all.length ? t + ' …' : t, 80, yy, W - 160, 'B', 500, fs, '#E6ECFF'); yy += lh; });
+  shTxt(ctx, 'Leggi la news completa nell’app', W / 2, B.y1 - 6, W - 140, 'B', 700, story ? 30 : 23, B.acc, 'center');
+  return B.cv;
 }
 
 /* ---------- avvio ---------- */
