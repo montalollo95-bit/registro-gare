@@ -67,7 +67,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;min-height:46px;text-decoration:none}
 .btn-primary{background:var(--blue);color:#fff}
 .btn-ghost{background:var(--surface-2);color:var(--fg)}
-.btn-ok{background:var(--ok);color:#fff}
+.btn-ok{background:#1E8A4F;color:#fff}
 .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red)}
 .btn-block{width:100%}
 .btn.sm{min-height:36px;padding:7px 12px;font-size:14px;border-radius:10px}
@@ -83,7 +83,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;width:100%;text-align:left;cursor:pointer}
 .item .ph{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--surface-2);flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--muted);font-size:15px}
 .item .tx{flex:1;min-width:0;display:flex;flex-direction:column}
-.item .tx b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .tx b{overflow-wrap:anywhere}
 .item .tx span{font-size:13px;color:var(--muted)}
 .badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
 .b-attesa{background:rgba(232,163,60,.18);color:var(--warn)}
@@ -149,12 +149,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tessera .top img{width:34px;height:34px;border-radius:9px;background:#fff;padding:2px}
 .tessera .top b{font-family:var(--display);font-size:20px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
 .tessera .top span{font-size:11px;opacity:.8;display:block}
+@media (max-width:380px){.tessera .top b{font-size:16px}.tessera .top{gap:8px}.tessera .stato{font-size:10.5px;padding:4px 8px}}
 .tessera .foto{width:96px;height:120px;border-radius:12px;object-fit:cover;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;z-index:1}
 .tessera .dati{display:flex;flex-direction:column;gap:2px;min-width:0;z-index:1}
 .tessera .nome{font-family:var(--display);font-size:24px;font-weight:800;line-height:1.05;text-transform:uppercase}
 .tessera .k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-top:4px}
 .tessera .v{font-size:14px;font-weight:600}
-.tessera .stato{margin-left:auto;align-self:flex-start;z-index:1;font-weight:800;font-size:12px;letter-spacing:.08em;padding:4px 10px;border-radius:99px;background:#1E8A4F}
+.tessera .stato{white-space:nowrap;flex:none;margin-left:auto;align-self:flex-start;z-index:1;font-weight:800;font-size:12px;letter-spacing:.08em;padding:4px 10px;border-radius:99px;background:#1E8A4F}
 .tessera.scaduto{filter:grayscale(.85)}
 .tessera.scaduto .stato,.tessera.sospeso .stato{background:#D23A2E}
 
@@ -235,7 +236,8 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 .tab-cl{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;border-radius:20px;overflow:hidden}
 .tab-cl th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg);font-weight:800;padding:12px 4px;text-align:center;background:none}
 .tab-cl td{padding:11px 4px;text-align:center;border-top:1px solid var(--line);font-variant-numeric:tabular-nums;color:var(--muted)}
-.tab-cl td.sq,.tab-cl th.sq{text-align:left;padding-left:8px;max-width:0;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab-cl td.sq,.tab-cl th.sq{text-align:left;padding-left:8px;max-width:0;width:100%}
+.tab-cl .sqc{display:flex;align-items:center;gap:8px;min-width:0}.tab-cl .sqc .stemma{margin:0}.tab-cl .sqc .nm{min-width:0;line-height:1.15;overflow-wrap:anywhere}
 .tab-cl td.sq{font-weight:800;letter-spacing:.03em;color:var(--fg);text-transform:uppercase;font-size:13.5px}
 .tab-cl td.pt{font-weight:800;color:var(--fg);font-size:16px;border-left:3px solid var(--royal)}
 .tab-cl td.pos{width:30px;color:var(--muted);font-size:16px;padding-left:8px}
@@ -291,7 +293,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .gioc .pos{text-align:center;font-size:16px;color:var(--muted);font-variant-numeric:tabular-nums}
 .gioc .gr .stemma{width:34px;height:34px;border-radius:10px;font-size:13px;margin:0}
 .gioc .gn{min-width:0;display:flex;flex-direction:column}
-.gioc .gn b{font-weight:800;letter-spacing:.02em;text-transform:uppercase;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gioc .gn b{font-weight:800;letter-spacing:.02em;text-transform:uppercase;font-size:14px;line-height:1.2;overflow-wrap:anywhere}
 .gioc .gn span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.04em}
 .gioc .gv,.gioc .gh span:last-child{text-align:center}.gioc .gv{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
 .gioc .gr.p1 .pos{color:#D49A00;font-weight:800}
@@ -323,6 +325,8 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sw.cust{position:relative;overflow:hidden;background:conic-gradient(#f33,#fd3,#3d5,#3cf,#36f,#c3f,#f33);display:inline-block}
 .sw.cust input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
 .sheet-bg.sopra{z-index:60}
+.seg .sh{display:none}@media (max-width:380px){.seg .lg{display:none}.seg .sh{display:inline}}
+.tbtn{gap:6px;flex-wrap:nowrap}.tbtn .btn{flex:1 1 auto;white-space:nowrap;padding-left:8px;padding-right:8px}
 .avv{color:#B5650B !important;font-weight:700}
 .tstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tstat div{background:var(--chip,var(--surface-2));border-radius:12px;padding:8px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.tstat b{font-family:var(--display);font-size:22px;line-height:1}.tstat span{font-size:11.5px;color:var(--muted);line-height:1.15}
 .imp-l{display:flex;flex-direction:column;gap:6px}.imp-r{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip,var(--surface-2));cursor:pointer}.imp-r input{margin-top:3px;width:20px;height:20px;flex:none}.imp-r .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.imp-r .tx>span{font-size:13px;color:var(--muted)}.imp-r .pst{align-self:flex-start}.imp-r.dis{opacity:.55}
@@ -349,10 +353,10 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sqnum .nn{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 8px;flex:1}.sqnum .nn span{display:flex;flex-direction:column;align-items:center}.sqnum .nn b{font-size:17px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}.sqnum .nn small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .sqcampo{display:flex;align-items:center;gap:12px;padding:12px 14px}.sqcampo .ic{font-size:22px}.sqcampo div{flex:1;min-width:0;display:flex;flex-direction:column}.sqcampo small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.sqcampo b{color:var(--fg)}.sqcampo span{font-size:13px;color:var(--muted)}
 .sqpar{padding:4px 0}.pr{display:grid;grid-template-columns:30px 30px 1fr auto;gap:8px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}.pr:first-child{border-top:0}
-.pr .g{color:var(--muted);font-weight:700;text-align:center}.pr .stemma{width:28px;height:28px;font-size:11px;margin:0}.pr .vs{min-width:0;display:flex;flex-direction:column}.pr .vs b{font-size:13.5px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fg)}.pr .vs small{font-size:11px;color:var(--muted)}
+.pr .g{color:var(--muted);font-weight:700;text-align:center}.pr .stemma{width:28px;height:28px;font-size:11px;margin:0}.pr .vs{min-width:0;display:flex;flex-direction:column}.pr .vs b{font-size:13.5px;text-transform:uppercase;letter-spacing:.02em;line-height:1.2;overflow-wrap:anywhere;color:var(--fg)}.pr .vs small{font-size:11px;color:var(--muted)}
 .pr .rs{font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;padding:3px 9px;border-radius:9px;background:var(--chip);color:var(--fg);white-space:nowrap}.pr .rs.v{background:rgba(51,178,106,.22)}.pr .rs.p{background:rgba(229,51,58,.18)}.pr .rs.n{background:rgba(160,170,190,.25)}
 .sqlist{padding:4px 0}.sqlist > div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line);font-size:14px;color:var(--fg)}.sqlist > div:first-child{border-top:0}.sqlist b{font-weight:800}.sqlist small{color:var(--muted)}.sqlist .no span{color:#E5333A;font-weight:700}
-.drow{display:grid;grid-template-columns:24px 1fr 52px 40px;gap:6px;align-items:center}.drow.dir{grid-template-columns:1fr 40px}
+.drow{display:grid;grid-template-columns:24px minmax(0,1fr) 52px auto;gap:6px;align-items:center}.drow.dir{grid-template-columns:minmax(0,1fr) auto}
 .drow .dn{text-align:center;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
 .pick{display:flex;align-items:center;gap:6px;min-height:44px;width:100%;min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg);padding:6px 10px;font-size:15px;font-weight:600;text-align:left;cursor:pointer}
 .pick span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pick.vuoto{color:var(--muted);font-weight:500;border-style:dashed}.pick b{font-size:12px;color:var(--muted)}
@@ -423,13 +427,13 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .it b{font-size:16px;letter-spacing:.02em;overflow-wrap:anywhere}
 .ix{color:var(--muted)}.ix svg{width:20px;height:20px}
 .dot{width:12px;height:12px;border-radius:50%;background:#33B26A}.dot.wait{background:#E8A33C}.dot.fine{background:#8C97AE}
-.st-ok{color:#2EAD62}.st-wait{color:var(--warn)}.st-fine{color:var(--muted)}
+.st-ok{color:#1E8A4F}.st-wait{color:var(--warn)}.st-fine{color:var(--muted)}
 .isez{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
 .premi{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
 .premio{width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .pbox{width:130px;height:96px;border-radius:16px;border:2px solid #A9B3C6;display:flex;align-items:center;justify-content:center;background:var(--card)}
 .premio.oro .pbox{border-color:#E0A800;background:rgba(255,206,60,.22)}.premio:not(.oro) .pbox{background:rgba(160,172,196,.20)}.pbox svg{width:80px;height:80px}
-.premio b{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.premio.oro b{color:#D49A00}
+.premio b{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.premio.oro b{color:#9A6B00}
 .premio span{font-size:13px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
 .iregole{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--fg)}
 .iregole li{padding:10px 12px;border-radius:12px;background:var(--chip);line-height:1.4}.iregole li i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
@@ -443,7 +447,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
   .coppa.oro .c1{fill:#FFD54A}.coppa.oro .c2{fill:#FFC21A}.coppa.arg .c1{fill:#E6EBF3}.coppa.arg .c2{fill:#C9D1DE}.coppa .c3{fill:#9AA4B8}
   .coppa.oro path{stroke:#B07A00}.coppa.oro text{fill:#4A3300}.coppa.arg path{stroke:#8A94A8}.coppa.arg text{fill:#2E3547}
   .coppa.oro .ln{stroke:#FFC21A}.coppa.arg .ln{stroke:#E6EBF3}.coppa.oro .c3{fill:#E0A800}.coppa.arg .c3{fill:#B5BFD0}
-  .premio b{color:#C9D5EA}.premio.oro b{color:#FFC83D}.premio span{color:#C3D0E6}.pbox{border-color:#C9D1DE}.premio.oro .pbox{border-color:#FFC21A}}
+  .st-ok{color:#3CC879}.premio b{color:#C9D5EA}.premio.oro b{color:#FFC83D}.premio span{color:#C3D0E6}.pbox{border-color:#C9D1DE}.premio.oro .pbox{border-color:#FFC21A}}
 /* finestre: sempre dentro lo schermo, scorrono fino in fondo (come nell'app arbitri) */
 .sheet-bg{align-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));box-sizing:border-box;overscroll-behavior:contain}
 .sheet{border-radius:22px;max-width:560px;max-height:100%;padding:16px 16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.35);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box}
@@ -676,7 +680,7 @@ const stemmaImg = n => { if(!STEMMI){ STEMMI = new Map(); [...(S.pubSq || []), .
 const stemma = n => { const im = stemmaImg(n); if(im) return `<span class="stemma img${olCls(im.b)}"><img src="${im.img}" alt=""></span>`; const t = String(n || ''); let h = 0; for(const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0; const ini = t.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(); return `<span class="stemma" style="background:${COL[h % COL.length]}">${esc(ini)}</span>`; };
 const testa = (l, t) => `<p class="lbl">${l}</p><h2 class="ttl">${t}</h2>`;
 const vuoto = (t, x) => `<div class="empty"><h3>${t}</h3><span>${x}</span></div>`;
-const segSub = (k, l) => `<div class="seg" role="tablist">${l.map(([id, t]) => `<button data-sub="${k}:${id}" aria-pressed="${(S.sub[k] || l[0][0]) === id}">${t}</button>`).join('')}</div>`;
+const segSub = (k, l) => `<div class="seg" role="tablist">${l.map(([id, t, c]) => `<button data-sub="${k}:${id}" aria-pressed="${(S.sub[k] || l[0][0]) === id}">${c ? `<span class="lg">${t}</span><span class="sh">${c}</span>` : t}</button>`).join('')}</div>`;
 /* ===================== GIOCATORI ===================== */
 /* nelle partite: mar [{id, nome, cog, sq:'casa'|'ospite', n}], aut {casa, ospite} (autogol a favore), mvp e por {id, nome, cog, sq} */
 const brv = m => { const r = (m.nome || '').slice((m.cog || '').length).trim(); return m.cog ? m.cog + (r ? ' ' + r[0] + '.' : '') : m.nome || ''; };
@@ -1069,7 +1073,7 @@ function renderCamp(app, v){
     const k = sb('gio') || 'mar';
     const lg = S.pubParOk ? classGioc(C.cat, k) : [], fq = (S.gsq || {})[v] || '', sqs = [...new Map(lg.map(r => [r.sqId || r.sq, r.sq])).entries()].sort((a, b) => (a[1] || '').localeCompare(b[1] || '', 'it'));
     const lf = fq ? lg.filter(r => (r.sqId || r.sq) === fq) : lg;
-    body = segSub('gio', [['mar', 'Marcatori'], ['mvp', 'Migliore in campo'], ['por', 'Miglior portiere']]) + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lg.length
+    body = segSub('gio', [['mar', 'Marcatori'], ['mvp', 'Migliore in campo', 'MVP'], ['por', 'Miglior portiere', 'Portieri']]) + (!S.pubParOk ? '<div class="status"><span class="spin"></span>Carico…</div>' : lg.length
       ? (sqs.length > 1 ? `<div class="gfil"><select id="gFil" aria-label="Squadra"><option value="">Tutte le squadre</option>${sqs.map(([id, n]) => `<option value="${esc(id)}" ${id === fq ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></div>` : '') + tabGioc(lf, k)
       : {mar: vuoto('Ancora nessun gol', 'La classifica marcatori si riempie con i gol scritti nei referti degli arbitri.'),
       mvp: vuoto('Ancora nessuna partita', 'A fine partita l’arbitro sceglie il migliore in campo: qui la classifica di chi è stato scelto più volte.'),
@@ -1200,7 +1204,7 @@ function renderResp(app){
   app.dataset.v = 'resp'; pubStart();
   const att = S.abil.filter(a => a.stato === 'attivo').sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it'));
   const sw = att.length > 1 ? `<div class="seg sqsw" role="group" aria-label="Squadra">${att.map(a => `<button data-rsq="${esc(a.squadraId)}" aria-pressed="${a.squadraId === r.squadraId}">${stemma(a.squadra)}${esc(a.squadra)}</button>`).join('')}</div>` : '';
-  const rt = S.rtab || 'dist', segR = sw + `<div class="seg" role="tablist">${[['dist', 'Partite e distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra']].map(([k, t]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${t}</button>`).join('')}</div>`;
+  const rt = S.rtab || 'dist', segR = sw + `<div class="seg" role="tablist">${[['dist', 'Partite e distinte', 'Distinte'], ['tess', 'Tesserati'], ['sq', 'Squadra']].map(([k, t, c]) => `<button data-rt="${k}" aria-pressed="${rt === k}">${c ? `<span class="lg">${t}</span><span class="sh">${c}</span>` : t}</button>`).join('')}</div>`;
   if(rt === 'sq'){
     const qq = {id: r.squadraId, nome: q.nome || r.squadra, categoria: q.categoria || r.categoria};
     app.innerHTML = band(qq.nome, `${qq.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}${schedaBox(qq)}
@@ -1498,7 +1502,7 @@ function openEsporta(sqId){
     <label class="check"><input type="checkbox" id="ex-at" checked><span>Anche quelli in attesa di approvazione</span></label>
     <label class="check"><input type="checkbox" id="ex-sc"><span>Anche gli scaduti delle stagioni passate</span></label>
     <div class="err" id="exErr" role="alert" style="grid-column:1/-1"></div>
-    <div class="actions"><button class="btn btn-primary" id="exGo">⬇️ Scarica Excel</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Esporta tesserati');
+    <div class="actions"><button class="btn btn-primary" id="exGo">⬇️ Scarica</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Esporta tesserati');
   root.querySelector('#exF').onsubmit = async e => { e.preventDefault(); const id = root.querySelector('#ex-sq').value, at = root.querySelector('#ex-at').checked, scd = root.querySelector('#ex-sc').checked, er = root.querySelector('#exErr');
     const l = S.tess.filter(t => (!id || t.squadraId === id) && t.stato !== 'rifiutato' && (at || t.stato !== 'attesa') && (scd || statoT(t) !== 'scaduto'))
       .sort((a, b) => (a.squadra || '').localeCompare(b.squadra || '', 'it') || nomeT(a).localeCompare(nomeT(b), 'it'));
@@ -1544,7 +1548,7 @@ const bindAttT = root => root.querySelectorAll('[data-aall]').forEach(b => b.onc
   catch(err){ b.disabled = false; toast(fbErr(err)); } });
 
 /* -- cartellino digitale -- */
-const tesseraHTML = t => { const s = statoT(t); return `<div class="tessera ${s}"><div class="top"><img src="../icon-aics.png" alt=""><div><b>AICS Reggio Emilia</b><span>${esc(t.categoria || '')} · Stagione ${t.scadenza ? `${+t.scadenza.slice(0, 4) - 1}/${t.scadenza.slice(2, 4)}` : ''}</span></div><span class="stato">${s === 'approvato' ? 'VALIDO' : esc((ST_L[s] || s).toUpperCase())}</span></div>
+const tesseraHTML = t => { const s = statoT(t); return `<div class="tessera ${s}"><div class="top"><img src="../icon-aics.png" alt=""><div><b>AICS Reggio Emilia</b><span>${esc(t.categoria || '')} · Stagione ${t.scadenza ? `${+t.scadenza.slice(0, 4) - 1}/${t.scadenza.slice(2, 4)}` : STAG}</span></div><span class="stato">${s === 'approvato' ? 'VALIDO' : esc((ST_L[s] || s).toUpperCase())}</span></div>
   ${t.foto ? `<img class="foto" src="${esc(t.foto)}" alt="Foto di ${esc(nomeT(t))}">` : `<span class="foto">${esc(iniz(t))}</span>`}
   <div class="dati"><span class="nome">${esc(t.cognome || '')}<br>${esc(t.nome || '')}</span>
     <span class="k">Squadra</span><span class="v">${esc(t.squadra || '')}</span>
@@ -1612,7 +1616,7 @@ function renderAdmin(app){
         : `<div class="empty"><h3>Nessuna squadra ${S.cat}</h3><span>Le squadre sono le stesse dell’archivio del designatore nell’app arbitri.</span></div>`}`;
   } else {
     const f = S.filtro, l = S.tess.filter(t => f === 'tutti' || statoT(t) === f).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
-    body = `<div class="row"><button class="btn btn-primary sm" id="tImp">📥 Importa</button><button class="btn btn-ghost sm" id="tExp">⬇️ Esporta</button><button class="btn btn-ghost sm" id="tLim">⚙️ Limiti</button></div>
+    body = `<div class="row tbtn"><button class="btn btn-primary sm" id="tImp">📥 Importa</button><button class="btn btn-ghost sm" id="tExp">⬇️ Esporta</button><button class="btn btn-ghost sm" id="tLim">⚙️ Limiti</button></div>
       <div class="field"><label for="aFind">Cerca</label><input id="aFind" type="search" placeholder="Cognome, nome o squadra" value="${esc(S.cerca || '')}"></div>
       <div class="seg" role="group" aria-label="Filtro">${[['tutti', 'Tutti'], ['approvato', 'Validi'], ['sospeso', 'Sospesi'], ['scaduto', 'Scaduti']].map(([k, t]) => `<button data-f="${k}" aria-pressed="${k === f}">${t}</button>`).join('')}</div>
       <ul class="list" id="aList">${l.map(itemT).join('') || '<div class="empty"><h3>Nessun tesserato</h3></div>'}</ul>`;
@@ -1661,7 +1665,7 @@ function adminResp(){
     return `<li class="card stack rcard" style="gap:10px" data-cerca="${esc(cerca)}"><div class="rhead">${stemma(q.nome)}<b>${esc(q.nome)}</b><span class="cnt${n ? '' : ' hot'}">${n}/${MAXRESP}</span></div>
       ${rs.map(r => `<div class="rper"><div class="rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || 'telefono non indicato')}${r.email ? ' · ' + esc(r.email) : ''}</span></div><button class="btn btn-ghost sm" data-re="${esc(r.id)}">Modifica</button></div>${contatti(r)}</div>`).join('')}
       ${iv.map(i => `<div class="rp"><div class="rtx"><b>${esc(nomeR(i))}</b><span>Invitato · entra quando si registra con ${esc(i.email)}</span></div><button class="btn btn-ghost sm" data-ri="${esc(i.id)}">Annulla</button></div>`).join('')}
-      ${at.map(a => `<div class="rp"><div class="rtx"><b>${esc(nomeR(a))}</b><span>Chiede di gestirla${a.telefono ? ' · ' + esc(a.telefono) : ''}</span></div>${n < MAXRESP ? `<button class="btn btn-ok sm" data-ra="${esc(a.id)}">✓ Abilita</button>` : ''}<button class="btn btn-danger sm" data-rn="${esc(a.id)}">Rifiuta</button></div>`).join('')}
+      ${at.map(a => `<div class="rper"><div class="rtx"><b>${esc(nomeR(a))}</b><span>Chiede di gestirla${a.telefono ? ' · ' + esc(a.telefono) : ''}</span></div><div class="row" style="gap:6px">${n < MAXRESP ? `<button class="btn btn-ok sm" data-ra="${esc(a.id)}">✓ Abilita</button>` : ''}<button class="btn btn-danger sm" data-rn="${esc(a.id)}">Rifiuta</button></div></div>`).join('')}
       ${n ? '' : '<p class="note">Nessun responsabile.</p>'}${n < MAXRESP ? `<button class="btn btn-ghost sm" data-radd="${esc(q.id)}">+ Aggiungi responsabile</button>` : ''}</li>`; };
   return seg2 + segC + `<div class="field"><label for="rFind">Cerca</label><input id="rFind" type="search" placeholder="Squadra, nome o telefono" value="${esc(S.rcerca || '')}"></div>
     <p class="note">${l.length} squadre${senza ? ` · <b>${senza} senza responsabile</b>` : ' · tutte con almeno un responsabile'}. Massimo ${MAXRESP} responsabili per squadra.</p>
@@ -1767,7 +1771,7 @@ function openSquadra(q){
       <h3>${esc(q.nome)}</h3><div class="note">${esc(q.categoria || '')}</div>
       ${schedaBox(q)}
       <section class="stack" style="gap:8px"><div class="eyebrow">Responsabili <span class="cnt">${rs.length + iv.length}/${MAXRESP}</span></div>${rs.map(r => `<div class="rp"><div class="rtx"><b>${esc(nomeR(r))}</b><span>${esc(r.telefono || '')}${r.telefono && r.email ? ' · ' : ''}${esc(r.email || '')}</span></div><button class="btn btn-ghost sm" data-re="${esc(r.id)}">Modifica</button></div>`).join('')}${iv.map(i => `<div class="rp"><div class="rtx"><b>${esc(nomeR(i))}</b><span>Invitato: entra quando si registra con ${esc(i.email)}</span></div></div>`).join('')}${rs.length + iv.length ? '' : '<p class="note">Nessun responsabile.</p>'}${rs.length + iv.length < MAXRESP ? `<button class="btn btn-ghost sm" data-radd="${esc(q.id)}">+ Aggiungi responsabile</button>` : ''}</section>
-      <section class="stack" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="eyebrow">Tesserati <span class="cnt">${ts.length}</span></div><div class="row" style="gap:6px"><button class="btn btn-ghost sm" id="sqImp" aria-label="Importa tesserati">📥</button><button class="btn btn-ghost sm" id="sqExp" aria-label="Esporta tesserati">⬇️</button><button class="btn btn-primary sm" id="sqAddT">+ Tesserato</button></div></div>
+      <section class="stack" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="eyebrow">Tesserati <span class="cnt">${ts.length}</span></div></div><div class="row tbtn"><button class="btn btn-primary sm" id="sqAddT">+ Tesserato</button><button class="btn btn-ghost sm" id="sqImp">📥 Importa</button><button class="btn btn-ghost sm" id="sqExp">⬇️ Esporta</button></div>
       <ul class="list">${ts.map(itemT).join('') || '<p class="note">Nessun tesserato.</p>'}</ul></section>
       <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
     root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
@@ -2215,7 +2219,7 @@ function tabClassifica(cat, squadre){
   const {righe, giocate, imp} = classifica(cat, squadre, S.pubPar), sg = n => n > 0 ? '+' + n : String(n);
   const zone = (imp.zone || []).filter(z => z.nome);
   return `<div class="tab-wrap"><table class="tab-cl"><thead><tr><th class="pos"></th><th class="sq">Squadre</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th></tr></thead><tbody>
-    ${righe.map((r, i) => { const z = !r.rit && zonaDi(imp, i + 1); return `<tr class="${r.rit ? 'rit' : ''}"><td class="pos">${r.rit ? '–' : i + 1}</td><td class="sq" data-sqp="${esc(r.id)}">${stemma(r.nome)}${esc(r.nome)}${r.rit ? ' <small>ritirata</small>' : ''}</td><td class="pt" style="border-left-color:${z ? ZCOL[z.col] || ZCOL.blu : 'transparent'}">${r.Pt}</td><td>${r.G}</td><td>${r.V}</td><td>${r.N}</td><td>${r.P}</td><td>${r.GF}</td><td>${r.GS}</td><td>${sg(r.GF - r.GS)}</td></tr>`; }).join('')}</tbody></table></div>
+    ${righe.map((r, i) => { const z = !r.rit && zonaDi(imp, i + 1); return `<tr class="${r.rit ? 'rit' : ''}"><td class="pos">${r.rit ? '–' : i + 1}</td><td class="sq" data-sqp="${esc(r.id)}"><span class="sqc">${stemma(r.nome)}<span class="nm">${esc(r.nome)}${r.rit ? ' <small>ritirata</small>' : ''}</span></span></td><td class="pt" style="border-left-color:${z ? ZCOL[z.col] || ZCOL.blu : 'transparent'}">${r.Pt}</td><td>${r.G}</td><td>${r.V}</td><td>${r.N}</td><td>${r.P}</td><td>${r.GF}</td><td>${r.GS}</td><td>${sg(r.GF - r.GS)}</td></tr>`; }).join('')}</tbody></table></div>
     ${zone.length ? `<div class="legenda">${zone.map(z => `<span><i style="background:${ZCOL[z.col] || ZCOL.blu}"></i>${z.da === z.a ? z.da + 'ª' : `${z.da}ª–${z.a}ª`} ${esc(z.nome)}</span>`).join('')}</div>` : ''}`;
 }
 /* --- impostazioni della classifica (amministratore) --- */
