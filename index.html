@@ -1705,7 +1705,7 @@ function renderReferto(){
     const r = g.referto ? JSON.parse(JSON.stringify(g.referto)) : {};
     const [rc, ro] = String(g.risultato || '').split('-');
     draft = {gc: r.gc ?? (rc ?? '').trim(), go: r.go ?? (ro ?? '').trim(), gc1: r.gc1 ?? '', go1: r.go1 ?? '', rec1: r.rec1 ?? '', rec2: r.rec2 ?? '',
-      esito: r.esito || '', minSosp: r.minSosp ?? '', motivo: r.motivo ?? '', marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], mvp: r.mvp || null, por: r.por || null, spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
+      esito: r.esito || '', assente: r.assente || '', minSosp: r.minSosp ?? '', motivo: r.motivo ?? '', marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], mvp: r.mvp || null, por: r.por || null, spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
     ['marcatori', 'ammoniti', 'espulsi', 'dirigenti'].forEach(k => draft[k].forEach(e => { if(!e.tid && e.nome) e.tid = '__man'; }));
   }
   renderRefForm(g);
@@ -1802,7 +1802,7 @@ function renderRefForm(g){
       <select class="wide" data-k="mot" aria-label="${LISTS[key].lbl}">${LISTS[key].mot.map(m=>`<option ${m===e.mot?'selected':''}>${esc(m)}</option>`).join('')}</select>
       ${key === 'marcatori' && e.mot === 'Autorete' ? `<p class="note wide" style="margin:0">Autorete: scegli il giocatore che l’ha fatta. Il gol va a <b>${esc(s === 'casa' ? g.ospite || 'Ospite' : g.casa || 'Casa')}</b>.</p>` : ''}
     </div>`; }).join('');
-  const nG = golRef(d), golWarn = d.esito !== 'rinviata' && d.marcatori.length && d.gc !== '' && d.go !== '' && (nG.casa !== +d.gc || nG.ospite !== +d.go)
+  const nG = golRef(d), golWarn = !['rinviata', 'assente'].includes(d.esito) && d.marcatori.length && d.gc !== '' && d.go !== '' && (nG.casa !== +d.gc || nG.ospite !== +d.go)
     ? `<p class="note warn-gol" style="margin:0">Reti scritte: ${esc(g.casa || 'Casa')} ${nG.casa} di ${+d.gc} · ${esc(g.ospite || 'Ospite')} ${nG.ospite} di ${+d.go}</p>` : '';
   const sec = key => `<section class="ref-sec"><header><h3>${LISTS[key].chip ? `<span class="${LISTS[key].chip}"></span>` : ''}${LISTS[key].t} <span class="cnt">${d[key].length}</span></h3><button type="button" class="btn btn-ghost sm" data-add="${key}">+ ${LISTS[key].add}</button></header>${key === 'marcatori' ? golWarn : ''}${d[key].length ? rows(key) : '<p class="note" style="margin:0">Nessuno</p>'}</section>`;
   const fld = (id, label, val, extra='') => `<div class="field"><label for="${id}">${label}</label><input id="${id}" value="${esc(val)}" ${extra}></div>`;
@@ -1813,22 +1813,24 @@ function renderRefForm(g){
     return `<div class="field full"><label for="rf-${k}">${label}</label><select id="rf-${k}" data-premio="${k}"><option value="">Nessuno</option>${grp('casa')}${grp('ospite')}
       <optgroup label="Scrivi a mano">${['casa', 'ospite'].map(s => `<option value="${s}:__man" ${cur === s + ':__man' ? 'selected' : ''}>Altro di ${esc(g[s] || s)}</option>`).join('')}</optgroup></select>
       ${v.man ? `<input id="rf-${k}-nome" data-premio-nome="${k}" placeholder="Cognome e nome" value="${esc(v.nome || '')}" aria-label="${label}: cognome e nome" style="margin-top:6px">` : ''}</div>`; };
-  const premi = pid && d.esito !== 'rinviata' ? `<section class="ref-sec"><h3>Premi</h3>${premio('mvp', 'Migliore in campo')}${premio('por', 'Miglior portiere', true)}</section>` : '';
+  const premi = pid && !['rinviata', 'assente'].includes(d.esito) ? `<section class="ref-sec"><h3>Premi</h3>${premio('mvp', 'Migliore in campo')}${premio('por', 'Miglior portiere', true)}</section>` : '';
   const ufficiale = !!g.desId;
   body.innerHTML = `
     <div class="ref-head view" style="gap:6px"><div class="eyebrow">${esc(fmtLong(g.data))}${g.ora ? ' · ore ' + esc(g.ora) : ''}</div><h2>${esc(g.casa||'—')} – ${esc(g.ospite||'—')}</h2>
       <div class="pills">${g.categoria?`<span class="pill">${esc(g.categoria)}</span>`:''}${g.numeroGara?`<span class="pill">Gara n. ${esc(g.numeroGara)}</span>`:''}${g.ruolo?`<span class="pill ruolo">${esc(g.ruolo)}</span>`:''}</div></div>
     ${distHTML(g, D)}
     <section class="ref-sec"><h3>Esito della gara</h3>
-      <div class="seg seg3" role="group" aria-label="Esito della gara">${[['', 'Regolare'], ['sospesa', 'Sospesa'], ['rinviata', 'Rinviata']].map(([k, t]) => `<button type="button" data-esito="${k}" aria-pressed="${(d.esito || '') === k}">${t}</button>`).join('')}</div>
+      <div class="seg" role="group" aria-label="Esito della gara">${[['', 'Regolare'], ['sospesa', 'Sospesa'], ['rinviata', 'Rinviata'], ['assente', 'Squadra assente']].map(([k, t]) => `<button type="button" data-esito="${k}" aria-pressed="${(d.esito || '') === k}">${t}</button>`).join('')}</div>
       ${d.esito === 'sospesa' ? `<div class="mini">${fld('rf-minsosp', 'Minuto della sospensione', d.minSosp, 'type="number" min="0" inputmode="numeric" placeholder="Es. 32"')}</div>` : ''}
-      ${d.esito ? `<div class="field full"><label for="rf-motivo">Motivo ${d.esito === 'sospesa' ? 'della sospensione' : 'del rinvio'}</label><textarea id="rf-motivo" rows="2" placeholder="${d.esito === 'sospesa' ? 'Es. infortunio grave, rissa, impianto di illuminazione guasto' : 'Es. campo impraticabile, squadra assente, maltempo'}">${esc(d.motivo)}</textarea></div>` : ''}
+      ${d.esito === 'assente' ? `<div class="field full"><label for="rf-assente">Quale squadra non si è presentata?</label><select id="rf-assente"><option value="">Scegli…</option><option value="casa" ${d.assente === 'casa' ? 'selected' : ''}>${esc(g.casa || 'Casa')}</option><option value="ospite" ${d.assente === 'ospite' ? 'selected' : ''}>${esc(g.ospite || 'Ospite')}</option></select></div>
+        <p class="note" style="margin:0">La squadra assente perde a tavolino: lo conferma l’amministratore del campionato.</p>` : ''}
+      ${d.esito ? `<div class="field full"><label for="rf-motivo">${d.esito === 'assente' ? 'Note (facoltative)' : 'Motivo ' + (d.esito === 'sospesa' ? 'della sospensione' : 'del rinvio')}</label><textarea id="rf-motivo" rows="2" placeholder="${d.esito === 'sospesa' ? 'Es. infortunio grave, rissa, impianto di illuminazione guasto' : d.esito === 'assente' ? 'Es. attesa di 15 minuti oltre l’orario' : 'Es. campo impraticabile, maltempo'}">${esc(d.motivo)}</textarea></div>` : ''}
     </section>
-    ${d.esito === 'rinviata' ? '' : `<section class="ref-sec"><h3>${d.esito === 'sospesa' ? 'Risultato al momento della sospensione' : 'Risultato finale'}</h3>
+    ${['rinviata', 'assente'].includes(d.esito) ? '' : `<section class="ref-sec"><h3>${d.esito === 'sospesa' ? 'Risultato al momento della sospensione' : 'Risultato finale'}</h3>
       <div class="score"><div><label for="rf-gc">${esc(g.casa||'Casa')}</label><input id="rf-gc" type="number" min="0" inputmode="numeric" value="${esc(d.gc)}"></div><span class="dash">–</span><div><label for="rf-go">${esc(g.ospite||'Ospite')}</label><input id="rf-go" type="number" min="0" inputmode="numeric" value="${esc(d.go)}"></div></div>
       <div class="mini">${fld('rf-gc1','1° tempo casa',d.gc1,'type="number" min="0" inputmode="numeric"')}${fld('rf-go1','1° tempo ospite',d.go1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec1','Recupero 1° T (min)',d.rec1,'type="number" min="0" inputmode="numeric"')}${fld('rf-rec2','Recupero 2° T (min)',d.rec2,'type="number" min="0" inputmode="numeric"')}</div>
     </section>`}
-    ${d.esito === 'rinviata' ? '' : sec('marcatori') + sec('ammoniti') + sec('espulsi')}${sec('dirigenti')}${premi}
+    ${['rinviata', 'assente'].includes(d.esito) ? '' : sec('marcatori') + sec('ammoniti') + sec('espulsi')}${d.esito === 'assente' ? '' : sec('dirigenti')}${premi}
     <section class="ref-sec"><h3>Altre informazioni</h3>
       <div class="mini">${fld('rf-spett','Spettatori (circa)',d.spettatori,'type="number" min="0" inputmode="numeric"')}
         <div class="field"><label for="rf-campo">Terreno di gioco</label><select id="rf-campo">${['','Buono','Discreto','Pesante','Allentato','Sintetico','Impraticabile'].map(o=>`<option ${o===d.campo?'selected':''}>${o}</option>`).join('')}</select></div></div>
@@ -1866,28 +1868,30 @@ function renderRefForm(g){
   $('#rfSave').onclick = async () => {
     readDraft();
     if(d.esito === 'sospesa' && d.minSosp === ''){ toast('Scrivi il minuto della sospensione.'); $('#rf-minsosp').focus(); return; }
-    if(d.esito && !d.motivo){ toast(d.esito === 'sospesa' ? 'Scrivi il motivo della sospensione.' : 'Scrivi il motivo del rinvio.'); $('#rf-motivo').focus(); return; }
+    if(d.esito === 'assente' && !d.assente){ toast('Scegli la squadra che non si è presentata.'); $('#rf-assente').focus(); return; }
+    if(d.esito && d.esito !== 'assente' && !d.motivo){ toast(d.esito === 'sospesa' ? 'Scrivi il motivo della sospensione.' : 'Scrivi il motivo del rinvio.'); $('#rf-motivo').focus(); return; }
     if(!iniziata(g) && !g.referto){ toast(`Il referto si compila dalle ${g.ora}.`); return; }
     if(refBloccato(g) || refNonMio(g)){ toast('Referto bloccato: chiedi a un designatore di sbloccarlo.'); refId = g.id; draft = null; renderReferto(); return; }
-    const rinv = d.esito === 'rinviata';
-    if(!rinv && conDist){
+    const rinv = d.esito === 'rinviata', ass = d.esito === 'assente';
+    if(!rinv && !ass && conDist){
       const liste = ['marcatori', 'ammoniti', 'espulsi', 'dirigenti'], vuota = liste.flatMap(k => d[k].map((e, i) => [k, i, e])).find(([k, i, e]) => {
         const l = lista(e.sq === 'ospite' ? 'ospite' : 'casa', k === 'dirigenti' ? 'dir' : 'gioc'); return l ? !e.tid || (e.tid === '__man' && !e.nome) : !e.nome; });
       if(vuota){ const [k, i, e] = vuota; toast(e.tid === '__man' || !lista(e.sq === 'ospite' ? 'ospite' : 'casa', k === 'dirigenti' ? 'dir' : 'gioc') ? 'Scrivi il nome in ogni riga.' : 'Scegli chi è in ogni riga (oppure «Altro: scrivi a mano»).');
         body.querySelector(`.ev[data-list="${k}"][data-i="${i}"]`)?.scrollIntoView({block: 'center'}); return; }
       if(['mvp', 'por'].some(k => d[k] && d[k].man && !d[k].nome)){ toast('Scrivi il nome del premiato o scegli «Nessuno».'); return; }
     }
-    if(!rinv){
+    if(!rinv && !ass){
       const n = golRef(d);
       if(d.marcatori.length && d.gc !== '' && d.go !== '' && (n.casa !== +d.gc || n.ospite !== +d.go)
         && !confirm(`Le reti scritte (${g.casa || 'Casa'} ${n.casa}, ${g.ospite || 'Ospite'} ${n.ospite}) non tornano con il risultato ${d.gc}-${d.go}.\n\nRicorda: l’autorete va alla squadra avversaria. ${ufficiale ? 'Inviare' : 'Salvare'} lo stesso?`)) return;
     }
     if(ufficiale && !confirm('Inviare il referto?\n\nÈ il referto ufficiale della gara: dopo l’invio non potrai più modificarlo, se non te lo sblocca un designatore.')) return;
-    if(rinv){ d.gc = d.go = d.gc1 = d.go1 = d.rec1 = d.rec2 = ''; d.marcatori = []; d.ammoniti = []; d.espulsi = []; d.mvp = null; d.por = null; }
+    if(rinv || ass){ d.gc = d.go = d.gc1 = d.go1 = d.rec1 = d.rec2 = ''; d.marcatori = []; d.ammoniti = []; d.espulsi = []; d.mvp = null; d.por = null; }
+    if(ass) d.dirigenti = []; else d.assente = '';
     if(d.esito !== 'sospesa') d.minSosp = '';
     if(!d.esito) d.motivo = '';
     const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: rinv ? 'rinviata' : 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length, risultato: ''};
-    if(!rinv && d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}${d.esito === 'sospesa' ? ` (sosp. ${d.minSosp}')` : ''}`;
+    if(!rinv && !ass && d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}${d.esito === 'sospesa' ? ` (sosp. ${d.minSosp}')` : ''}`;
     const btn = $('#rfSave'); btn.disabled = true;
     try{ await Store.saveGara(upd); toast(upd.desId ? 'Referto inviato' : 'Referto salvato'); btn.disabled = false; if(upd.desId){ await inviaReferto(upd.desId, upd); if(refBloccato(upd) && location.hash === '#referto'){ refId = upd.id; draft = null; renderReferto(); } } }
     catch(e){ btn.disabled = false; toast('Salvataggio non riuscito. Riprova.'); }
@@ -1901,6 +1905,7 @@ function renderRefForm(g){
 
 function readDraft(){
   const d = draft, v = id => { const el = $('#'+id); return el ? el.value.trim() : ''; };
+  if($('#rf-assente')) d.assente = v('rf-assente');
   if($('#rf-minsosp')) d.minSosp = v('rf-minsosp'); if($('#rf-motivo')) d.motivo = v('rf-motivo');
   d.gc = v('rf-gc'); d.go = v('rf-go'); d.gc1 = v('rf-gc1'); d.go1 = v('rf-go1'); d.rec1 = v('rf-rec1'); d.rec2 = v('rf-rec2');
   d.spettatori = v('rf-spett'); d.campo = v('rf-campo'); d.note = v('rf-note');
@@ -1920,6 +1925,7 @@ function refText(g, d){
   L.push('');
   const block = (title, list, fn) => { L.push(''); L.push(`${title}: ${list.length ? '' : 'nessuna'}`.trim()); list.forEach(e => L.push('- ' + fn(e))); };
   if(d.esito === 'rinviata'){ L.push('GARA RINVIATA'); if(d.motivo) L.push(`Motivo: ${d.motivo}`); }
+  else if(d.esito === 'assente'){ L.push(`GARA NON DISPUTATA: ${team(d.assente)} non si è presentata`); if(d.motivo) L.push(`Note: ${d.motivo}`); }
   else {
     if(d.esito === 'sospesa'){ L.push(`GARA SOSPESA al ${d.minSosp || '?'}'`); if(d.motivo) L.push(`Motivo: ${d.motivo}`); }
     L.push(`${d.esito === 'sospesa' ? 'Risultato al momento della sospensione' : 'Risultato finale'}: ${d.gc || '?'}-${d.go || '?'}${d.gc1 !== '' || d.go1 !== '' ? ` (1° tempo ${d.gc1 || 0}-${d.go1 || 0})` : ''}`);
@@ -1930,7 +1936,7 @@ function refText(g, d){
   }
   if(d.mvp && d.mvp.nome) L.push('', `MIGLIORE IN CAMPO: ${d.mvp.nome} (${team(d.mvp.sq)})`);
   if(d.por && d.por.nome) L.push(`${d.mvp && d.mvp.nome ? '' : '\n'}MIGLIOR PORTIERE: ${d.por.nome} (${team(d.por.sq)})`);
-  block('PROVVEDIMENTI DIRIGENTI', d.dirigenti || [], e => `${e.min ? e.min + "' " : ''}${team(e.sq)} – ${e.qual || ''} ${e.nome || ''}: ${e.prov || ''}${e.mot ? ' (' + e.mot + ')' : ''}`);
+  if(d.esito !== 'assente') block('PROVVEDIMENTI DIRIGENTI', d.dirigenti || [], e => `${e.min ? e.min + "' " : ''}${team(e.sq)} – ${e.qual || ''} ${e.nome || ''}: ${e.prov || ''}${e.mot ? ' (' + e.mot + ')' : ''}`);
   if(d.spettatori || d.campo){ L.push(''); if(d.spettatori) L.push(`Spettatori: circa ${d.spettatori}`); if(d.campo) L.push(`Terreno di gioco: ${d.campo}`); }
   if(d.note){ L.push(''); L.push('Fatti da segnalare:'); L.push(d.note); }
   return L.join('\n');
@@ -2795,7 +2801,7 @@ const refInviati = new Set();
 async function inviaReferto(desId, g){
   if(!ACC.user || !g || !g.referto) return;
   refInviati.add(desId);
-  try{ await firebase.firestore().collection('designazioni').doc(desId).update({[`referti.${ACC.user.uid}`]: {referto: g.referto, risultato: g.risultato || (g.referto.esito === 'rinviata' ? 'Rinviata' : ''), gialli: toNum(g.gialli), rossi: toNum(g.rossi), nome: nomeArb(ACC.profilo), at: Date.now()}}); }
+  try{ await firebase.firestore().collection('designazioni').doc(desId).update({[`referti.${ACC.user.uid}`]: {referto: g.referto, risultato: g.risultato || (g.referto.esito === 'rinviata' ? 'Rinviata' : g.referto.esito === 'assente' ? 'Squadra assente' : ''), gialli: toNum(g.gialli), rossi: toNum(g.rossi), nome: nomeArb(ACC.profilo), at: Date.now()}}); }
   catch(e){ refInviati.delete(desId); toast('Referto salvato, ma non ancora inviato ai designatori: riprovo quando riapri l’app.'); }
 }
 function syncAccettate(){
