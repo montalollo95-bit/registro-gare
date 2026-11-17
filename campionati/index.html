@@ -283,8 +283,12 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 
 /* partite (pagina pubblica) */
 .card.par{padding:0;overflow:hidden}
-.par .m{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:16px 10px 12px;border-top:1px solid var(--line);text-align:center}
+.par .m{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;padding:16px 10px 14px;border-top:1px solid var(--line);text-align:center}
 .par .m:first-child{border-top:0}
+/* lo stemma è centrato con il risultato (o l'orario), il nome sotto */
+.par .m .tm{padding-top:var(--tmp,35px)}.par .m:not(.fin) .tm{--tmp:28px}.par .m .sc .num,.par .m .sc .ora{margin-top:8px}
+/* il risultato un filo più basso del centro degli stemmi (scelta B) */
+.par .m .sc .num,.par .m .sc .ora{position:relative;top:6px}
 .tm{display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;line-height:1.15;color:var(--fg);min-width:0;overflow-wrap:anywhere}
 .tm .stemma{width:46px;height:46px;border-radius:12px;font-size:18px;margin:0}
 .sc{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 6px}
@@ -293,7 +297,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .st.no{background:rgba(210,58,46,.14);color:var(--red)}
 .num{font-family:var(--display);font-size:44px;font-weight:800;line-height:1;color:var(--fg);white-space:nowrap}
 .ora{font-family:var(--display);font-size:30px;font-weight:800;line-height:1;color:var(--ora);white-space:nowrap}
-.ft{grid-column:1/-1;margin-top:10px;font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
+.ft{grid-column:1/-1;margin-top:16px;font-size:12.5px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
 .arb{grid-column:1/-1;margin-top:4px;font-size:13.5px;color:var(--fg)}
 .mrc{grid-column:1/-1;display:grid;grid-template-columns:1fr 22px 1fr;gap:6px;margin-top:10px;font-size:13px;color:var(--fg);align-items:start}
 .mrc > div{display:flex;flex-direction:column;gap:2px}.mrc > div:first-child{text-align:right}.mrc > div:last-child{text-align:left}
@@ -360,7 +364,11 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .pal{display:flex;flex-wrap:wrap;gap:6px}.sw{width:28px;height:28px;border-radius:50%;border:2px solid rgba(0,0,0,.18);cursor:pointer;padding:0}.sw.on{outline:3px solid var(--royal);outline-offset:2px;border-color:#fff}
 .sqbox{display:flex;align-items:center;gap:12px;padding:12px}.sqbox .sqst .stemma{width:56px;height:56px;font-size:20px;border-radius:14px;margin:0}.sqbox .sqtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.sqbox .maglie{margin-top:0}
 .indietro-sq{align-self:flex-start;border:0;background:var(--card);color:var(--fg);font-weight:700;border-radius:99px;padding:8px 14px;cursor:pointer;box-shadow:var(--card-sh)}
-.sqhead{display:flex;gap:14px;align-items:center;padding:16px}.sqhead .stemma{width:76px;height:76px;font-size:28px;border-radius:18px;margin:0}
+.sqhead{container-type:inline-size;padding:16px}
+/* squadra: stemma, nome, maglie e numeri nella stessa scheda; su schermi larghi i numeri vanno a destra */
+.sqhead .sqtop{display:flex;gap:14px;align-items:center;min-width:0}
+.sqhead .sqnum{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+@container (min-width:620px){.sqhead .sqin{display:flex;align-items:center;gap:22px}.sqhead .sqtop{flex:0 1 auto;max-width:44%}.sqhead .sqnum{flex:1;margin:0;padding:0 0 0 22px;border-top:0;border-left:1px solid var(--line)}.sqhead .sqnum .nn{grid-template-columns:repeat(6,1fr)}}.sqhead .stemma{width:76px;height:76px;font-size:28px;border-radius:18px;margin:0}
 .sqhead h2{margin:0;font-family:var(--display);font-size:26px;line-height:1.05;text-transform:uppercase;color:var(--fg)}.sqhead p{margin:2px 0 0;color:var(--muted);font-size:13px}.sqhead .sqtx{min-width:0}
 .sqnum{display:flex;align-items:center;gap:12px;padding:12px 14px}.sqnum .big{display:flex;flex-direction:column;align-items:center;min-width:64px}.sqnum .big b{font-size:30px;font-weight:800;line-height:1;color:var(--fg)}.sqnum .big small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .sqnum .nn{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 8px;flex:1}.sqnum .nn span{display:flex;flex-direction:column;align-items:center}.sqnum .nn b{font-size:17px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}.sqnum .nn small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
@@ -557,9 +565,9 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .rc-sq p{margin:4px 0 0;font-size:14px}
 .rc-note{white-space:pre-wrap;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:14px}
 .par .m.fin{cursor:pointer;transition:background .15s}
-.par .m.fin:hover{background:color-mix(in srgb,var(--fg) 4%,transparent)}
+@media (hover:hover){.par .m.fin:hover{background:color-mix(in srgb,var(--fg) 4%,transparent)}}
 .par .m.fin:focus-visible{outline:3px solid color-mix(in srgb,var(--royal) 55%,transparent);outline-offset:-3px}
-.tb-vai{grid-column:1/-1;margin-top:6px;font-size:13px;font-weight:800;color:var(--royal)}
+.tb-vai{grid-column:1/-1;margin-top:8px;font-size:13px;font-weight:800;color:var(--royal)}
 .tb{display:flex;flex-direction:column;gap:10px}
 .tb-g{margin:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
 .tb-h{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;padding:4px 0}
@@ -1254,8 +1262,8 @@ function paginaSquadra(C, l){
       <span class="rs ${k}">${e ? `${gf}–${gs}` : p.stato === 'rinviata' ? 'Rinviata' : p.data ? esc(giornoCorto(p.data)) : 'Da definire'}</span></div>`; };
   const n = x => `<span><b>${x}</b>`;
   return `<button class="indietro-sq" data-sqback>‹ Indietro</button>
-    <div class="card sqhead"><div class="sqst">${stemma(q.nome)}</div><div class="sqtx"><h2>${esc(q.nome)}</h2><p>${esc(C.nome)}</p>${maglieHtml(inf, 38)}</div></div>
-    ${pos >= 0 ? `<div class="card sqnum"><div class="big"><b>${r.rit ? '–' : pos + 1 + 'º'}</b><small>${r.rit ? 'ritirata' : 'in classifica'}</small></div><div class="nn">${n(r.Pt)}<small>punti</small></span>${n(r.G)}<small>giocate</small></span>${n(r.V)}<small>vinte</small></span>${n(r.N)}<small>pari</small></span>${n(r.P)}<small>perse</small></span>${n(r.GF + '–' + r.GS)}<small>gol</small></span></div></div>` : ''}
+    <div class="card sqhead"><div class="sqin"><div class="sqtop"><div class="sqst">${stemma(q.nome)}</div><div class="sqtx"><h2>${esc(q.nome)}</h2><p>${esc(C.nome)}</p>${maglieHtml(inf, 38)}</div></div>
+    ${pos >= 0 ? `<div class="sqnum"><div class="big"><b>${r.rit ? '–' : pos + 1 + 'º'}</b><small>${r.rit ? 'ritirata' : 'in classifica'}</small></div><div class="nn">${n(r.Pt)}<small>punti</small></span>${n(r.G)}<small>giocate</small></span>${n(r.V)}<small>vinte</small></span>${n(r.N)}<small>pari</small></span>${n(r.P)}<small>perse</small></span>${n(r.GF + '–' + r.GS)}<small>gol</small></span></div></div>` : ''}</div></div>
     ${inf.campo ? `<div class="card sqcampo"><span class="ic" aria-hidden="true">📍</span><div><small>Campo di casa</small><b>${esc(inf.campo)}</b><span>${esc([inf.indirizzo, inf.citta].filter(Boolean).join(', '))}</span></div>${inf.mapsUrl && /^https:\/\//.test(inf.mapsUrl) ? `<a class="btn btn-ghost sm" href="${esc(inf.mapsUrl)}" target="_blank" rel="noopener">Mappa</a>` : ''}</div>` : ''}
     <p class="lbl">Partite</p>${lp.length ? `<div class="card sqpar">${lp.map(riga).join('')}</div>` : '<p class="note">Calendario in arrivo.</p>'}
     ${mar.length ? `<p class="lbl">Marcatori</p><div class="card sqlist">${mar.map(x => `<div><span>${esc(x.nome)}</span><b>${x.v}</b></div>`).join('')}</div>` : ''}
