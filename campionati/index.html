@@ -1209,7 +1209,11 @@ function openSchedaSq(q){
         ${t ? `<span class="mini">${l1}</span>${pal(i, 'c1')}${l2 ? `<span class="mini">${l2}</span>${pal(i, 'c2')}` : ''}` : ''}</div></div>`;
     el.querySelectorAll('[data-mt]').forEach(b => b.onclick = () => { m.t = b.dataset.mt.split(':')[1]; if(!m.t){ m.c1 = ''; m.c2 = ''; } drawMg(i); });
     el.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => { const [, k, h] = b.dataset.sw.split(':'); m[k] = m[k] === h ? '' : h; drawMg(i); });
-    el.querySelectorAll('[data-cc]').forEach(x => x.onchange = () => { m[x.dataset.cc.split(':')[1]] = okCol(x.value.toUpperCase()); drawMg(i); }); };
+    /* colore personalizzato: aggiorna anteprima e pallini senza ridisegnare, altrimenti il selettore del telefono si chiude mentre si scorre */
+    el.querySelectorAll('[data-cc]').forEach(x => x.oninput = x.onchange = () => { const k = x.dataset.cc.split(':')[1], c = okCol(x.value.toUpperCase()); if(!c) return; m[k] = c;
+      el.querySelector('.mg-prev').innerHTML = magliaSvg(m.t ? m : null, 64);
+      const pl = x.closest('.pal'); pl.querySelectorAll('[data-sw]').forEach(b => b.classList.toggle('on', b.dataset.sw.split(':')[2] === c));
+      const lb = x.closest('label'), fuori = !MCOL.some(([, h]) => h === c); lb.classList.toggle('on', fuori); lb.style.background = fuori ? c : ''; }); };
   drawMg(0); drawMg(1);
   $r('#scGo').onclick = async () => { const b = $r('#scGo'), er = $r('#scErr'); er.textContent = '';
     if(M.maglie.some(m => m.t && m.t !== 'unita' && m.c1 && !m.c2)){ er.textContent = 'Scegli anche il secondo colore della maglia (o metti “Tinta unita”).'; return; }
