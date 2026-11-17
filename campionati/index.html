@@ -461,7 +461,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .gs h4{margin:10px 0 2px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--royal,#1F4FB8)}
 @media (prefers-color-scheme:dark){.gs h4{color:#8FB3FF}}
 .gs h5{margin:6px 0 0;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-.gs-r{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.gs-r li{display:flex;flex-direction:column;font-size:14px;line-height:1.25;padding-left:9px;border-left:3px solid var(--surface-2);overflow-wrap:anywhere}.gs-r li span{font-size:13px;color:var(--muted)}.gs-r.ris li{flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px}.gs-r.ris li span{font-size:15px;font-weight:800;color:var(--fg);white-space:nowrap;font-variant-numeric:tabular-nums}
+.gs-r{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.gs-r li{display:flex;flex-direction:column;font-size:14px;line-height:1.25;padding-left:9px;border-left:3px solid var(--surface-2);overflow-wrap:anywhere}.gs-r li span{font-size:13px;color:var(--muted)}.gs-r.ris li{flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px}.gs-r.ris{gap:0}.gs-r.ris li{padding-top:7px;padding-bottom:7px;border-bottom:1px solid color-mix(in srgb,var(--muted) 24%,transparent)}.gs-r.ris li:last-child{border-bottom:0}.gs-r.ris li span{font-size:15px;font-weight:800;color:var(--fg);white-space:nowrap;font-variant-numeric:tabular-nums}
 .gs-x,.com-x{line-height:1.45;margin:0;overflow-wrap:anywhere}.com-x a,.gs-x a{color:inherit;text-decoration:underline}
 .gs-f{text-align:right;font-weight:800;margin:10px 0 0}
 .alg-img{min-height:60px;display:flex;align-items:center;justify-content:center}.alg-img img{width:100%;border-radius:12px;display:block;cursor:zoom-in}
@@ -3552,28 +3552,37 @@ const shHead = (ctx, cols, y, fs) => cols.forEach(([t, x]) => shTxt(ctx, t, x, y
 /* --- una partita: risultato, gol, cartellini, premi --- */
 async function shPartita(p, fmtI){
   const e = esito(p), B = await shBase(p.camp, fmtI, e ? 'RISULTATO' : 'PROSSIMA PARTITA', `${p.giornata}ª giornata${p.data ? ' · ' + giornoCorto(p.data) : ''}${p.impianto ? ' · ' + p.impianto : ''}`), {ctx, W, story} = B;
-  let y = B.y0 + (story ? 30 : 6); const cs = story ? 200 : 128, cxs = [W * .21, W * .79], hb = cs + (story ? 110 : 70);
-  shBar(ctx, 50, y, W - 100, hb);
-  await shCrest(ctx, p.casa, cxs[0], y + 20 + cs / 2, cs); await shCrest(ctx, p.ospite, cxs[1], y + 20 + cs / 2, cs);
-  shTxt(ctx, (p.casa || '').toUpperCase(), cxs[0], y + cs + (story ? 82 : 56), 360, 'D', 800, story ? 44 : 34, '#fff', 'center', 22);
-  shTxt(ctx, (p.ospite || '').toUpperCase(), cxs[1], y + cs + (story ? 82 : 56), 360, 'D', 800, story ? 44 : 34, '#fff', 'center', 22);
-  shPill(ctx, e ? (e.tav ? 'A TAVOLINO' : 'FINALE') : (p.data ? giornoCorto(p.data).toUpperCase() : 'DA DEFINIRE'), W / 2, y + (story ? 52 : 34), story ? 26 : 20, e && e.tav ? 'rgba(229,51,58,.35)' : 'rgba(255,255,255,.14)', '#fff');
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 16;
-  shTxt(ctx, e ? `${e.gc} : ${e.go}` : (p.ora || '– : –'), W / 2, y + 20 + cs / 2 + (story ? 92 : 58), 300, 'D', 800, story ? 168 : 112, '#fff', 'center'); ctx.restore();
-  y += hb + (story ? 50 : 22);
   const gol = e && !e.tav ? eventiPar(p) : [], premi = e && !e.tav ? [p.mvp && ['MIGLIORE IN CAMPO', p.mvp], p.por && ['MIGLIOR PORTIERE', p.por]].filter(Boolean) : [];
   const pH = premi.length ? (story ? 130 : 84) : 0, yEnd = B.y1 - pH - (pH ? (story ? 20 : 12) : 0);
-  if(e && e.tav) shTxt(ctx, `${p[e.gc > e.go ? 'casa' : 'ospite']} vince a tavolino${e.rit ? ' (squadra ritirata)' : ''}`, W / 2, y + 50, W - 160, 'B', 600, story ? 40 : 32, SH_MUTO, 'center');
-  else if(gol.length){
-    shTxt(ctx, 'TABELLINO', W / 2, y + (story ? 34 : 26), 400, 'D', 800, story ? 38 : 30, B.acc, 'center'); y += story ? 56 : 40;
-    const conMin = gol.some(x => x.min !== ''), rh = story ? 60 : 44, fs = story ? 31 : 24;
-    let righe;
+  /* righe del tabellino */
+  const conMin = gol.some(x => x.min !== ''); let righe = [];
+  if(gol.length){
     if(conMin) righe = gol.map((x, i) => ({...x, i})).sort((a, b) => (a.min === '') - (b.min === '') || minNum(a.min) - minNum(b.min) || a.i - b.i).map(x => ({c: x.sq === 'casa' ? x : null, o: x.sq !== 'casa' ? x : null, m: x.min}));
     else { const col = s => { const m = new Map(); gol.filter(x => x.sq === s).sort((a, b) => 'gayyrr'.indexOf(a.t) - 'gayyrr'.indexOf(b.t)).forEach(x => { const k = x.t + '|' + x.nome; m.set(k, {...x, n: (m.get(k) || {n: 0}).n + 1}); }); return [...m.values()]; };
       const c = col('casa'), o = col('ospite'); righe = Array.from({length: Math.max(c.length, o.length)}, (_, i) => ({c: c[i] || null, o: o[i] || null, m: ''})); }
-    const max = Math.max(1, Math.floor((yEnd - y) / rh)), vis = righe.length > max ? righe.slice(0, max - 1) : righe;
+  }
+  let rh = story ? 60 : 44, fs = story ? 31 : 24;
+  const tTit = story ? 56 : 40, sp = story ? 50 : 22, y0 = B.y0 + (story ? 30 : 6);
+  /* se il tabellino è lungo, prima si rimpicciolisce il riquadro del risultato (fino al 60%), poi, se serve ancora, le righe */
+  const cs0 = story ? 200 : 128, hb0 = cs0 + (story ? 110 : 70), serve = righe.length ? tTit + righe.length * rh + 6 : 0;
+  const k = Math.max(.6, Math.min(1, (yEnd - y0 - sp - serve) / hb0));
+  let y = y0; const cs = cs0 * k, cxs = [W * .21, W * .79], hb = hb0 * k;
+  shBar(ctx, 50, y, W - 100, hb);
+  await shCrest(ctx, p.casa, cxs[0], y + 20 * k + cs / 2, cs); await shCrest(ctx, p.ospite, cxs[1], y + 20 * k + cs / 2, cs);
+  const nf = (story ? 44 : 34) * Math.max(k, .8);
+  shTxt(ctx, (p.casa || '').toUpperCase(), cxs[0], y + cs + (story ? 82 : 56) * k, 360, 'D', 800, nf, '#fff', 'center', 22);
+  shTxt(ctx, (p.ospite || '').toUpperCase(), cxs[1], y + cs + (story ? 82 : 56) * k, 360, 'D', 800, nf, '#fff', 'center', 22);
+  shPill(ctx, e ? (e.tav ? 'A TAVOLINO' : 'FINALE') : (p.data ? giornoCorto(p.data).toUpperCase() : 'DA DEFINIRE'), W / 2, y + (story ? 52 : 34) * k, (story ? 26 : 20) * Math.max(k, .8), e && e.tav ? 'rgba(229,51,58,.35)' : 'rgba(255,255,255,.14)', '#fff');
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 16;
+  shTxt(ctx, e ? `${e.gc} : ${e.go}` : (p.ora || '– : –'), W / 2, y + 20 * k + cs / 2 + (story ? 92 : 58) * k, 300, 'D', 800, (story ? 168 : 112) * k, '#fff', 'center'); ctx.restore();
+  y += hb + sp;
+  if(e && e.tav) shTxt(ctx, `${p[e.gc > e.go ? 'casa' : 'ospite']} vince a tavolino${e.rit ? ' (squadra ritirata)' : ''}`, W / 2, y + 50, W - 160, 'B', 600, story ? 40 : 32, SH_MUTO, 'center');
+  else if(righe.length){
+    shTxt(ctx, 'TABELLINO', W / 2, y + (story ? 34 : 26), 400, 'D', 800, story ? 38 : 30, B.acc, 'center'); y += tTit;
+    const spazio = yEnd - y - 6; if(righe.length * rh > spazio){ rh = Math.max(story ? 29 : 22, spazio / righe.length); fs = Math.min(fs, rh * .52); }
+    const max = Math.max(1, Math.floor(spazio / rh)), vis = righe.length > max ? righe.slice(0, max - 1) : righe;
     const nm = x => (x.t === 'a' ? 'Autogol' : shBrv(x.nome)) + (x.n > 1 ? ` ×${x.n}` : '');
-    vis.forEach((r, i) => { const yy = y + i * rh, cy = yy + (rh - 8) / 2, mid = W / 2; shBar(ctx, 50, yy, W - 100, rh - 8);
+    const gp = Math.min(8, rh * .14); vis.forEach((r, i) => { const yy = y + i * rh, cy = yy + (rh - gp) / 2, mid = W / 2; shBar(ctx, 50, yy, W - 100, rh - gp);
       if(r.m) shTxt(ctx, r.m + '’', mid, cy + fs * .36, 90, 'D', 800, fs, SH_GIALLO, 'center');
       if(r.c){ shIco(ctx, mid - 66, cy, fs * .85, r.c.t); shTxt(ctx, nm(r.c), mid - 96, cy + fs * .36, mid - 170, 'B', 700, fs, '#fff', 'right', 20); }
       if(r.o){ shIco(ctx, mid + 66, cy, fs * .85, r.o.t); shTxt(ctx, nm(r.o), mid + 96, cy + fs * .36, mid - 170, 'B', 700, fs, '#fff', 'left', 20); } });
