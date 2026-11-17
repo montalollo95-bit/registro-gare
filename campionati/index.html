@@ -149,7 +149,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tessera .top img{width:34px;height:34px;border-radius:9px;background:#fff;padding:2px}
 .tessera .top b{font-family:var(--display);font-size:20px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
 .tessera .top span{font-size:11px;opacity:.8;display:block}
-@media (max-width:380px){.tessera .top b{font-size:16px}.tessera .top{gap:8px}.tessera .stato{font-size:10.5px;padding:4px 8px}}
+.tessera .top .tstem{opacity:1;flex:none;align-self:flex-start;display:block;width:34px;height:34px}.tessera .top .tstem .stemma{display:flex;width:34px;height:34px;margin:0;font-size:12px;border-radius:9px;opacity:1}.tessera .top .tstem .stemma.img{background:none}.tessera .top .tstem img{width:100%;height:100%;background:none;padding:0;border-radius:0;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.35))}
+@media (max-width:380px){.tessera .top .tstem,.tessera .top .tstem .stemma{width:26px;height:26px;font-size:10px}.tessera .top img{width:30px;height:30px}.tessera .top span{font-size:10.5px}.tessera .top b{font-size:16px}.tessera .top{gap:8px}.tessera .stato{font-size:10.5px;padding:4px 8px}}
 .tessera .foto{width:96px;height:120px;border-radius:12px;object-fit:cover;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;z-index:1}
 .tessera .dati{display:flex;flex-direction:column;gap:2px;min-width:0;z-index:1}
 .tessera .nome{font-family:var(--display);font-size:24px;font-weight:800;line-height:1.05;text-transform:uppercase}
@@ -369,6 +370,8 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .avv{color:#B5650B !important;font-weight:700}
 .tstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tstat div{background:var(--chip,var(--surface-2));border-radius:12px;padding:8px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.tstat b{font-family:var(--display);font-size:22px;line-height:1}.tstat span{font-size:11.5px;color:var(--muted);line-height:1.15}
 #t-cognome,#t-nome{text-transform:uppercase}
+.cal-sum ul{margin:4px 0 8px;padding-left:20px;display:flex;flex-direction:column;gap:2px}.cal-sum p{margin:6px 0}.cal-ante span i{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:4px}
+.tgr{gap:8px}.tgr[hidden]{display:none}.tgr-h{display:flex;align-items:center;gap:10px;padding:6px 2px 0;min-width:0}.tgr-h .stemma{width:30px;height:30px;font-size:11px;border-radius:8px;margin:0;flex:none}.tgr-h b{font-family:var(--display);font-size:17px;letter-spacing:.03em;text-transform:uppercase;min-width:0;overflow-wrap:normal}.tgr-h .cnt{flex:none}.tgr-h .tgr-c{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
 .imp-l{display:flex;flex-direction:column;gap:6px}.imp-n{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.imp-n .nm b{font-weight:800}.imp-n .nm{font-weight:500}.imp-sw{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;min-width:34px;height:28px;font-size:15px;line-height:1;cursor:pointer;padding:0 8px}.imp-av{background:color-mix(in srgb,#E8A33C 16%,transparent);border-radius:10px;padding:8px 10px}.imp-r{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip,var(--surface-2));cursor:pointer}.imp-r input{margin-top:3px;width:20px;height:20px;flex:none}.imp-r .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.imp-r .tx>span{font-size:13px;color:var(--muted)}.imp-r .pst{align-self:flex-start}.imp-r.dis{opacity:.55}
 .rhead{display:flex;align-items:center;gap:10px;min-width:0}.rhead>b{flex:1;min-width:0}.rhead .stemma{width:36px;height:36px;border-radius:10px;margin:0}
 .rp{display:flex;align-items:center;gap:8px}.rp .rtx{flex:1}.rtx{display:flex;flex-direction:column;min-width:0;gap:1px}.rtx span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
@@ -691,7 +694,9 @@ const CATS = ['C5 AICS', 'C7 AICS'];
 const RUOLI = ['Giocatore', 'Portiere', 'Allenatore', 'Dirigente'];
 const ADMINS = () => [].concat(window.FIREBASE_ADMINS || window.FIREBASE_ADMIN || []).map(e => String(e).trim().toLowerCase()).filter(Boolean);
 const nomeT = t => `${t.cognome || ''} ${t.nome || ''}`.trim();
-const iniz = t => ((t.cognome || '?')[0] + (t.nome || '')[0] || '').toUpperCase();
+/* due iniziali anche quando c'è solo il cognome (o solo il nome) */
+const iniz = t => { const c = String(t.cognome || '').trim(), n = String(t.nome || '').trim(), w = (c || n).split(/[\s'’-]+/).filter(Boolean);
+  if(c && n) return (c[0] + n[0]).toUpperCase(); if(!w.length) return '?'; return (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase(); };
 const statoT = t => t.stato === 'approvato' && t.scadenza && t.scadenza < oggi() ? 'scaduto' : (t.stato || 'attesa');
 const ST_L = {attesa: 'In attesa', approvato: 'Valido', rifiutato: 'Rifiutato', sospeso: 'Sospeso', scaduto: 'Scaduto', attivo: 'Attivo', revocato: 'Revocato', svincolato: 'Svincolato'};
 const badge = s => `<span class="badge b-${s}">${ST_L[s] || s}</span>`;
@@ -1934,7 +1939,7 @@ const bindAttT = root => root.querySelectorAll('[data-aall]').forEach(b => b.onc
   catch(err){ b.disabled = false; toast(fbErr(err)); } });
 
 /* -- cartellino digitale -- */
-const tesseraHTML = t => { const s = statoT(t); return `<div class="tessera ${s}"><div class="top"><img src="../icon-aics.png" alt=""><div><b>AICS Reggio Emilia</b><span>${esc(t.categoria || '')} · Stagione ${t.scadenza ? `${+t.scadenza.slice(0, 4) - 1}/${t.scadenza.slice(2, 4)}` : STAG}</span></div><span class="stato">${s === 'approvato' ? 'VALIDO' : esc((ST_L[s] || s).toUpperCase())}</span></div>
+const tesseraHTML = t => { const s = statoT(t); return `<div class="tessera ${s}"><div class="top"><img src="../icon-aics.png" alt=""><div><b>AICS Reggio Emilia</b><span>${esc(t.categoria || '')} · Stagione ${t.scadenza ? `${+t.scadenza.slice(0, 4) - 1}/${t.scadenza.slice(2, 4)}` : STAG}</span></div><span class="stato">${s === 'approvato' ? 'VALIDO' : esc((ST_L[s] || s).toUpperCase())}</span>${t.squadra ? `<span class="tstem" title="${esc(t.squadra)}">${stemma(t.squadra)}</span>` : ''}</div>
   ${t.foto ? `<img class="foto" src="${esc(t.foto)}" alt="Foto di ${esc(nomeT(t))}">` : `<span class="foto">${esc(iniz(t))}</span>`}
   <div class="dati"><span class="nome">${esc(t.cognome || '')}<br>${esc(t.nome || '')}</span>
     <span class="k">Squadra</span><span class="v">${esc(t.squadra || '')}</span>
@@ -2061,7 +2066,9 @@ function renderAdmin(app){
     body = `<div class="row tbtn"><button class="btn btn-primary sm" id="tImp">📥 Importa</button><button class="btn btn-ghost sm" id="tExp">⬇️ Esporta</button><button class="btn btn-ghost sm" id="tLim">⚙️ Limiti</button></div>
       <div class="field"><label for="aFind">Cerca</label><input id="aFind" type="search" placeholder="Cognome, nome o squadra" value="${esc(S.cerca || '')}"></div>
       <div class="seg" role="group" aria-label="Filtro">${[['tutti', 'Tutti'], ['approvato', 'Validi'], ['sospeso', 'Sospesi'], ['svincolato', 'Svincolati'], ['scaduto', 'Scaduti']].map(([k, t]) => `<button data-f="${k}" aria-pressed="${k === f}">${t}</button>`).join('')}</div>
-      <ul class="list" id="aList">${l.map(itemT).join('') || '<div class="empty"><h3>Nessun tesserato</h3></div>'}</ul>`;
+      <div class="stack" id="aList">${(() => { if(!l.length) return '<div class="empty"><h3>Nessun tesserato</h3></div>';
+        const G = new Map(); l.forEach(t => { const k = t.squadra || ''; if(!G.has(k)) G.set(k, []); G.get(k).push(t); });
+        return [...G.entries()].sort((a, b) => !a[0] ? 1 : !b[0] ? -1 : a[0].localeCompare(b[0], 'it')).map(([sq, ts]) => `<section class="tgr stack"><div class="tgr-h">${sq ? stemma(sq) : ''}<b>${esc(sq || 'Senza squadra')}</b><span class="cnt">${ts.length}</span>${ts[0].categoria ? `<span class="tgr-c">${esc(NOMECAMP[ts[0].categoria] || ts[0].categoria)}</span>` : ''}</div><ul class="list">${ts.map(itemT).join('')}</ul></section>`).join(''); })()}</div>`;
   }
   app.innerHTML = band('Torneo AICS', 'Amministratore · ' + S.user.email) + `<main class="wrap stack">
     <div class="seg" role="tablist">${tabs.map(([k, t, n]) => `<button data-tab="${k}" aria-pressed="${S.tab === k}">${t}${n ? ` <span class="cnt hot">${n}</span>` : ''}${k === 'com' && prC.length ? '<i class="sdot" aria-label="comunicato pronto"></i>' : ''}</button>`).join('')}</div>
@@ -2083,7 +2090,8 @@ function renderAdmin(app){
   if(S.tab === 'resp') bindResp(app);
   const fi = $('#aFind');
   if(fi) fi.oninput = () => { S.cerca = fi.value; const k = fi.value.trim().toLowerCase();
-    $('#aList').querySelectorAll('li').forEach(li => { const t = S.tess.find(x => x.id === li.querySelector('[data-t]').dataset.t); li.hidden = !!k && !`${nomeT(t)} ${t.nome} ${t.cognome} ${t.squadra}`.toLowerCase().includes(k); }); };
+    $('#aList').querySelectorAll('li').forEach(li => { const t = S.tess.find(x => x.id === li.querySelector('[data-t]').dataset.t); li.hidden = !!k && !`${nomeT(t)} ${t.nome} ${t.cognome} ${t.squadra}`.toLowerCase().includes(k); });
+    $('#aList').querySelectorAll('.tgr').forEach(g => { g.hidden = ![...g.querySelectorAll('li')].some(li => !li.hidden); }); };
   if(fi && S.cerca) fi.oninput();
   bindItems(app);
 }
@@ -2824,36 +2832,118 @@ function scaricaModello(){
   const blob = new Blob(['﻿Giornata;Casa;Ospite\n' + es.join('\n') + '\n'], {type: 'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `calendario-${NOMECAMP[S.pcat].replace(/\W+/g, '-').toLowerCase()}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
+/* ---------- importa il calendario ----------
+   Va bene il modello (Giornata, Casa, Ospite) ma anche un elenco con luogo, data, orario, squadre e punteggio:
+   se manca la giornata la ricavo dalle date (una giornata a settimana, i recuperi tornano nella loro giornata). */
+const CALK = [['giornata', /giornata|turno|^g\.?$|^gior/], ['casa', /casa|squadra\s*(1|a)$|^home|locale/], ['ospite', /ospit|squadra\s*(2|b)$|trasferta|away/], ['data', /^data|^giorno|^date/], ['ora', /^ora\b|orario|^inizio|^ore\b/], ['luogo', /luogo|campo|impianto|palestra|palazzetto/], ['ris', /risultato|punteggio|^gol|^reti|score/]];
+const oraDi = v => { if(v instanceof Date) return `${pad(v.getHours())}:${pad(v.getMinutes())}`; if(typeof v === 'number' && v >= 0 && v < 1){ const m = Math.round(v * 1440); return `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`; }
+  const m = NRM(v).match(/^(\d{1,2})[:.](\d{2})/); return m && +m[1] < 24 ? `${pad(+m[1])}:${m[2]}` : ''; };
+function leggiCalendario(rows, teams){
+  const byN = new Map(teams.map(q => [norm(q.nome), q])), err = [], l = [], txt = c => c instanceof Date ? 'x' : NRM(c);
+  const R = rows.map((r, i) => ({r: r || [], n: i + 1})).filter(x => x.r.some(c => txt(c)));
+  let map = null, hi = -1;
+  for(let i = 0; i < Math.min(R.length, 10) && !map; i++){ const m = {ris: []};
+    R[i].r.forEach((c, j) => { const t = txt(c).toLowerCase(); if(!t || t.length > 40) return; const k = CALK.find(([k, re]) => re.test(t) && (k === 'ris' || !(k in m))); if(!k) return; if(k[0] === 'ris') m.ris.push(j); else m[k[0]] = j; });
+    if('casa' in m && 'ospite' in m){ map = m; hi = i; } }
+  const body = map ? R.slice(hi + 1) : R.filter((x, i) => i || /^\d+/.test(txt(x.r[0])));
+  body.forEach(({r, n}) => {
+    const g = k => map ? (k in map ? r[map[k]] : '') : ({giornata: r[0], casa: r[1], ospite: r[2]})[k];
+    const cn = NRM(g('casa')), on = NRM(g('ospite')); if(!cn && !on) return;
+    const c = byN.get(norm(cn)), o = byN.get(norm(on));
+    if(!c || !o){ err.push(`Riga ${n}: ${[!c && `“${cn}”`, !o && `“${on}”`].filter(Boolean).join(' e ')} non ${!c && !o ? 'sono' : 'è'} nell’archivio squadre`); return; }
+    if(c.id === o.id){ err.push(`Riga ${n}: casa e ospite sono la stessa squadra`); return; }
+    const x = {n, c, o, giornata: parseInt(txt(g('giornata')), 10) || 0, data: isoDi(g('data'), true), ora: oraDi(g('ora')), luogo: NRM(g('luogo')), gc: null, go: null};
+    if(map && map.ris.length >= 2){ const a = txt(r[map.ris[0]]), b = txt(r[map.ris[1]]); if(/^\d+$/.test(a) && /^\d+$/.test(b)){ x.gc = +a; x.go = +b; } }
+    else if(map && map.ris.length === 1){ const m = txt(r[map.ris[0]]).match(/^(\d+)\s*[-–:]\s*(\d+)$/); if(m){ x.gc = +m[1]; x.go = +m[2]; } }
+    /* 0-0 o risultato con data futura = partita non ancora giocata */
+    if((x.gc === 0 && x.go === 0) || (x.gc != null && (!x.data || x.data > oggi()))){ x.gc = null; x.go = null; }
+    l.push(x); });
+  const senzaG = l.filter(x => !x.giornata);
+  if(senzaG.length){ const noD = senzaG.filter(x => !x.data);
+    if(noD.length || senzaG.length < l.length) (noD.length ? noD : senzaG).forEach(x => err.push(`Riga ${x.n}: manca il numero della giornata${noD.length ? ' (o la data, per ricavarla)' : ''}`));
+    else assegnaGiornate(l); }
+  return {l: err.length ? [] : l, err, calcolate: !err.length && senzaG.length > 0};
+}
+function assegnaGiornate(l){
+  const lun = d => { const t = new Date(d + 'T12:00:00'); t.setDate(t.getDate() - (t.getDay() + 6) % 7); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; };
+  const gg = d => Math.round(new Date(d + 'T12:00:00').getTime() / 864e5), pieno = Math.floor(new Set(l.flatMap(x => [x.c.id, x.o.id])).size / 2);
+  const metti = (r, x) => { r.m.push(x); r.t.add(x.c.id); r.t.add(x.o.id); }, libero = (r, x) => !r.t.has(x.c.id) && !r.t.has(x.o.id);
+  let R = [];
+  l.slice().sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora)).forEach(x => { const w = lun(x.data); let r = R.find(r => r.w === w && libero(r, x)); if(!r) R.push(r = {w, m: [], t: new Set()}); metti(r, x); });
+  /* settimane con poche partite = recuperi o anticipi: vanno nella giornata dove mancano proprio quelle due squadre */
+  const pezzi = R.filter(r => r.m.length <= pieno / 2); R = R.filter(r => r.m.length > pieno / 2);
+  pezzi.flatMap(r => r.m).forEach(x => { const r = R.filter(r => r.m.length < pieno && libero(r, x)).sort((a, b) => Math.abs(gg(a.w) - gg(x.data)) - Math.abs(gg(b.w) - gg(x.data)))[0];
+    if(r) metti(r, x); else { const nr = {w: lun(x.data), m: [], t: new Set()}; metti(nr, x); R.push(nr); } });
+  R.sort((a, b) => a.w.localeCompare(b.w)).forEach((r, i) => r.m.forEach(x => x.giornata = i + 1));
+}
+/* campo scritto nel file → campo dell'archivio (anche se scritto un po' diverso) */
+const PAROLE_CAMPO = /^(PALESTRA|PALAZZETTO|PALAZZO|PALA|CAMPO|CENTRO|SPORTIVO|COMUNALE|SCUOLA|SCUOLE|ELEMENTARI|ELEMENTARE|MEDIE|IMPIANTO|DELLO|DELLA|DEL|DEI|DI|LE|LA|IL|LO|VIA)$/;
+const impDaNome = t => { const k = norm(t); if(!k) return null; const ex = S.impianti.find(i => norm(i.nome) === k); if(ex) return ex;
+  const pz = s => s.split(' ').filter(w => w.length > 2 && !PAROLE_CAMPO.test(w)), a = pz(k); if(!a.length) return null;
+  const c = S.impianti.filter(i => { const b = pz(norm(i.nome) + ' ' + norm(i.citta || '')); const bn = pz(norm(i.nome)); return b.length && (a.every(w => b.includes(w)) || (bn.length && bn.every(w => a.includes(w)))); });
+  return c.length === 1 ? c[0] : null; };
+/* cosa succede a ogni riga: partita nuova o già in app, risultato, app arbitri */
+function pianoCalendario(cat, l){
+  const P = parDi(S.partite, cat), oggi_ = oggi(), usate = new Set();
+  return l.map(x => {
+    const ex = P.find(p => !usate.has(p.id) && p.casaId === x.c.id && p.ospiteId === x.o.id) || P.find(p => !usate.has(p.id) && p.casaId === x.o.id && p.ospiteId === x.c.id);
+    if(ex) usate.add(ex.id);
+    const d = ex ? desDi(ex) : null, fatto = refFatto(d), im = impDaNome(x.luogo), ic = S.info[x.c.id] || {};
+    const futura = !!x.data && x.data >= oggi_, giaRis = ex && ex.giocata, ris = x.gc != null && !giaRis && !fatto;
+    const des = !fatto && !(ex && ex.desId) ? S.des.find(z => !z.partitaId && z.data === x.data && norm(z.casa) === norm(x.c.nome) && norm(z.ospite) === norm(x.o.nome)) : null;
+    const campo = im ? {impianto: im.nome, impiantoId: im.id, indirizzo: im.indirizzo || '', citta: im.citta || ''}
+      : x.luogo ? {impianto: x.luogo, impiantoId: '', indirizzo: '', citta: ''}
+      : ex && ex.impianto ? {impianto: ex.impianto, impiantoId: ex.impiantoId || '', indirizzo: ex.indirizzo || '', citta: ex.citta || ''}
+      : {impianto: ic.campo || '', impiantoId: ic.campoId || '', indirizzo: ic.indirizzo || '', citta: ic.citta || ''};
+    return {x, ex, d, fatto, im, futura, ris, des, campo, campoNonTrovato: !!x.luogo && !im}; });
+}
+async function eseguiCalendario(cat, piano){
+  const now = Date.now(), dir = [], seq = [];
+  piano.forEach(q => { const {x, ex, fatto, im, futura, ris, des, campo} = q, c = x.c, o = x.o;
+    let n = {giornata: x.giornata, updatedAt: now};
+    if(!fatto) Object.assign(n, {casa: c.nome, casaId: c.id, ospite: o.nome, ospiteId: o.id, data: x.data || (ex && ex.data) || '', ora: x.ora || (ex && ex.ora) || '', ...campo});
+    if(ris){ Object.assign(n, {giocata: true, tavolino: '', gc: x.gc, go: x.go, mar: [], aut: {casa: 0, ospite: 0}, autMin: {casa: [], ospite: []}, mvp: null, por: null, amm: [], esp: []}); n.cart = {casa: 0, ospite: 0}; n.risImportato = true; }
+    const tutta = ex ? {...ex, ...n} : {...nuovaPar(cat, x.giornata, c, o), ...n};
+    if(futura && !fatto && !des) seq.push(() => salvaPartita(tutta, ex || null, im));
+    else { const ref = ex ? db().collection('partite').doc(ex.id) : db().collection('partite').doc(), {id, ...dati} = tutta;
+      if(des){ dati.desId = des.id; dir.push(b => b.update(db().collection('designazioni').doc(des.id), {partitaId: ref.id, giornata: x.giornata})); }
+      dir.push(b => b.set(ref, dati, {merge: true})); } });
+  if(dir.length) await scriviTutto(dir);
+  for(const f of seq) await f();
+}
 function openImporta(){
-  const cat = S.pcat, teams = squadreCat(cat), byN = new Map(teams.map(q => [norm(q.nome), q]));
+  const cat = S.pcat, teams = squadreCat(cat);
   const {root, close} = sheet(`<h3>Importa il calendario</h3>
-    <p class="note">Un file Excel (.xlsx) o CSV con 3 colonne: <b>Giornata</b>, <b>Casa</b>, <b>Ospite</b>. I nomi delle squadre devono essere uguali a quelli dell’archivio squadre di ${esc(NOMECAMP[cat])}.</p>
+    <p class="note">Un file Excel (.xlsx) o CSV. Va bene il modello con <b>Giornata</b>, <b>Casa</b>, <b>Ospite</b>, ma anche un elenco con <b>luogo, data, orario, squadre e punteggio</b>: se manca la giornata la ricavo dalle date. I nomi delle squadre devono essere quelli dell’archivio squadre di ${esc(NOMECAMP[cat])}.</p>
     <button class="btn btn-ghost btn-block" id="iMod">⬇️ Scarica il modello da compilare</button>
     <label class="btn btn-primary btn-block" for="iFile">📄 Scegli il file</label><input type="file" id="iFile" accept=".csv,.xlsx,.xls,text/csv" hidden>
     <div id="iOut"></div><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Importa calendario', 'largo');
   root.querySelector('#iMod').onclick = scaricaModello;
   root.querySelector('#iFile').onchange = async e => {
-    const f = e.target.files[0], out = root.querySelector('#iOut'); if(!f) return;
+    const f = e.target.files[0], out = root.querySelector('#iOut'); if(!f) return; e.target.value = '';
     out.innerHTML = '<div class="status"><span class="spin"></span>Leggo il file…</div>';
     let rows;
     try{
-      if(/\.xlsx?$/i.test(f.name)){ const X = await caricaXlsx(); const wb = X.read(await f.arrayBuffer(), {type: 'array'}); rows = X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, raw: false}).map(r => r.map(c => String(c ?? '').trim())); }
+      if(/\.xlsx?$/i.test(f.name)){ const X = await caricaXlsx(); const wb = X.read(await f.arrayBuffer(), {type: 'array', cellDates: true}); rows = X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, raw: true, defval: ''}); }
       else rows = leggiCsv(await f.text());
     }catch(err){ out.innerHTML = '<p class="err">Non riesco a leggere il file. Prova a salvarlo come CSV.</p>'; return; }
-    rows = rows.filter(r => r.some(Boolean));
-    if(rows.length && !/^\d+/.test(rows[0][0] || '')) rows.shift();
-    const err = [], ok = [];
-    rows.forEach((r, i) => { const g = parseInt(r[0], 10), c = byN.get(norm(r[1])), o = byN.get(norm(r[2]));
-      if(!g) err.push(`Riga ${i + 2}: manca il numero della giornata`);
-      else if(!c || !o) err.push(`Riga ${i + 2}: ${[!c && `“${r[1] || ''}”`, !o && `“${r[2] || ''}”`].filter(Boolean).join(' e ')} non ${!c && !o ? 'sono' : 'è'} nell’archivio squadre`);
-      else if(c.id === o.id) err.push(`Riga ${i + 2}: casa e ospite sono la stessa squadra`);
-      else ok.push({giornata: g, c, o}); });
-    if(!ok.length && !err.length){ out.innerHTML = '<p class="err">Il file è vuoto.</p>'; return; }
+    const {l, err, calcolate} = leggiCalendario(rows, teams);
     if(err.length){ out.innerHTML = `<div class="warn-box"><b>Da correggere prima di importare (${err.length}):</b><br>${err.slice(0, 15).map(esc).join('<br>')}${err.length > 15 ? '<br>…' : ''}</div><p class="note">Squadre in archivio: ${teams.map(q => esc(q.nome)).join(', ') || 'nessuna'}.</p>`; return; }
-    out.innerHTML = `<p class="note">${ok.length} partite in ${new Set(ok.map(x => x.giornata)).size} giornate.</p>${anteprima(ok.map(x => ({giornata: x.giornata, casa: x.c.nome, ospite: x.o.nome})))}<button class="btn btn-primary btn-block" id="iOk">Importa ${ok.length} partite</button>`;
-    root.querySelector('#iOk').onclick = async ev => { ev.target.disabled = true;
-      try{ await scriviTutto(ok.map(x => b => b.set(db().collection('partite').doc(), nuovaPar(cat, x.giornata, x.c, x.o)))); toast('Calendario importato'); close(); }
-      catch(e2){ ev.target.disabled = false; toast(fbErr(e2)); } };
+    if(!l.length){ out.innerHTML = '<p class="err">Il file è vuoto.</p>'; return; }
+    const piano = pianoCalendario(cat, l), nG = new Set(l.map(x => x.giornata)).size;
+    const nNuove = piano.filter(q => !q.ex).length, nAgg = piano.length - nNuove, nRis = piano.filter(q => q.ris).length, nArb = piano.filter(q => q.futura && !q.fatto && q.campo.impianto && (q.x.ora || (q.ex && q.ex.ora)) && !(q.ex && q.ex.desId) && !q.des).length, nLeg = piano.filter(q => q.des).length;
+    const campiNo = [...new Set(piano.filter(q => q.campoNonTrovato).map(q => q.x.luogo))];
+    const fuori = parDi(S.partite, cat).filter(p => !piano.some(q => q.ex && q.ex.id === p.id));
+    const giorni = [...new Set(l.map(x => x.giornata))].sort((a, b) => a - b);
+    out.innerHTML = `<div class="cal-sum"><p><b>${l.length}</b> partite in <b>${nG}</b> giornate${calcolate ? ' (giornate ricavate dalle date: controllale qui sotto)' : ''}.</p>
+      <ul>${nNuove ? `<li><b>${nNuove}</b> nuove</li>` : ''}${nAgg ? `<li><b>${nAgg}</b> già nell’app: aggiorno giornata, data, ora e campo</li>` : ''}${nRis ? `<li><b>${nRis}</b> risultati delle partite già giocate (contano in classifica)</li>` : ''}${nArb ? `<li><b>${nArb}</b> partite da oggi in poi vanno nell’app arbitri da designare</li>` : ''}${nLeg ? `<li><b>${nLeg}</b> ${nLeg === 1 ? 'era già' : 'erano già'} nell’app arbitri: le collego, senza doppioni (i referti arrivano nella partita)</li>` : ''}</ul>
+      ${campiNo.length ? `<p class="note">Campi non trovati nell’archivio (li scrivo così, senza mappa): ${campiNo.map(esc).join(', ')}.</p>` : ''}
+      ${fuori.length ? `<p class="note">${fuori.length === 1 ? 'Una partita dell’app non è' : fuori.length + ' partite dell’app non sono'} nel file: le lascio come sono.</p>` : ''}</div>
+      <div class="ante cal-ante">${giorni.map(g => `<div><b>${g}ª giornata</b>${piano.filter(q => q.x.giornata === g).sort((a, b) => ((a.x.data || '') + a.x.ora).localeCompare((b.x.data || '') + b.x.ora)).map(q => `<span><i>${q.x.data ? esc(fmt(q.x.data).slice(0, 5)) + (q.x.ora ? ' ' + esc(q.x.ora) : '') : ''}</i> ${esc(q.x.c.nome)} – ${esc(q.x.o.nome)}${q.x.gc != null ? ` <b>${q.x.gc}-${q.x.go}</b>` : ''}</span>`).join('')}</div>`).join('')}</div>
+      <button class="btn btn-primary btn-block" id="iOk">Importa ${l.length} partite</button>`;
+    root.querySelector('#iOk').onclick = async ev => { ev.target.disabled = true; ev.target.textContent = 'Importo…';
+      try{ await eseguiCalendario(cat, piano); toast('Calendario importato'); close(); }
+      catch(e2){ console.warn(e2); ev.target.disabled = false; ev.target.textContent = `Importa ${l.length} partite`; toast(e2.msg || fbErr(e2)); } };
   };
 }
 
