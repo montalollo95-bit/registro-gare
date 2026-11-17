@@ -571,9 +571,11 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .tb{display:flex;flex-direction:column;gap:10px}
 .tb-g{margin:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
 .tb-h{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;padding:4px 0}
-.tb-h .tm{overflow-wrap:break-word;hyphens:auto}
+.tb-h{align-items:start}.tb .tb-h div.tm,.tb .tb-h button.tm{padding-top:21px}
+/* nomi delle squadre: mai spezzati a metà parola; se non ci stanno il carattere si rimpicciolisce (fitNomi) */
+.par .m .tm > span:not(.stemma),.tb-h .tm > span:not(.stemma){align-self:stretch;overflow-wrap:normal;word-break:normal;hyphens:none}
 .tb-h .sc{padding:0 4px}
-@media (max-width:380px){.tb-h .tm{font-size:12px;letter-spacing:.02em}.tb-h .num{font-size:38px}.tlr{grid-template-columns:1fr 40px 1fr}.ev{font-size:13.5px}}
+@media (max-width:380px){.tb-h .tm{font-size:12px;letter-spacing:.02em}.tb .tb-h div.tm,.tb .tb-h button.tm{padding-top:18px}.tb-h .num{font-size:38px}.tlr{grid-template-columns:1fr 40px 1fr}.ev{font-size:13.5px}}
 .tb-h button.tm{background:none;border:0;padding:4px;border-radius:12px;cursor:pointer;font:inherit;font-weight:800;color:var(--fg)}
 .tb-h button.tm:hover{background:color-mix(in srgb,var(--fg) 6%,transparent)}
 .tb-note{text-align:center}
@@ -824,7 +826,15 @@ function segFerme(fn){
     const dove = l - pad < sx ? l - pad : l + b.offsetWidth + pad > sx + el.clientWidth ? l + b.offsetWidth + pad - el.clientWidth : null;
     if(dove != null){ if(prima.has(k)) el.scrollTo({left: dove, behavior: 'smooth'}); else el.scrollLeft = dove; } });
 }
-function render(){ segFerme(render_); bordiSeg(); }
+function render(){ segFerme(render_); bordiSeg(); fitNomi(); }
+/* nomi delle squadre nelle partite e nel tabellino: stessa grandezza per le due squadre, al massimo 2 righe, nessuna parola tagliata */
+function fitNomi(scope = document){
+  scope.querySelectorAll('.par .m, .tb-h').forEach(r => { const l = [...r.querySelectorAll('.tm > span:not(.stemma)')]; if(!l.length || !r.offsetParent) return;
+    l.forEach(x => x.style.fontSize = ''); const base = parseFloat(getComputedStyle(l[0]).fontSize); let fs = base;
+    const ok = () => l.every(x => { const lh = parseFloat(getComputedStyle(x).lineHeight) || fs * 1.25; return x.scrollWidth <= x.clientWidth + 1 && x.offsetHeight <= lh * 2 + 2; });
+    while(!ok() && fs > 9.5){ fs -= .5; l.forEach(x => x.style.fontSize = fs + 'px'); } });
+}
+addEventListener('resize', () => fitNomi());
 /* barre che scorrono di lato: col dito, con la rotellina del mouse e trascinando col mouse; sfumatura dove ci sono altre voci */
 function bordiSeg(el){ (el ? [el] : document.querySelectorAll('#app .seg')).forEach(x => { const m = x.scrollWidth - x.clientWidth, o = m > 2;
   x.classList.toggle('fa-s', o && x.scrollLeft > 2); x.classList.toggle('fa-d', o && x.scrollLeft < m - 2); }); }
@@ -1313,6 +1323,7 @@ function openTabellino(p, squadre){
     ${vuoto}${e.tav ? '' : corpo}
     ${premi.length && !e.tav ? `<div class="tb-pr">${premi.map(([i, t, x]) => `<div><span class="pi" aria-hidden="true">${i}</span><span><small>${t}</small><b>${esc(x.nome)}</b> · ${sqN(x.sq === 'ospite' ? 'ospite' : 'casa')}</span></div>`).join('')}</div>` : ''}
     </div><button class="btn btn-primary btn-block" id="tbSh">${ICO_SH} Condividi</button><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Tabellino', 'largo');
+  fitNomi(root); requestAnimationFrame(() => fitNomi(root));
   root.querySelector('#tbSh').onclick = () => shareDa('p', Object.keys(CAMP).find(k => CAMP[k].cat === p.camp) || 'futsal', {p});
   root.querySelectorAll('[data-tsq]').forEach(b => b.onclick = () => { close(); S.sqp = b.dataset.tsq; render(); window.scrollTo(0, 0); });
 }
