@@ -372,6 +372,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 #t-cognome,#t-nome{text-transform:uppercase}
 .cal-sum ul{margin:4px 0 8px;padding-left:20px;display:flex;flex-direction:column;gap:2px}.cal-sum p{margin:6px 0}.cal-ante span i{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:4px}
 .tgr{gap:8px}.tgr[hidden]{display:none}.tgr-h{display:flex;align-items:center;gap:10px;padding:6px 2px 0;min-width:0}.tgr-h .stemma{width:30px;height:30px;font-size:11px;border-radius:8px;margin:0;flex:none}.tgr-h b{font-family:var(--display);font-size:17px;letter-spacing:.03em;text-transform:uppercase;min-width:0;overflow-wrap:normal}.tgr-h .cnt{flex:none}.tgr-h .tgr-c{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.pfil{flex-wrap:wrap}.pfil button{flex:1 1 auto}.gtag{font-weight:700;color:var(--fg)}
 .imp-l{display:flex;flex-direction:column;gap:6px}.imp-n{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.imp-n .nm b{font-weight:800}.imp-n .nm{font-weight:500}.imp-sw{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;min-width:34px;height:28px;font-size:15px;line-height:1;cursor:pointer;padding:0 8px}.imp-av{background:color-mix(in srgb,#E8A33C 16%,transparent);border-radius:10px;padding:8px 10px}.imp-r{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip,var(--surface-2));cursor:pointer}.imp-r input{margin-top:3px;width:20px;height:20px;flex:none}.imp-r .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.imp-r .tx>span{font-size:13px;color:var(--muted)}.imp-r .pst{align-self:flex-start}.imp-r.dis{opacity:.55}
 .rhead{display:flex;align-items:center;gap:10px;min-width:0}.rhead>b{flex:1;min-width:0}.rhead .stemma{width:36px;height:36px;border-radius:10px;margin:0}
 .rp{display:flex;align-items:center;gap:8px}.rp .rtx{flex:1}.rtx{display:flex;flex-direction:column;min-width:0;gap:1px}.rtx span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
@@ -2288,14 +2289,29 @@ function adminPartite(){
   let g = S.pgio[cat]; if(!giorn.includes(g)) g = S.pgio[cat] = gioDefault(l, giorn);
   const lg = l.filter(p => +p.giornata === g).sort(ordPar);
   const daProg = l.filter(p => !p.data && p.stato !== 'rinviata').length;
+  /* filtri: valgono su tutte le giornate */
+  const fk = PFILTRI.some(([k]) => k === S.pfil) ? S.pfil : '', cnt = Object.fromEntries(PFILTRI.map(([k, , f]) => [k, l.filter(f).length]));
+  const lf = fk ? l.filter(PFILTRI.find(([k]) => k === fk)[2]).sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999') || (a.ora || '').localeCompare(b.ora || '') || (+a.giornata || 0) - (+b.giornata || 0)) : lg;
+  const item = (p, conG) => { const [k, t] = statoPar(p); return `<li><button class="item" data-par="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${conG ? `<b class="gtag">${esc(p.giornata)}ª giornata</b> · ` : ''}${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>${t.startsWith('Finale') ? '' : `<span class="pst ${k}">${esc(t)}</span>`}</span></button></li>`; };
   return seg + `<div class="row"><button class="btn btn-primary sm" data-cal="mano">+ Partita</button><button class="btn btn-ghost sm" data-cal="menu">Calendario…</button></div>
+    <div class="seg pfil" role="group" aria-label="Filtra le partite"><button data-pf="" aria-pressed="${!fk}">Tutte</button>${PFILTRI.map(([k, t]) => `<button data-pf="${k}" aria-pressed="${k === fk}">${t} <span class="cnt${cnt[k] && (k === 'des' || k === 'manca' || k === 'ris') ? ' hot' : ''}">${cnt[k]}</span></button>`).join('')}</div>
     <p class="note">${l.length} partite in ${giorn.length} giornate · ${daProg ? `<b>${daProg} senza data</b>` : 'tutte con la data'}. Appena una partita ha data, ora e campo passa da sola nell’app arbitri, pronta da designare.</p>
-    <div class="seg gior" role="tablist" aria-label="Giornate">${giorn.map(n => `<button data-pg="${n}" aria-pressed="${n === g}">${n}ª giornata</button>`).join('')}</div>
-    <ul class="list">${lg.map(p => { const [k, t] = statoPar(p); return `<li><button class="item" data-par="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>${t.startsWith('Finale') ? '' : `<span class="pst ${k}">${esc(t)}</span>`}</span></button></li>`; }).join('')}</ul>`;
+    ${fk ? `<p class="note"><b>${lf.length}</b> ${lf.length === 1 ? 'partita' : 'partite'} «${esc(PFILTRI.find(([k]) => k === fk)[1])}», di tutte le giornate, in ordine di data.</p>
+      ${lf.length ? `<ul class="list">${lf.map(p => item(p, true)).join('')}</ul>` : '<div class="empty"><h3>Nessuna partita</h3><span>Qui non c’è niente da fare.</span></div>'}`
+    : `<div class="seg gior" role="tablist" aria-label="Giornate">${giorn.map(n => `<button data-pg="${n}" aria-pressed="${n === g}">${n}ª giornata</button>`).join('')}</div>
+    <ul class="list">${lg.map(p => item(p, false)).join('')}</ul>`}`;
 }
+/* filtri delle partite (amministratore) */
+const giaGiocata = p => !!esito(p) || refNuovo(p) || refFatto(desDi(p));
+const PFILTRI = [
+  ['des', 'Da designare', p => ['Da designare', 'Da riprogrammare'].includes(statoPar(p)[1])],
+  ['manca', 'Manca data, ora o campo', p => !giaGiocata(p) && (!p.data || !p.ora || !p.impianto)],
+  ['ris', 'Senza risultato', p => !!p.data && p.data < oggi() && p.stato !== 'rinviata' && !giaGiocata(p)],
+  ['rinv', 'Rinviate', p => p.stato === 'rinviata' || !!p.rigiocare]];
 function bindPartite(app){
   app.querySelectorAll('[data-pc]').forEach(b => b.onclick = () => { S.pcat = b.dataset.pc; render(); });
   app.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { S.pgio[S.pcat] = +b.dataset.pg; render(); });
+  app.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { S.pfil = b.dataset.pf; render(); });
   app.querySelectorAll('[data-par]').forEach(b => b.onclick = () => openPartita(S.partite.find(p => p.id === b.dataset.par)));
   app.querySelectorAll('[data-cal]').forEach(b => b.onclick = () => ({file: openImporta, gen: openGenera, mano: () => openPartita({camp: S.pcat, giornata: S.pgio[S.pcat] || 1}), menu: openCalMenu})[b.dataset.cal]());
   const sel = app.querySelector('.gior [aria-pressed=true]'); if(sel) sel.scrollIntoView({block: 'nearest', inline: 'center'});
@@ -3553,7 +3569,7 @@ async function shGiornata(cat, g, lg, fmtI, riposa){
     const nw = W / 2 - 76 - cs - 18 - 110;
     shTxt(ctx, (p.casa || '').toUpperCase(), 76 + cs + 18, cy + fs * .36, nw, 'D', 800, fs, '#fff', 'left', 16);
     shTxt(ctx, (p.ospite || '').toUpperCase(), W - 76 - cs - 18, cy + fs * .36, nw, 'D', 800, fs, '#fff', 'right', 16);
-    if(e) shTxt(ctx, `${e.gc} - ${e.go}`, W / 2, cy + fs * .5, 200, 'D', 800, fs * 1.4, e.tav ? '#FF8A8F' : SH_GIALLO, 'center');
+    if(e) shTxt(ctx, `${e.gc} - ${e.go}`, W / 2, cy + fs * .5, 200, 'D', 800, fs * 1.4, e.tav ? '#FF8A8F' : '#fff', 'center');
     else { const a = p.stato === 'rinviata' ? 'RINVIATA' : p.rigiocare && !p.data ? 'DA RIGIOCARE' : p.data ? (p.ora || '--:--') : 'DA DEFINIRE', b = p.data && p.stato !== 'rinviata' ? giornoCorto(p.data) : '';
       shTxt(ctx, a, W / 2, cy + (b ? -2 : fs * .36), 190, 'D', 800, b ? fs * 1.05 : fs * .75, p.stato === 'rinviata' ? '#FF8A8F' : B.acc, 'center', 12);
       if(b) shTxt(ctx, b, W / 2, cy + fs * .95, 190, 'B', 600, fs * .62, SH_MUTO, 'center'); } }
@@ -3615,7 +3631,7 @@ async function shComunicato(c, fmtI){
       for(const r of z.r || []){ if(y + rh > fine){ pieno = true; break; } const h = rh - (story ? 10 : 7), cy = y + h / 2; shBar(ctx, 50, y, W - 100, h);
         ctx.font = SHF.B(700, fs * .9); const bw = r.b ? Math.min(ctx.measureText(r.b).width + 30, W * .42) : 0, ris = z.liv === 1;
         shTxt(ctx, ris ? (r.a || '').toUpperCase() : r.a || '', 76, cy + fs * .36, W - 152 - bw, ris ? 'D' : 'B', ris ? 800 : 700, fs * (ris ? 1 : .86), '#fff', 'left', 14);
-        if(r.b) shTxt(ctx, r.b, W - 76, cy + fs * .36, W * .42, ris ? 'D' : 'B', ris ? 800 : 600, fs * (ris ? 1.05 : .8), ris ? SH_GIALLO : SH_MUTO, 'right', 12);
+        if(r.b) shTxt(ctx, r.b, W - 76, cy + fs * .36, W * .42, ris ? 'D' : 'B', ris ? 800 : 600, fs * (ris ? 1.05 : .8), ris ? '#fff' : SH_MUTO, 'right', 12);
         y += rh; }
       if(!(z.r || []).length && z.vuoto && z.liv === 1){ shTxt(ctx, z.vuoto, W / 2, y + fs * .8, W - 160, 'B', 600, fs * .85, SH_MUTO, 'center'); y += fs * 1.4; }
       y += fs * .4; }
