@@ -2576,8 +2576,14 @@ const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.
 let jspP = null;
 const caricaJsPdf = () => jspP || (jspP = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = JSPDF; sc.onload = () => res(window.jspdf.jsPDF); sc.onerror = () => { jspP = null; rej(new Error('net')); }; document.head.appendChild(sc); }));
 const imgData = src => new Promise(res => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'), k = Math.min(1, 240 / Math.max(i.naturalWidth, i.naturalHeight)); c.width = Math.round(i.naturalWidth * k); c.height = Math.round(i.naturalHeight * k); const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(i, 0, 0, c.width, c.height); try{ res(c.toDataURL('image/jpeg', .9)); }catch(e){ res(null); } }; i.onerror = () => res(null); i.src = src; });
+/* filigrana del PDF: lo sfondo della pagina iniziale, appena appena visibile */
+const FILI_VELO = .91;
+let filiP = null;
+const filigrana = () => filiP || (filiP = new Promise(res => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'); c.width = 1000; c.height = 1414; const x = c.getContext('2d'), k = Math.max(c.width / i.naturalWidth, c.height / i.naturalHeight), w = i.naturalWidth * k, h = i.naturalHeight * k;
+  x.drawImage(i, (c.width - w) / 2, 0, w, h); x.fillStyle = `rgba(255,255,255,${FILI_VELO})`; x.fillRect(0, 0, c.width, c.height); try{ res(c.toDataURL('image/jpeg', .82)); }catch(e){ res(null); } }; i.onerror = () => res(null); i.src = '../sfondo-avvio.jpg'; }));
 async function pdfGS(c){
   const J = await caricaJsPdf(), d = new J({unit: 'mm', format: 'a4'}), W = 210, M = 18, L = W - 2 * M; let y = 18;
+  const fili = await filigrana(), sotto = () => { if(fili) d.addImage(fili, 'JPEG', 0, 0, 210, 297); }; sotto();
   /* i caratteri che il PDF semplice non ha: meno, emoji */
   const pt = t => String(t == null ? '' : t).replace(/[−‐‑]/g, '-').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\uFE0F]/gu, ''), tx = d.text.bind(d), sp = d.splitTextToSize.bind(d);
   d.text = (t, ...a) => tx(Array.isArray(t) ? t.map(pt) : pt(t), ...a); d.splitTextToSize = (t, ...a) => sp(pt(t), ...a);
@@ -2586,7 +2592,7 @@ async function pdfGS(c){
   d.setFont('helvetica', 'normal'); d.setFontSize(11); d.text(`${(NOMECAMP[c.camp] || '').toUpperCase()} · Stagione ${c.stagione || STAG}`, W / 2, y + 8, {align: 'center'});
   y += 22; d.setFont('helvetica', 'bold'); d.setFontSize(14); d.text(`COMUNICATO UFFICIALE N. ${c.numero} del ${fmt(c.data)}`, W / 2, y, {align: 'center'});
   y += 4; d.setLineWidth(.4); d.line(M, y, W - M, y); y += 9;
-  const posto = h => { if(y + h > 278){ d.addPage(); y = 20; } };
+  const posto = h => { if(y + h > 278){ d.addPage(); sotto(); y = 20; } };
   gsSez(c).forEach(x => {
     if(x.liv === 1){ posto(16); d.setFont('helvetica', 'bold'); d.setFontSize(12); d.text(x.t.toUpperCase(), M, y); y += 7; }
     else { posto(13); d.setFont('helvetica', 'bold'); d.setFontSize(10.5); d.text(x.t, M + 3, y); y += 5.5; }
