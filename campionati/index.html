@@ -368,7 +368,8 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .tbtn{gap:6px;flex-wrap:nowrap}.tbtn .btn{flex:1 1 auto;white-space:nowrap;padding-left:8px;padding-right:8px}
 .avv{color:#B5650B !important;font-weight:700}
 .tstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tstat div{background:var(--chip,var(--surface-2));border-radius:12px;padding:8px 4px;text-align:center;display:flex;flex-direction:column;gap:2px}.tstat b{font-family:var(--display);font-size:22px;line-height:1}.tstat span{font-size:11.5px;color:var(--muted);line-height:1.15}
-.imp-l{display:flex;flex-direction:column;gap:6px}.imp-r{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip,var(--surface-2));cursor:pointer}.imp-r input{margin-top:3px;width:20px;height:20px;flex:none}.imp-r .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.imp-r .tx>span{font-size:13px;color:var(--muted)}.imp-r .pst{align-self:flex-start}.imp-r.dis{opacity:.55}
+#t-cognome,#t-nome{text-transform:uppercase}
+.imp-l{display:flex;flex-direction:column;gap:6px}.imp-n{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.imp-n .nm b{font-weight:800}.imp-n .nm{font-weight:500}.imp-sw{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;min-width:34px;height:28px;font-size:15px;line-height:1;cursor:pointer;padding:0 8px}.imp-av{background:color-mix(in srgb,#E8A33C 16%,transparent);border-radius:10px;padding:8px 10px}.imp-r{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--chip,var(--surface-2));cursor:pointer}.imp-r input{margin-top:3px;width:20px;height:20px;flex:none}.imp-r .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.imp-r .tx>span{font-size:13px;color:var(--muted)}.imp-r .pst{align-self:flex-start}.imp-r.dis{opacity:.55}
 .rhead{display:flex;align-items:center;gap:10px;min-width:0}.rhead>b{flex:1;min-width:0}.rhead .stemma{width:36px;height:36px;border-radius:10px;margin:0}
 .rp{display:flex;align-items:center;gap:8px}.rp .rtx{flex:1}.rtx{display:flex;flex-direction:column;min-width:0;gap:1px}.rtx span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
 .rper{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid var(--line, rgba(127,127,127,.2))}.rcard .rper:first-of-type{border-top:0;padding-top:0}
@@ -1647,7 +1648,7 @@ function openTess(t){
   $('#tForm').onsubmit = async e => {
     e.preventDefault(); const v = id => $('#t-' + id).value.trim();
     const q = S.admin ? sqById($('#t-sq').value) : {id: t.squadraId, nome: t.squadra, categoria: t.categoria};
-    const o = {cognome: v('cognome'), nome: v('nome'), dataNascita: v('dataNascita'), luogoNascita: v('luogoNascita'), ruolo: v('ruolo'), numero: v('numero'), documento: v('documento'),
+    const o = {cognome: maiusc(v('cognome')), nome: maiusc(v('nome')), dataNascita: v('dataNascita'), luogoNascita: v('luogoNascita'), ruolo: v('ruolo'), numero: v('numero'), documento: v('documento'),
       tesseraAics: v('tesseraAics'), foto, squadraId: q.id, squadra: q.nome || '', categoria: q.categoria || ''};
     if(o.dataNascita > oggi()){ toast('Controlla la data di nascita'); return; }
     const cat = o.categoria;
@@ -1759,15 +1760,15 @@ const isoDi = (v, seriale) => {
   return '';
 };
 const ruoloDi = t => /port/i.test(t) ? 'Portiere' : /allen|mister|tecnic/i.test(t) ? 'Allenatore' : /dirig|accomp|massag|medic|prepar|team/i.test(t) ? 'Dirigente' : 'Giocatore';
-const IMPK = [['luogo', /luogo|comune|citt[aà]/], ['tessera', /tessera|^tess\b|n\.?\s*tess/], ['documento', /documento|^doc\b/], ['nominativo', /nominativo|cognome\s*(e|\/|-)\s*nome|^atleta|^tesserato/], ['cognome', /cognome/], ['nome', /^nome\b|\bnome$/], ['data', /nascita|^nato|^data\b|^d\.?\s*n\.?$/], ['ruolo', /ruolo|qualifica|mansione/], ['numero', /maglia/]];
+const IMPK = [['luogo', /luogo|comune|citt[aà]/], ['tessera', /tessera|^tess\b|n\.?\s*tess/], ['documento', /documento|^doc\b/], ['nominativo', /nominativo|cognome\s*(e|\/|-)\s*nome|nome\s*(e|\/|-)\s*cognome|nome\s+del\s+(giocatore|tesserato|calciatore|atleta)|^atleta|^tesserato|^giocator[ei]$|^calciator[ei]$/], ['cognome', /cognome/], ['nome', /^nome\b|\bnome$/], ['data', /nascita|^nato|^data\b|^d\.?\s*n\.?$/], ['ruolo', /ruolo|qualifica|mansione/], ['numero', /maglia/]];
 function leggiTess(rows){
   const hx = rows.map(r => (r || []).map(c => c && typeof c === 'object' && 'x' in c ? c.x : null));
   rows = rows.map(r => (r || []).map(c => c instanceof Date ? c : NRM(c && typeof c === 'object' && 'v' in c ? c.v : c)));
   let map = null, hi = -1;
   for(let i = 0; i < Math.min(rows.length, 25) && !map; i++){ const m = {};
     rows[i].forEach((c, j) => { const t = String(c).toLowerCase(); if(!t || t.length > 40) return; const k = IMPK.find(([k, re]) => !(k in m) && re.test(t)); if(k) m[k[0]] = j; });
-    if(('cognome' in m || 'nominativo' in m) && Object.keys(m).length >= 2){ map = m; hi = i; } }
-  const nomi = (o, full) => { const w = NRM(full).split(/\s+/).filter(Boolean); if(w.length < 2){ o.cognome = w[0] || ''; o.nome = ''; } else { o.nome = w.pop(); o.cognome = w.join(' '); } };
+    if(('cognome' in m || 'nominativo' in m) && (Object.keys(m).length >= 2 || 'nominativo' in m)){ map = m; hi = i; } }
+  const nomi = (o, full) => { o._full = NRM(full); o.cognome = o._full; o.nome = ''; };
   const out = [];
   /* PDF: ogni casella va nella colonna dell'intestazione più vicina */
   if(map && hx[hi].every(x => x != null)){ const H = hx[hi];
@@ -1794,8 +1795,32 @@ function leggiTess(rows){
     if(!/[A-Za-zÀ-ÿ]/.test(o.cognome) || /^(totale|pagina|squadra|elenco)\b/i.test(o.cognome)) return;
     out.push(o);
   });
+  dividiNomi(out);
+  out.forEach(o => { o.cognome = maiusc(o.cognome); o.nome = maiusc(o.nome); });
   return out;
 }
+/* nomi di battesimo più comuni: servono a capire se una riga è "Nome Cognome" o "Cognome Nome" */
+const NOMIB = new Set(('alessandro alessio alex alin andrea angelo antonio arlind armando arsim bogdan biagio bruno carlo carmine carmelo christian ciro claudio cosimo cristian cristiano daniel daniele dario davide denis diego dino domenico donato edoardo elia emanuele emiliano enrico enzo ettore fabio fabrizio federico filippo flavio francesco franco gabriel gabriele gaetano gennaro gerardo gheorghe giacomo gianluca gianni gioacchino giorgio giovanni giulio giuseppe gregorio hamza ivan jacopo julian kevin lauro leonardo lorenzo luca luciano luigi manuel marco mario marian massimo matteo mattia maurizio michele mihai mirko mohamed mohammed nicola nicolas nicolò niccolò omar paolo patrick pasquale pier pierluigi piero pietro radu raffaele riccardo roberto rocco salvatore samuele sebastiano sergio simion simone stefano teodoro tommaso valentino valerio vincenzo vladut vlad youssef abdalah abdallah ahmed ali amine ayoub bilal hassan ibrahim karim mehdi samir yassine ion andrei florin ionut cristi adrian marius stefan alexandru ciprian costel dorin dumitru eugen sorin bekim besnik ervin erion klodian mario elvis fatjon gentian'). split(' '));
+const PARTIC = /^(de|di|da|del|della|dello|dei|degli|la|lo|le|li|van|von|el|al|d'|mac|mc|dos|das)$/i;
+function dividiNomi(l){
+  const w = o => o._full.split(/\s+/).filter(Boolean), isN = x => NOMIB.has(x.toLowerCase());
+  /* che ordine usa il file? conto le righe dove si capisce */
+  let nc = 0, cn = 0; l.forEach(o => { if(!o._full) return; const p = w(o); if(p.length < 2) return; const a = isN(p[0]), b = isN(p[p.length - 1]);
+    if(a && !b) nc++; else if(b && !a) cn++; });
+  const preferNC = nc > cn;
+  l.forEach(o => { if(!o._full) return; const p = w(o); delete o._full; if(p.length < 2){ o.cognome = p[0] || ''; o.nome = ''; return; }
+    const a = isN(p[0]), b = isN(p[p.length - 1]), nc1 = a && !b ? true : b && !a ? false : preferNC;
+    if(nc1){ let k = 1; while(k < p.length - 1 && isN(p[k]) && !PARTIC.test(p[k])) k++; o.nome = p.slice(0, k).join(' '); o.cognome = p.slice(k).join(' '); }
+    else { let k = p.length - 1; while(k > 1 && isN(p[k - 1]) && !PARTIC.test(p[k - 2] || '')) k--; o.cognome = p.slice(0, k).join(' '); o.nome = p.slice(k).join(' '); }
+    o.dubbio = !(a !== b); });
+}
+/* cognome e nome dei tesserati sempre in MAIUSCOLO */
+const maiusc = t => NRM(t).replace(/\s+/g, ' ').toUpperCase();
+/* nome della squadra scritto nel file (es. il titolo del PDF) */
+const squadraNelFile = (rows, cat) => { const k = t => String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), sq = squadreCat(cat);
+  for(const r of rows.slice(0, 12)){ const t = k((r || []).map(c => c && typeof c === 'object' && 'v' in c ? c.v : c).join(' ')); if(t.length < 3) continue;
+    const f = sq.find(q => k(q.nome) === t); if(f) return f; }
+  return null; };
 function openImportaTess(sqId){
   caricaXlsx().catch(() => {});
   const {root, close} = sheet(`<form class="form" id="imF"><h3 style="grid-column:1/-1">Importa tesserati</h3>
@@ -1806,22 +1831,26 @@ function openImportaTess(sqId){
     <div class="actions"><button class="btn btn-primary" id="imGo">Leggi il file</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div></form>`, 'Importa tesserati');
   root.querySelector('#imF').onsubmit = async e => { e.preventDefault(); const q = S.admin ? sqById(root.querySelector('#im-sq').value) : {...sqById(sqId), id: sqId, nome: sqById(sqId).nome || S.resp.squadra, categoria: sqById(sqId).categoria || S.resp.categoria}, file = root.querySelector('#im-f').files[0], er = root.querySelector('#imErr'), bt = root.querySelector('#imGo');
     if(!q.id || !file) return; bt.disabled = true; er.textContent = ''; bt.textContent = 'Leggo…';
-    try{ const l = leggiTess(await righeDaFile(file));
-      if(!l.length){ er.textContent = 'Non ho trovato tesserati nel file: su ogni riga servono almeno cognome, nome e data di nascita.'; bt.disabled = false; bt.textContent = 'Leggi il file'; return; }
+    try{ const rows = await righeDaFile(file), l = leggiTess(rows), sf = S.admin && squadraNelFile(rows, q.categoria);
+      if(sf && sf.id !== q.id && l.length){ root.querySelector('#im-sq').value = sf.id; er.textContent = `Questo file è di ${sf.nome}, non di ${q.nome}: ho scelto ${sf.nome}. Controlla e premi di nuovo “Leggi il file”.`; bt.disabled = false; bt.textContent = 'Leggi il file'; return; }
+      if(!l.length){ er.textContent = S.admin ? 'Non ho trovato tesserati nel file: serve almeno una colonna con cognome e nome (meglio anche la data di nascita).' : 'Non ho trovato tesserati nel file: su ogni riga servono almeno cognome, nome e data di nascita.'; bt.disabled = false; bt.textContent = 'Leggi il file'; return; }
       anteprimaImport(q, l, file.name); }
     catch(err){ console.warn(err); er.textContent = err.message === 'net' ? 'Serve internet per leggere questo tipo di file.' : 'Non riesco a leggere questo file. Prova a salvarlo come Excel o CSV.'; bt.disabled = false; bt.textContent = 'Leggi il file'; }
   };
 }
+const nomeImp = o => `<b>${esc(o.cognome)}</b>${o.nome ? ' ' + esc(o.nome) : ''}`;
 function anteprimaImport(q, l, nomeFile){
-  const cat = q.categoria, L = limDi(cat), visti = new Set();
+  const cat = q.categoria, L = limDi(cat), visti = new Set(), senzaDate = S.admin && !l.some(o => o.dataNascita);
   l.forEach(o => { const k = lc(o.cognome) + '|' + lc(o.nome) + '|' + o.dataNascita; o.ok = true; o.dis = false; o.pb = '';
     const qui = S.tess.find(x => x.squadraId === q.id && stessa(x, o) && statoT(x) !== 'scaduto'), alt = S.tess.find(x => x.squadraId !== q.id && stessa(x, o) && statoT(x) !== 'scaduto');
     if(visti.has(k)){ o.dis = true; o.pb = 'Doppione nel file'; } else if(qui){ o.dis = true; o.pb = 'Già in questa squadra'; }
-    else if(alt){ o.ok = false; o.pb = 'Già tesserato con ' + alt.squadra; } else if(!o.dataNascita){ o.ok = false; o.dis = !S.admin; o.pb = 'Manca la data di nascita'; }
+    else if(alt){ o.ok = false; o.pb = 'Già tesserato con ' + alt.squadra; } else if(!o.dataNascita){ o.ok = senzaDate; o.dis = !S.admin; o.pb = senzaDate ? '' : 'Manca la data di nascita'; }
     else if(troppoGiovane(o, cat)){ o.ok = false; o.dis = !S.admin; o.pb = 'Troppo giovane'; }
     if(o.dis) o.ok = false; visti.add(k); });
   const {root, close} = sheet(`<h3>Importa in ${esc(q.nome)}</h3><p class="note">Ho letto <b>${l.length}</b> ${l.length === 1 ? 'tesserato' : 'tesserati'} da ${esc(nomeFile)}. Togli la spunta a chi non vuoi importare: dopo potrai correggere e aggiungere la foto dalla scheda di ognuno.</p>
-    <div class="imp-l">${l.map((o, i) => `<label class="imp-r${o.dis ? ' dis' : ''}"><input type="checkbox" data-ii="${i}" ${o.ok ? 'checked' : ''} ${o.dis ? 'disabled' : ''}><span class="tx"><b>${esc(nomeT(o))}</b><span>${[o.dataNascita ? 'nato il ' + fmt(o.dataNascita) : '', o.luogoNascita, o.ruolo, o.numero ? 'n. ' + o.numero : '', o.tesseraAics ? 'tessera ' + o.tesseraAics : ''].filter(Boolean).map(esc).join(' · ')}</span>${o.pb ? `<span class="pst ${o.dis ? '' : 'no'}">${esc(o.pb)}</span>` : ''}</span></label>`).join('')}</div>
+    ${senzaDate ? '<p class="note imp-av">Nel file non ci sono le date di nascita: importo solo cognome e nome. Le date si aggiungono dopo dalla scheda di ognuno (anche dal responsabile della squadra).</p>' : ''}
+    ${l.some(o => o.nome) ? '<p class="note">In <b>grassetto</b> il cognome. Se ho invertito nome e cognome tocca <b>⇄</b>.</p>' : ''}
+    <div class="imp-l">${l.map((o, i) => `<label class="imp-r${o.dis ? ' dis' : ''}"><input type="checkbox" data-ii="${i}" ${o.ok ? 'checked' : ''} ${o.dis ? 'disabled' : ''}><span class="tx"><span class="imp-n"><span class="nm">${nomeImp(o)}</span>${o.nome ? `<button type="button" class="imp-sw" data-sw="${i}" aria-label="Inverti nome e cognome">⇄</button>` : ''}</span><span>${[o.dataNascita ? 'nato il ' + fmt(o.dataNascita) : '', o.luogoNascita, o.ruolo, o.numero ? 'n. ' + o.numero : '', o.tesseraAics ? 'tessera ' + o.tesseraAics : ''].filter(Boolean).map(esc).join(' · ')}</span>${o.pb ? `<span class="pst ${o.dis ? '' : 'no'}">${esc(o.pb)}</span>` : ''}</span></label>`).join('')}</div>
     <p class="note" id="imCnt"></p>
     <label class="check"><input type="checkbox" id="im-ok"><span>La società ha raccolto il consenso dei tesserati (o dei genitori, se minorenni) all’uso dei dati per il torneo AICS.</span></label>
     <div class="err" id="imErr" role="alert"></div>
@@ -1831,6 +1860,7 @@ function anteprimaImport(q, l, nomeFile){
     root.querySelector('#imCnt').innerHTML = `Da importare: <b>${sc.length}</b>.${L.max ? ` In squadra diventano <b${over ? ' style="color:var(--danger,#D0342C)"' : ''}>${dopo} su ${L.max}</b>${L.soloGioc ? ' (solo giocatori)' : ''}${over ? ': oltre il massimo' : ''}.` : ''}`;
     const lb = S.admin ? 'Importa e approva' : 'Invia all’amministratore'; root.querySelector('#imGo').textContent = sc.length ? `${lb} (${sc.length})` : lb; return {sc, over, dopo}; };
   root.querySelectorAll('[data-ii]').forEach(x => x.onchange = cnt); cnt();
+  root.querySelectorAll('[data-sw]').forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const o = l[+b.dataset.sw]; [o.cognome, o.nome] = [o.nome, o.cognome]; b.previousElementSibling.innerHTML = nomeImp(o); });
   root.querySelector('#imGo').onclick = async () => { const {sc, over, dopo} = cnt(), er = root.querySelector('#imErr');
     if(!sc.length){ er.textContent = 'Non hai scelto nessun tesserato'; return; }
     if(!root.querySelector('#im-ok').checked){ er.textContent = 'Conferma il consenso al trattamento dei dati'; return; }
@@ -1838,7 +1868,7 @@ function anteprimaImport(q, l, nomeFile){
     if(over && !confirm(`${q.nome} arriva a ${dopo} tesserati: il massimo è ${L.max}. Importare lo stesso?`)) return;
     const bt = root.querySelector('#imGo'); bt.disabled = true; bt.textContent = 'Importo…';
     try{ for(let i = 0; i < sc.length; i += 400){ const b = db().batch();
-        sc.slice(i, i + 400).forEach(o => { const {ok, dis, pb, ...d} = o, t = {...d, foto: '', squadraId: q.id, squadra: q.nome || '', categoria: cat || ''};
+        sc.slice(i, i + 400).forEach(o => { const {ok, dis, pb, dubbio, ...d} = o, t = {...d, foto: '', squadraId: q.id, squadra: q.nome || '', categoria: cat || ''};
           b.set(db().collection('tesserati').doc(), {...t, ...(S.admin ? approva(t) : {stato: 'attesa', motivo: ''}), consenso: true, importato: true, creatoDa: S.user.uid, createdAt: Date.now()}); });
         await b.commit(); }
       toast(S.admin ? `Importati ${sc.length} tesserati in ${q.nome}` : `Inviati ${sc.length} tesserati all’amministratore`); close(); }
