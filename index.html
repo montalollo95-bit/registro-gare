@@ -3495,7 +3495,7 @@ function openDs(id){
   };
   root.querySelectorAll('[data-unl]').forEach(b => b.onclick = async () => {
     if(!confirm('Sbloccare il referto? L’arbitro potrà correggerlo e reinviarlo, poi si blocca di nuovo.')) return;
-    try{ await firebase.firestore().collection('designazioni').doc(id).update({[`referti.${b.dataset.unl}.sbloccato`]: true}); toast('Referto sbloccato: l’arbitro può correggerlo'); close(); }catch(err){ toast(fbErr(err)); }
+    try{ await firebase.firestore().collection('designazioni').doc(id).update({[`referti.${b.dataset.unl}.sbloccato`]: true, updatedAt: Date.now()}); toast('Referto sbloccato: l’arbitro può correggerlo'); close(); }catch(err){ toast(fbErr(err)); }
   });
   root.querySelectorAll('[data-ref]').forEach(b => b.onclick = () => {
     const r = d.referti[b.dataset.ref], txt = refText(d, r.referto || {}), rb = root.querySelector('#dsRefBox');

@@ -59,22 +59,27 @@ async function eliminazioni() {
 // Le partite dei campionati NON vengono lette: quello che è già stato scritto è annotato in notifiche/_arbitri
 // (partita → nome dell'arbitro + giorno e ora della gara) e si scrive nella partita solo quando qualcosa cambia.
 // Giorno e ora servono perché l'app arbitri, se la gara viene rinviata, cancella da sola il nome nella partita.
-async function arbitriPubblici(desSnap, adesso, memDoc) {
-  const voglio = {};
-  desSnap.forEach(x => {
-    const d = x.data(); if (!d.partitaId || !d.data || !d.ora || d.annullata) return;
+// Si occupa solo delle designazioni lette in questo giro (e di quelle cancellate): le partite delle designazioni
+// chiuse, che non vengono più lette, restano come sono. Con tutte=true (giro completo) si occupa di tutto.
+async function arbitriPubblici(desDocs, adesso, memDoc, cancellate, tutte) {
+  const voglio = {}, lette = new Set(), partiteLette = new Set();
+  desDocs.forEach(x => {
+    const d = x.data(); lette.add(x.id); if (d.partitaId) partiteLette.add(d.partitaId);
+    if (!d.partitaId || !d.data || !d.ora || d.annullata) return;
     if (adesso < minuti(d.data, d.ora) - 48 * 60) return;
     const u = (d.ufficiali || []).find(u => (u.ruolo || 'Arbitro') === 'Arbitro') || (d.ufficiali || [])[0];
     const r = u && (d.risposte || {})[u.uid];
-    if (u && r && r.stato === 'accettata' && u.nome) voglio[d.partitaId] = {n: u.nome, k: d.data + ' ' + d.ora};
+    if (u && r && r.stato === 'accettata' && u.nome) voglio[d.partitaId] = {n: u.nome, k: d.data + ' ' + d.ora, d: x.id};
   });
+  const gestita = (id, e) => tutte || id in voglio || partiteLette.has(id) || (e && e.d && (lette.has(e.d) || cancellate.has(e.d)));
   let ora = memDoc ? {...(memDoc.partite || {})} : null;
   if (!ora) { // solo la prima volta: legge quali nomi sono già scritti nelle partite, poi non le legge più
     ora = {}; (await db.collection('partite').where('arbitro', '>', '').get()).forEach(p => { ora[p.id] = {n: p.data().arbitro, k: ''}; });
   }
   const prima = JSON.stringify(ora);
-  const cambi = [...new Set([...Object.keys(voglio), ...Object.keys(ora)])]
+  const cambi = [...new Set([...Object.keys(voglio), ...Object.keys(ora)])].filter(id => gestita(id, ora[id]))
     .filter(id => !voglio[id] ? !!(ora[id] && ora[id].n) : !ora[id] || ora[id].n !== voglio[id].n || ora[id].k !== voglio[id].k);
+  for (const id of Object.keys(voglio)) if (ora[id] && ora[id].d !== voglio[id].d && !cambi.includes(id)) ora[id] = voglio[id]; // annota a quale designazione appartiene
   for (const id of cambi) {
     const nome = voglio[id] ? voglio[id].n : '';
     if (DRY) { console.log(`  [prova] partita ${id}: arbitro “${nome}”`); continue; }
@@ -90,24 +95,55 @@ async function arbitriPubblici(desSnap, adesso, memDoc) {
   if (!DRY && (!memDoc || JSON.stringify(ora) !== prima)) await db.collection('notifiche').doc('_arbitri').set({partite: ora, at: Date.now()});
 }
 
+// Partita chiusa: già giocata e con il referto inviato da ogni arbitro (ruolo "Arbitro"), tranne chi l'ha rifiutata.
+// Chi non ha ancora risposto la tiene aperta (può accettare in ritardo e poi mandare il referto).
+// Da quel momento non si legge più. Se il designatore sblocca il referto, l'app scrive updatedAt e la partita si riapre.
+function chiusa(d, adesso) {
+  if (!d.data || adesso < minuti(d.data, d.ora || '23:59')) return false;
+  if (d.annullata) return true;
+  const arb = (d.ufficiali || []).filter(u => u && u.uid && (u.ruolo || 'Arbitro') === 'Arbitro' && ((d.risposte || {})[u.uid] || {}).stato !== 'rifiutata');
+  return arb.every(u => { const r = (d.referti || {})[u.uid]; return !!r && !r.sbloccato; });
+}
+
 async function main() {
   await eliminazioni();
   const now = oraRoma(), adesso = minuti(now.data, now.ora);
-  const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap, indSnap, elSnap] = await Promise.all([...['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi', 'indisponibilita'].map(c => db.collection(c).get()), db.collection('elenco').doc('arbitri').get()]);
-  const stati = {}; statiSnap.forEach(s => { stati[s.id] = s.data(); });
-  const meta = stati._meta; delete stati._meta;
-  const memArbitri = stati._arbitri || null; delete stati._arbitri;
-  try { await arbitriPubblici(desSnap, adesso, memArbitri); } catch (e) { console.log('  ! arbitri nelle partite non aggiornati:', e.message); }
+  const notif = db.collection('notifiche'), desCol = db.collection('designazioni');
+  const [arbSnap, tokSnap, accSnap, elSnap, metaDoc, memDoc] = await Promise.all([...['arbitri', 'tokens', 'accessi'].map(c => db.collection(c).get()),
+    db.collection('elenco').doc('arbitri').get(), notif.doc('_meta').get(), notif.doc('_arbitri').get()]);
+  const meta = metaDoc.exists ? metaDoc.data() : null, memArbitri = memDoc.exists ? memDoc.data() : null;
   const zitto = !meta; // primo giro: registra com'è la situazione senza mandare niente
+  const av = accSnap.docs.find(a => a.id === '_avvio');
+  // Giro completo (legge tutto, come prima): il primo giro in assoluto, il primo con questa versione e la correzione una tantum degli accessi.
+  // Negli altri giri legge solo le designazioni ancora aperte.
+  const completo = !meta || !Array.isArray(meta.seguite) || !!(av && !av.data().corretto);
+  const daDove = meta && meta.ultimoGiro ? meta.ultimoGiro - 30 * 60 * 1000 : 0; // 30 minuti di margine per gli orologi dei telefoni
+  const stati = {}, cancellate = new Set();
+  let desDocs;
+  if (completo) {
+    const [dS, sS] = await Promise.all([desCol.get(), notif.get()]);
+    desDocs = dS.docs; sS.forEach(s => { if (!s.id.startsWith('_')) stati[s.id] = s.data(); });
+  } else {
+    // oggi e future, senza data, modificate dall'ultimo giro (anche referto sbloccato)
+    const qs = await Promise.all([desCol.where('data', '>=', now.data).get(), desCol.where('data', '==', '').get(), desCol.where('updatedAt', '>', daDove).get()]);
+    const per = new Map(); qs.forEach(q => q.forEach(d => per.set(d.id, d)));
+    // quelle seguite nel giro prima che non sono uscite qui: giocate senza referto, oppure cancellate
+    const resto = meta.seguite.filter(id => !per.has(id));
+    if (resto.length) (await db.getAll(...resto.map(id => desCol.doc(id)))).forEach(d => { if (d.exists) per.set(d.id, d); else cancellate.add(d.id); });
+    desDocs = [...per.values()];
+    const ids = [...per.keys(), ...cancellate];
+    if (ids.length) (await db.getAll(...ids.map(id => notif.doc(id)))).forEach(s => { if (s.exists) stati[s.id] = s.data(); });
+  }
+  const [antSnap, indSnap] = await Promise.all([db.collection('anticipi').where('createdAt', '>=', daDove).get(), db.collection('indisponibilita').where('al', '>=', now.data).get()]);
+  try { await arbitriPubblici(desDocs, adesso, memArbitri, cancellate, completo); } catch (e) { console.log('  ! arbitri nelle partite non aggiornati:', e.message); }
   const nomi = {}, adminUid = [];
   arbSnap.forEach(a => { const x = a.data(); nomi[a.id] = [x.nome, x.cognome].filter(Boolean).join(' ') || x.email || ''; if (ADMINS.includes(String(x.email || '').toLowerCase())) adminUid.push(a.id); });
   // accessi: chi non è approvato (o ha l'accesso tolto) non riceve niente
   const acc = {}; accSnap.forEach(a => { acc[a.id] = a.data().stato || ''; });
   const scritture = [];
   // correzione una tantum: chi era stato abilitato in automatico per sbaglio (appena iscritto e mai designato) torna da approvare
-  const av = accSnap.docs.find(a => a.id === '_avvio');
   if (av && !av.data().corretto) {
-    const designati = new Set(desSnap.docs.flatMap(d => d.data().arbitriIds || [])), lim = (av.data().at || Date.now()) - 24 * 3600 * 1000;
+    const designati = new Set(desDocs.flatMap(d => d.data().arbitriIds || [])), lim = (av.data().at || Date.now()) - 24 * 3600 * 1000;
     accSnap.forEach(x => { const a = arbSnap.docs.find(y => y.id === x.id), c = a && a.data().createdAt;
       if (a && x.data().stato === 'attivo' && x.data().da === 'avvio' && !ADMINS.includes(String(a.data().email || '').toLowerCase()) && !designati.has(x.id) && c && c > lim) { delete acc[x.id]; scritture.push(['accdel', x.id]); } });
     scritture.push(['accmerge', '_avvio', {corretto: Date.now()}]);
@@ -119,8 +155,8 @@ async function main() {
   const manda = (uids, title, body, tag, url = './index.html') => { for (const uid of new Set(uids)) if (uid) msg.push({uid, title, body, tag, url}); };
   const aiDesignatori = (title, body, tag, tranne) => manda(adminUid.filter(u => u !== tranne), title, body, tag, './index.html#designazioni');
 
-  const visti = new Set();
-  desSnap.forEach(doc => {
+  const visti = new Set(), seguite = [];
+  desDocs.forEach(doc => {
     const d = doc.data(), id = doc.id, s = stati[id] || null; visti.add(id);
     const uff = (d.ufficiali || []).filter(u => u && u.uid);
     const uids = uff.map(u => u.uid), prima = s ? s.uff || [] : [];
@@ -179,6 +215,7 @@ async function main() {
       }
     }
     if (JSON.stringify(nuovo) !== JSON.stringify(s)) scritture.push(['set', id, nuovo]);
+    if (!chiusa(d, adesso)) seguite.push(id); // le chiuse non si leggono più
   });
 
   // designazioni eliminate
@@ -191,7 +228,9 @@ async function main() {
   }
 
   // anticipi aggiunti dagli arbitri
-  const antIds = antSnap.docs.map(a => a.id), giaVisti = new Set(meta && meta.anticipi || []);
+  // (si leggono solo quelli creati dall'ultimo giro, con 30 minuti di margine; quelli già visti non si ripetono)
+  const giaVisti = new Set([...(meta && meta.anticipi || []), ...(meta && meta.antRecenti || [])]);
+  const antRecenti = antSnap.docs.filter(a => (a.data().createdAt || 0) >= Date.now() - 35 * 60 * 1000).map(a => a.id);
   if (!zitto) antSnap.forEach(a => {
     if (giaVisti.has(a.id)) return;
     const x = a.data();
@@ -242,7 +281,7 @@ async function main() {
     }
     await b.commit();
   }
-  await col.doc('_meta').set({anticipi: antIds, richieste: inAttesa, ultimoGiro: Date.now(), avviato: meta && meta.avviato || Date.now()});
+  await col.doc('_meta').set({seguite, antRecenti, richieste: inAttesa, ultimoGiro: Date.now(), avviato: meta && meta.avviato || Date.now()});
 }
 
 main().then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });
