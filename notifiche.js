@@ -54,46 +54,50 @@ async function eliminazioni() {
   }
 }
 
-// tesserati delle squadre: i dati restano un anno dopo la scadenza del cartellino (30 giugno), poi si cancellano
-async function pulisciTesserati() {
-  const q = await db.collection('tesserati').where('cancellaDopo', '<', oraRoma().data).limit(400).get();
-  if (q.empty) return;
-  if (DRY) { console.log(`  [prova] cancellerei ${q.size} tesserati scaduti da più di un anno`); return; }
-  const b = db.batch(); q.forEach(d => b.delete(d.ref)); await b.commit();
-  console.log(`  ✕ cancellati ${q.size} tesserati scaduti da più di un anno`);
-}
-
-// app dei campionati: 2 giorni prima della partita mostra il nome dell'arbitro, solo se ha accettato.
+// app dei campionati: 48 ore prima dell'inizio della partita mostra il nome dell'arbitro, solo se ha accettato.
 // Prima di allora il nome non viene scritto da nessuna parte pubblica. Rifiuti e sostituzioni non si vedono mai.
-async function arbitriPubblici(desSnap, adesso) {
+// Le partite dei campionati NON vengono lette: quello che è già stato scritto è annotato in notifiche/_arbitri
+// (partita → nome dell'arbitro + giorno e ora della gara) e si scrive nella partita solo quando qualcosa cambia.
+// Giorno e ora servono perché l'app arbitri, se la gara viene rinviata, cancella da sola il nome nella partita.
+async function arbitriPubblici(desSnap, adesso, memDoc) {
   const voglio = {};
   desSnap.forEach(x => {
     const d = x.data(); if (!d.partitaId || !d.data || !d.ora || d.annullata) return;
     if (adesso < minuti(d.data, d.ora) - 48 * 60) return;
     const u = (d.ufficiali || []).find(u => (u.ruolo || 'Arbitro') === 'Arbitro') || (d.ufficiali || [])[0];
     const r = u && (d.risposte || {})[u.uid];
-    if (u && r && r.stato === 'accettata' && u.nome) voglio[d.partitaId] = u.nome;
+    if (u && r && r.stato === 'accettata' && u.nome) voglio[d.partitaId] = {n: u.nome, k: d.data + ' ' + d.ora};
   });
-  const ora = {};
-  (await db.collection('partite').where('arbitro', '>', '').get()).forEach(p => { ora[p.id] = p.data().arbitro; });
-  const ids = Object.keys(voglio).filter(id => !(id in ora));
-  if (ids.length) (await db.getAll(...ids.map(id => db.collection('partite').doc(id)))).forEach(p => { if (p.exists) ora[p.id] = p.data().arbitro || ''; else delete voglio[p.id]; });
-  const cambi = [...new Set([...Object.keys(voglio), ...Object.keys(ora)])].filter(id => (voglio[id] || '') !== (ora[id] || ''));
-  for (const id of cambi) {
-    if (DRY) { console.log(`  [prova] partita ${id}: arbitro “${voglio[id] || ''}”`); continue; }
-    await db.collection('partite').doc(id).update({arbitro: voglio[id] || ''});
-    console.log(`  ⚽ partita ${id}: ${voglio[id] ? 'arbitro ' + voglio[id] : 'arbitro tolto'}`);
+  let ora = memDoc ? {...(memDoc.partite || {})} : null;
+  if (!ora) { // solo la prima volta: legge quali nomi sono già scritti nelle partite, poi non le legge più
+    ora = {}; (await db.collection('partite').where('arbitro', '>', '').get()).forEach(p => { ora[p.id] = {n: p.data().arbitro, k: ''}; });
   }
+  const prima = JSON.stringify(ora);
+  const cambi = [...new Set([...Object.keys(voglio), ...Object.keys(ora)])]
+    .filter(id => !voglio[id] ? !!(ora[id] && ora[id].n) : !ora[id] || ora[id].n !== voglio[id].n || ora[id].k !== voglio[id].k);
+  for (const id of cambi) {
+    const nome = voglio[id] ? voglio[id].n : '';
+    if (DRY) { console.log(`  [prova] partita ${id}: arbitro “${nome}”`); continue; }
+    try { await db.collection('partite').doc(id).update({arbitro: nome}); }
+    catch (e) {
+      if (e.code !== 5) { console.log(`  ! partita ${id}: nome arbitro non aggiornato (${e.code || e.message})`); continue; } // si riprova al prossimo giro
+      if (voglio[id]) ora[id] = voglio[id]; else delete ora[id]; // 5 = la partita non esiste più: non riprovare
+      continue;
+    }
+    console.log(`  ⚽ partita ${id}: ${nome ? 'arbitro ' + nome : 'arbitro tolto'}`);
+    if (voglio[id]) ora[id] = voglio[id]; else delete ora[id];
+  }
+  if (!DRY && (!memDoc || JSON.stringify(ora) !== prima)) await db.collection('notifiche').doc('_arbitri').set({partite: ora, at: Date.now()});
 }
 
 async function main() {
   await eliminazioni();
-  try { await pulisciTesserati(); } catch (e) { console.log('  ! pulizia tesserati non riuscita:', e.message); }
   const now = oraRoma(), adesso = minuti(now.data, now.ora);
   const [desSnap, statiSnap, arbSnap, tokSnap, antSnap, accSnap, indSnap, elSnap] = await Promise.all([...['designazioni', 'notifiche', 'arbitri', 'tokens', 'anticipi', 'accessi', 'indisponibilita'].map(c => db.collection(c).get()), db.collection('elenco').doc('arbitri').get()]);
-  try { await arbitriPubblici(desSnap, adesso); } catch (e) { console.log('  ! arbitri nelle partite non aggiornati:', e.message); }
   const stati = {}; statiSnap.forEach(s => { stati[s.id] = s.data(); });
   const meta = stati._meta; delete stati._meta;
+  const memArbitri = stati._arbitri || null; delete stati._arbitri;
+  try { await arbitriPubblici(desSnap, adesso, memArbitri); } catch (e) { console.log('  ! arbitri nelle partite non aggiornati:', e.message); }
   const zitto = !meta; // primo giro: registra com'è la situazione senza mandare niente
   const nomi = {}, adminUid = [];
   arbSnap.forEach(a => { const x = a.data(); nomi[a.id] = [x.nome, x.cognome].filter(Boolean).join(' ') || x.email || ''; if (ADMINS.includes(String(x.email || '').toLowerCase())) adminUid.push(a.id); });
