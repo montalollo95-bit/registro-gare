@@ -238,6 +238,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ev.con-dist .nm{grid-column:2/-1}
 .warn-gol{color:var(--card-red);font-weight:600}
 .dteam{display:flex;flex-direction:column;gap:6px}
+.dteam .dinv{margin:-2px 0 2px;font-size:12.5px}
+#distBox{margin-top:14px}#distBox:empty{display:none}
+.dcorr{border-radius:12px;padding:10px 12px;background:color-mix(in srgb,#E8A33C 16%,transparent);display:flex;flex-direction:column;gap:2px;font-size:14px}
+.dcorr ul{margin:2px 0 4px;padding-left:18px}.dcorr .note{margin:4px 0 0;font-size:12.5px}
+.cg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cg li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:12px;background:var(--surface-2,rgba(127,127,127,.08))}
+.cg li.via .cnm{text-decoration:line-through;opacity:.55}.cg li.nuovo{background:color-mix(in srgb,#E8A33C 12%,transparent)}
+.cg .cn{width:52px;flex:none;text-align:center}.cg .cnm{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}.cg .cnm i{font-style:normal;font-weight:500;font-size:12px;color:var(--muted)}
+.cg .cin{flex:1;min-width:0}.cg select{flex:none;width:auto}.cg .btn.sm{flex:none}
 .dth{font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;overflow-wrap:anywhere}
 .dgl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:4px}
 @media (min-width:600px){.dgl{grid-template-columns:1fr 1fr}}
@@ -1711,44 +1720,156 @@ function renderReferto(){
   renderRefForm(g);
 }
 
-/* distinte del campionato: per le gare designate collegate a una partita l'arbitro vede chi è in distinta (foto, numeri, capitani, panchina) */
-const DIST = {};
-const parDiGara = g => { const d = desDi(g); return d && d.partitaId ? d.partitaId : ''; };
-function caricaDistinte(g){
+/* distinte del campionato: per le gare designate collegate a una partita l'arbitro vede chi è in distinta (foto, numeri, capitani, panchina).
+   Restano in ascolto mentre la scheda della gara o il referto sono aperti: la distinta compare appena la squadra o l'amministratore la invia. */
+const DIST = {}, TESSC = new Map();
+let distAtt = null;
+const parDiGara = g => { if(g.partitaId) return g.partitaId; const d = desDi(g); return d && d.partitaId ? d.partitaId : ''; };
+/* correzione all'appello: chi è stato aggiunto dall'arbitro non ha un cartellino collegato */
+const manDist = t => !!t.arb || String(t.id || '').startsWith('__arb');
+const CORR_MIN = 60;
+const desDiPar = pid => (ACC.mie || []).find(x => x.partitaId === pid && (x.arbitriIds || []).includes(ACC.user.uid));
+/* l'arbitro designato corregge dall'ora prima dell'inizio finché non invia il referto e la partita non è chiusa */
+function corrOk(g){
+  const o = DIST[g.id]; if(!o || o.st !== 'ok' || !o.p || !ACC.user) return false;
+  const p = o.p; if(p.giocata || p.stato === 'rinviata' || !p.data || !p.ora) return false;
+  if(Date.now() < new Date(`${p.data}T${p.ora}:00`).getTime() - CORR_MIN * 60e3) return false;
+  const d = desDiPar(o.pid), r = d && d.referti && d.referti[ACC.user.uid];
+  return !!d && !(r && !r.sbloccato);
+}
+const oraHM = ms => new Date(ms).toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'});
+const corrHTML = x => { const l = (x && x.corr) || []; if(!l.length) return '';
+  return `<div class="dcorr"><b>✏️ Corretta all’appello</b>${l.map(c => `<span class="note">${esc(c.nome || 'Arbitro')} · ore ${esc(oraHM(c.at))}</span><ul>${(c.cosa || []).map(v => `<li>${esc(v)}</li>`).join('')}</ul>`).join('')}</div>`; };
+function apriCorrezione(g, s, riapri){
+  const o = DIST[g.id], T = o && o[s]; if(!T || !T.raw || !corrOk(g)){ toast('Ora la distinta non si può correggere.'); return; }
+  const x = T.raw, root = $('#sheetRoot'), uid = () => '__arb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const G = (x.giocatori || []).map(t => ({...t, numero: t.numero || '', num0: t.numero || '', via: false})), Dd = (x.dirigenti || []).map(t => ({...t, via: false}));
+  const NG = [], ND = []; let cap = x.capitano || '', vice = x.vice || '';
+  const close = () => { root.innerHTML = ''; if(riapri) riapri(); };
+  const vivi = () => [...G.filter(t => !t.via), ...NG.filter(t => t.nome.trim())];
+  const nomeDi = id => { const t = [...G, ...NG].find(y => y.id === id); return t ? (t.nome || '').trim() : 'nessuno'; };
+  const draw = () => {
+    const opz = sel => `<option value="">Nessuno</option>${vivi().map(t => `<option value="${esc(t.id)}" ${t.id === sel ? 'selected' : ''}>${t.numero ? 'n. ' + esc(t.numero) + ' · ' : ''}${esc(t.nome)}</option>`).join('')}`;
+    root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Correggi distinta"><div class="grab"></div>
+      <div class="eyebrow">Appello</div><h3 style="margin:0">Correggi la distinta di ${esc(T.nome)}</h3>
+      <p class="note" style="margin:0">Se all’appello trovi differenze correggile qui: ogni modifica viene segnata e la vedono tutte e due le squadre e l’amministratore.</p>
+      ${corrHTML(x)}
+      <div class="eyebrow">Giocatori</div>
+      <ul class="cg">${G.map((t, i) => `<li class="${t.via ? 'via' : ''}"><input class="cn" data-gn="${i}" inputmode="numeric" maxlength="2" value="${esc(t.numero)}" aria-label="Numero di ${esc(t.nome)}" ${t.via ? 'disabled' : ''}>
+        <span class="cnm">${esc(t.nome)}${t.ruolo === 'Portiere' ? ' <i>portiere</i>' : ''}${manDist(t) ? ' <i>aggiunto</i>' : ''}</span><button type="button" class="btn btn-ghost sm" data-gv="${i}">${t.via ? 'Rimetti' : 'Togli'}</button></li>`).join('')}
+        ${NG.map((t, i) => `<li class="nuovo"><input class="cn" data-nn="${i}" inputmode="numeric" maxlength="2" value="${esc(t.numero)}" placeholder="N°" aria-label="Numero"><input class="cin" data-nm="${i}" value="${esc(t.nome)}" placeholder="Cognome e nome" aria-label="Cognome e nome"><button type="button" class="btn btn-ghost sm" data-nx="${i}" aria-label="Togli">✕</button></li>`).join('')}</ul>
+      <button type="button" class="btn btn-ghost sm" id="cAddG">+ Aggiungi un giocatore</button>
+      <div class="row"><div class="field" style="flex:1"><label for="cCap">Capitano</label><select id="cCap">${opz(cap)}</select></div><div class="field" style="flex:1"><label for="cVice">Vice capitano</label><select id="cVice">${opz(vice)}</select></div></div>
+      <div class="eyebrow">In panchina</div>
+      <ul class="cg">${Dd.map((t, i) => `<li class="${t.via ? 'via' : ''}"><span class="cnm">${esc(t.nome)} <i>${esc((t.ruolo || 'Dirigente').toLowerCase())}</i></span><button type="button" class="btn btn-ghost sm" data-dv="${i}">${t.via ? 'Rimetti' : 'Togli'}</button></li>`).join('')}
+        ${ND.map((t, i) => `<li class="nuovo"><input class="cin" data-dm="${i}" value="${esc(t.nome)}" placeholder="Cognome e nome" aria-label="Cognome e nome"><select data-dr="${i}" aria-label="Ruolo"><option ${t.ruolo === 'Dirigente' ? 'selected' : ''}>Dirigente</option><option ${t.ruolo === 'Allenatore' ? 'selected' : ''}>Allenatore</option></select><button type="button" class="btn btn-ghost sm" data-dx="${i}" aria-label="Togli">✕</button></li>`).join('')}</ul>
+      <button type="button" class="btn btn-ghost sm" id="cAddD">+ Aggiungi in panchina</button>
+      <p class="err-t" id="cErr" style="margin:0"></p>
+      <div class="row"><button type="button" class="btn btn-primary" id="cGo">Salva le correzioni</button><button type="button" class="btn btn-ghost" id="cNo">Annulla</button></div></div></div>`;
+    const R = root.querySelector('.sheet'), q = (a, f) => R.querySelectorAll(a).forEach(f);
+    root.querySelector('.sheet-bg').onclick = e => { if(e.target === e.currentTarget) close(); };
+    q('[data-gn]', i => i.oninput = () => { G[+i.dataset.gn].numero = i.value.replace(/\D/g, '').slice(0, 2); });
+    q('[data-nn]', i => i.oninput = () => { NG[+i.dataset.nn].numero = i.value.replace(/\D/g, '').slice(0, 2); });
+    q('[data-nm]', i => i.oninput = () => { NG[+i.dataset.nm].nome = i.value; });
+    q('[data-dm]', i => i.oninput = () => { ND[+i.dataset.dm].nome = i.value; });
+    q('[data-dr]', i => i.onchange = () => { ND[+i.dataset.dr].ruolo = i.value; });
+    q('[data-gv]', b => b.onclick = () => { const t = G[+b.dataset.gv]; t.via = !t.via; if(t.via){ if(cap === t.id) cap = ''; if(vice === t.id) vice = ''; } draw(); });
+    q('[data-dv]', b => b.onclick = () => { const t = Dd[+b.dataset.dv]; t.via = !t.via; draw(); });
+    q('[data-nx]', b => b.onclick = () => { const t = NG.splice(+b.dataset.nx, 1)[0]; if(cap === t.id) cap = ''; if(vice === t.id) vice = ''; draw(); });
+    q('[data-dx]', b => b.onclick = () => { ND.splice(+b.dataset.dx, 1); draw(); });
+    R.querySelector('#cAddG').onclick = () => { NG.push({id: uid(), nome: '', numero: ''}); draw(); root.querySelector(`[data-nn="${NG.length - 1}"]`)?.focus(); };
+    R.querySelector('#cAddD').onclick = () => { ND.push({id: uid(), nome: '', ruolo: 'Dirigente'}); draw(); root.querySelector(`[data-dm="${ND.length - 1}"]`)?.focus(); };
+    R.querySelector('#cCap').onchange = e => { cap = e.target.value; };
+    R.querySelector('#cVice').onchange = e => { vice = e.target.value; };
+    R.querySelector('#cNo').onclick = close;
+    R.querySelector('#cGo').onclick = async () => {
+      const er = R.querySelector('#cErr'); er.textContent = '';
+      const nome = t => (t.nome || '').replace(/\s+/g, ' ').trim().toUpperCase();
+      if(NG.some(t => !nome(t)) || ND.some(t => !nome(t))){ er.textContent = 'Scrivi cognome e nome di chi aggiungi, oppure toglilo con ✕.'; return; }
+      const nums = vivi().map(t => (t.numero || '').trim()).filter(Boolean), dup = nums.find((n, i) => nums.indexOf(n) !== i);
+      if(dup){ er.textContent = `Il numero ${dup} è ripetuto.`; return; }
+      if(cap && cap === vice){ er.textContent = 'Capitano e vice devono essere diversi.'; return; }
+      const cosa = [];
+      G.forEach(t => { if(t.via) cosa.push(`Tolto ${t.nome}${t.num0 ? ' (n. ' + t.num0 + ')' : ''}`); else if(t.numero !== t.num0) cosa.push(`${t.nome}: numero ${t.num0 || '–'} → ${t.numero || '–'}`); });
+      NG.forEach(t => cosa.push(`Aggiunto${t.numero ? ' n. ' + t.numero : ''} ${nome(t)} (scritto dall’arbitro)`));
+      Dd.forEach(t => { if(t.via) cosa.push(`Tolto dalla panchina ${t.nome} (${(t.ruolo || 'dirigente').toLowerCase()})`); });
+      ND.forEach(t => cosa.push(`Aggiunto in panchina ${nome(t)} (${t.ruolo.toLowerCase()}, scritto dall’arbitro)`));
+      NG.forEach(t => { t.nome = nome(t); });
+      if(cap !== (x.capitano || '')) cosa.push(`Capitano: ${x.capitano ? nomeDi(x.capitano) : 'nessuno'} → ${cap ? nomeDi(cap) : 'nessuno'}`);
+      if(vice !== (x.vice || '')) cosa.push(`Vice capitano: ${x.vice ? nomeDi(x.vice) : 'nessuno'} → ${vice ? nomeDi(vice) : 'nessuno'}`);
+      if(!cosa.length){ er.textContent = 'Non hai cambiato niente.'; return; }
+      const d = desDiPar(o.pid), me = d && (d.ufficiali || []).find(u => u.uid === ACC.user.uid);
+      const upd = {giocatori: [...G.filter(t => !t.via).map(({via, num0, ...t}) => t), ...NG.map(t => ({id: t.id, nome: t.nome, cog: t.nome.split(' ')[0], numero: t.numero, ruolo: 'Giocatore', arb: true}))],
+        dirigenti: [...Dd.filter(t => !t.via).map(({via, ...t}) => t), ...ND.map(t => ({id: t.id, nome: nome(t), ruolo: t.ruolo, arb: true}))],
+        capitano: cap, vice, corr: [...(x.corr || []), {at: Date.now(), uid: ACC.user.uid, nome: me ? me.nome : 'Arbitro', cosa}], updatedAt: Date.now()};
+      const b = R.querySelector('#cGo'); b.disabled = true;
+      try{ await firebase.firestore().collection('distinte').doc(o.pid + '_' + T.sid).update(upd); toast('Distinta corretta: la vedono anche le squadre'); close(); }
+      catch(e){ b.disabled = false; er.textContent = e && e.code === 'permission-denied' ? 'Non puoi più correggerla: si corregge dall’ora prima dell’inizio fino all’invio del referto.' : 'Non riesco a salvare: controlla la connessione e riprova.'; }
+    };
+  };
+  draw();
+}
+/* riquadro delle distinte dentro una scheda (gara del registro o designazione) */
+function montaDistinte(root, g, riapri){
+  const box0 = root.querySelector('#distBox'); if(!box0) return;
+  const disegna = () => { const box = $('#distBox'); if(!box || !box.isConnected){ fermaDistinte(); return; }
+    box.innerHTML = distHTML(g, DIST[g.id], !iniziata(g));
+    box.querySelectorAll('[data-dg]').forEach(b => b.onclick = () => { const [s, k, i] = b.dataset.dg.split(':'), T = DIST[g.id][s]; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome, riapri); });
+    box.querySelectorAll('[data-corr]').forEach(b => b.onclick = () => apriCorrezione(g, b.dataset.corr, riapri));
+    const rr = box.querySelector('#rfDistRetry'); if(rr) rr.onclick = () => { delete DIST[g.id]; fermaDistinte(); caricaDistinte(g, disegna); disegna(); }; };
+  caricaDistinte(g, disegna); disegna();
+}
+function fermaDistinte(){ if(distAtt){ distAtt.stop.forEach(f => { try{ f(); }catch(e){} }); distAtt = null; } }
+function caricaDistinte(g, ridisegna){
   const pid = parDiGara(g); if(!pid || !fbReady() || !ACC.user) return null;
-  if(DIST[g.id] && DIST[g.id].pid === pid && DIST[g.id].st !== 'err') return DIST[g.id];
-  const o = DIST[g.id] = {st: 'load', pid}, db = firebase.firestore();
-  (async () => {
+  const o0 = DIST[g.id];
+  if(distAtt && distAtt.gid === g.id && o0 && o0.pid === pid && o0.st !== 'err'){ distAtt.ridisegna = ridisegna; return o0; }
+  fermaDistinte();
+  const o = DIST[g.id] = o0 && o0.pid === pid && o0.st === 'ok' ? o0 : {st: 'load', pid};
+  const att = distAtt = {gid: g.id, stop: [], ridisegna}, db = firebase.firestore(), raw = {casa: null, ospite: null}, sid = {casa: '', ospite: ''};
+  let p = null, giro = 0;
+  const avvisa = () => { if(distAtt === att && att.ridisegna) att.ridisegna(); };
+  const errore = e => { if(distAtt !== att) return; o.st = 'err'; o.msg = e && e.code === 'permission-denied' ? 'Non riesco a leggere le distinte: avvisa il designatore.' : 'Non riesco a caricare le distinte: controlla la connessione.'; fermaDistinte(); att.ridisegna && att.ridisegna(); };
+  const ricalcola = async () => {
+    if(!p || ['casa', 'ospite'].some(s => sid[s] && raw[s] === null)) return;
+    const n = ++giro, ora = Date.now(), prima = JSON.stringify([o.st, o.casa, o.ospite, !!(o.p && o.p.giocata)]), out = {};
     try{
-      const ps = await db.collection('partite').doc(pid).get();
-      if(!ps.exists){ o.st = 'no'; return; }
-      const p = ps.data(), ora = Date.now();
       for(const s of ['casa', 'ospite']){
-        const sid = p[s + 'Id'] || '', T = o[s] = {nome: p[s] || g[s] || '', inviata: false, gioc: [], dir: []};
-        if(!sid) continue;
-        const ds = await db.collection('distinte').doc(pid + '_' + sid).get(), x = ds.exists ? ds.data() : null;
-        if(!x || (+x.rinvii || 0) !== (+p.rinvii || 0)) continue;
-        T.inviata = true;
+        const T = out[s] = {nome: p[s] || g[s] || '', sid: sid[s], inviata: false, at: 0, gioc: [], dir: []}, x = raw[s];
+        if(!sid[s] || !x || (+x.rinvii || 0) !== (+p.rinvii || 0)) continue;
+        T.inviata = true; T.at = +x.updatedAt || 0; T.raw = x;
         const tutti = [...(x.giocatori || []), ...(x.dirigenti || [])];
-        const tess = await Promise.all(tutti.map(t => db.collection('tesserati').doc(t.id).get().then(r => r.exists ? r.data() : false, () => null)));
-        const info = new Map(tutti.map((t, i) => [t.id, tess[i]]));
+        await Promise.all(tutti.filter(t => t.id && !manDist(t) && !TESSC.has(t.id)).map(t => db.collection('tesserati').doc(t.id).get().then(r => TESSC.set(t.id, r.exists ? r.data() : false), () => TESSC.set(t.id, null))));
         /* fuori chi non ha più il cartellino valido (le squalifiche le toglie già l'amministratore dalla distinta) */
-        const ok = t => { const r = info.get(t.id); if(r === null){ o.noFoto = true; return true; } return !!r && r.stato === 'approvato' && !(r.scadenzaMs && r.scadenzaMs < ora); };
-        const dati = t => { const r = info.get(t.id) || {}; return {id: t.id, nome: t.nome || `${r.cognome || ''} ${r.nome || ''}`.trim(), foto: r.foto || '', nato: r.dataNascita || ''}; };
-        T.gioc = (x.giocatori || []).filter(ok).map(t => ({...dati(t), num: t.numero || '', ruolo: t.ruolo || 'Giocatore', cap: t.id === x.capitano, vice: t.id === x.vice}));
-        T.dir = (x.dirigenti || []).filter(ok).map(t => ({...dati(t), ruolo: t.ruolo || 'Dirigente'}));
+        const ok = t => { if(manDist(t)) return true; const r = TESSC.get(t.id); if(r == null){ out.noFoto = true; return true; } return !!r && r.stato === 'approvato' && !(r.scadenzaMs && r.scadenzaMs < ora); };
+        const dati = t => { const r = TESSC.get(t.id) || {}; return {id: t.id, nome: t.nome || `${r.cognome || ''} ${r.nome || ''}`.trim(), foto: r.foto || '', nato: r.dataNascita || ''}; };
+        T.gioc = (x.giocatori || []).filter(ok).map(t => ({...dati(t), num: t.numero || '', ruolo: t.ruolo || 'Giocatore', cap: t.id === x.capitano, vice: t.id === x.vice, arb: manDist(t)}));
+        T.dir = (x.dirigenti || []).filter(ok).map(t => ({...dati(t), ruolo: t.ruolo || 'Dirigente', arb: manDist(t)}));
       }
-      o.st = 'ok';
-    }catch(e){ o.st = 'err'; o.msg = e && e.code === 'permission-denied' ? 'Non riesco a leggere le distinte: avvisa il designatore.' : 'Non riesco a caricare le distinte: controlla la connessione.'; }
-    finally{ if(location.hash === '#referto' && refId === g.id && $('#rfSave')){ readDraft(); renderRefForm(g); } }
-  })();
+    }catch(e){ errore(e); return; }
+    if(n !== giro || distAtt !== att) return;
+    Object.assign(o, {st: 'ok', p, casa: out.casa, ospite: out.ospite, noFoto: !!out.noFoto});
+    /* si ridisegna solo se è cambiato qualcosa che si vede */
+    if(JSON.stringify([o.st, o.casa, o.ospite, !!p.giocata]) !== prima) avvisa();
+  };
+  const segui = (s, id) => {
+    if(sid[s] === id) return; sid[s] = id; raw[s] = id ? null : false;
+    const k = 'u' + s; if(att[k]){ att[k](); att.stop = att.stop.filter(f => f !== att[k]); att[k] = null; }
+    if(!id) return;
+    att[k] = db.collection('distinte').doc(pid + '_' + id).onSnapshot(r => { raw[s] = r.exists ? r.data() : false; ricalcola(); }, errore);
+    att.stop.push(att[k]);
+  };
+  att.stop.push(db.collection('partite').doc(pid).onSnapshot(ps => {
+    if(!ps.exists){ o.st = 'no'; avvisa(); return; }
+    p = ps.data(); segui('casa', p.casaId || ''); segui('ospite', p.ospiteId || ''); ricalcola();
+  }, errore));
   return o;
 }
 const iniz = n => String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
 const fotoT = (t, cls = 'dfoto') => `<span class="${cls}">${t.foto ? `<img src="${esc(t.foto)}" alt="">` : `<i>${esc(iniz(t.nome))}</i>`}</span>`;
-function apriTesserato(t, sq){
+function apriTesserato(t, sq, poi){
   const root = $('#sheetRoot');
-  const close = () => { root.innerHTML = ''; };
+  const close = () => { root.innerHTML = ''; if(poi) poi(); };
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Tesserato"><div class="tess-big">${fotoT(t, 'dfoto big')}
     <div><div class="eyebrow">${esc(sq)}</div><h3>${t.num ? `<b class="dnum">${esc(t.num)}</b> ` : ''}${esc(t.nome)}</h3>
     <p class="note">${[t.cap ? 'Capitano' : t.vice ? 'Vice capitano' : '', t.ruolo && t.ruolo !== 'Giocatore' ? t.ruolo : '', t.nato ? 'nato il ' + String(t.nato).split('-').reverse().join('/') : ''].filter(Boolean).map(esc).join(' · ')}</p></div></div>
@@ -1756,15 +1877,17 @@ function apriTesserato(t, sq){
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   root.querySelector('[data-x]').onclick = close;
 }
-const distHTML = (g, D) => {
+const quandoInv = ms => { if(!ms) return ''; const d = new Date(ms); return `inviata ${d.toDateString() === new Date().toDateString() ? 'oggi' : 'il ' + d.toLocaleDateString('it-IT', {day: 'numeric', month: 'numeric'})} alle ${d.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'})}`; };
+const distHTML = (g, D, prima = false) => {
   if(!D) return '';
   if(D.st === 'load') return `<section class="ref-sec"><h3>Distinte</h3><div class="status"><span class="spin"></span>Carico le distinte…</div></section>`;
   if(D.st === 'err') return `<section class="ref-sec"><h3>Distinte</h3><p class="note" style="margin:0">${esc(D.msg)}</p><button type="button" class="btn btn-ghost sm" id="rfDistRetry">Riprova</button></section>`;
   if(D.st !== 'ok') return '';
   const team = s => { const T = D[s]; if(!T) return '';
-    if(!T.inviata) return `<div class="dteam"><div class="dth">${esc(T.nome)}</div><p class="note" style="margin:0">Distinta non inviata: i giocatori li scrivi a mano nel referto.</p></div>`;
-    return `<div class="dteam"><div class="dth">${esc(T.nome)} <span class="cnt">${T.gioc.length}</span></div>
-      <ul class="dgl">${T.gioc.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:g:${i}">${fotoT(t)}<b class="dnum">${esc(t.num || '–')}</b><span class="dnm">${esc(t.nome)}</span>${t.cap ? '<em>C</em>' : t.vice ? '<em>VC</em>' : ''}${t.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}</button></li>`).join('')}</ul>
+    if(!T.inviata) return `<div class="dteam"><div class="dth">${esc(T.nome)}</div><p class="note" style="margin:0">${prima ? 'Non ancora inviata: compare qui appena la squadra la invia.' : 'Distinta non inviata: i giocatori li scrivi a mano nel referto.'}</p></div>`;
+    return `<div class="dteam"><div class="dth">${esc(T.nome)} <span class="cnt">${T.gioc.length}</span></div>${prima && T.at ? `<p class="note dinv">${esc(quandoInv(T.at))}</p>` : ''}${corrHTML(T.raw)}
+      ${corrOk(g) ? `<button type="button" class="btn btn-ghost sm" data-corr="${s}">✏️ Correggi all’appello</button>` : ''}
+      <ul class="dgl">${T.gioc.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:g:${i}">${fotoT(t)}<b class="dnum">${esc(t.num || '–')}</b><span class="dnm">${esc(t.nome)}</span>${t.cap ? '<em>C</em>' : t.vice ? '<em>VC</em>' : ''}${t.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}${t.arb ? '<i>aggiunto</i>' : ''}</button></li>`).join('')}</ul>
       ${T.dir.length ? `<div class="eyebrow">In panchina</div><ul class="dgl">${T.dir.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:d:${i}">${fotoT(t)}<span class="dnm">${esc(t.nome)}</span><i>${esc(t.ruolo.toLowerCase())}</i></button></li>`).join('')}</ul>` : ''}</div>`; };
   return `<section class="ref-sec"><header><h3>Distinte</h3></header>${team('casa')}${team('ospite')}
     <p class="note" style="margin:0">Tocca un tesserato per vedere la foto grande.${D.noFoto ? ' Alcune foto non sono disponibili.' : ''}</p></section>`;
@@ -1774,7 +1897,7 @@ const golRef = d => { const n = {casa: 0, ospite: 0}; (d.marcatori || []).forEac
 
 function renderRefForm(g){
   const d = draft, body = $('#refBody');
-  const pid = parDiGara(g), D = pid ? caricaDistinte(g) : null;
+  const pid = parDiGara(g), D = pid ? caricaDistinte(g, () => { if(location.hash === '#referto' && refId === g.id && $('#rfSave')){ readDraft(); renderRefForm(g); } else fermaDistinte(); }) : null;
   const lista = (s, k) => D && D.st === 'ok' && D[s] && D[s].inviata ? D[s][k] : null;
   const conDist = !!(D && D.st === 'ok' && (lista('casa', 'gioc') || lista('ospite', 'gioc')));
   const sqOpt = v => `<option value="casa" ${v!=='ospite'?'selected':''}>${esc(g.casa||'Casa')}</option><option value="ospite" ${v==='ospite'?'selected':''}>${esc(g.ospite||'Ospite')}</option>`;
@@ -1851,7 +1974,7 @@ function renderRefForm(g){
     const sqSel = ev.querySelector('[data-k="sq"]'), pk = ev.querySelector('[data-pick]'), mot = ev.querySelector('[data-k="mot"]');
     sqSel.addEventListener('change', () => { readDraft(); if(e.tid && e.tid !== '__man'){ e.tid = ''; e.nome = ''; e.num = ''; } renderRefForm(g); });
     if(pk) pk.addEventListener('change', () => { readDraft(); const l = lista(e.sq === 'ospite' ? 'ospite' : 'casa', cosa) || [], t = l.find(x => x.id === e.tid);
-      if(t){ e.nome = t.nome; if(cosa === 'gioc') e.num = t.num || ''; else e.qual = t.ruolo === 'Allenatore' ? 'Allenatore' : 'Dirigente accompagnatore'; }
+      if(t){ e.nome = t.nome; if(cosa === 'gioc') e.num = t.num || ''; else e.qual = t.ruolo === 'Allenatore' ? 'Allenatore' : 'Dirigente accompagnatore'; if(t.arb) e.tid = '__man'; }
       else if(e.tid === '__man'){ e.nome = ''; if(cosa === 'gioc') e.num = ''; }
       renderRefForm(g); if(e.tid === '__man') body.querySelector(`.ev[data-list="${key}"][data-i="${ev.dataset.i}"] [data-k="nome"]`)?.focus(); });
     if(key === 'marcatori' && mot) mot.addEventListener('change', () => { readDraft(); renderRefForm(g); });
@@ -1862,7 +1985,8 @@ function renderRefForm(g){
     else { const t = (lista(sq, 'gioc') || []).find(x => x.id === tid); d[k] = {sq, tid, nome: t ? t.nome : '', num: t ? t.num || '' : ''}; }
     renderRefForm(g); if(d[k] && d[k].man) $(`#rf-${k}-nome`)?.focus(); });
   body.querySelectorAll('[data-dg]').forEach(b => b.onclick = () => { const [s, k, i] = b.dataset.dg.split(':'), T = D[s]; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome); });
-  const rr = $('#rfDistRetry'); if(rr) rr.onclick = () => { delete DIST[g.id]; readDraft(); renderRefForm(g); };
+  const rr = $('#rfDistRetry'); if(rr) rr.onclick = () => { delete DIST[g.id]; fermaDistinte(); readDraft(); renderRefForm(g); };
+  body.querySelectorAll('[data-corr]').forEach(b => b.onclick = () => { readDraft(); apriCorrezione(g, b.dataset.corr, null); });
   $('#rfOther').onclick = () => openReferto(null);
   body.querySelectorAll('[data-esito]').forEach(b => b.onclick = () => { readDraft(); d.esito = b.dataset.esito; renderRefForm(g); });
   $('#rfSave').onclick = async () => {
@@ -2208,7 +2332,7 @@ function openSheet(id, edit=false){
   const g = Store.gare.find(x => x.id === id); if(!g) return;
   const root = $('#sheetRoot');
   const onKey = e => { if(e.key === 'Escape') close(); };
-  const close = () => { root.innerHTML = ''; document.removeEventListener('keydown', onKey); };
+  const close = () => { root.innerHTML = ''; document.removeEventListener('keydown', onKey); fermaDistinte(); };
   document.addEventListener('keydown', onKey);
   const row = (k,v) => v ? `<dt>${k}</dt><dd>${esc(v)}</dd>` : '';
   const addr = [g.impianto, g.indirizzo, g.citta].filter(Boolean).join(', ');
@@ -2229,7 +2353,7 @@ function openSheet(id, edit=false){
       <button class="btn btn-ghost" data-act="spesa">Rimborso e km</button>
       <button class="btn btn-danger" data-act="del">Elimina</button>
     </div>
-    <div id="confirmBox"></div><div id="sostBox"></div>`;
+    ${parDiGara(g) ? '<div id="distBox"></div>' : ''}<div id="confirmBox"></div><div id="sostBox"></div>`;
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Dettaglio gara"><div class="grab"></div>${body}<button class="btn btn-ghost btn-block" data-act="close">Chiudi</button></div></div>`;
   const bg = root.querySelector('.sheet-bg');
   bg.addEventListener('click', e => { if(e.target === bg) close(); });
@@ -2244,6 +2368,8 @@ function openSheet(id, edit=false){
   }
   const a = s => root.querySelector(`[data-act=${s}]`);
   if(a('ics')) a('ics').onclick = () => saveIcs([g], `gara-${g.data}.ics`);
+  /* distinte: si aggiornano da sole finché la scheda è aperta */
+  montaDistinte(root, g, () => openSheet(id));
   if(desDi(g) && !refNonMio({...g, ruolo: 'Arbitro'})) { sostRender(root.querySelector('#sostBox'), desDi(g)); const sb = subDi(desDi(g), ACC.user.uid); if(sb) root.querySelector('#sostBox').insertAdjacentHTML('beforebegin', subInfo(sb)); if(modDi(desDi(g))){ root.querySelector('#sostBox').insertAdjacentHTML('beforebegin', modInfo(desDi(g)) + '<button class=btn-primary data-modok>Vedi e conferma di nuovo</button>'); root.querySelector('[data-modok]').className = 'btn btn-primary btn-block'; root.querySelector('[data-modok]').onclick = () => openMie(g.desId); } }
   a('edit').onclick = () => openSheet(id, true);
   if(a('ref')) a('ref').onclick = () => { close(); openReferto(id); };
@@ -2732,15 +2858,17 @@ function mieRow(d){
 function bindRows(box){ box.querySelectorAll('[data-mie]').forEach(b => b.onclick = () => openMie(b.dataset.mie)); }
 function openMie(id){
   const d = ACC.mie.find(x => x.id === id); if(!d) return;
-  const root = $('#sheetRoot'), close = () => root.innerHTML = '';
+  const root = $('#sheetRoot'), close = () => { root.innerHTML = ''; fermaDistinte(); };
   root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Designazione"><div class="grab"></div>${mieCard(d)}
     ${[d.impianto, d.indirizzo, d.citta].some(Boolean) ? `<a class="btn btn-ghost" href="${esc(gmapsUrl(d))}" target="_blank" rel="noopener">Apri in Google Maps</a>` : ''}
-    <div id="sostBox"></div>
+    ${d.partitaId ? '<div id="distBox"></div>' : ''}<div id="sostBox"></div>
     <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   root.querySelector('[data-x]').onclick = close;
   bindMie(root.querySelector('.sheet'));
   sostRender(root.querySelector('#sostBox'), d);
+  /* distinte delle squadre: compaiono appena vengono inviate */
+  montaDistinte(root, {id: 'des-' + d.id, partitaId: d.partitaId, casa: d.casa, ospite: d.ospite, data: d.data, ora: d.ora}, () => openMie(id));
 }
 function mieCard(d){
     const uid = ACC.user.uid, r = rispOf(d, uid), mine = (d.ufficiali || []).find(u => u.uid === uid) || {}, altri = (d.ufficiali || []).filter(u => u.uid !== uid);
