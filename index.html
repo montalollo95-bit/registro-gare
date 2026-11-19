@@ -237,8 +237,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ev.con-dist{grid-template-columns:62px 1fr 40px}
 .ev.con-dist .nm{grid-column:2/-1}
 .warn-gol{color:var(--card-red);font-weight:600}
-.dteam{display:flex;flex-direction:column;gap:6px}
-.dteam .dinv{margin:-2px 0 2px;font-size:12.5px}
 #distBox{margin-top:14px}#distBox:empty{display:none}
 .dcorr{border-radius:12px;padding:10px 12px;background:color-mix(in srgb,#E8A33C 16%,transparent);display:flex;flex-direction:column;gap:2px;font-size:14px}
 .dcorr ul{margin:2px 0 4px;padding-left:18px}.dcorr .note{margin:4px 0 0;font-size:12.5px}
@@ -248,21 +246,33 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cg .cn{width:52px;flex:none;text-align:center}.cg .cnm{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}.cg .cnm i{font-style:normal;font-weight:500;font-size:12px;color:var(--muted)}
 .cg .cin{flex:1;min-width:0}.cg select{flex:none;width:auto}.cg .btn.sm{flex:none}
 .dth{font-weight:800;font-size:17px;display:flex;align-items:center;gap:6px;overflow-wrap:anywhere}
-.dgl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:4px}
-@media (min-width:600px){.dgl{grid-template-columns:1fr 1fr}}
-.dg{width:100%;display:flex;align-items:center;gap:10px;padding:6px 8px;border:0;border-radius:12px;background:var(--surface-2);color:var(--fg);text-align:left;cursor:pointer;font:inherit;min-height:56px}
+.dgl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.dg{width:100%;display:flex;align-items:center;gap:8px;padding:6px 10px;border:0;border-radius:10px;background:var(--surface-2);color:var(--fg);text-align:left;cursor:pointer;font:inherit;font-size:15px;min-height:42px}
+.dsqs{display:flex;flex-direction:column;gap:6px}
+.dsq{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;border-radius:14px;background:var(--surface-2);color:var(--fg);text-align:left;cursor:pointer;font:inherit;min-height:58px}
+.dsq:hover{filter:brightness(.97)}.dsq.no{cursor:default}.dsq.no:hover{filter:none}
+.dsq .dsn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dsq .dsn b{font-weight:800;font-size:15.5px;line-height:1.2;overflow-wrap:anywhere}
+.dsq .dsn small{font-size:12.5px;color:var(--muted)}.dsq .dsn small.ko{color:var(--card-red)}
+.dsq .ctag{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:99px;background:color-mix(in srgb,#E8A33C 22%,transparent);white-space:nowrap}
+.dsq .chev{flex:none;color:var(--muted);font-size:22px;line-height:1}
+.dsub{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
+.tdati{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;padding:12px 14px;border-radius:14px;background:var(--surface-2);font-size:14.5px}
+.tdati dt{color:var(--muted)}.tdati dd{margin:0;font-weight:600;overflow-wrap:anywhere}
 .dg:hover{filter:brightness(.97)}
 .dfoto{flex:none;width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--line);display:grid;place-items:center}
 .dfoto img{width:100%;height:100%;object-fit:cover;display:block}
 .dfoto i{font-style:normal;font-weight:700;font-size:15px;color:var(--muted)}
 .dfoto.big{width:120px;height:150px;border-radius:14px}
 .dfoto.big i{font-size:34px}
-.dnum{font-family:var(--display);font-size:22px;min-width:26px;text-align:center}
+.dnum{font-family:var(--display);font-size:17px;min-width:24px;text-align:center}
+.tess-big .dnum{font-size:26px}
 .dnm{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere;line-height:1.2}
-.dg em{font-style:normal;font-weight:800;font-size:12px;padding:2px 7px;border-radius:99px;background:var(--fg);color:var(--bg)}
+.dg .chev{color:var(--muted);font-size:18px;line-height:1}
+.dg em{font-style:normal;font-weight:800;font-size:11px;padding:1px 6px;border-radius:99px;background:var(--fg);color:var(--bg)}
 .dg i{font-style:normal;font-size:12px;color:var(--muted)}
 .tess-big{display:flex;gap:16px;align-items:center}
-.tess-big h3{font-size:26px;overflow-wrap:anywhere}
+.tess-big h3{font-size:22px;overflow-wrap:anywhere;margin:2px 0}
 .copybox{width:100%;min-height:200px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-family:var(--mono);font-size:13px}
 
 .cat-list{display:flex;flex-direction:column;gap:6px}
@@ -1814,8 +1824,7 @@ function montaDistinte(root, g, riapri){
   const box0 = root.querySelector('#distBox'); if(!box0) return;
   const disegna = () => { const box = $('#distBox'); if(!box || !box.isConnected){ fermaDistinte(); return; }
     box.innerHTML = distHTML(g, DIST[g.id], !iniziata(g));
-    box.querySelectorAll('[data-dg]').forEach(b => b.onclick = () => { const [s, k, i] = b.dataset.dg.split(':'), T = DIST[g.id][s]; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome, riapri); });
-    box.querySelectorAll('[data-corr]').forEach(b => b.onclick = () => apriCorrezione(g, b.dataset.corr, riapri));
+    box.querySelectorAll('[data-dsq]').forEach(b => b.onclick = () => apriDistSq(g, b.dataset.dsq, riapri));
     const rr = box.querySelector('#rfDistRetry'); if(rr) rr.onclick = () => { delete DIST[g.id]; fermaDistinte(); caricaDistinte(g, disegna); disegna(); }; };
   caricaDistinte(g, disegna); disegna();
 }
@@ -1842,7 +1851,7 @@ function caricaDistinte(g, ridisegna){
         await Promise.all(tutti.filter(t => t.id && !manDist(t) && !TESSC.has(t.id)).map(t => db.collection('tesserati').doc(t.id).get().then(r => TESSC.set(t.id, r.exists ? r.data() : false), () => TESSC.set(t.id, null))));
         /* fuori chi non ha più il cartellino valido (le squalifiche le toglie già l'amministratore dalla distinta) */
         const ok = t => { if(manDist(t)) return true; const r = TESSC.get(t.id); if(r == null){ out.noFoto = true; return true; } return !!r && r.stato === 'approvato' && !(r.scadenzaMs && r.scadenzaMs < ora); };
-        const dati = t => { const r = TESSC.get(t.id) || {}; return {id: t.id, nome: t.nome || `${r.cognome || ''} ${r.nome || ''}`.trim(), foto: r.foto || '', nato: r.dataNascita || ''}; };
+        const dati = t => { const r = TESSC.get(t.id) || {}; return {id: t.id, nome: t.nome || `${r.cognome || ''} ${r.nome || ''}`.trim(), foto: r.foto || '', nato: r.dataNascita || '', luogo: r.luogoNascita || '', doc: r.documento || '', aics: r.tesseraAics || '', codice: r.codice || '', scad: r.scadenza || ''}; };
         T.gioc = (x.giocatori || []).filter(ok).map(t => ({...dati(t), num: t.numero || '', ruolo: t.ruolo || 'Giocatore', cap: t.id === x.capitano, vice: t.id === x.vice, arb: manDist(t)}));
         T.dir = (x.dirigenti || []).filter(ok).map(t => ({...dati(t), ruolo: t.ruolo || 'Dirigente', arb: manDist(t)}));
       }
@@ -1868,14 +1877,40 @@ function caricaDistinte(g, ridisegna){
 const iniz = n => String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
 const fotoT = (t, cls = 'dfoto') => `<span class="${cls}">${t.foto ? `<img src="${esc(t.foto)}" alt="">` : `<i>${esc(iniz(t.nome))}</i>`}</span>`;
 function apriTesserato(t, sq, poi){
-  const root = $('#sheetRoot');
+  const root = $('#sheetRoot'), dt = d => d ? String(d).split('-').reverse().join('/') : '';
   const close = () => { root.innerHTML = ''; if(poi) poi(); };
-  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Tesserato"><div class="tess-big">${fotoT(t, 'dfoto big')}
-    <div><div class="eyebrow">${esc(sq)}</div><h3>${t.num ? `<b class="dnum">${esc(t.num)}</b> ` : ''}${esc(t.nome)}</h3>
-    <p class="note">${[t.cap ? 'Capitano' : t.vice ? 'Vice capitano' : '', t.ruolo && t.ruolo !== 'Giocatore' ? t.ruolo : '', t.nato ? 'nato il ' + String(t.nato).split('-').reverse().join('/') : ''].filter(Boolean).map(esc).join(' · ')}</p></div></div>
-    <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
+  const righe = [['In distinta', t.num ? 'numero ' + t.num : ''], ['Ruolo', [t.ruolo || 'Giocatore', t.cap ? 'capitano' : t.vice ? 'vice capitano' : ''].filter(Boolean).join(' · ')],
+    ['Nato il', [dt(t.nato), t.luogo ? 'a ' + t.luogo : ''].filter(Boolean).join(' ')], ['Documento', t.doc], ['Tessera AICS', t.aics], ['Cartellino', t.codice], ['Valido fino al', dt(t.scad)]].filter(r => r[1]);
+  root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Tesserato"><div class="grab"></div><div class="tess-big">${fotoT(t, 'dfoto big')}
+    <div style="min-width:0"><div class="eyebrow">${esc(sq)}</div><h3>${t.num ? `<b class="dnum">${esc(t.num)}</b> ` : ''}${esc(t.nome)}</h3></div></div>
+    ${t.arb ? '<p class="note" style="margin:0">Aggiunto dall’arbitro all’appello: non ha un cartellino collegato.</p>' : ''}
+    ${righe.length ? `<dl class="tdati">${righe.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
+    <button class="btn btn-ghost btn-block" data-x>${poi ? '← Torna alla distinta' : 'Chiudi'}</button></div></div>`;
   const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
   root.querySelector('[data-x]').onclick = close;
+}
+/* elenco di una squadra in un pop-up: righe piccole, si tocca il nome per il cartellino */
+function apriDistSq(g, s, riapri){
+  const root = $('#sheetRoot'), att = distAtt && distAtt.gid === g.id ? distAtt : null, prima = att ? att.ridisegna : null;
+  let su = true;
+  const close = () => { su = false; if(att && distAtt === att) att.ridisegna = prima; root.innerHTML = ''; if(riapri) riapri(); else if(prima) prima(); };
+  const draw = () => {
+    const o = DIST[g.id], T = o && o[s]; if(!T || !T.inviata){ close(); return; }
+    root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Distinta di ${esc(T.nome)}"><div class="grab"></div>
+      <div class="eyebrow">Distinta</div><h3 style="margin:0">${esc(T.nome)} <span class="cnt">${T.gioc.length}</span></h3>
+      ${T.at ? `<p class="note" style="margin:0">${esc(quandoInv(T.at))}</p>` : ''}${corrHTML(T.raw)}
+      ${corrOk(g) ? `<button type="button" class="btn btn-ghost sm" data-corr>✏️ Correggi all’appello</button>` : ''}
+      <ul class="dgl">${T.gioc.map((t, i) => `<li><button type="button" class="dg" data-i="g:${i}"><b class="dnum">${esc(t.num || '–')}</b><span class="dnm">${esc(t.nome)}</span>${t.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}${t.arb ? '<i>aggiunto</i>' : ''}${t.cap ? '<em>C</em>' : t.vice ? '<em>VC</em>' : ''}<span class="chev">›</span></button></li>`).join('')}</ul>
+      ${T.dir.length ? `<p class="dsub">In panchina</p><ul class="dgl">${T.dir.map((t, i) => `<li><button type="button" class="dg" data-i="d:${i}"><span class="dnm">${esc(t.nome)}</span><i>${esc(t.ruolo.toLowerCase())}</i><span class="chev">›</span></button></li>`).join('')}</ul>` : ''}
+      <p class="note" style="margin:0">Tocca un nome per vedere il cartellino con foto e dati.${o.noFoto ? ' Alcune foto non sono disponibili.' : ''}</p>
+      <button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
+    const bg = root.querySelector('.sheet-bg'); bg.onclick = e => { if(e.target === bg) close(); };
+    root.querySelector('[data-x]').onclick = close;
+    root.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.i.split(':'); su = false; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome, () => { su = true; draw(); }); });
+    const c = root.querySelector('[data-corr]'); if(c) c.onclick = () => { su = false; apriCorrezione(g, s, () => { su = true; draw(); }); };
+  };
+  if(att) att.ridisegna = () => { if(su) draw(); };
+  draw();
 }
 const quandoInv = ms => { if(!ms) return ''; const d = new Date(ms); return `inviata ${d.toDateString() === new Date().toDateString() ? 'oggi' : 'il ' + d.toLocaleDateString('it-IT', {day: 'numeric', month: 'numeric'})} alle ${d.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'})}`; };
 const distHTML = (g, D, prima = false) => {
@@ -1883,14 +1918,12 @@ const distHTML = (g, D, prima = false) => {
   if(D.st === 'load') return `<section class="ref-sec"><h3>Distinte</h3><div class="status"><span class="spin"></span>Carico le distinte…</div></section>`;
   if(D.st === 'err') return `<section class="ref-sec"><h3>Distinte</h3><p class="note" style="margin:0">${esc(D.msg)}</p><button type="button" class="btn btn-ghost sm" id="rfDistRetry">Riprova</button></section>`;
   if(D.st !== 'ok') return '';
-  const team = s => { const T = D[s]; if(!T) return '';
-    if(!T.inviata) return `<div class="dteam"><div class="dth">${esc(T.nome)}</div><p class="note" style="margin:0">${prima ? 'Non ancora inviata: compare qui appena la squadra la invia.' : 'Distinta non inviata: i giocatori li scrivi a mano nel referto.'}</p></div>`;
-    return `<div class="dteam"><div class="dth">${esc(T.nome)} <span class="cnt">${T.gioc.length}</span></div>${prima && T.at ? `<p class="note dinv">${esc(quandoInv(T.at))}</p>` : ''}${corrHTML(T.raw)}
-      ${corrOk(g) ? `<button type="button" class="btn btn-ghost sm" data-corr="${s}">✏️ Correggi all’appello</button>` : ''}
-      <ul class="dgl">${T.gioc.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:g:${i}">${fotoT(t)}<b class="dnum">${esc(t.num || '–')}</b><span class="dnm">${esc(t.nome)}</span>${t.cap ? '<em>C</em>' : t.vice ? '<em>VC</em>' : ''}${t.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}${t.arb ? '<i>aggiunto</i>' : ''}</button></li>`).join('')}</ul>
-      ${T.dir.length ? `<div class="eyebrow">In panchina</div><ul class="dgl">${T.dir.map((t, i) => `<li><button type="button" class="dg" data-dg="${s}:d:${i}">${fotoT(t)}<span class="dnm">${esc(t.nome)}</span><i>${esc(t.ruolo.toLowerCase())}</i></button></li>`).join('')}</ul>` : ''}</div>`; };
-  return `<section class="ref-sec"><header><h3>Distinte</h3></header>${team('casa')}${team('ospite')}
-    <p class="note" style="margin:0">Tocca un tesserato per vedere la foto grande.${D.noFoto ? ' Alcune foto non sono disponibili.' : ''}</p></section>`;
+  const riga = s => { const T = D[s]; if(!T) return '';
+    if(!T.inviata) return `<div class="dsq no"><span class="dsn"><b>${esc(T.nome)}</b><small class="${prima ? '' : 'ko'}">${prima ? 'Non ancora inviata' : 'Distinta non inviata: i giocatori li scrivi a mano nel referto'}</small></span></div>`;
+    const corr = ((T.raw && T.raw.corr) || []).length;
+    return `<button type="button" class="dsq" data-dsq="${s}"><span class="dsn"><b>${esc(T.nome)}</b><small>${T.gioc.length} giocatori${T.dir.length ? ' · ' + T.dir.length + ' in panchina' : ''}</small>${T.at ? `<small>${esc(quandoInv(T.at))}</small>` : ''}</span>${corr ? '<span class="ctag">corretta</span>' : ''}<span class="chev">›</span></button>`; };
+  return `<section class="ref-sec"><header><h3>Distinte</h3></header><div class="dsqs">${riga('casa')}${riga('ospite')}</div>
+    ${prima && ['casa', 'ospite'].some(s => D[s] && !D[s].inviata) ? '<p class="note" style="margin:0">Compare qui appena la squadra la invia.</p>' : ''}</section>`;
 };
 /* gol scritti nelle reti: l'autorete va alla squadra avversaria */
 const golRef = d => { const n = {casa: 0, ospite: 0}; (d.marcatori || []).forEach(e => { const s = e.sq === 'ospite' ? 'ospite' : 'casa'; n[e.mot === 'Autorete' ? (s === 'casa' ? 'ospite' : 'casa') : s]++; }); return n; };
@@ -1984,9 +2017,8 @@ function renderRefForm(g){
     else if(tid === '__man') d[k] = {sq, tid: '', nome: '', man: true};
     else { const t = (lista(sq, 'gioc') || []).find(x => x.id === tid); d[k] = {sq, tid, nome: t ? t.nome : '', num: t ? t.num || '' : ''}; }
     renderRefForm(g); if(d[k] && d[k].man) $(`#rf-${k}-nome`)?.focus(); });
-  body.querySelectorAll('[data-dg]').forEach(b => b.onclick = () => { const [s, k, i] = b.dataset.dg.split(':'), T = D[s]; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome); });
+  body.querySelectorAll('[data-dsq]').forEach(b => b.onclick = () => { readDraft(); apriDistSq(g, b.dataset.dsq, null); });
   const rr = $('#rfDistRetry'); if(rr) rr.onclick = () => { delete DIST[g.id]; fermaDistinte(); readDraft(); renderRefForm(g); };
-  body.querySelectorAll('[data-corr]').forEach(b => b.onclick = () => { readDraft(); apriCorrezione(g, b.dataset.corr, null); });
   $('#rfOther').onclick = () => openReferto(null);
   body.querySelectorAll('[data-esito]').forEach(b => b.onclick = () => { readDraft(); d.esito = b.dataset.esito; renderRefForm(g); });
   $('#rfSave').onclick = async () => {
