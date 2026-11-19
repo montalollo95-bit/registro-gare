@@ -291,6 +291,8 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 /* partite (amministratore) */
 .pst{display:inline-block;margin-top:4px;font-size:12px;font-weight:800;padding:2px 9px;border-radius:99px;align-self:flex-start;background:var(--chip);color:var(--muted)}
 .pst.multi{border-radius:12px;padding:6px 10px;line-height:1.35;align-self:stretch;font-weight:700}
+.list li>.avv-b{display:block;width:100%;margin-top:6px}
+.corr-box{display:flex;flex-direction:column;gap:2px}.corr-box ul{margin:2px 0 4px;padding-left:18px}.corr-box .note{margin:4px 0 0}
 .pst.ok{background:rgba(30,138,79,.16);color:var(--ok)}.pst.wait{background:rgba(232,163,60,.18);color:var(--warn)}.pst.no{background:rgba(210,58,46,.14);color:var(--red)}
 .item .stemma{width:40px;height:40px;border-radius:11px;font-size:15px;margin:0}
 .item .tx .vsr{display:flex;align-items:center;gap:8px;min-width:0;font-size:inherit;color:var(--fg)}
@@ -1047,7 +1049,7 @@ function statoDist(p, sqId){
   if(distOk(d, p)){ const sid = new Set(squPer(p, sqId).map(x => x.id)), bad = [...d.giocatori, ...(d.dirigenti || [])].filter(x => sid.has(x.id));
     if(bad.length && !chiusa) return ['no', `In distinta c’è uno squalificato (${bad.map(x => x.nome).join(', ')}): correggila`];
     if((d.tolti || []).length && !chiusa) return ['no', `Tolti dalla distinta: ${d.tolti.map(x => x.nome + ' (' + x.perche + ')').join(', ')}. Controllala`];
-    return ['ok', chiusa ? 'Distinta inviata · chiusa' : 'Distinta inviata ✓']; }
+    return ['ok', corrDi(d).length ? 'Distinta inviata · corretta dall’arbitro' : chiusa ? 'Distinta inviata · chiusa' : 'Distinta inviata ✓']; }
   if(chiusa) return ['no', 'Distinta non inviata'];
   if(d) return ['wait', 'Partita riprogrammata: ricompila la distinta'];
   return ['wait', 'Distinta da compilare'];
@@ -1059,24 +1061,64 @@ function squPer(p, sqId){
     const r = out.get(z.id) || {id: z.id, nome: z.nome, motivi: []}; r.motivi.push(z.gg == null ? 'espulsione diretta, giornate da decidere' : z.motivo.toLowerCase()); out.set(z.id, r); });
   return [...out.values()];
 }
+/* correzioni dell'arbitro all'appello: cosa ha cambiato, visibile a tutte e due le squadre e all'amministratore */
+const corrDi = d => (d && d.corr) || [];
+const oraHM = ms => { const d = new Date(ms); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const corrBox = d => corrDi(d).length ? `<div class="warn-box corr-box"><b>✏️ Corretta dall’arbitro all’appello</b>${corrDi(d).map(c => `<span class="note">${esc(c.nome || 'Arbitro')} · ore ${esc(oraHM(c.at))}</span><ul>${(c.cosa || []).map(v => `<li>${esc(v)}</li>`).join('')}</ul>`).join('')}</div>` : '';
+const listaDist = x => `<ol class="dlist">${(x.giocatori || []).map(g => `<li><span>${esc(g.numero || '–')}</span><b>${esc(g.nome)}</b>${g.id === x.capitano ? '<em>C</em>' : g.id === x.vice ? '<em>VC</em>' : ''}${g.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}${g.arb ? '<i>aggiunto dall’arbitro</i>' : ''}</li>`).join('')}</ol>
+  ${(x.dirigenti || []).length ? `<div class="eyebrow">Dirigenti</div><ul class="dlist dir">${x.dirigenti.map(g => `<li><b>${esc(g.nome)}</b><i>${esc((g.ruolo || '').toLowerCase())}${g.arb ? ' · aggiunto dall’arbitro' : ''}</i></li>`).join('')}</ul>` : ''}`;
+/* distinta della squadra avversaria: il responsabile la vede dai 10 minuti prima dell'inizio (lo controllano anche le regole) */
+const AVV_MIN = 10;
+const avvDa = p => { const ini = inizioMs(p); return ini && p.ora && p.stato !== 'rinviata' ? ini - AVV_MIN * 60e3 : null; };
+const avvOk = p => { if(esito(p)) return true; const t = avvDa(p); return t != null && Date.now() >= t; };
+const oraAvv = p => { const d = new Date(avvDa(p)); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+/* lettura singola via REST: le regole guardano l'ora della richiesta. Con la connessione già aperta Firestore userebbe l'ora in cui
+   la connessione è partita, e chi ha la pagina aperta da prima dei 10 minuti resterebbe bloccato. */
+const valRest = v => 'stringValue' in v ? v.stringValue : 'integerValue' in v ? +v.integerValue : 'doubleValue' in v ? v.doubleValue : 'booleanValue' in v ? v.booleanValue
+  : 'arrayValue' in v ? (v.arrayValue.values || []).map(valRest) : 'mapValue' in v ? daRest(v.mapValue.fields || {}) : 'timestampValue' in v ? v.timestampValue : null;
+const daRest = f => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, valRest(v)]));
+async function leggiRest(path){
+  const u = firebase.auth().currentUser; if(!u) throw {code: 'unauthenticated'};
+  /* batchGet: un documento che non c'è torna come «missing», senza errori in console */
+  const E = window.FB_EMU, base = E ? `http://${E.host}:${E.port}` : 'https://firestore.googleapis.com', db0 = `projects/${firebase.app().options.projectId}/databases/(default)`;
+  const r = await fetch(`${base}/v1/${db0}/documents:batchGet`, {method: 'POST', headers: {Authorization: 'Bearer ' + await u.getIdToken(), 'Content-Type': 'application/json'}, body: JSON.stringify({documents: [`${db0}/documents/${path}`]})});
+  if(r.status === 403) throw {code: 'permission-denied'};
+  if(!r.ok) throw {code: 'unavailable'};
+  const x = ((await r.json()) || [])[0] || {};
+  return x.found ? daRest(x.found.fields || {}) : null;
+}
+async function openDistAvv(p, sqId){
+  const casa = p.casaId === sqId, vsId = casa ? p.ospiteId : p.casaId, vs = casa ? p.ospite : p.casa;
+  const testa = `<h3>Distinta di ${esc(vs)}</h3><p class="note">${esc(p.giornata)}ª giornata · ${esc(p.casa)} – ${esc(p.ospite)}${p.data ? ' · ' + esc(giornoCorto(p.data)) + (p.ora ? ' ore ' + esc(p.ora) : '') : ''}</p>`;
+  const {root} = sheet(`${testa}<div class="status"><span class="spin"></span>Carico la distinta…</div>`, 'Distinta avversaria', 'largo');
+  const chiudi = '<div class="row"><button class="btn btn-ghost" data-agg>Aggiorna</button><button class="btn btn-ghost" data-x>Chiudi</button></div>', fine = html => { const sh = root.querySelector('.sheet'); if(!sh) return; sh.innerHTML = `<div class="grab"></div>${testa}${html}${chiudi}`;
+    sh.querySelector('[data-x]').onclick = () => { root.innerHTML = ''; }; sh.querySelector('[data-agg]').onclick = () => openDistAvv(p, sqId); };
+  try{
+    const x = await leggiRest('distinte/' + encodeURIComponent(p.id + '_' + vsId));
+    if(!x || !distOk(x, p)){ fine(`<div class="empty"><h3>Distinta non inviata</h3><span>${esc(vs)} non ha inviato la distinta per questa partita.</span></div>`); return; }
+    fine(`${corrBox(x)}${listaDist(x)}<p class="note">Se l’arbitro la corregge all’appello lo vedi qui: tocca «Aggiorna».</p>`);
+  }catch(e){ /* distinta mai inviata: Firestore risponde «permesso negato» anche quando l'orario è già arrivato */
+    if(e && e.code === 'permission-denied' && avvOk(p)){ fine(`<div class="empty"><h3>Distinta non inviata</h3><span>${esc(vs)} non ha inviato la distinta per questa partita.</span></div>`); return; }
+    fine(`<div class="warn-box">${e && e.code === 'permission-denied' ? `La distinta di ${esc(vs)} si vede dai ${AVV_MIN} minuti prima dell’inizio${avvDa(p) ? ' (dalle ' + oraAvv(p) + ')' : ''}.` : esc(fbErr(e))}</div>`); }
+}
 function openDistinta(p, sqId){
   if(!p) return;
   const lim = LIM[p.camp] || [3, 12], casa = p.casaId === sqId, sq = casa ? p.casa : p.ospite, vs = casa ? p.ospite : p.casa;
   const squ = squPer(p, sqId), sid = new Set(squ.map(x => x.id)), old = distDi(p, sqId), ini = inizioMs(p);
-  const ro = !S.admin && (!!esito(p) || (ini && Date.now() >= ini));
+  const corretta = distOk(old, p) && corrDi(old).length > 0;
+  const ro = !S.admin && (!!esito(p) || (ini && Date.now() >= ini) || corretta);
   const rosa = S.tess.filter(t => t.squadraId === sqId && statoT(t) === 'approvato').sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it'));
   const gioc = rosa.filter(t => ['Giocatore', 'Portiere', ''].includes(t.ruolo || '')), dirL = rosa.filter(t => ['Allenatore', 'Dirigente'].includes(t.ruolo));
   const testa = `<h3>Distinta · ${esc(p.giornata)}ª giornata</h3><p class="note"><b>${esc(sq)}</b> contro ${esc(vs)}${p.data ? ' · ' + esc(giornoCorto(p.data)) + (p.ora ? ' ore ' + esc(p.ora) : '') : ''}${p.impianto ? ' · ' + esc(p.impianto) : ''}</p>`;
   /* sola lettura: partita iniziata o giocata */
   if(ro){
     if(!old){ toast('Per questa partita la distinta non è stata inviata'); return; }
-    sheet(`${testa}${distOk(old, p) ? '' : '<div class="warn-box">Questa distinta era per la data precedente alla riprogrammazione.</div>'}
-      <ol class="dlist">${old.giocatori.map(x => `<li><span>${esc(x.numero || '–')}</span><b>${esc(x.nome)}</b>${x.id === old.capitano ? '<em>C</em>' : x.id === old.vice ? '<em>VC</em>' : ''}${x.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}</li>`).join('')}</ol>
-      ${(old.dirigenti || []).length ? `<div class="eyebrow">Dirigenti</div><ul class="dlist dir">${old.dirigenti.map(x => `<li><b>${esc(x.nome)}</b><i>${esc((x.ruolo || '').toLowerCase())}</i></li>`).join('')}</ul>` : ''}
-      <p class="note">La distinta si chiude all’orario d’inizio: ora la può cambiare solo l’amministratore.</p><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Distinta', 'largo');
+    sheet(`${testa}${distOk(old, p) ? corrBox(old) : '<div class="warn-box">Questa distinta era per la data precedente alla riprogrammazione.</div>'}
+      ${listaDist(old)}
+      <p class="note">${corretta && !esito(p) && !(ini && Date.now() >= ini) ? 'L’arbitro l’ha corretta all’appello: ora la può cambiare solo l’amministratore.' : 'La distinta si chiude all’orario d’inizio: ora la può cambiare solo l’amministratore.'}</p><button class="btn btn-ghost btn-block" data-x>Chiudi</button>`, 'Distinta', 'largo');
     return;
   }
-  const valido = id => rosa.some(t => t.id === id) && !sid.has(id);
+  const valido = id => rosa.some(t => t.id === id) && !sid.has(id), scad = S.tess.filter(t => t.squadraId === sqId && statoT(t) === 'scaduto').length;
   const D = {g: [], dir: [], cap: '', vice: ''};
   if(old){ D.g = old.giocatori.filter(x => valido(x.id)).map(x => ({id: x.id, num: x.numero || ''})); D.dir = (old.dirigenti || []).filter(x => valido(x.id)).map(x => ({id: x.id}));
     D.cap = valido(old.capitano) ? old.capitano : ''; D.vice = valido(old.vice) ? old.vice : ''; }
@@ -1087,12 +1129,12 @@ function openDistinta(p, sqId){
   const nm = id => { const t = rosa.find(x => x.id === id); return t ? nomeT(t) : ''; };
   const apri = () => {
     const {root, close} = sheet(`${testa}
-      ${old && !distOk(old, p) ? '<div class="warn-box">La partita è stata annullata e riprogrammata: controlla la distinta e inviala di nuovo.</div>' : ''}
+      ${old && !distOk(old, p) ? '<div class="warn-box">La partita è stata annullata e riprogrammata: controlla la distinta e inviala di nuovo.</div>' : corrBox(old)}
       ${squ.length ? `<div class="warn-box squ-box">⛔ <b>Squalificati:</b> ${squ.map(x => esc(x.nome)).join(', ')}${tolti.length ? '<br>Li ho tolti dalla distinta che avevi già compilato.' : ''}</div>` : ''}
       <div id="dBody" class="stack" style="gap:10px"></div>
       <div class="err" id="dErr"></div>
       <div class="actions"><button class="btn btn-primary" id="dGo">${old ? 'Invia di nuovo' : 'Invia distinta'}</button><button type="button" class="btn btn-ghost" data-x>Annulla</button></div>
-      <p class="note">Puoi cambiarla fino all’orario d’inizio della partita.</p>`, 'Distinta', 'largo');
+      ${scad ? `<p class="note">⚠️ ${scad === 1 ? '1 tesserato ha' : scad + ' tesserati hanno'} il cartellino scaduto e non ${scad === 1 ? 'compare' : 'compaiono'} nell’elenco: manda la richiesta di rinnovo dalla scheda Tesserati.</p>` : ''}<p class="note">Puoi cambiarla fino all’orario d’inizio della partita. L’arbitro la vede appena la invii e all’appello può correggerla; ${esc(vs)} la vedrà ${AVV_MIN} minuti prima dell’inizio, e tu vedrai la sua.</p>`, 'Distinta', 'largo');
     const body = root.querySelector('#dBody');
     const tend = (k, i, lista, cur, usati) => `<div class="tend" role="listbox">${cur ? `<button type="button" data-pk="${k}:${i}:" class="svuota">Svuota la riga</button>` : ''}${lista.map(t => sid.has(t.id)
         ? `<button type="button" class="sq" disabled aria-disabled="true"><span>${esc(nomeT(t))}</span><em>squalificato</em></button>`
@@ -1139,6 +1181,8 @@ function openDistinta(p, sqId){
         giocatori: g.map(x => { const t = rosa.find(y => y.id === x.id); return {id: t.id, nome: nomeT(t), cog: t.cognome || '', numero: x.num.trim(), ruolo: t.ruolo || 'Giocatore'}; }),
         capitano: D.cap, vice: D.vice || '', dirigenti: D.dir.filter(x => x.id).map(x => { const t = rosa.find(y => y.id === x.id); return {id: t.id, nome: nomeT(t), ruolo: t.ruolo}; }),
         by: S.user.uid, updatedAt: Date.now()};
+      /* le correzioni dell'arbitro restano, con chi ha aggiunto a mano */
+      if(corretta){ doc.corr = old.corr; doc.giocatori.push(...old.giocatori.filter(x => x.arb)); doc.dirigenti.push(...(old.dirigenti || []).filter(x => x.arb)); }
       const b = root.querySelector('#dGo'); b.disabled = true;
       try{ await db().collection('distinte').doc(p.id + '_' + sqId).set(doc); toast('Distinta inviata'); close(); }catch(err){ b.disabled = false; er.textContent = fbErr(err); }
     };
@@ -1594,7 +1638,8 @@ function renderResp(app){
     const prox = lp.filter(p => !esito(p)), fatte = lp.filter(p => esito(p)).reverse();
     const item = p => { const [k, t] = statoDist(p, r.squadraId), vs = p.casaId === r.squadraId ? p.ospite : p.casa, sq = !esito(p) && p.data && p.stato !== 'rinviata' ? squPer(p, r.squadraId) : [];
       return `<li><button class="item" data-dp="${esc(p.id)}"><span class="tx">${righeSq(p)}<span>${esc(p.giornata)}ª giornata · ${p.data ? esc(giornoCorto(p.data) + (p.ora ? ' · ' + p.ora : '') + (p.impianto ? ' · ' + p.impianto : '')) : 'Data da definire'}</span>
-        <span class="pst ${k}">${esc(t)}</span>${sq.length ? `<span class="pst no">⛔ ${sq.length === 1 ? '1 squalificato' : sq.length + ' squalificati'}</span>` : ''}</span></button></li>`; };
+        <span class="pst ${k}">${esc(t)}</span>${sq.length ? `<span class="pst no">⛔ ${sq.length === 1 ? '1 squalificato' : sq.length + ' squalificati'}</span>` : ''}${!esito(p) && avvDa(p) && !avvOk(p) ? `<span class="pst">Distinta di ${esc(vs)}: la vedi dalle ${oraAvv(p)}</span>` : ''}</span></button>
+        ${avvOk(p) || (esito(p) && p.data) ? `<button class="btn btn-ghost sm avv-b" data-da="${esc(p.id)}">Vedi la distinta di ${esc(vs)}</button>` : ''}</li>`; };
     app.innerHTML = band(q.nome || r.squadra, `${q.categoria || r.categoria || ''} · Responsabile: ${nomeR(r)}`) + `<main class="wrap stack">${segR}
       ${!S.pubParOk || !S.loaded.dist ? '<div class="status"><span class="spin"></span>Carico le partite…</div>' : !lp.length ? '<div class="empty"><h3>Calendario in arrivo</h3><span>Qui troverai le partite della tua squadra: per ognuna si compila la distinta.</span></div>'
         : `${prox.length ? `<section class="stack" style="gap:8px"><div class="eyebrow">Da giocare</div><ul class="list">${prox.map(item).join('')}</ul></section>` : ''}
@@ -1602,6 +1647,10 @@ function renderResp(app){
       <p class="note">Distinta: da ${(LIM[cat] || [3, 12])[0]} a ${(LIM[cat] || [3, 12])[1]} giocatori, capitano obbligatorio, fino a ${MAXDIR} dirigenti. Si compila quando la partita ha data e ora e si può cambiare fino all’inizio. Se la partita viene annullata, la distinta va rifatta.</p></main>`;
     bindOut(); bindHome(app);
     bindRT(app);
+    app.querySelectorAll('[data-da]').forEach(b => b.onclick = () => { const p = lp.find(x => x.id === b.dataset.da); if(p) openDistAvv(p, r.squadraId); });
+    /* allo scoccare dei 10 minuti la pagina si aggiorna da sola */
+    clearTimeout(S.avvT); const prossimo = Math.min(...prox.map(avvDa).filter(t => t && t > Date.now()));
+    if(isFinite(prossimo) && prossimo - Date.now() < 864e5) S.avvT = setTimeout(() => { if(VIEW() === 'area') render(); }, prossimo - Date.now() + 500);
     app.querySelectorAll('[data-dp]').forEach(b => b.onclick = () => { const p = lp.find(x => x.id === b.dataset.dp); if(!p) return;
       if(!esito(p) && p.stato === 'rinviata'){ toast('Partita rinviata: la distinta si compila quando c’è la nuova data'); return; }
       if(!esito(p) && (!p.data || !p.ora)){ toast('La distinta si compila quando la partita ha data e ora'); return; }
@@ -1614,7 +1663,7 @@ function renderResp(app){
     <button class="btn btn-primary btn-block" id="tNew">+ Nuovo tesserato</button>
     <div class="row tbtn"><button class="btn btn-ghost sm" id="rImp">📥 Importa elenco</button><button class="btn btn-ghost sm" id="rExp">⬇️ Esporta elenco</button></div>
     ${!S.loaded.tess ? '<div class="status"><span class="spin"></span>Carico i tesserati…</div>' : !l.length ? `<div class="empty"><h3>Nessun tesserato</h3><span>Aggiungi i giocatori e lo staff: l’amministratore del torneo li controlla e approva. Solo i tesserati approvati potranno andare in distinta.</span></div>` : ''}
-    ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('svincolato', 'Svincolati')}${blocco('scaduto', 'Scaduti (stagioni passate)')}
+    ${blocco('rifiutato', 'Da correggere')}${blocco('attesa', 'In attesa di approvazione')}${blocco('approvato', 'Tesserati validi')}${blocco('sospeso', 'Sospesi')}${blocco('svincolato', 'Svincolati')}${blocco('scaduto', 'Scaduti · per rimetterli in distinta serve la richiesta di rinnovo')}
     ${(() => { const cat = q.categoria || r.categoria, L = limDi(cat); return `<p class="note">${L.max ? `Tesserati: <b>${contaTess(r.squadraId, cat)} su ${L.max}</b>${L.soloGioc ? ' (contano solo giocatori e portieri)' : ''}. ` : ''}${L.etaMin ? `Età minima: ${L.etaMin} anni compiuti entro il 30 giugno ${fineStagione().slice(0, 4)}.` : ''}</p>`; })()}
     <p class="note">I cartellini valgono fino al 30 giugno. Dopo la scadenza restano in archivio per un anno, poi i dati si cancellano da soli.</p></main>`;
   bindOut();
@@ -1700,10 +1749,10 @@ function openTess(t){
     }catch(err){ b.disabled = false; toast(fbErr(err)); }
   };
 }
-/* dati che l'approvazione aggiunge: scadenza al 30 giugno, codice del cartellino, cancellazione un anno dopo */
+/* dati che l'approvazione aggiunge: scadenza al 30 giugno e codice del cartellino. Alla scadenza serve la richiesta di rinnovo */
 function approva(t){
   const sc = fineStagione();
-  return {stato: 'approvato', scadenza: sc, scadenzaMs: msDopo(sc), cancellaDopo: unAnnoDopo(sc), approvatoAt: Date.now(), approvatoDa: S.user.email, motivo: '',
+  return {stato: 'approvato', scadenza: sc, scadenzaMs: msDopo(sc), approvatoAt: Date.now(), approvatoDa: S.user.email, motivo: '',
     codice: t.codice || `${/7/.test(t.categoria || '') ? 'C7' : 'C5'}-${sc.slice(2, 4)}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`};
 }
 
@@ -2009,7 +2058,7 @@ function openCard(t){
       ${s === 'approvato' ? '<button class="btn btn-danger" data-a="sosp">Sospendi</button>' : ''}${s === 'sospeso' ? '<button class="btn btn-ok" data-a="riatt">Riattiva</button>' : ''}
       ${s === 'approvato' || s === 'sospeso' ? '<button class="btn btn-ghost" data-a="svi">Svincola</button>' : ''}${s === 'svincolato' ? '<button class="btn btn-ok" data-a="nosvi">Annulla svincolo</button>' : ''}
       ${s === 'scaduto' ? '<button class="btn btn-ok" data-a="ok">Rinnova per questa stagione</button>' : ''}
-      <button class="btn btn-ghost" data-a="mod">Modifica</button></div>` : s === 'scaduto' ? '<button class="btn btn-primary btn-block" data-a="rinnova">Rinnova per la nuova stagione</button>' : s === 'approvato' || s === 'sospeso' ? azResp(t) : '';
+      <button class="btn btn-ghost" data-a="mod">Modifica</button></div>` : s === 'scaduto' ? `<div class="warn-box">Cartellino scaduto${t.scadenza ? ' il ' + esc(fmt(t.scadenza)) : ''}: finché non mandi la richiesta di rinnovo e l’amministratore non la approva, non si può mettere in distinta.</div><button class="btn btn-primary btn-block" data-a="rinnova">Rinnova per la nuova stagione</button>` : s === 'approvato' || s === 'sospeso' ? azResp(t) : '';
   const cand = S.admin && (s === 'attesa' || s === 'rifiutato') ? S.tess.filter(x => x.id !== t.id && (x.squadraId !== t.squadraId || x.stato === 'svincolato') && x.stato !== 'attesa' && x.stato !== 'rifiutato' && (stessa(x, t) || (x.squadraId === t.daSquadraId && lc(x.cognome) === lc(t.cognome) && lc(x.nome) === lc(t.nome)))) : [];
   const dup = S.admin && S.tess.filter(x => x.id !== t.id && x.dataNascita === t.dataNascita && (x.cognome || '').toLowerCase() === (t.cognome || '').toLowerCase() && (x.nome || '').toLowerCase() === (t.nome || '').toLowerCase() && statoT(x) !== 'scaduto');
   root.innerHTML = `<div class="sheet-bg"><div class="sheet stack" role="dialog" aria-modal="true" aria-label="Cartellino"><div class="grab"></div>
@@ -2023,7 +2072,7 @@ function openCard(t){
     ${S.admin && (s === 'attesa' || s === 'rifiutato') && troppoGiovane(t, t.categoria) ? `<div class="warn-box">⚠️ ${esc(msgEta(t.categoria))}</div>` : ''}
     ${s !== 'attesa' && s !== 'rifiutato' ? statHtml(t) : ''}
     ${S.admin && t.documento ? `<p class="note">Documento: ${esc(t.documento)}</p>` : ''}
-    ${S.admin && t.approvatoDa ? `<p class="note">Approvato da ${esc(t.approvatoDa)} il ${new Date(t.approvatoAt).toLocaleDateString('it-IT')} · dati conservati fino al ${fmt(t.cancellaDopo)}</p>` : ''}
+    ${S.admin && t.approvatoDa ? `<p class="note">Approvato da ${esc(t.approvatoDa)} il ${new Date(t.approvatoAt).toLocaleDateString('it-IT')}</p>` : ''}
     ${azioni}<button class="btn btn-ghost btn-block" data-x>Chiudi</button></div></div>`;
   root.querySelector('.sheet-bg').onclick = e => { if(e.target.classList.contains('sheet-bg')) close(); };
   root.querySelector('[data-x]').onclick = close;
@@ -3565,6 +3614,15 @@ const shBrv = n => { const p = String(n || '').split(/\s+/); if(p.length < 2) re
 const shHead = (ctx, cols, y, fs) => cols.forEach(([t, x]) => shTxt(ctx, t, x, y, 110, 'B', 700, fs, SH_MUTO, 'center'));
 
 /* --- una partita: risultato, gol, cartellini, premi --- */
+/* simbolini dei premi: stella (migliore in campo) e guanto (miglior portiere) */
+function shPremioIco(ctx, cx, cy, s, tipo, col){
+  ctx.save(); ctx.fillStyle = col; ctx.strokeStyle = col; ctx.beginPath();
+  if(tipo === 'mvp'){ const R = s / 2, r = R * .45; for(let i = 0; i < 10; i++){ const a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r : R; ctx.lineTo(cx + Math.cos(a) * q, cy + Math.sin(a) * q); } ctx.closePath(); ctx.fill(); }
+  else { const u = s / 10, x0 = cx - 4 * u, y0 = cy - 5 * u;
+    [[0, 1.2], [2, 0], [4, .4], [6, 1.4]].forEach(([dx, dy]) => { shRR(ctx, x0 + dx * u, y0 + dy * u, 1.7 * u, 5.5 * u, .85 * u); ctx.fill(); ctx.beginPath(); });
+    shRR(ctx, x0, y0 + 4 * u, 7.7 * u, 5 * u, 1.6 * u); ctx.fill(); ctx.beginPath();
+    ctx.translate(x0 + 7.4 * u, y0 + 5.6 * u); ctx.rotate(-.6); shRR(ctx, -.85 * u, -3.6 * u, 1.7 * u, 4 * u, .85 * u); ctx.fill(); }
+  ctx.restore(); }
 async function shPartita(p, fmtI){
   const e = esito(p), B = await shBase(p.camp, fmtI, e ? 'RISULTATO' : 'PROSSIMA PARTITA', `${p.giornata}ª giornata${p.data ? ' · ' + giornoCorto(p.data) : ''}${p.impianto ? ' · ' + p.impianto : ''}`), {ctx, W, story} = B;
   const gol = e && !e.tav ? eventiPar(p) : [], premi = e && !e.tav ? [p.mvp && ['MIGLIORE IN CAMPO', p.mvp], p.por && ['MIGLIOR PORTIERE', p.por]].filter(Boolean) : [];
@@ -3605,7 +3663,9 @@ async function shPartita(p, fmtI){
   }
   premi.forEach(([t, x], i) => { const bw = premi.length > 1 ? (W - 130) / 2 : W - 100, bx = 50 + i * (bw + 30), by = B.y1 - pH;
     shBar(ctx, bx, by, bw, pH);
-    shTxt(ctx, t, bx + 26, by + pH * .42, bw - 52, 'B', 700, story ? 24 : 18, B.acc);
+    const ls = story ? 24 : 18, ly = by + pH * .34, is = ls * 1.25;
+    shPremioIco(ctx, bx + 26 + is / 2, ly - ls * .36, is, t === 'MIGLIOR PORTIERE' ? 'por' : 'mvp', B.acc);
+    shTxt(ctx, t, bx + 26 + is + 10, ly, bw - 62 - is, 'B', 700, ls, B.acc);
     shTxt(ctx, `${shBrv(x.nome)} · ${p[x.sq === 'ospite' ? 'ospite' : 'casa']}`, bx + 26, by + pH * .42 + (story ? 46 : 32), bw - 52, 'D', 800, story ? 38 : 28, '#fff', 'left', 18); });
   return B.cv;
 }
