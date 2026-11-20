@@ -1,7 +1,10 @@
 name: Notifiche
+# Ogni 15 minuti, dalle 8:00 alle 23:00 ora italiana. Di notte non gira (GitHub ragiona in ora UTC:
+# il controllo dell'ora italiana qui sotto vale sia con l'ora solare sia con l'ora legale).
+# Quello che cambia di notte arriva con il primo giro delle 8:00.
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/15 6-22 * * *'
   workflow_dispatch:
 concurrency:
   group: notifiche
@@ -11,11 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Orario (8-23 ora italiana)
+        id: ora
+        run: |
+          h=$(TZ=Europe/Rome date +%-H)
+          if [ "$h" -ge 8 ] && [ "$h" -lt 23 ]; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "Sono le $h in Italia: di notte niente notifiche"; fi
       - uses: actions/checkout@v4
+        if: steps.ora.outputs.ok == '1' || github.event_name == 'workflow_dispatch'
       - uses: actions/setup-node@v4
+        if: steps.ora.outputs.ok == '1' || github.event_name == 'workflow_dispatch'
         with:
           node-version: 20
       - run: npm install --no-save --no-audit --no-fund firebase-admin@12
+        if: steps.ora.outputs.ok == '1' || github.event_name == 'workflow_dispatch'
       - run: node notifiche.js
+        if: steps.ora.outputs.ok == '1' || github.event_name == 'workflow_dispatch'
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
