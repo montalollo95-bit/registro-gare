@@ -440,6 +440,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .mkr{display:grid;grid-template-columns:1fr 40px 30px 40px;align-items:center;gap:4px;font-size:14px}
 .mkr > span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mkr.aut > span{color:var(--muted);font-style:italic}
 .mkr b{text-align:center;font-size:16px;font-variant-numeric:tabular-nums}
+.mkr .mkm{grid-column:1/-1;min-height:36px;border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:transparent;color:var(--fg);font-size:16px;width:100%;min-width:0}.mkr .mkm::placeholder{color:var(--muted)}
 .mkr button{height:36px;border:0;border-radius:10px;background:var(--chip);color:var(--fg);font-size:18px;font-weight:800;cursor:pointer}
 .mkb select{min-height:42px;border:1px dashed var(--line);border-radius:10px;padding:6px 10px;background:transparent;color:var(--fg);width:100%}
 @media (prefers-color-scheme:dark){.ora{text-shadow:0 1px 10px rgba(91,139,255,.35)}.st.prox{background:rgba(169,204,255,.16);color:#CFE2FF}}
@@ -3121,7 +3122,7 @@ function openPartita(p0, pre){
   const risVis = () => { root.querySelectorAll('[data-ris]').forEach(x => x.hidden = es.value !== 'g' && !(x.id === 'pMk' && sosp())); root.querySelector('#pSosp').hidden = !sosp(); root.querySelectorAll('#pMk .mk-gol').forEach(x => x.hidden = es.value !== 'g'); };
   es.onchange = risVis; stS.addEventListener('change', risVis);
   /* marcatori, migliore in campo, miglior portiere */
-  const M = {mar: (p.mar || []).map(x => ({...x})), aut: {casa: +((p.aut || {}).casa) || 0, ospite: +((p.aut || {}).ospite) || 0}, mvp: p.mvp || null, por: p.por || null, ids: {casa: p.casaId, ospite: p.ospiteId},
+  const M = {mar: (p.mar || []).map(x => ({...x, min: (x.min || []).slice()})), aut: {casa: +((p.aut || {}).casa) || 0, ospite: +((p.aut || {}).ospite) || 0}, autMin: {casa: (((p.autMin || {}).casa) || []).slice(), ospite: (((p.autMin || {}).ospite) || []).slice()}, mvp: p.mvp || null, por: p.por || null, ids: {casa: p.casaId, ospite: p.ospiteId},
     car: [...(p.amm || []).map(x => ({...x, t: 'g'})), ...(p.esp || []).map(x => ({...x, t: x.tipo === 'doppia' ? 'd' : 'r'}))]};
   const mk = root.querySelector('#pMk'), sel = id => root.querySelector('#' + id);
   const rosa = s => { const q = sel(s === 'casa' ? 'p-c' : 'p-o').value; return S.tess.filter(t => t.squadraId === q && t.stato === 'approvato' && ['Giocatore', 'Portiere', ''].includes(t.ruolo || '')).sort((a, b) => nomeT(a).localeCompare(nomeT(b), 'it')); };
@@ -3134,8 +3135,8 @@ function openPartita(p0, pre){
     const blocco = s => { const r = rosa(s), lm = M.mar.map((x, i) => [x, i]).filter(([x]) => x.sq === s), ass = lm.reduce((a, [x]) => a + (+x.n || 0), 0) + M.aut[s], g = gol(s);
       const pres = new Set(lm.map(([x]) => x.id));
       return `<div class="mkb"><div class="mkh">${stemma(nomeSq(s))}<span>${esc(nomeSq(s))}</span><em class="${ass === g ? 'ok' : 'ko'}">${ass} di ${g} gol</em></div>
-        ${lm.map(([x, i]) => `<div class="mkr"><span>${esc(x.nome)}</span><button type="button" data-mm="${i}" aria-label="Un gol in meno">−</button><b>${x.n}</b><button type="button" data-mp="${i}" aria-label="Un gol in più">+</button></div>`).join('')}
-        ${M.aut[s] ? `<div class="mkr aut"><span>Autogol degli avversari</span><button type="button" data-am="${s}" aria-label="Un autogol in meno">−</button><b>${M.aut[s]}</b><button type="button" data-ap="${s}" aria-label="Un autogol in più">+</button></div>` : ''}
+        ${lm.map(([x, i]) => `<div class="mkr"><span>${esc(x.nome)}</span><button type="button" data-mm="${i}" aria-label="Un gol in meno">−</button><b>${x.n}</b><button type="button" data-mp="${i}" aria-label="Un gol in più">+</button><input class="mkm" data-mmin="${i}" inputmode="decimal" autocomplete="off" maxlength="80" value="${esc((x.min || []).join(', '))}" placeholder="${x.n > 1 ? 'Minuti (facoltativi): es. 5, 12' : 'Minuto (facoltativo)'}" aria-label="Minuti dei gol di ${esc(x.nome)}"></div>`).join('')}
+        ${M.aut[s] ? `<div class="mkr aut"><span>Autogol degli avversari</span><button type="button" data-am="${s}" aria-label="Un autogol in meno">−</button><b>${M.aut[s]}</b><button type="button" data-ap="${s}" aria-label="Un autogol in più">+</button><input class="mkm" data-amin="${s}" inputmode="decimal" autocomplete="off" maxlength="80" value="${esc(M.autMin[s].join(', '))}" placeholder="${M.aut[s] > 1 ? 'Minuti (facoltativi): es. 5, 12' : 'Minuto (facoltativo)'}" aria-label="Minuti degli autogol"></div>` : ''}
         <select data-add="${s}" aria-label="Aggiungi marcatore ${esc(nomeSq(s))}"><option value="">+ Aggiungi chi ha segnato…</option>${r.filter(t => !pres.has(t.id)).map(t => `<option value="${esc(t.id)}">${esc(nomeT(t))}${t.numero ? ' · n. ' + esc(t.numero) : ''}</option>`).join('')}${M.aut[s] ? '' : '<option value="__aut">Autogol degli avversari</option>'}</select>
         ${!r.length && M.ids[s] ? '<p class="note">Questa squadra non ha ancora tesserati approvati.</p>' : ''}</div>`; };
     const opz = (cur, pref) => ['casa', 'ospite'].map(s => { let r = rosa(s); if(pref) r = [...r.filter(t => t.ruolo === 'Portiere'), ...r.filter(t => t.ruolo !== 'Portiere')];
@@ -3158,9 +3159,15 @@ function openPartita(p0, pre){
     mk.querySelector('#p-mvp').onchange = e => { M.mvp = trova(e.target.value, M.mvp); };
     mk.querySelector('#p-por').onchange = e => { M.por = trova(e.target.value, M.por); };
     mk.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => { M.mar[+b.dataset.mp].n++; drawMk(); });
-    mk.querySelectorAll('[data-mm]').forEach(b => b.onclick = () => { const x = M.mar[+b.dataset.mm]; if(--x.n <= 0) M.mar.splice(+b.dataset.mm, 1); drawMk(); });
+    mk.querySelectorAll('[data-mm]').forEach(b => b.onclick = () => { const x = M.mar[+b.dataset.mm]; if(--x.n <= 0) M.mar.splice(+b.dataset.mm, 1); else x.min = (x.min || []).slice(0, x.n); drawMk(); });
     mk.querySelectorAll('[data-ap]').forEach(b => b.onclick = () => { M.aut[b.dataset.ap]++; drawMk(); });
-    mk.querySelectorAll('[data-am]').forEach(b => b.onclick = () => { M.aut[b.dataset.am]--; drawMk(); });
+    mk.querySelectorAll('[data-am]').forEach(b => b.onclick = () => { const s = b.dataset.am; M.aut[s]--; M.autMin[s] = M.autMin[s].slice(0, M.aut[s]); drawMk(); });
+    const minuti = v => v.split(/[\s,;\/]+/).map(t => t.replace(/[’'`]/g, '').trim()).filter(Boolean).map(t => t.slice(0, 6)).slice(0, 99);
+    const piuGol = (k, n, set) => { if(k > n){ set(k); drawMk(); } };
+    mk.querySelectorAll('[data-mmin]').forEach(x => { const m = M.mar[+x.dataset.mmin];
+      x.oninput = () => { m.min = minuti(x.value); }; x.onchange = () => piuGol(m.min.length, m.n, k => m.n = k); });
+    mk.querySelectorAll('[data-amin]').forEach(x => { const s = x.dataset.amin;
+      x.oninput = () => { M.autMin[s] = minuti(x.value); }; x.onchange = () => piuGol(M.autMin[s].length, M.aut[s], k => M.aut[s] = k); });
     mk.querySelectorAll('[data-add]').forEach(x => x.onchange = () => { const s = x.dataset.add; if(x.value === '__aut') M.aut[s] = 1; else { const t = rosa(s).find(y => y.id === x.value); if(t) M.mar.push({...ogg(t, s), n: 1}); } drawMk(); });
   };
   const campoN = () => { const i = S.info[sel('p-c').value] || {}, n = sel('pCampoN'), v2 = sel('p-i').value;
@@ -3184,7 +3191,7 @@ function openPartita(p0, pre){
       if(piu.length){ er.textContent = 'Hai assegnato più gol di quelli del risultato: controlla i marcatori.'; return; }
       const manca = (+gc - ass('casa')) + (+go - ass('ospite'));
       if(manca && (M.mar.length || M.aut.casa || M.aut.ospite) && !confirm(`${manca === 1 ? "Manca 1 gol" : "Mancano " + manca + " gol"} da assegnare a chi ha segnato. Salvare lo stesso?`)) return;
-      const cc = ({id, nome, cog, sq, ruolo, min}) => ({id, nome, cog, sq, ruolo: ruolo || 'Giocatore', ...(min ? {min} : {})}), am = p.autMin || {};
+      const cc = ({id, nome, cog, sq, ruolo, min}) => ({id, nome, cog, sq, ruolo: ruolo || 'Giocatore', ...(min ? {min} : {})}), am = M.autMin;
       Object.assign(n, {mar: M.mar.filter(x => x.n > 0).map(({id, nome, cog, sq, n: k, min}) => ({id, nome, cog, sq, n: k, ...(min && min.length ? {min: min.slice(0, k)} : {})})), aut: {...M.aut},
         autMin: {casa: (am.casa || []).slice(0, M.aut.casa), ospite: (am.ospite || []).slice(0, M.aut.ospite)}, mvp: M.mvp, por: M.por,
         amm: M.car.filter(x => x.t === 'g').map(cc), esp: M.car.filter(x => x.t !== 'g').map(x => ({...cc(x), tipo: x.t === 'd' ? 'doppia' : 'diretta'}))});
