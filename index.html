@@ -233,6 +233,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .ev input,.ev select{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0;width:100%}
 .ev .wide{grid-column:1/-1}
 .ev.dir{grid-template-columns:62px 1fr 40px}
+.ev .golrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.ev .golrow b{margin:0 4px 0 2px;font-size:14px}
+.ev .gpm{width:40px;height:40px;flex:none;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font-size:20px;font-weight:700;line-height:1;cursor:pointer}.ev .gpm:disabled{opacity:.35;cursor:default}
+.ev .golrow [data-k=n]{width:50px;flex:none;text-align:center;font-weight:800}.ev .golrow .gmin{flex:1 1 100%}
+.ev .gx{display:flex;align-items:center;justify-content:center;border-radius:10px;background:color-mix(in srgb,var(--pitch) 22%,transparent);font-weight:800;font-size:14px;white-space:nowrap}
 .ev .x{border:0;border-radius:10px;background:transparent;color:var(--card-red);font-size:18px;cursor:pointer}
 .ev.con-dist{grid-template-columns:62px 1fr 40px}
 .ev.con-dist .nm{grid-column:2/-1}
@@ -1729,6 +1733,7 @@ function renderReferto(){
     draft = {gc: r.gc ?? (rc ?? '').trim(), go: r.go ?? (ro ?? '').trim(), gc1: r.gc1 ?? '', go1: r.go1 ?? '', rec1: r.rec1 ?? '', rec2: r.rec2 ?? '',
       esito: r.esito || '', assente: r.assente || '', minSosp: r.minSosp ?? '', motivo: r.motivo ?? '', marcatori: r.marcatori || [], ammoniti: r.ammoniti || [], espulsi: r.espulsi || [], dirigenti: r.dirigenti || [], mvp: r.mvp || null, por: r.por || null, spettatori: r.spettatori ?? '', campo: r.campo ?? '', note: r.note ?? ''};
     ['marcatori', 'ammoniti', 'espulsi', 'dirigenti'].forEach(k => draft[k].forEach(e => { if(!e.tid && e.nome) e.tid = '__man'; }));
+    draft.marcatori = unisciGol(draft.marcatori);
   }
   renderRefForm(g);
 }
@@ -1952,7 +1957,20 @@ const distHTML = (g, D, prima = false) => {
     ${prima && ['casa', 'ospite'].some(s => D[s] && !D[s].inviata) ? '<p class="note" style="margin:0">Compare qui appena la squadra la invia.</p>' : ''}</section>`;
 };
 /* gol scritti nelle reti: l'autorete va alla squadra avversaria */
-const golRef = d => { const n = {casa: 0, ospite: 0}; (d.marcatori || []).forEach(e => { const s = e.sq === 'ospite' ? 'ospite' : 'casa'; n[e.mot === 'Autorete' ? (s === 'casa' ? 'ospite' : 'casa') : s]++; }); return n; };
+const golRef = d => { const n = {casa: 0, ospite: 0}; (d.marcatori || []).forEach(e => { const s = e.sq === 'ospite' ? 'ospite' : 'casa'; n[e.mot === 'Autorete' ? (s === 'casa' ? 'ospite' : 'casa') : s] += nGol(e); }); return n; };
+/* marcatore con più gol: nel modulo è una riga sola con il numero di gol (n) e i minuti separati da virgola;
+   nel referto salvato resta un gol per riga, come sempre (campionati, testo e stampa non cambiano) */
+const nGol = e => Math.max(1, Math.min(99, parseInt(e && e.n, 10) || 1));
+const minGol = e => String((e && e.min) || '').split(/[\s,;.\/]+/).filter(Boolean);
+const unisciGol = l => { const out = [], per = {};
+  (l || []).forEach(e => { const k = [e.sq === 'ospite' ? 'ospite' : 'casa', e.tid || '', e.tid && e.tid !== '__man' ? '' : String(e.nome || '').trim().toUpperCase() + '#' + (e.num || ''), e.mot || ''].join('|');
+    if(!e.tid && !e.nome){ out.push({...e, n: 1}); return; }
+    const x = per[k]; if(x){ x.n++; if(e.min) x.min = x.min ? x.min + ', ' + e.min : e.min; } else out.push(per[k] = {...e, n: 1, min: e.min || ''}); });
+  return out; };
+const espandiGol = l => { const out = [];
+  (l || []).forEach(e => { const n = nGol(e), m = n > 1 ? minGol(e) : [e.min || ''], {n: _n, ...b} = e; for(let i = 0; i < Math.max(n, m.length); i++) out.push({...b, min: m[i] || ''}); });
+  const mi = e => { const v = parseInt(e.min, 10); return isNaN(v) ? 1e9 : v; };
+  return out.map((e, i) => [e, i]).sort(([a, i], [b, j]) => mi(a) - mi(b) || i - j).map(([e]) => e); };
 
 function renderRefForm(g){
   const d = draft, body = $('#refBody');
@@ -1973,8 +1991,9 @@ function renderRefForm(g){
       <input class="wide" data-k="mot" placeholder="Motivo (es. proteste, frasi offensive)" value="${esc(e.mot)}" aria-label="Motivo">
     </div>`; }).join('');
   const rows = key => key === 'dirigenti' ? dirRows() : d[key].map((e,i) => { const s = e.sq === 'ospite' ? 'ospite' : 'casa', l = lista(s, 'gioc'), man = !l || e.tid === '__man';
+    const piu = key === 'marcatori' && nGol(e) > 1;
     return `<div class="ev${l ? ' con-dist' : ''}" data-list="${key}" data-i="${i}">
-      <input data-k="min" inputmode="numeric" placeholder="Min" value="${esc(e.min)}" aria-label="Minuto">
+      ${piu ? `<span class="gx">${nGol(e)} gol</span>` : `<input data-k="min" inputmode="numeric" placeholder="Min" value="${esc(e.min)}" aria-label="Minuto">`}
       <select data-k="sq" aria-label="Squadra">${sqOpt(e.sq)}</select>
       ${l ? '' : `<input data-k="num" inputmode="numeric" placeholder="N°" value="${esc(e.num)}" aria-label="Numero di maglia">`}
       <button type="button" class="x" data-del aria-label="Rimuovi">✕</button>
@@ -1983,10 +2002,11 @@ function renderRefForm(g){
       ${l ? '' : `<input class="wide" data-k="nome" placeholder="Cognome e nome" value="${esc(e.nome)}" aria-label="Giocatore">`}
       <select class="wide" data-k="mot" aria-label="${LISTS[key].lbl}">${LISTS[key].mot.map(m=>`<option ${m===e.mot?'selected':''}>${esc(m)}</option>`).join('')}</select>
       ${key === 'marcatori' && e.mot === 'Autorete' ? `<p class="note wide" style="margin:0">Autorete: scegli il giocatore che l’ha fatta. Il gol va a <b>${esc(s === 'casa' ? g.ospite || 'Ospite' : g.casa || 'Casa')}</b>.</p>` : ''}
+      ${key === 'marcatori' ? `<div class="wide golrow"><b>Gol</b><button type="button" class="gpm" data-gm aria-label="Un gol in meno"${nGol(e) > 1 ? '' : ' disabled'}>−</button><input data-k="n" inputmode="numeric" value="${nGol(e)}" aria-label="Numero di gol"><button type="button" class="gpm" data-gp aria-label="Un gol in più">+</button>${piu ? `<input class="gmin" data-k="min" inputmode="decimal" placeholder="Minuti: 5, 12, 30" value="${esc(e.min)}" aria-label="Minuti dei gol, separati da virgola">` : ''}</div>` : ''}
     </div>`; }).join('');
   const nG = golRef(d), golWarn = !['rinviata', 'assente'].includes(d.esito) && d.marcatori.length && d.gc !== '' && d.go !== '' && (nG.casa !== +d.gc || nG.ospite !== +d.go)
     ? `<p class="note warn-gol" style="margin:0">Reti scritte: ${esc(g.casa || 'Casa')} ${nG.casa} di ${+d.gc} · ${esc(g.ospite || 'Ospite')} ${nG.ospite} di ${+d.go}</p>` : '';
-  const sec = key => `<section class="ref-sec"><header><h3>${LISTS[key].chip ? `<span class="${LISTS[key].chip}"></span>` : ''}${LISTS[key].t} <span class="cnt">${d[key].length}</span></h3><button type="button" class="btn btn-ghost sm" data-add="${key}">+ ${LISTS[key].add}</button></header>${key === 'marcatori' ? golWarn : ''}${d[key].length ? rows(key) : '<p class="note" style="margin:0">Nessuno</p>'}</section>`;
+  const sec = key => `<section class="ref-sec"><header><h3>${LISTS[key].chip ? `<span class="${LISTS[key].chip}"></span>` : ''}${LISTS[key].t} <span class="cnt">${key === 'marcatori' ? d.marcatori.reduce((a, e) => a + nGol(e), 0) : d[key].length}</span></h3><button type="button" class="btn btn-ghost sm" data-add="${key}">+ ${LISTS[key].add}</button></header>${key === 'marcatori' ? golWarn : ''}${d[key].length ? rows(key) : '<p class="note" style="margin:0">Nessuno</p>'}</section>`;
   const fld = (id, label, val, extra='') => `<div class="field"><label for="${id}">${label}</label><input id="${id}" value="${esc(val)}" ${extra}></div>`;
   /* migliore in campo e miglior portiere: solo per le partite del campionato */
   const premio = (k, label, port) => { const v = d[k] || {}, cur = v.tid ? `${v.sq}:${v.tid}` : v.sq && v.man ? `${v.sq}:__man` : '';
@@ -2026,6 +2046,10 @@ function renderRefForm(g){
     readDraft(); const key = b.dataset.add; d[key].push(key === 'dirigenti' ? {min:'', sq:'casa', tid:'', qual: QUAL[0], nome:'', prov: PROV[0], mot:''} : {min:'', sq:'casa', tid:'', num:'', nome:'', mot: LISTS[key].mot[0]}); renderRefForm(g);
     const last = body.querySelectorAll(`.ev[data-list="${key}"]`); last[last.length-1]?.querySelector('input')?.focus();
   });
+  body.querySelectorAll('[data-gp],[data-gm]').forEach(b => b.onclick = () => { readDraft(); const i = +b.closest('.ev').dataset.i, e = d.marcatori[i];
+    e.n = Math.max(1, Math.min(99, nGol(e) + ('gp' in b.dataset ? 1 : -1))); const m = minGol(e); if(m.length > e.n) e.min = m.slice(0, e.n).join(', ');
+    renderRefForm(g); const r = body.querySelector(`.ev[data-list="marcatori"][data-i="${i}"]`); r?.querySelector('gp' in b.dataset ? '[data-gp]' : '[data-gm]:not([disabled])')?.focus({preventScroll: true}); });
+  body.querySelectorAll('.golrow [data-k="n"]').forEach(x => x.addEventListener('change', () => { readDraft(); renderRefForm(g); }));
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { readDraft(); const ev = b.closest('.ev'); d[ev.dataset.list].splice(+ev.dataset.i, 1); renderRefForm(g); });
   /* scelta dalla distinta: numero e nome arrivano da soli; cambiando squadra si riparte da capo */
   body.querySelectorAll('.ev').forEach(ev => {
@@ -2072,7 +2096,7 @@ function renderRefForm(g){
     if(ass) d.dirigenti = []; else d.assente = '';
     if(d.esito !== 'sospesa') d.minSosp = '';
     if(!d.esito) d.motivo = '';
-    const upd = {...g, referto: JSON.parse(JSON.stringify(d)), stato: rinv ? 'rinviata' : 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length, risultato: ''};
+    const upd = {...g, referto: JSON.parse(JSON.stringify({...d, marcatori: espandiGol(d.marcatori)})), stato: rinv ? 'rinviata' : 'disputata', gialli: d.ammoniti.length, rossi: d.espulsi.length, risultato: ''};
     if(!rinv && !ass && d.gc !== '' && d.go !== '') upd.risultato = `${d.gc}-${d.go}${d.esito === 'sospesa' ? ` (sosp. ${d.minSosp}')` : ''}`;
     const btn = $('#rfSave'); btn.disabled = true;
     try{ await Store.saveGara(upd); toast(upd.desId ? 'Referto inviato' : 'Referto salvato'); btn.disabled = false; if(upd.desId){ await inviaReferto(upd.desId, upd); if(refBloccato(upd) && location.hash === '#referto'){ refId = upd.id; draft = null; renderReferto(); } } }
@@ -2092,6 +2116,7 @@ function readDraft(){
   d.gc = v('rf-gc'); d.go = v('rf-go'); d.gc1 = v('rf-gc1'); d.go1 = v('rf-go1'); d.rec1 = v('rf-rec1'); d.rec2 = v('rf-rec2');
   d.spettatori = v('rf-spett'); d.campo = v('rf-campo'); d.note = v('rf-note');
   document.querySelectorAll('#refBody .ev').forEach(ev => { const e = d[ev.dataset.list][+ev.dataset.i]; if(!e) return; ev.querySelectorAll('[data-k]').forEach(el => e[el.dataset.k] = el.value.trim()); });
+  (d.marcatori || []).forEach(e => { e.n = nGol(e); const m = minGol(e); if(m.length > 1 && m.length > e.n) e.n = Math.min(99, m.length); });
   document.querySelectorAll('#refBody [data-premio-nome]').forEach(el => { const p = d[el.dataset.premioNome]; if(p) p.nome = el.value.trim(); });
 }
 
@@ -2112,7 +2137,7 @@ function refText(g, d){
     if(d.esito === 'sospesa'){ L.push(`GARA SOSPESA al ${d.minSosp || '?'}'`); if(d.motivo) L.push(`Motivo: ${d.motivo}`); }
     L.push(`${d.esito === 'sospesa' ? 'Risultato al momento della sospensione' : 'Risultato finale'}: ${d.gc || '?'}-${d.go || '?'}${d.gc1 !== '' || d.go1 !== '' ? ` (1° tempo ${d.gc1 || 0}-${d.go1 || 0})` : ''}`);
     if(d.rec1 || d.rec2) L.push(`Recupero: 1° T ${d.rec1 || 0}' – 2° T ${d.rec2 || 0}'`);
-    block('RETI', d.marcatori, e => ev(e, e.mot && e.mot !== 'Azione' ? e.mot.toLowerCase() : ''));
+    block('RETI', espandiGol(d.marcatori), e => ev(e, e.mot && e.mot !== 'Azione' ? e.mot.toLowerCase() : ''));
     block('AMMONIZIONI', d.ammoniti, e => ev(e, e.mot));
     block('ESPULSIONI', d.espulsi, e => ev(e, e.mot));
   }
