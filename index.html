@@ -255,6 +255,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .dsq .dsn b{font-weight:800;font-size:15.5px;line-height:1.2;overflow-wrap:anywhere}
 .dsq .dsn small{font-size:12.5px;color:var(--muted)}.dsq .dsn small.ko{color:var(--card-red)}
 .dsq .ctag{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:99px;background:color-mix(in srgb,#E8A33C 22%,transparent);white-space:nowrap}
+.dsq .ctag.ok{background:color-mix(in srgb,#33B26A 22%,transparent)}
+.dcons{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#33B26A 14%,transparent);font-size:14px}
+.dbtn{display:flex;gap:8px;flex-wrap:wrap}.dbtn .btn{flex:1 1 auto}
 .dsq .chev{flex:none;color:var(--muted);font-size:22px;line-height:1}
 .dsub{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
 .tdati{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;padding:12px 14px;border-radius:14px;background:var(--surface-2);font-size:14.5px}
@@ -1737,9 +1740,9 @@ let distAtt = null;
 const parDiGara = g => { if(g.partitaId) return g.partitaId; const d = desDi(g); return d && d.partitaId ? d.partitaId : ''; };
 /* correzione all'appello: chi è stato aggiunto dall'arbitro non ha un cartellino collegato */
 const manDist = t => !!t.arb || String(t.id || '').startsWith('__arb');
-const CORR_MIN = 60;
+const CORR_MIN = 20; /* da 20 minuti prima dell'inizio l'arbitro riceve la distinta (e da lì la può correggere) */
 const desDiPar = pid => (ACC.mie || []).find(x => x.partitaId === pid && (x.arbitriIds || []).includes(ACC.user.uid));
-/* l'arbitro designato corregge dall'ora prima dell'inizio finché non invia il referto e la partita non è chiusa */
+/* l'arbitro designato riceve, ridà e corregge le distinte da 20 minuti prima dell'inizio finché non invia il referto e la partita non è chiusa */
 function corrOk(g){
   const o = DIST[g.id]; if(!o || o.st !== 'ok' || !o.p || !ACC.user) return false;
   const p = o.p; if(p.giocata || p.stato === 'rinviata' || !p.data || !p.ora) return false;
@@ -1747,11 +1750,21 @@ function corrOk(g){
   const d = desDiPar(o.pid), r = d && d.referti && d.referti[ACC.user.uid];
   return !!d && !(r && !r.sbloccato);
 }
+const RIT_MIN = 30; /* come nell'app campionati: se l'arbitro non la riceve, la distinta si chiude da sola 30 minuti dopo l'orario */
 const oraHM = ms => new Date(ms).toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'});
-const corrHTML = x => { const l = (x && x.corr) || []; if(!l.length) return '';
-  return `<div class="dcorr"><b>✏️ Corretta all’appello</b>${l.map(c => `<span class="note">${esc(c.nome || 'Arbitro')} · ore ${esc(oraHM(c.at))}</span><ul>${(c.cosa || []).map(v => `<li>${esc(v)}</li>`).join('')}</ul>`).join('')}</div>`; };
+const corrHTML = x => { const l = [...((x && x.corr) || []).map(c => ({...c, arb: true})), ...((x && x.modSq) || [])].sort((a, b) => (a.at || 0) - (b.at || 0)); if(!l.length) return '';
+  return `<div class="dcorr"><b>${l.every(c => c.arb) ? '✏️ Corretta all’appello' : '📝 Modifiche dopo la consegna'}</b>${l.map(c => `<span class="note">${c.arb ? esc(c.nome || 'Arbitro') : esc(c.nome || 'Squadra')} · ore ${esc(oraHM(c.at))}</span><ul>${(c.cosa || []).map(v => `<li>${esc(v)}</li>`).join('')}</ul>`).join('')}</div>`; };
+/* l'arbitro "riceve" la distinta: da lì la squadra non la cambia più. Può ridarla alla squadra finché non l'ha corretta */
+async function consegna(g, s, ricevi){
+  const o = DIST[g.id], T = o && o[s]; if(!T || !T.raw || !corrOk(g)){ toast('Ora non si può.'); return; }
+  const x = T.raw, d = desDiPar(o.pid), me = d && (d.ufficiali || []).find(u => u.uid === ACC.user.uid);
+  if(!ricevi && (x.corr || []).length){ toast('L’hai già corretta: non si può più ridare alla squadra.'); return; }
+  const upd = ricevi ? {cons: {at: Date.now(), uid: ACC.user.uid, nome: me ? me.nome : 'Arbitro'}, consPrima: x.consPrima || Date.now(), aperta: false} : {cons: null, aperta: true};
+  try{ await firebase.firestore().collection('distinte').doc(o.pid + '_' + T.sid).update(upd); toast(ricevi ? `Distinta di ${T.nome} ricevuta: la squadra non può più cambiarla` : `Distinta ridata a ${T.nome}: può modificarla`); }
+  catch(e){ toast(e && e.code === 'permission-denied' ? 'Non si può: si fa da 20 minuti prima dell’inizio fino all’invio del referto.' : 'Non riesco a salvare: controlla la connessione e riprova.'); }
+}
 function apriCorrezione(g, s, riapri){
-  const o = DIST[g.id], T = o && o[s]; if(!T || !T.raw || !corrOk(g)){ toast('Ora la distinta non si può correggere.'); return; }
+  const o = DIST[g.id], T = o && o[s]; if(!T || !T.raw || !corrOk(g) || !T.raw.cons){ toast('Ora la distinta non si può correggere: prima va ricevuta.'); return; }
   const x = T.raw, root = $('#sheetRoot'), uid = () => '__arb' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const G = (x.giocatori || []).map(t => ({...t, numero: t.numero || '', num0: t.numero || '', via: false})), Dd = (x.dirigenti || []).map(t => ({...t, via: false}));
   const NG = [], ND = []; let cap = x.capitano || '', vice = x.vice || '';
@@ -1890,6 +1903,16 @@ function apriTesserato(t, sq, poi){
   root.querySelector('[data-x]').onclick = close;
 }
 /* elenco di una squadra in un pop-up: righe piccole, si tocca il nome per il cartellino */
+const statoCons = (g, o, T) => {
+  const x = T.raw || {}, P = o.p || {}, ini = P.data && P.ora ? new Date(`${P.data}T${P.ora}:00`).getTime() : 0, ok = corrOk(g);
+  if(x.cons) return `<div class="dcons">🔒 <span><b>Ricevuta</b> alle ${esc(oraHM(x.cons.at))}${x.cons.uid !== ACC.user.uid ? ' da ' + esc(x.cons.nome || 'un arbitro') : ''}: la squadra non può più cambiarla.</span></div>
+    ${ok ? `<div class="dbtn"><button type="button" class="btn btn-ghost sm" data-corr>✏️ Correggi all’appello</button>${(x.corr || []).length ? '' : '<button type="button" class="btn btn-ghost sm" data-cons="ridai">↩️ Ridai alla squadra</button>'}</div>` : ''}`;
+  const chiusa = ini && Date.now() >= ini + RIT_MIN * 60e3 && !x.aperta;
+  const nota = x.aperta && x.consPrima ? '↩️ Ridata alla squadra: può modificarla e le modifiche le vedono tutti.' : chiusa ? `La squadra non può più cambiarla: si è chiusa alle ${oraHM(ini + RIT_MIN * 60e3)}.` : 'Finché non la ricevi, la squadra può ancora cambiarla.';
+  if(ok) return `<button type="button" class="btn btn-primary" data-cons="ricevi">📋 Ricevi distinta</button>
+    <p class="note" style="margin:0">${esc(nota)}</p>${chiusa ? '<button type="button" class="btn btn-ghost sm" data-cons="ridai">🔓 Ridai alla squadra</button>' : ''}`;
+  return `<p class="note" style="margin:0">${ini && Date.now() < ini - CORR_MIN * 60e3 ? `Potrai riceverla da ${CORR_MIN} minuti prima dell’inizio (dalle ${esc(oraHM(ini - CORR_MIN * 60e3))}). ` : ''}${esc(nota)}</p>`;
+};
 function apriDistSq(g, s, riapri){
   const root = $('#sheetRoot'), att = distAtt && distAtt.gid === g.id ? distAtt : null, prima = att ? att.ridisegna : null;
   let su = true;
@@ -1898,8 +1921,8 @@ function apriDistSq(g, s, riapri){
     const o = DIST[g.id], T = o && o[s]; if(!T || !T.inviata){ close(); return; }
     root.innerHTML = `<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true" aria-label="Distinta di ${esc(T.nome)}"><div class="grab"></div>
       <div class="eyebrow">Distinta</div><h3 style="margin:0">${esc(T.nome)} <span class="cnt">${T.gioc.length}</span></h3>
-      ${T.at ? `<p class="note" style="margin:0">${esc(quandoInv(T.at))}</p>` : ''}${corrHTML(T.raw)}
-      ${corrOk(g) ? `<button type="button" class="btn btn-ghost sm" data-corr>✏️ Correggi all’appello</button>` : ''}
+      ${T.at ? `<p class="note" style="margin:0">${esc(quandoInv(T.at))}${T.raw && T.raw.ritardo ? ', dopo l’inizio (squadra in ritardo)' : ''}</p>` : ''}${corrHTML(T.raw)}
+      ${statoCons(g, o, T)}
       <ul class="dgl">${T.gioc.map((t, i) => `<li><button type="button" class="dg" data-i="g:${i}"><b class="dnum">${esc(t.num || '–')}</b><span class="dnm">${esc(t.nome)}</span>${t.ruolo === 'Portiere' ? '<i>portiere</i>' : ''}${t.arb ? '<i>aggiunto</i>' : ''}${t.cap ? '<em>C</em>' : t.vice ? '<em>VC</em>' : ''}<span class="chev">›</span></button></li>`).join('')}</ul>
       ${T.dir.length ? `<p class="dsub">In panchina</p><ul class="dgl">${T.dir.map((t, i) => `<li><button type="button" class="dg" data-i="d:${i}"><span class="dnm">${esc(t.nome)}</span><i>${esc(t.ruolo.toLowerCase())}</i><span class="chev">›</span></button></li>`).join('')}</ul>` : ''}
       <p class="note" style="margin:0">Tocca un nome per vedere il cartellino con foto e dati.${o.noFoto ? ' Alcune foto non sono disponibili.' : ''}</p>
@@ -1908,6 +1931,7 @@ function apriDistSq(g, s, riapri){
     root.querySelector('[data-x]').onclick = close;
     root.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.i.split(':'); su = false; apriTesserato((k === 'g' ? T.gioc : T.dir)[+i], T.nome, () => { su = true; draw(); }); });
     const c = root.querySelector('[data-corr]'); if(c) c.onclick = () => { su = false; apriCorrezione(g, s, () => { su = true; draw(); }); };
+    root.querySelectorAll('[data-cons]').forEach(b => b.onclick = async () => { b.disabled = true; await consegna(g, s, b.dataset.cons === 'ricevi'); b.disabled = false; });
   };
   if(att) att.ridisegna = () => { if(su) draw(); };
   draw();
@@ -1918,10 +1942,12 @@ const distHTML = (g, D, prima = false) => {
   if(D.st === 'load') return `<section class="ref-sec"><h3>Distinte</h3><div class="status"><span class="spin"></span>Carico le distinte…</div></section>`;
   if(D.st === 'err') return `<section class="ref-sec"><h3>Distinte</h3><p class="note" style="margin:0">${esc(D.msg)}</p><button type="button" class="btn btn-ghost sm" id="rfDistRetry">Riprova</button></section>`;
   if(D.st !== 'ok') return '';
+  const P = D.p || g, fineRit = P.data && P.ora ? new Date(`${P.data}T${P.ora}:00`).getTime() + RIT_MIN * 60e3 : 0;
   const riga = s => { const T = D[s]; if(!T) return '';
-    if(!T.inviata) return `<div class="dsq no"><span class="dsn"><b>${esc(T.nome)}</b><small class="${prima ? '' : 'ko'}">${prima ? 'Non ancora inviata' : 'Distinta non inviata: i giocatori li scrivi a mano nel referto'}</small></span></div>`;
-    const corr = ((T.raw && T.raw.corr) || []).length;
-    return `<button type="button" class="dsq" data-dsq="${s}"><span class="dsn"><b>${esc(T.nome)}</b><small>${T.gioc.length} giocatori${T.dir.length ? ' · ' + T.dir.length + ' in panchina' : ''}</small>${T.at ? `<small>${esc(quandoInv(T.at))}</small>` : ''}</span>${corr ? '<span class="ctag">corretta</span>' : ''}<span class="chev">›</span></button>`; };
+    if(!T.inviata){ const tardi = !prima && fineRit && Date.now() < fineRit && !(D.p && D.p.giocata);
+      return `<div class="dsq no"><span class="dsn"><b>${esc(T.nome)}</b><small class="${prima || tardi ? '' : 'ko'}">${prima ? 'Non ancora inviata' : tardi ? `Non ancora inviata: se è in ritardo può mandarla fino alle ${oraHM(fineRit)}` : 'Distinta non inviata: i giocatori li scrivi a mano nel referto'}</small></span></div>`; }
+    const corr = ((T.raw && T.raw.corr) || []).length + ((T.raw && T.raw.modSq) || []).length, cons = T.raw && T.raw.cons;
+    return `<button type="button" class="dsq" data-dsq="${s}"><span class="dsn"><b>${esc(T.nome)}</b><small>${T.gioc.length} giocatori${T.dir.length ? ' · ' + T.dir.length + ' in panchina' : ''}</small>${T.at ? `<small>${esc(quandoInv(T.at))}${T.raw && T.raw.ritardo ? ', dopo l’inizio' : ''}</small>` : ''}</span>${cons ? '<span class="ctag ok">🔒 ricevuta</span>' : corrOk(g) ? '<span class="ctag">da ricevere</span>' : ''}${corr ? '<span class="ctag">modificata</span>' : ''}<span class="chev">›</span></button>`; };
   return `<section class="ref-sec"><header><h3>Distinte</h3></header><div class="dsqs">${riga('casa')}${riga('ospite')}</div>
     ${prima && ['casa', 'ospite'].some(s => D[s] && !D[s].inviata) ? '<p class="note" style="margin:0">Compare qui appena la squadra la invia.</p>' : ''}</section>`;
 };
@@ -3374,7 +3400,7 @@ async function eliminaArbitro(a){
   b.set(db.collection('eliminazioni').doc(a.id), {nome: nomeArb(a), email: a.email || '', at: Date.now(), da: myEmail()});
   b.set(db.collection('accessi').doc(a.id), {stato: 'eliminato', at: Date.now(), da: myEmail()});
   b.delete(db.collection('arbitri').doc(a.id));
-  try{ await b.commit(); toast(`${nomeArb(a)} eliminato: l’account di accesso si cancella entro 5 minuti`); return true; }catch(e){ toast(fbErr(e)); return false; }
+  try{ await b.commit(); toast(`${nomeArb(a)} eliminato: l’account di accesso si cancella entro 15 minuti (di notte, alle 8)`); return true; }catch(e){ toast(fbErr(e)); return false; }
 }
 
 const dsSort = (a, b) => `${a.data || '9999'} ${a.ora || ''}`.localeCompare(`${b.data || '9999'} ${b.ora || ''}`);
