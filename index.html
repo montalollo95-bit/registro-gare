@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="AICS">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#1677D2">
+<meta name="theme-color" content="#060709">
 <link rel="apple-touch-icon" href="icon-aics.png">
 <link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="avvio-arbitri-nero-1320x2868.jpg">
 <link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="avvio-arbitri-nero-1206x2622.jpg">
@@ -789,6 +789,9 @@ body.app-in .tabs,body.app-in #scroller{animation:appIn 1.2s cubic-bezier(.2,.8,
 /* Animazione d'apertura (come nell'app campionati, ma nera con l'arbitro sfumato): logo con riflesso di luce, poi il login o l'app. Se si è già entrati, sotto il logo compare il nome. Un tocco la salta */
 #intro{position:fixed;inset:0;z-index:2147483000;background:#060709;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:inEsci .7s ease 2.4s forwards}
 #intro.con-nome{animation-delay:3.1s}
+/* logo (e nome) più in alto, come ha chiesto Lorenzo: l'inizio del logo a circa un quinto dello schermo */
+#intro{align-items:flex-start;padding-top:19vh;box-sizing:border-box}
+#intro .in-luce{top:calc(19vh + min(135px,32vw))}
 #intro .in-bg{position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 45%,#161d2e 0,#0b0e16 45%,#060709 75%);opacity:0;animation:inBg 1.2s ease .1s forwards}
 #intro .in-foto{position:absolute;inset:-30px;background:url(sfondo-arbitri.jpg) center 30%/cover no-repeat;filter:blur(8px) brightness(.8);-webkit-mask-image:linear-gradient(180deg,transparent 34%,#000 66%);mask-image:linear-gradient(180deg,transparent 34%,#000 66%);opacity:0;animation:inFoto 1.6s ease .2s forwards}
 #intro .in-luce{position:absolute;left:50%;top:50%;width:min(520px,130vw);aspect-ratio:1;transform:translate(-50%,-50%) scale(.4);border-radius:50%;background:radial-gradient(closest-side,rgba(150,185,240,.32),rgba(70,110,200,.1) 55%,transparent);opacity:0;animation:inLuce 1.6s ease .35s forwards}
@@ -2699,6 +2702,8 @@ function renderGate(){
   const fermo = !!(ACC.ready && ACC.user && !ACC.isAdmin && ACC.accesso && ACC.accesso !== 'attivo' && (ACC.profilo || ACC.accesso !== 'attesa'));
   const show = !ACC.ready || !ACC.user || !ACC.profilo || fermo;
   document.body.classList.toggle('gated', show);
+  // barra in alto (ora, batteria): nera nel login e nell'animazione, blu scuro come la testata dentro l'app
+  try{ const tc = document.querySelector('meta[name=theme-color]'); if(tc) tc.content = show ? '#060709' : '#0B1640'; }catch(e){}
   if(!show){ if(g) gateEsci(g); return; }
   if(g && g.classList.contains('gate-out')){ g.classList.remove('gate-out'); clearTimeout(g._t); }
   if(!g){ g = document.createElement('div'); g.id = 'gate'; if(ACC.appVista) g.classList.add('gate-in-anim'); document.body.appendChild(g); }
