@@ -615,7 +615,7 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .tl .l,.tbc .l{text-align:right}.tl .r,.tbc .r{text-align:left}
 .ev{display:inline-flex;align-items:center;gap:6px;font-size:14px;line-height:1.25;color:var(--fg)}
 .tl .l .ev,.tbc .l .ev{justify-content:flex-end}
-.ev small{color:var(--muted)}
+.ev small{color:var(--muted)}.ev .evm{display:block;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
 .ev-i{font-size:14px}
 .ev .cy+.cr{margin-left:-3px}
 .tbc{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;padding:2px 0 6px}
@@ -672,7 +672,32 @@ main.wrap > .note,main.wrap > section > .note,main.wrap .eyebrow{color:var(--mut
 .sheet .x-fisso{position:sticky;bottom:0;z-index:6;background:linear-gradient(var(--surface-2),var(--surface-2)) var(--bg)!important;box-shadow:0 0 0 10px var(--bg),0 30px 0 10px var(--bg)}
 .sheet .x-fisso:hover{filter:brightness(.97)}
 </style>
+<style id="intro-css">
+/* Animazione d'apertura: logo che compare in dissolvenza con un riflesso di luce, poi l'app (un tocco la salta) */
+#intro{position:fixed;inset:0;z-index:2147483000;background:#081446;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:inEsci .7s ease 2.4s forwards}
+#intro .in-bg{position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 45%,#16328f 0,#0b1d63 45%,#081446 75%);opacity:0;animation:inBg 1.2s ease .1s forwards}
+#intro .in-foto{position:absolute;inset:-30px;background:url(../sfondo-avvio.jpg) center 30%/cover no-repeat;filter:blur(8px) brightness(.85) saturate(1.1);-webkit-mask-image:linear-gradient(180deg,transparent 30%,#000 62%);mask-image:linear-gradient(180deg,transparent 30%,#000 62%);opacity:0;animation:inFoto 1.6s ease .2s forwards}
+#intro .in-luce{position:absolute;left:50%;top:50%;width:min(520px,130vw);aspect-ratio:1;transform:translate(-50%,-50%) scale(.4);border-radius:50%;background:radial-gradient(closest-side,rgba(120,170,255,.45),rgba(40,90,220,.15) 55%,transparent);opacity:0;animation:inLuce 1.6s ease .35s forwards}
+#intro .in-logo{position:relative;width:min(270px,64vw);aspect-ratio:450/516;background:url(../marchio-aics.png) center/contain no-repeat;-webkit-mask:url(../marchio-aics.png) center/contain no-repeat;mask:url(../marchio-aics.png) center/contain no-repeat;opacity:0;transform:scale(.72);filter:blur(14px);animation:inLogo 1.1s cubic-bezier(.16,.85,.25,1) .3s forwards,inAccendi .7s ease 1.5s forwards}
+#intro .in-sh{position:absolute;inset:0;-webkit-mask:url(../marchio-aics.png) center/contain no-repeat;mask:url(../marchio-aics.png) center/contain no-repeat;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.95) 50%,transparent 62%) no-repeat;background-size:260% 100%;background-position:160% 0;animation:inSh .9s ease-in-out 1.35s forwards}
+#intro .in-zoom{position:relative;display:flex;align-items:center;justify-content:center;animation:inGlow .9s ease 1.45s forwards,inZoom .55s ease-in 2.25s forwards}
+#intro.via{animation:inEsci .3s ease forwards}
+@keyframes inBg{to{opacity:1}}
+@keyframes inFoto{to{opacity:.3}}
+@media (min-aspect-ratio:1/1){#intro .in-foto{background-position:center 82%;-webkit-mask-image:linear-gradient(180deg,transparent 20%,#000 60%);mask-image:linear-gradient(180deg,transparent 20%,#000 60%)}}
+@keyframes inLuce{40%{opacity:1}to{opacity:.55;transform:translate(-50%,-50%) scale(1)}}
+@keyframes inLogo{to{opacity:1;transform:scale(1);filter:blur(0) brightness(.72)}}
+@keyframes inAccendi{from{filter:blur(0) brightness(.72)}to{filter:blur(0) brightness(1.05)}}
+@keyframes inGlow{to{filter:drop-shadow(0 0 22px rgba(120,170,255,.6))}}
+@keyframes inSh{to{background-position:-60% 0}}
+@keyframes inZoom{to{transform:scale(1.3);opacity:0}}
+@keyframes inEsci{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){#intro *{animation-duration:.01s!important;animation-delay:0s!important}#intro{animation-delay:1.2s}}
+</style>
 </head><body>
+<div id="intro" aria-hidden="true"><div class="in-bg"></div><div class="in-foto"></div><div class="in-luce"></div><div class="in-zoom"><div class="in-logo"></div><span class="in-sh"></span></div></div>
+<script>(function(){var d=document.getElementById('intro');if(!d)return;var via=function(){if(d.parentNode)d.parentNode.removeChild(d)};d.addEventListener('animationend',function(e){if(e.target===d)via()});d.addEventListener('click',function(){d.classList.add('via')});setTimeout(via,4000)})();</script>
+
 <div id="app"><div id="home"><div class="hbg"></div><div class="sc"><div class="mid"><h2>Scegli il campionato</h2><div class="sub">Risultati e classifiche</div>
 <div class="camp"><a class="c f" href="#futsal"><img src="logo-futsal.png" alt=""><div class="n">Futsal League</div><div class="s">Calcio a 5</div></a>
 <a class="c l" href="#liga"><img src="logo-liga.png" alt=""><div class="n">R.E. Liga</div><div class="s">Calcio a 7</div></a></div></div>
@@ -1425,16 +1450,21 @@ function eventiPar(p){
   (p.esp || []).forEach(x => E.push({t: x.tipo === 'doppia' ? 'yr' : 'r', sq: x.sq, nome: x.nome, ruolo: x.ruolo, min: mn(x.min)}));
   return E;
 }
+/* in ordine di minuto, i gol dello stesso giocatore in una riga sola (al minuto del primo) */
+const unisciGolTl = l => { const out = [], m = new Map();
+  l.forEach(x => { if(x.t !== 'g' && x.t !== 'a'){ out.push(x); return; } const k = x.t + '|' + x.sq + '|' + x.nome, g = m.get(k);
+    if(g){ g.n++; if(x.min) g.mins.push(x.min); return; } const y = {...x, n: 1, mins: x.min ? [x.min] : []}; m.set(k, y); out.push(y); });
+  return out; };
 const minNum = m => { const [a, b] = String(m).split('+'); return (parseInt(a, 10) || 0) + (parseInt(b, 10) || 0) / 100; };
 const ICO_EV = {g: '<span class="ev-i" aria-label="gol">⚽</span>', a: '<span class="ev-i" aria-label="autogol">⚽</span>', y: '<span class="cy" aria-label="ammonito"></span>', r: '<span class="cr" aria-label="espulso"></span>', yr: '<span class="cy" aria-hidden="true"></span><span class="cr" aria-label="espulso per doppia ammonizione"></span>'};
 function openTabellino(p, squadre){
   if(!p) return; const e = esito(p); if(!e) return;
   const E = eventiPar(p), conMin = E.some(x => x.min !== ''), nm = x => esc(x.nome) + (x.ruolo && !['Giocatore', 'Portiere', ''].includes(x.ruolo) ? ` <small>(${esc(x.ruolo.toLowerCase())})</small>` : '') + (x.t === 'a' ? '' : '');
-  const ev = x => `<span class="ev">${x.sq === 'casa' ? '' : ICO_EV[x.t]}<span>${nm(x)}</span>${x.sq === 'casa' ? ICO_EV[x.t] : ''}</span>`;
+  const ev = x => `<span class="ev">${x.sq === 'casa' ? '' : ICO_EV[x.t]}<span>${nm(x)}${x.n > 1 ? ` <b>×${x.n}</b>` : ''}${x.n > 1 && x.mins.length ? `<small class="evm">${x.mins.map(m => esc(m) + '’').join(' · ')}</small>` : ''}</span>${x.sq === 'casa' ? ICO_EV[x.t] : ''}</span>`;
   let corpo = '';
   if(conMin){
-    const l = E.map((x, i) => ({...x, i})).sort((a, b) => (a.min === '') - (b.min === '') || minNum(a.min) - minNum(b.min) || a.i - b.i);
-    corpo = `<div class="tl">${l.map(x => `<div class="tlr"><div class="l">${x.sq === 'casa' ? ev(x) : ''}</div><div class="mn">${x.min ? esc(x.min) + '’' : ''}</div><div class="r">${x.sq !== 'casa' ? ev(x) : ''}</div></div>`).join('')}</div>`;
+    const l = unisciGolTl(E.map((x, i) => ({...x, i})).sort((a, b) => (a.min === '') - (b.min === '') || minNum(a.min) - minNum(b.min) || a.i - b.i));
+    corpo = `<div class="tl">${l.map(x => `<div class="tlr"><div class="l">${x.sq === 'casa' ? ev(x) : ''}</div><div class="mn">${x.min && !(x.n > 1) ? esc(x.min) + '’' : ''}</div><div class="r">${x.sq !== 'casa' ? ev(x) : ''}</div></div>`).join('')}</div>`;
   } else {
     const blocco = (tit, tipi, raggr) => { const col = s => { let l = E.filter(x => tipi.includes(x.t) && x.sq === s);
         if(raggr){ const m = new Map(); l.forEach(x => { const k = x.t + '|' + x.nome; m.set(k, {...x, n: (m.get(k) || {n: 0}).n + 1}); }); l = [...m.values()]; }
@@ -3677,7 +3707,7 @@ async function shPartita(p, fmtI){
   /* righe del tabellino */
   const conMin = gol.some(x => x.min !== ''); let righe = [];
   if(gol.length){
-    if(conMin) righe = gol.map((x, i) => ({...x, i})).sort((a, b) => (a.min === '') - (b.min === '') || minNum(a.min) - minNum(b.min) || a.i - b.i).map(x => ({c: x.sq === 'casa' ? x : null, o: x.sq !== 'casa' ? x : null, m: x.min}));
+    if(conMin) righe = unisciGolTl(gol.map((x, i) => ({...x, i})).sort((a, b) => (a.min === '') - (b.min === '') || minNum(a.min) - minNum(b.min) || a.i - b.i)).map(x => ({c: x.sq === 'casa' ? x : null, o: x.sq !== 'casa' ? x : null, m: x.n > 1 ? '' : x.min}));
     else { const col = s => { const m = new Map(); gol.filter(x => x.sq === s).sort((a, b) => 'gayyrr'.indexOf(a.t) - 'gayyrr'.indexOf(b.t)).forEach(x => { const k = x.t + '|' + x.nome; m.set(k, {...x, n: (m.get(k) || {n: 0}).n + 1}); }); return [...m.values()]; };
       const c = col('casa'), o = col('ospite'); righe = Array.from({length: Math.max(c.length, o.length)}, (_, i) => ({c: c[i] || null, o: o[i] || null, m: ''})); }
   }
@@ -3701,7 +3731,7 @@ async function shPartita(p, fmtI){
     shTxt(ctx, 'TABELLINO', W / 2, y + (story ? 34 : 26), 400, 'D', 800, story ? 38 : 30, B.acc, 'center'); y += tTit;
     const spazio = yEnd - y - 6; if(righe.length * rh > spazio){ rh = Math.max(story ? 29 : 22, spazio / righe.length); fs = Math.min(fs, rh * .52); }
     const max = Math.max(1, Math.floor(spazio / rh)), vis = righe.length > max ? righe.slice(0, max - 1) : righe;
-    const nm = x => (x.t === 'a' ? 'Autogol' : shBrv(x.nome)) + (x.n > 1 ? ` ×${x.n}` : '');
+    const nm = x => (x.t === 'a' ? 'Autogol' : shBrv(x.nome)) + (x.n > 1 ? ` ×${x.n}` : '') + (x.n > 1 && x.mins && x.mins.length ? ' · ' + x.mins.map(m => m + '’').join(' ') : '');
     const gp = Math.min(8, rh * .14); vis.forEach((r, i) => { const yy = y + i * rh, cy = yy + (rh - gp) / 2, mid = W / 2; shBar(ctx, 50, yy, W - 100, rh - gp);
       if(r.m) shTxt(ctx, r.m + '’', mid, cy + fs * .36, 90, 'D', 800, fs, SH_GIALLO, 'center');
       if(r.c){ shIco(ctx, mid - 66, cy, fs * .85, r.c.t); shTxt(ctx, nm(r.c), mid - 96, cy + fs * .36, mid - 170, 'B', 700, fs, '#fff', 'right', 20); }
